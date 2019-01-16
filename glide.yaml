@@ -1,0 +1,9 @@
+package: github.com/grid-x/gxctl
+import:
+- package: github.com/dgrijalva/jwt-go
+- package: github.com/mitchellh/go-homedir
+- package: github.com/spf13/cobra
+  version: 0.0.3
+- package: github.com/spf13/pflag
+  version: 1.0.3
+- package: github.com/spf13/viper
