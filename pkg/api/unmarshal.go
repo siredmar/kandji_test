@@ -2,60 +2,44 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
-	devicesApi "github.com/grid-x/ds-api/api/management/2018-11-02/devices"
-	podsApi "github.com/grid-x/ds-api/api/management/2018-12-04/pods"
-	"os"
 )
 
-type Device devicesApi.Device
-
-type Devices struct {
-	Devices []Device `json:"devices"`
-}
-
-type Pod podsApi.Pod
-
-type Pods struct {
-	Pods []Pod `json:"pods"`
-}
-
-func (d Device) InitFromJSON(j []byte) Device {
+func NewDevice(j []byte) (Device, error) {
+	d := Device{}
 	err := json.Unmarshal(j, &d)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return d, err
 	}
-	return d
+	return d, nil
 }
 
-func (d Devices) InitFromJSON(j []byte) Devices {
+func NewDevices(j []byte) (Devices, error) {
+	d := Devices{}
 	err := json.Unmarshal(j, &d)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return d, err
 	}
-	return d
+	return d, nil
 }
 
-func (p Pod) InitFromJSON(j []byte) Pod {
-	err := json.Unmarshal(j, &p)
+func NewPod(j []byte) (Pod, error) {
+	d := Pod{}
+	err := json.Unmarshal(j, &d)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return d, err
 	}
-	return p
+	return d, nil
 }
 
-func (p Pods) InitFromJSON(j []byte) Pods {
-	err := json.Unmarshal(j, &p)
+func NewPods(j []byte) (Pods, error) {
+	d := Pods{}
+	err := json.Unmarshal(j, &d)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return d, err
 	}
-	return p
+	return d, nil
 }

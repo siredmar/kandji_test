@@ -2,17 +2,30 @@ package printer
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
+	"io"
 )
 
-func JSONOutput(v interface{}) {
+type JSONPrinter struct {
+	Target io.Writer
+}
+
+func NewJSONPrinter(t io.Writer) *JSONPrinter {
+	return &JSONPrinter{
+		Target: t,
+	}
+}
+
+func (p *JSONPrinter) Print(v interface{}) error {
 	out, err := json.MarshalIndent(v, "", "    ")
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
-	fmt.Print(string(out))
+	_, err = p.Target.Write(out)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

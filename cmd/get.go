@@ -1,35 +1,25 @@
-// Copyright © 2019 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cmd
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// getCmd represents the get command
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get different resources",
-	Long:  `TODO`,
+type Get struct {
+	Command *cobra.Command
 }
 
-var GetCmdDeviceID string
-var GetCmdOutputType string
+func NewGet(parent *cobra.Command) *Get {
+	var getCmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get different resources",
+		Long:  `TODO`,
+	}
 
-func init() {
-	rootCmd.AddCommand(getCmd)
-	getCmd.PersistentFlags().StringVarP(&GetCmdDeviceID, "device-id", "d", "", "specify device id")
-	getCmd.PersistentFlags().StringVarP(&GetCmdOutputType, "out", "o", "", "print the result in a different format. Currently supported json")
+	getCmd.PersistentFlags().StringP("device-id", "d", "", "specify device id")
+	getCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json")
+	parent.AddCommand(getCmd)
+
+	return &Get{
+		Command: getCmd,
+	}
 }

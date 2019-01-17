@@ -1,4 +1,4 @@
-package api
+package errors
 
 import (
 	"errors"
@@ -14,16 +14,12 @@ func NotFoundError(d ErrorDetails) error {
 	if d.Id != "" {
 		s = fmt.Sprintf("Error from server (NotFound): %s \"%s\" not found", d.Command, d.Id)
 	} else {
-		s = fmt.Sprintf("No %s found", d.Command)
+		s = fmt.Sprintf("No %s found\n", d.Command)
 	}
-	fmt.Println(s)
-	err := errors.New(s)
-	return err
+	return errors.New(s)
 }
 
-func NotImplementedError() error {
-	s := fmt.Sprintf("This is not yet implemented ;(")
-	fmt.Println(s)
-	err := errors.New(s)
-	return err
+func NotImplementedError(msg string) error {
+	s := fmt.Sprintf("%s is not yet implemented ;(", msg)
+	return errors.New(s)
 }

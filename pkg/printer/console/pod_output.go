@@ -1,9 +1,6 @@
 package printer
 
 import (
-	"github.com/landoop/tableprinter"
-	"os"
-
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
@@ -11,12 +8,6 @@ type PodConsoleOutput struct {
 	ID        string `header:"ID"`
 	DeviceID  string `header:"Device ID"`
 	StartTime string `header:"StartTime"`
-}
-
-func (o PodConsoleOutput) Print() int {
-	printer := tableprinter.New(os.Stdout)
-	printer.HeaderLine = false
-	return printer.Print(o)
 }
 
 func (o PodConsoleOutput) Map(p api.Pod) PodConsoleOutput {

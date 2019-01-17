@@ -1,9 +1,6 @@
 package printer
 
 import (
-	"github.com/landoop/tableprinter"
-	"os"
-
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
@@ -13,13 +10,6 @@ type DeviceConsoleOutput struct {
 	MACAddress    string `header:"MAC address"`
 	LastHeartbeat string `header:"Last heartbeat"`
 	PublicKey     string `header:"Pubkey"`
-}
-
-func (d DeviceConsoleOutput) Print() int {
-	printer := tableprinter.New(os.Stdout)
-	printer.HeaderLine = false
-
-	return printer.Print(d)
 }
 
 func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {

@@ -14,8 +14,17 @@
 
 package main
 
-import "github.com/grid-x/gxctl/cmd"
+import (
+	"fmt"
+	"os"
+
+	cmd "github.com/grid-x/gxctl/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	_, err := cmd.NewCommander()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
