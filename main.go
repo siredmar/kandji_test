@@ -29,6 +29,7 @@ func main() {
 	cmd.NewGetPods(get.Command)
 	cmd.NewGetDeployments(get.Command)
 	cmd.NewGetApplications(get.Command)
+	cmd.NewGetMaintenance(get.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
