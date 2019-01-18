@@ -1,6 +1,9 @@
 package api
 
 const (
-	DevicesEndpoint = "api/management/devices"
-	PodsEndpoint    = "api/management/pods"
+	APIVersion           = "2018-12-04"
+	DevicesEndpoint      = "api/management/devices"
+	PodsEndpoint         = "api/management/pods"
+	DeploymentsEndpoint  = "api/management/deployments"
+	ApplicationsEndpoint = "api/management/applications"
 )

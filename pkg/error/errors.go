@@ -5,21 +5,26 @@ import (
 	"fmt"
 )
 
-type ErrorDetails struct {
-	Command, Id string
+func GetNotFoundError(id string) error {
+	s := fmt.Sprintf("Error from server (NotFound): %s not found", id)
+	return errors.New(s)
 }
 
-func NotFoundError(d ErrorDetails) error {
-	var s string
-	if d.Id != "" {
-		s = fmt.Sprintf("Error from server (NotFound): %s \"%s\" not found", d.Command, d.Id)
-	} else {
-		s = fmt.Sprintf("No %s found\n", d.Command)
-	}
+func ListNotFoundError(res string) error {
+	s := fmt.Sprintf("No %s found", res)
 	return errors.New(s)
 }
 
 func NotImplementedError(msg string) error {
 	s := fmt.Sprintf("%s is not yet implemented ;(", msg)
+	return errors.New(s)
+}
+
+func InvalidFormat() error {
+	return errors.New("The provided file is not in a valid format")
+}
+
+func ServerError(msg string) error {
+	s := fmt.Sprintf("Unexpected server error: %s", msg)
 	return errors.New(s)
 }

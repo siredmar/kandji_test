@@ -1,4 +1,4 @@
-// Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2019 gridX <ops@gridx.de>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,8 +22,15 @@ import (
 )
 
 func main() {
-	_, err := cmd.NewCommander()
-	if err != nil {
+	root := cmd.NewRoot()
+	get := cmd.NewGet(root.Command)
+	cmd.NewCreate(root.Command)
+	cmd.NewGetDevices(get.Command)
+	cmd.NewGetPods(get.Command)
+	cmd.NewGetDeployments(get.Command)
+	cmd.NewGetApplications(get.Command)
+
+	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

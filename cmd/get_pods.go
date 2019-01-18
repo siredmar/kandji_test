@@ -17,7 +17,7 @@ type GetPods struct {
 func NewGetPods(parent *cobra.Command) *GetPods {
 	var getPodsCmd = &cobra.Command{
 		Use:     "pods",
-		Aliases: []string{"pod"},
+		Aliases: []string{"po", "pod"},
 		Short:   "get pods",
 		Long:    `Prints a list of all pods you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -73,6 +73,7 @@ func NewGetPods(parent *cobra.Command) *GetPods {
 	}
 
 	parent.AddCommand(getPodsCmd)
+	getPodsCmd.Flags().StringP("device-id", "d", "", "specify device id")
 
 	return &GetPods{
 		Command: getPodsCmd,
@@ -80,7 +81,7 @@ func NewGetPods(parent *cobra.Command) *GetPods {
 }
 
 func getPods(client *client.APIClient) (api.Pods, error) {
-	response, err := client.Request(api.PodsEndpoint)
+	response, err := client.GetRequest(api.PodsEndpoint)
 	if err != nil {
 		return api.Pods{}, err
 	}
@@ -90,8 +91,8 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 		return podList, err
 	}
 
-	if len(podList.Pods) == 0 {
-		return podList, errors.NotFoundError(errors.ErrorDetails{Command: "pods"})
+	if podList.IsEmpty() {
+		return podList, errors.ListNotFoundError("pods")
 	}
 
 	return podList, nil
@@ -99,7 +100,7 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 
 func getPodById(client *client.APIClient, id string) (api.Pod, error) {
 	endpoint := fmt.Sprintf("%s/%s", api.PodsEndpoint, id)
-	response, err := client.Request(endpoint)
+	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Pod{}, err
 	}
@@ -109,8 +110,9 @@ func getPodById(client *client.APIClient, id string) (api.Pod, error) {
 		return pod, err
 	}
 
-	if pod.UUID != id {
-		return pod, errors.NotFoundError(errors.ErrorDetails{Command: "pod", Id: id})
+	if pod.IsEmpty() {
+		msg := fmt.Sprintf("pod \"%s\"", id)
+		return pod, errors.GetNotFoundError(msg)
 	}
 
 	return pod, nil
@@ -124,15 +126,14 @@ func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
 		if err != nil {
 			return api.Pods{}, err
 		}
-		pods, err := api.NewPods(response)
+		podList, err := api.NewPods(response)
 
 		if err != nil {
 			return pods, err
 		}
 
-		if len(pods.Pods) == 0 {
-			errors.NotFoundError(api.ErrorDetails{Command: "pods", Id: id})
-			return pods, errors.New("Not Found")
+		if podList.IsEmpty() {
+			return podList, errors.NotFoundError(errors.ErrorDetails{Command: "pods"})
 		}
 
 		return pods, nil

@@ -35,6 +35,14 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
 		out = PodsConsoleOutput{}.Map(v).Sort()
+	case api.Deployment:
+		out = DeploymentConsoleOutput{}.Map(v)
+	case api.Deployments:
+		out = DeploymentsConsoleOutput{}.Map(v).Sort()
+	case api.Application:
+		out = ApplicationConsoleOutput{}.Map(v)
+	case api.Applications:
+		out = ApplicationsConsoleOutput{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)

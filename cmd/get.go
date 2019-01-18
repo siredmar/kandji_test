@@ -15,7 +15,6 @@ func NewGet(parent *cobra.Command) *Get {
 		Long:  `TODO`,
 	}
 
-	getCmd.PersistentFlags().StringP("device-id", "d", "", "specify device id")
 	getCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json")
 	parent.AddCommand(getCmd)
 

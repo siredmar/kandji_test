@@ -76,7 +76,7 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 }
 
 func getDevices(client *client.APIClient) (api.Devices, error) {
-	response, err := client.Request(api.DevicesEndpoint)
+	response, err := client.GetRequest(api.DevicesEndpoint)
 	if err != nil {
 		return api.Devices{}, err
 	}
@@ -86,8 +86,8 @@ func getDevices(client *client.APIClient) (api.Devices, error) {
 		return deviceList, err
 	}
 
-	if len(deviceList.Devices) == 0 {
-		return deviceList, errors.NotFoundError(errors.ErrorDetails{Command: "devices"})
+	if deviceList.IsEmpty() {
+		return deviceList, errors.ListNotFoundError("devices")
 	}
 
 	return deviceList, nil
@@ -95,7 +95,7 @@ func getDevices(client *client.APIClient) (api.Devices, error) {
 
 func getDeviceById(client *client.APIClient, id string) (api.Device, error) {
 	endpoint := fmt.Sprintf("%s/%s", api.DevicesEndpoint, id)
-	response, err := client.Request(endpoint)
+	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Device{}, err
 	}
@@ -105,8 +105,9 @@ func getDeviceById(client *client.APIClient, id string) (api.Device, error) {
 		return device, err
 	}
 
-	if device.ID != id {
-		return device, errors.NotFoundError(errors.ErrorDetails{Command: "device", Id: id})
+	if device.IsEmpty() {
+		msg := fmt.Sprintf("device \"%s\"", id)
+		return device, errors.GetNotFoundError(msg)
 	}
 
 	return device, nil
