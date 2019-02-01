@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	auth "github.com/grid-x/gxctl/pkg/auth"

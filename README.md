@@ -13,9 +13,9 @@ where `command`, `TYPE`, `NAME`, and `flags` are:
 * **TYPE**   Specifies the resource type. Resource types are case-insensitive and you can specify the singular, plural, or abbreviated forms. For example, the following commands produce the same output:
 
 ```shell
-$ gxctl get deployment pod1
-$ gxctl get deployments pod1
-$ gxctl get deploy pod1
+$ gxctl get deployment deployment1
+$ gxctl get deployments deployment1
+$ gxctl get deploy deployment1
 ```
 * **NAME**   Specifies the name of the resource. Names are case-sensitive. If the name is omitted, details for all resources are displayed, for example `gxctl get pods`
 

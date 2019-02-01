@@ -32,7 +32,6 @@ func main() {
 	cmd.NewGetApplications(get.Command)
 	cmd.NewGetMaintenance(get.Command)
 	cmd.NewPatchDevice(patch.Command)
-	//cmd.NewPatchDeployment(patch.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)

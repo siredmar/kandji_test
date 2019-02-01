@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/google/go-cmp/cmp"
+
 	devicesApi "github.com/grid-x/ds-api/api/management/2018-11-02/devices"
 	applicationsApi "github.com/grid-x/ds-api/api/management/2018-11-27/application"
 	deploymentsApi "github.com/grid-x/ds-api/api/management/2018-11-28/deployments"
