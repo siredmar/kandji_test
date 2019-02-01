@@ -1,0 +1,3 @@
+version: "1"
+domain: gridx.ai
+repo: github.com/grid-x/ds-k8s

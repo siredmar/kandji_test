@@ -1,0 +1,9 @@
+apiVersion: core.gridx.ai/v1beta1
+kind: Device
+metadata:
+  name: "foo"
+  namespace: "default"
+spec:
+  serialnumber: "abcdefghijklmno-123"
+  accountID: "default"
+  publicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4H3QCpgn/3//9NMPWuOn69wDEgw8PnOqu4ucd7oJid3Yi0a8A63N1U+LvWwPrupKS5GE+D+Q2wDOraOzOHjWgAnZmI7JtqZCZgcDMTzUM6DmvUAwZZ0lCY1FqBHDtdWp/RWEDb6B4ZQIYxEvLqwZRGCCi5mE2aoMargbus6JKQrdtLJbOh4ybhm2F1aqlRmlhWmp4Hl2FvOHytMm5O8GxXMJ8TrjTzDvmMsqCgqAk2nqxe/oD1nTtcgHl/KSAhf/0mtfokMhCMFLLbBL/MtLfhBdXjob+BP6SWJS0E24a43OffnhgpvgY9vFwRdnZStM65khZXfQzzdx62mZdSs0f joel@deep-thought.local"

@@ -1,0 +1,23 @@
+package {{ toPackageName .APIVersion }}
+import (
+{{$type := .Type }}
+{{- range $index, $group := .APIGroups }}
+  "github.com/grid-x/ds-api/api/{{ $type }}/{{ $.APIVersion }}/{{ . }}"
+{{- end }}
+)
+
+// Service implements the service for API version {{ .APIVersion }}
+type Service struct {
+{{- range $index, $group := .APIGroups }}
+  {{ title . }} *{{ . }}.Service
+{{- end}}
+}
+
+// NewService creates a new service
+func NewService(injections ...interface{}) (*Service, error) {
+return &Service{
+{{- range $index, $group := .APIGroups }}
+{{ title . }}: {{ . }}.NewService(injections...),
+{{- end}}
+}, nil
+}

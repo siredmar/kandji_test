@@ -1,0 +1,60 @@
+apiVersion: apps.gridx.ai/v1beta1
+kind: DeviceDeployment
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: foo-latest
+  namespace: foo
+spec:
+  app: foo
+  selector:
+    matchByLabels:
+      foo: bar
+  template:
+    spec:
+      containers:
+      - name: "monitoring-agent"
+        image: "gridx/monitoring:foobar-u28391389"
+        command: ["/usr/bin/foo", "-v", "-d"]
+        env:
+        - name: "foo"
+          value: "bar"
+        volumeMounts:
+        - name: "cache"
+          readOnly: false
+          mountPath: "/data/cache"
+          subPath: "cache"
+        workingDir: "/opt"
+        ports:
+        - name: "http"
+          hostPort: 8080
+          containerPort: 8081
+        livelinessProbe:
+          handler:
+            exec:
+              command: ["exit 0"]
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 2
+          successThreshold: 3
+          failureThreshold: 3
+        readinessProbe:
+          handler:
+            httpGet:
+              path: "/health"
+              port: 8081
+              host: "gridbox.local"
+              scheme: "HTTP"
+              headers:
+              - name: "User-Agent"
+                value: "supervisor"
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 2
+          successThreshold: 3
+          failureThreshold: 3
+      network: "Host"
+      restartPolicy:
+        type: "OnFailure"
+        maxRestartCount: 10
+      priority: 10

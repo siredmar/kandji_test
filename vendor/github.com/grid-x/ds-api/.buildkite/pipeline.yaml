@@ -1,0 +1,37 @@
+steps:
+- command:
+  - "make ci_test"
+  label: ":llama: Tests"
+  agents:
+  - "queue=default"
+- command:
+  - "make ci_test_routes"
+  label: ":llama: Test if routes are generated"
+  agents:
+  - "queue=default"
+- command:
+  - "make ci_lint"
+  label: ":llama: Linting"
+  agents:
+  - "queue=default"
+- wait
+- command: "make ci_server"
+  label: ":golang: Build server"
+  agents:
+  - "queue=default"
+  artifact_paths: "bin/*"
+- command: "make ci_ds_dev"
+  label: ":golang: Build dev tool"
+  agents:
+  - "queue=default"
+  artifact_paths: "bin/*"
+- wait
+- command:
+  - "buildkite-agent artifact download bin/* . --step \":golang: Build server\""
+  - "make ci_docker"
+  - ".buildkite/steps/aws_ecr_auth.sh"
+  - "make ci_docker_push"
+  label: ":docker: Build docker image"
+  agents:
+  - "queue=default"
+  branches: "master"
