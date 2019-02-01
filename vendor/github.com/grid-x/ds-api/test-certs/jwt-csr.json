@@ -1,0 +1,17 @@
+{
+  "CN": "JWT Signing",
+  "hosts": [""],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "DE",
+      "L": "Aachen",
+      "O": "gridX GmbH",
+      "OU": "JWT",
+      "ST": "NRW"
+    }
+  ]
+}

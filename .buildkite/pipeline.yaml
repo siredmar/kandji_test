@@ -1,0 +1,6 @@
+steps:
+- command:
+  - "make ci_build"
+  label: ":llama: Build"
+  agents:
+  - "queue=default"
