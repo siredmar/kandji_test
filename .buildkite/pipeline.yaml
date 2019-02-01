@@ -1,5 +1,7 @@
 steps:
 - command:
+  - ls -l
+  - pwd
   - "make ci_build"
   label: ":llama: Build"
   agents:
