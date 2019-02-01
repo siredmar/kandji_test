@@ -54,3 +54,35 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 	printer.Print(out)
 	return nil
 }
+
+func (c *ConsolePrinter) PrintWide(v interface{}) error {
+	var out interface{}
+
+	switch v := v.(type) {
+	case api.Device:
+		out = DeviceConsoleOutputWide{}.Map(v)
+	case api.Devices:
+		out = DevicesConsoleOutputWide{}.Map(v).Sort()
+	case api.Pod:
+		out = PodConsoleOutput{}.Map(v) //TODO make wide mapping
+	case api.Pods:
+		out = PodsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+	case api.Deployment:
+		out = DeploymentConsoleOutput{}.Map(v) //TODO make wide mapping
+	case api.Deployments:
+		out = DeploymentsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+	case api.Application:
+		out = ApplicationConsoleOutput{}.Map(v) //TODO make wide mapping
+	case api.Applications:
+		out = ApplicationsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+	default:
+		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
+		return errors.New(s)
+	}
+
+	printer := tableprinter.New(c.Target)
+	printer.HeaderLine = false
+
+	printer.Print(out)
+	return nil
+}

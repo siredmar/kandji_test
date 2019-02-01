@@ -16,6 +16,7 @@ import (
 
 const (
 	baseURL = "https://api.ds.gridx.ai"
+	//baseURL = "http://127.0.0.1:8080"
 )
 
 type APIClient struct {
@@ -32,22 +33,37 @@ func NewAPIClient() *APIClient {
 	}
 }
 
+//GetRequest to call via GET
 func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
-	return request(apiclient, http.MethodGet, nil, endpoint)
+	return internalRequest(apiclient, http.MethodGet, nil, endpoint)
 }
 
+//PostRequest to call via POST
 func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte, error) {
 	body, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
-
-	return request(apiclient, http.MethodPost, body, endpoint)
+	return internalRequest(apiclient, http.MethodPost, body, endpoint)
 }
 
-func request(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {
-	token, err := auth.GenerateJWTToken()
+//PatchRequest to call via PATCH
+func (apiclient *APIClient) PatchRequest(endpoint string, v interface{}, id string) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s", endpoint, id)
+	body, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return internalRequest(apiclient, http.MethodPatch, body, url)
+}
 
+//DeleteRequest to call via PATCH
+func (apiclient *APIClient) DeleteRequest(endpoint string) ([]byte, error) {
+	return internalRequest(apiclient, http.MethodDelete, nil, endpoint)
+}
+
+func internalRequest(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {
+	token, err := auth.GenerateJWTToken()
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +94,8 @@ func request(apiclient *APIClient, method string, body []byte, endpoint string) 
 	err = json.Unmarshal(bodyBytes, &respError)
 
 	if err != nil {
-		return nil, err
+		s := fmt.Sprintf("Unexpected to unmarshal '%s'", string(bodyBytes))
+		return nil, errors.ServerError(s)
 	}
 
 	if cmp.Diff(Error{}, respError) != "" {

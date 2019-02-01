@@ -11,7 +11,7 @@ type DeploymentConsoleOutput struct {
 }
 
 func (o DeploymentConsoleOutput) Map(d api.Deployment) DeploymentConsoleOutput {
-	o.ID = d.UUID
+	o.ID = d.Metadata.ID
 	o.App = d.Spec.App
 	o.LastUpdatedAt = d.Status.LastUpdatedAt
 

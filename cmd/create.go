@@ -41,7 +41,7 @@ func NewCreate(parent *cobra.Command) *Create {
 				return err
 			}
 
-			res, err := checkResourceFile(bytes)
+			res, err := checkCreateResourceFile(bytes)
 			if err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ func NewCreate(parent *cobra.Command) *Create {
 	}
 }
 
-func checkResourceFile(bytes []byte) (interface{}, error) {
+func checkCreateResourceFile(bytes []byte) (interface{}, error) {
 	deploymentCreate, err := api.NewCreateDeployment(bytes)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("Deployment %s created successfully", deployment.UUID), nil
+		return fmt.Sprintf("Deployment %s created successfully", deployment.Metadata.ID), nil
 	case api.CreateApplication:
 		response, err := client.PostRequest(api.ApplicationsEndpoint, v)
 		if err != nil {

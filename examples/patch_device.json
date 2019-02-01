@@ -1,0 +1,12 @@
+{
+  "metadata": {
+    "labels": {
+      "gridx.de/area": "west",
+      "gridx.de/channel": "stable"
+    }
+  },
+  "spec": {
+    "macAddress": "1234",
+    "maintenanceWindow": "Sun:11:00-Sun:13:00"
+  }
+}

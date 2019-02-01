@@ -24,12 +24,15 @@ import (
 func main() {
 	root := cmd.NewRoot()
 	get := cmd.NewGet(root.Command)
+	patch := cmd.NewPatch(root.Command)
 	cmd.NewCreate(root.Command)
 	cmd.NewGetDevices(get.Command)
 	cmd.NewGetPods(get.Command)
 	cmd.NewGetDeployments(get.Command)
 	cmd.NewGetApplications(get.Command)
 	cmd.NewGetMaintenance(get.Command)
+	cmd.NewPatchDevice(patch.Command)
+	//cmd.NewPatchDeployment(patch.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)

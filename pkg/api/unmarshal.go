@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 func NewDevice(j []byte) (Device, error) {
@@ -16,6 +17,16 @@ func NewDevice(j []byte) (Device, error) {
 
 func NewDevices(j []byte) (Devices, error) {
 	d := Devices{}
+	err := json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
+
+func NewPatchDevice(j []byte) (PatchDevice, error) {
+	d := PatchDevice{}
 	err := json.Unmarshal(j, &d)
 
 	if err != nil {
@@ -67,6 +78,18 @@ func NewDeployments(j []byte) (Deployments, error) {
 func NewCreateDeployment(j []byte) (CreateDeployment, error) {
 	d := CreateDeployment{}
 	err := json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
+
+func NewPatchDeployment(j []byte) (PatchDeployment, error) {
+	d := PatchDeployment{}
+	err := json.Unmarshal(j, &d)
+
+	fmt.Println(d.Spec.App)
 
 	if err != nil {
 		return d, err
