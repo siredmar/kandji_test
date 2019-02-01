@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -21,7 +22,6 @@ func NewGetPods(parent *cobra.Command) *GetPods {
 		Short:   "get pods",
 		Long:    `Prints a list of all pods you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			getCmdDeviceID, _ := cmd.Flags().GetString("device-id")
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
 			client := client.NewAPIClient()

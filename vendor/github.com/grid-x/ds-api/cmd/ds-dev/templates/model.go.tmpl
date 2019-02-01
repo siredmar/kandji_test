@@ -1,0 +1,13 @@
+package model
+
+import (
+       "time"
+)
+
+// {{ title .Name }} is ... TODO
+type {{ title .Name }} struct {
+{{- range $index, $attribute := .Attributes }}
+// {{ title .Name }} is ... TODO
+{{ title .Name }} {{ .Type }} `json:"{{ jsonField .Name }},omitempty",db:"{{ dbColumn .Name}}"`
+{{- end -}}
+}

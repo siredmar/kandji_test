@@ -1,0 +1,123 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: devices.core.gridx.ai
+spec:
+  group: core.gridx.ai
+  names:
+    kind: Device
+    plural: devices
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            accountID:
+              type: string
+            macAddress:
+              type: string
+            maintenanceWindow:
+              type: string
+            menderDeviceID:
+              type: string
+            publicKey:
+              type: string
+            serialnumber:
+              type: string
+          required:
+          - accountID
+          - serialnumber
+          type: object
+        status:
+          properties:
+            allocated:
+              type: object
+            capacity:
+              type: object
+            conditions:
+              items:
+                properties:
+                  lastHeartbeatTime:
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              type: array
+            images:
+              items:
+                properties:
+                  names:
+                    items:
+                      type: string
+                    type: array
+                  sizeBytes:
+                    format: int64
+                    type: integer
+                type: object
+              type: array
+            info:
+              properties:
+                architecture:
+                  type: string
+                bootID:
+                  type: string
+                cpuModel:
+                  type: string
+                dockerVersion:
+                  type: string
+                hardwareVersion:
+                  type: string
+                hostname:
+                  type: string
+                kernelVersion:
+                  type: string
+                lastReboot:
+                  type: string
+                machineID:
+                  type: string
+                networkInterfaces:
+                  items:
+                    properties:
+                      macAddress:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
+                osVersion:
+                  type: string
+                supervisorVersion:
+                  type: string
+              type: object
+            lastHeartBeat:
+              type: string
+          type: object
+  version: v1beta1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

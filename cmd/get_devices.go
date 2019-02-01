@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -22,7 +23,6 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 		Short:            "get devices",
 		Long:             `Prints a list of all devices you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			getCmdDeviceID, _ := cmd.Flags().GetString("device-id")
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
 			client := client.NewAPIClient()
@@ -40,17 +40,6 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 					if err != nil {
 						return err
 					}
-				}
-			} else if getCmdDeviceID != "" {
-				//Get device
-				device, err := getDeviceById(client, getCmdDeviceID)
-				if err != nil {
-					return err
-				}
-
-				err = printer.Print(device, getCmdOutputType)
-				if err != nil {
-					return err
 				}
 			} else {
 				//List all devices

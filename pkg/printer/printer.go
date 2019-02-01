@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	Console string = ""
-	JSON    string = "json"
-	YAML    string = "yaml"
+	Console     string = ""
+	ConsoleWide string = "wide"
+	JSON        string = "json"
+	YAML        string = "yaml"
 )
 
 type Printer struct {
@@ -33,6 +34,8 @@ func (p *Printer) Print(d interface{}, outputFormat string) error {
 		return errors.NotImplementedError("Getting yaml output")
 	case Console:
 		return p.Console.Print(d)
+	case ConsoleWide:
+		return p.Console.PrintWide(d)
 	default:
 		return p.JSON.Print(d)
 	}

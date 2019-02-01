@@ -1,0 +1,68 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: maintenancetasks.maintenance.gridx.ai
+spec:
+  group: maintenance.gridx.ai
+  names:
+    kind: MaintenanceTask
+    plural: maintenancetasks
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            selector:
+              properties:
+                matchByDeviceID:
+                  type: string
+                matchByLabels:
+                  type: object
+              required:
+              - matchByLabels
+              type: object
+            type:
+              type: string
+          required:
+          - type
+          - selector
+          type: object
+        status:
+          properties:
+            failed:
+              format: int64
+              type: integer
+            finishedAt:
+              format: date-time
+              type: string
+            running:
+              format: int64
+              type: integer
+            startedAt:
+              format: date-time
+              type: string
+            successful:
+              format: int64
+              type: integer
+          required:
+          - successful
+          - failed
+          - running
+          type: object
+  version: v1beta1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

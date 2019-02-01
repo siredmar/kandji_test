@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	errors "github.com/grid-x/gxctl/pkg/error"
 	"github.com/spf13/cobra"
+
+	errors "github.com/grid-x/gxctl/pkg/error"
 )
 
 type GetMaintenance struct {

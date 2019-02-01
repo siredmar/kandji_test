@@ -1,0 +1,9 @@
+apiVersion: apps.gridx.ai/v1beta1
+kind: DeviceApplication
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: deviceapplication-sample
+spec:
+  # Add fields here
+  foo: bar

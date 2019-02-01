@@ -11,7 +11,7 @@ type PodConsoleOutput struct {
 }
 
 func (o PodConsoleOutput) Map(p api.Pod) PodConsoleOutput {
-	o.ID = p.UUID
+	o.ID = p.Metadata.ID
 	o.DeviceID = p.Spec.DeviceID
 	if p.Status.StartTime != nil {
 		o.StartTime = p.Status.StartTime.String()

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/google/go-cmp/cmp"
+
 	devicesApi "github.com/grid-x/ds-api/api/management/2018-11-02/devices"
 	applicationsApi "github.com/grid-x/ds-api/api/management/2018-11-27/application"
 	deploymentsApi "github.com/grid-x/ds-api/api/management/2018-11-28/deployments"
@@ -14,6 +15,8 @@ type Devices struct {
 	Devices []Device `json:"devices"`
 }
 
+type PatchDevice devicesApi.UpdateRequest
+
 type Pod podsApi.Pod
 
 type Pods struct {
@@ -23,6 +26,8 @@ type Pods struct {
 type Deployment deploymentsApi.Deployment
 
 type CreateDeployment deploymentsApi.CreateRequest
+
+type PatchDeployment deploymentsApi.UpdateRequest
 
 type Deployments struct {
 	Deployments []Deployment `json:"deployments"`
@@ -48,6 +53,21 @@ func (d *Devices) IsEmpty() bool {
 		return true
 	}
 	return false
+}
+
+func (d *PatchDevice) IsEmpty() bool {
+	if cmp.Diff(PatchDevice{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (d *PatchDevice) IsValid() bool {
+	if d.Spec.MACAddress == nil && d.Spec.MaintenanceWindow == nil {
+		return false
+	}
+
+	return true
 }
 
 func (p *Pod) IsEmpty() bool {
@@ -85,8 +105,38 @@ func (d *CreateDeployment) IsEmpty() bool {
 	return false
 }
 
+func (d *PatchDeployment) IsEmpty() bool {
+	if cmp.Diff(PatchDeployment{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
 func (a *CreateDeployment) IsValid() bool {
-	//Todo: Check if it's valid eg. mandatory fields
+	if a.Spec.App == "" {
+		return false
+	}
+	if a.Spec.Selector.MatchByLabels == nil {
+		return false
+	}
+	if a.Spec.Template.Spec.Containers == nil {
+		return false
+	}
+
+	return true
+}
+
+func (a *PatchDeployment) IsValid() bool {
+	if a.Spec.App == "" {
+		return false
+	}
+	if a.Spec.Selector.MatchByLabels == nil {
+		return false
+	}
+	if a.Spec.Template.Spec.Containers == nil {
+		return false
+	}
+
 	return true
 }
 

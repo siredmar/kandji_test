@@ -7,3 +7,4 @@ import:
 - package: github.com/spf13/pflag
   version: 1.0.3
 - package: github.com/spf13/viper
+- package: github.com/google/go-cmp
