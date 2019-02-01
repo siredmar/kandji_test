@@ -14,4 +14,4 @@ ci_lint:
 	${GO_RUN} "make lint"
 
 ci_build:
-	${DOCKER_RUN} ${GO_TOOLS} bash -c "${GO_BUILD}"
+	${DOCKER_RUN} ${GO_TOOLS} bash -c "pwd && ls -l ./vendor/github.com/dustin && ${GO_BUILD}"
