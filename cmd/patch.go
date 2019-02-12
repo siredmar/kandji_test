@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type Patch struct {
@@ -16,12 +19,51 @@ type Patch struct {
 
 func NewPatch(parent *cobra.Command) *Patch {
 	var patchCmd = &cobra.Command{
-		Use:   "patch",
-		Short: "Patch different resources",
-		Long:  `TODO`,
+		Use:                   "patch [OPTIONS]",
+		Short:                 "Patch different resources",
+		DisableFlagsInUseLine: true,
+		Long:                  `TODO`,
+		Example:               "# Patch a deployment resource from file \n  gxctl patch -f deployment_new.json",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			patchCmdFilename, _ := cmd.Flags().GetString("filename")
+
+			client := client.NewAPIClient()
+
+			if patchCmdFilename == "" {
+				cmd.Usage()
+				return nil
+			}
+
+			jsonFile, err := os.Open(patchCmdFilename)
+			if err != nil {
+				return err
+			}
+			defer jsonFile.Close()
+
+			bytes, err := ioutil.ReadAll(jsonFile)
+			if err != nil {
+				return err
+			}
+
+			res, err := checkPatchResourceFile(bytes)
+			if err != nil {
+				return err
+			}
+
+			message, err := patchResource(client, res, "", nil)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(message)
+			return nil
+		},
 	}
 
-	patchCmd.PersistentFlags().StringP("filename", "f", "", "Filename to file to use to create the resource")
+	patchCmd.Flags().StringP("filename", "f", "", "Filename to file to use to patch the resource")
+
+	patchCmd.SetHelpTemplate(template.HelpTemplate())
+	patchCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(patchCmd)
 
 	return &Patch{
@@ -50,10 +92,22 @@ func checkPatchResourceFile(bytes []byte) (interface{}, error) {
 	return nil, errors.InvalidFormat()
 }
 
-func patchResource(client *client.APIClient, v interface{}, id string) (string, error) {
+func patchResource(client *client.APIClient, v interface{}, id string, ids []string) (string, error) {
+	resId := id
+	if ids != nil {
+		var err error
+		resId, err = api.LookupID(id, ids)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	switch v := v.(type) {
 	case api.PatchDevice:
-		response, err := client.PatchRequest(api.DevicesEndpoint, v, id)
+		if resId == "" {
+			resId = v.FullMeta.Id
+		}
+		response, err := client.PatchRequest(api.DevicesEndpoint, v, resId)
 		if err != nil {
 			return "", err
 		}
@@ -65,7 +119,10 @@ func patchResource(client *client.APIClient, v interface{}, id string) (string, 
 
 		return fmt.Sprintf("Device %s patched successfully", device.Metadata.ID), nil
 	case api.PatchDeployment:
-		response, err := client.PatchRequest(api.DeploymentsEndpoint, v, id)
+		if resId == "" {
+			resId = v.FullMeta.Id
+		}
+		response, err := client.PatchRequest(api.DeploymentsEndpoint, v, resId)
 		if err != nil {
 			return "", err
 		}

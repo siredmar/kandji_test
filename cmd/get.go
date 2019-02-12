@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type Get struct {
@@ -10,12 +12,15 @@ type Get struct {
 
 func NewGet(parent *cobra.Command) *Get {
 	var getCmd = &cobra.Command{
-		Use:   "get",
-		Short: "Get different resources",
-		Long:  `TODO`,
+		Use:                   "get [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Short:                 "Get different resources",
+		Long:                  `TODO`,
 	}
 
-	getCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json")
+	getCmd.SetHelpTemplate(template.HelpTemplate())
+	getCmd.SetUsageTemplate(template.UsageTemplate())
+	getCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json/wide/yaml")
 	parent.AddCommand(getCmd)
 
 	return &Get{

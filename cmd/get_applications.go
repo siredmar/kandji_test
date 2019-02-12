@@ -9,6 +9,7 @@ import (
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
 	printer "github.com/grid-x/gxctl/pkg/printer"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetApplications struct {
@@ -17,11 +18,12 @@ type GetApplications struct {
 
 func NewGetApplications(parent *cobra.Command) *GetApplications {
 	var getApplicationsCmd = &cobra.Command{
-		Use:              "applications",
-		TraverseChildren: true,
-		Aliases:          []string{"application", "app", "apps"},
-		Short:            "get applications",
-		Long:             `Prints a list of all applications you have access to`,
+		Use:                   "application [NAME] [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Aliases:               []string{"applications", "app", "apps"},
+		Short:                 "get application",
+		Long:                  `Prints a list of all applications you have access to`,
+		Example:               "# Get all applications \n  gxctl get applications\n\n  # Get information about an application with name test \n  gxctl get application test",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
@@ -57,6 +59,8 @@ func NewGetApplications(parent *cobra.Command) *GetApplications {
 		},
 	}
 
+	getApplicationsCmd.SetHelpTemplate(template.HelpTemplate())
+	getApplicationsCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getApplicationsCmd)
 
 	return &GetApplications{

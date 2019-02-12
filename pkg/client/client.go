@@ -58,9 +58,10 @@ func (apiclient *APIClient) PatchRequest(endpoint string, v interface{}, id stri
 	return internalRequest(apiclient, http.MethodPatch, body, url)
 }
 
-//DeleteRequest to call via PATCH
-func (apiclient *APIClient) DeleteRequest(endpoint string) ([]byte, error) {
-	return internalRequest(apiclient, http.MethodDelete, nil, endpoint)
+//DeleteRequest to call via DELETE
+func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s", endpoint, id)
+	return internalRequest(apiclient, http.MethodDelete, nil, url)
 }
 
 func internalRequest(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {

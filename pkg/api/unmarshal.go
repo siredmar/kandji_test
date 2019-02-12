@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 func NewDevice(j []byte) (Device, error) {
@@ -88,8 +87,6 @@ func NewCreateDeployment(j []byte) (CreateDeployment, error) {
 func NewPatchDeployment(j []byte) (PatchDeployment, error) {
 	d := PatchDeployment{}
 	err := json.Unmarshal(j, &d)
-
-	fmt.Println(d.Spec.App)
 
 	if err != nil {
 		return d, err

@@ -1,0 +1,20 @@
+{
+  "spec": {
+    "app": "datadog",
+    "selector": {
+        "matchByLabels": {
+            "gridx.de/channel": "alpha"
+        }
+    },
+    "template": {
+        "spec": {
+            "containers": [
+                {
+                    "name": "datadog",
+                    "image": "datadog/agent:6.9.0"
+                }
+            ]
+        }
+    }
+  }
+}
