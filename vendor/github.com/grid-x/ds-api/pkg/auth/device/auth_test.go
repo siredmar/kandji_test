@@ -122,11 +122,11 @@ func Test_DeviceAuth_GenerateToken(t *testing.T) {
 	}
 
 	testcases := []struct {
-		jwtIssuer, deviceID string
-		jwtIssuedAt         time.Time
-		jwtNotBefore        time.Time
-		jwtExpTime          time.Time
-		jwtPrivKey          *rsa.PrivateKey
+		jwtIssuer, deviceID, accountID string
+		jwtIssuedAt                    time.Time
+		jwtNotBefore                   time.Time
+		jwtExpTime                     time.Time
+		jwtPrivKey                     *rsa.PrivateKey
 
 		want    string
 		wantErr error
@@ -134,12 +134,13 @@ func Test_DeviceAuth_GenerateToken(t *testing.T) {
 		{
 			jwtIssuer:    "device-api.gridx.de",
 			deviceID:     "83d8769dc416a9203c2a86c72c325ac030a99bee776184d29e289e1b6fc4a22e",
+			accountID:    "9b80b43f-6c1a-4b03-aaed-229ed645eaa6",
 			jwtIssuedAt:  time.Date(2018, time.January, 1, 0, 30, 17, 0, time.UTC),
 			jwtNotBefore: time.Date(2018, time.January, 1, 1, 30, 37, 0, time.UTC),
 			jwtExpTime:   time.Date(2018, time.January, 1, 21, 30, 37, 0, time.UTC),
 			jwtPrivKey:   key,
 
-			want:    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MTQ4NDIyMzcsImlhdCI6MTUxNDc2NjYxNywiaXNzIjoiZGV2aWNlLWFwaS5ncmlkeC5kZSIsIm5iZiI6MTUxNDc3MDIzNywic3ViIjoiODNkODc2OWRjNDE2YTkyMDNjMmE4NmM3MmMzMjVhYzAzMGE5OWJlZTc3NjE4NGQyOWUyODllMWI2ZmM0YTIyZSJ9.ONtXYcQNakYJjLPyIhTEEO_xbxduTRMLgkXASmXapzXDlPUGIGXxbTJpGDDn5yS-2aWbUCFOq2AHEuusjtm3bJ9TwRu1gaW6-Hs5Y3QoeTTUYP24Qwi3UMYzvJ57ITDtc-NVVGMK39CW3R4iDkePSeqZpdBXvoddgE0sDOgeRiuFlgujFrL7JZgQTDBQVlxnXD05d4fKLCT8UJd5ZvyN5c275TxZyfsNaGxJeZA-oyEvo2L3HQoR1IXSZNMJMx32dJAUQXMhAM7f9IDSMh0fw8GiGZHES8OZfRWP2k2tgr8zR4K2uso8PFuyodxIOfwmGStaAlPGpHvnbhrzFUmgdg",
+			want:    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SUQiOiI5YjgwYjQzZi02YzFhLTRiMDMtYWFlZC0yMjllZDY0NWVhYTYiLCJleHAiOjE1MTQ4NDIyMzcsImlhdCI6MTUxNDc2NjYxNywiaXNzIjoiZGV2aWNlLWFwaS5ncmlkeC5kZSIsIm5iZiI6MTUxNDc3MDIzNywic3ViIjoiODNkODc2OWRjNDE2YTkyMDNjMmE4NmM3MmMzMjVhYzAzMGE5OWJlZTc3NjE4NGQyOWUyODllMWI2ZmM0YTIyZSJ9.TLg984XExc5HwG3bf9VpIYrHSOWbcR8sAFmOZRtcgi65FVkec5PXzCxbUWWBVEW9-VArBEgzmWBG_20NFVMUCtpP-I-MC0yPPu2EJ8SOAFgtRvcvcfLsIiRTF5LwrEkevRWnMg7ih0ofqA4sOv76HrbOTv2yEhdarKeP4MotkCwARsyo9c-7VSMlNUo4YWZ7O98CpUPaNgovzFP0nZTskyfG0wCp_XN82EbELVSWTYzZVZZm4Cm36iGX6KIHfeBhF3Q57vrasIMmBlJs6FxKn_AkuUVqwwrAnN2fhpETGxYD5Jsh5eXzO4xJyXtt7lyW8rAmu71Dx-hh-LDVSujMCQ",
 			wantErr: nil,
 		},
 	}
@@ -147,7 +148,7 @@ func Test_DeviceAuth_GenerateToken(t *testing.T) {
 	for i, tc := range testcases {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			gen := NewJWTGenerator(tc.jwtIssuer, tc.jwtPrivKey)
-			got, err := gen.genToken(tc.jwtIssuedAt, tc.jwtNotBefore, tc.jwtExpTime, tc.deviceID)
+			got, err := gen.genToken(tc.jwtIssuedAt, tc.jwtNotBefore, tc.jwtExpTime, tc.deviceID, tc.accountID)
 			if !cmp.Equal(tc.wantErr, err) {
 				t.Fatalf("unexpected error: %s", cmp.Diff(tc.wantErr, err))
 			}

@@ -1,3 +1,0 @@
-/*
- * Author: Joel Hermanns <j.hermanns@gridx.ai>
- */

@@ -9,9 +9,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -196,7 +196,7 @@ func (s *Service) Create(req *http.Request, payload CreateRequest) (*encoding.Re
 		)
 	}
 
-	deploy := newK8sDeployment(model.AccountNamespaceName(accountID), uuid.NewV4().String(), *payload.Spec)
+	deploy := newK8sDeployment(model.AccountNamespaceName(accountID), uuid.New().String(), *payload.Spec)
 
 	ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()

@@ -9,8 +9,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/grid-x/ds-api/api"
@@ -332,7 +332,7 @@ func (s *Service) Create(req *http.Request, payload CreateRequest) (*encoding.Re
 	defer cancel()
 
 	user, err := s.usersRepo.Create(ctx, accountID, &model.User{
-		UUID:      uuid.NewV4().String(),
+		UUID:      uuid.New().String(),
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     email,

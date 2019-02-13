@@ -1,5 +1,5 @@
 hash: bb3191f03ef9ba12fd0bb29089c3202b04a1f4693141702ffa76f28cdfc62837
-updated: 2019-02-01T15:24:08.224926+01:00
+updated: 2019-02-13T09:34:40.455889+01:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
@@ -21,15 +21,18 @@ imports:
   - cmp/internal/value
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
+- name: github.com/google/uuid
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
   version: a7962380ca08b5a188038c69871b8d3fbdf31e89
 - name: github.com/grid-x/ds-api
-  version: e69151ebecd0cacf78c4f91e025c78ba0ef61e1a
+  version: a1ce1b903cd336d5632af1ca77ccb10b2a9e6058
   subpackages:
   - api
   - api/management/2018-11-02/devices
   - api/management/2018-11-27/application
   - api/management/2018-11-28/deployments
+  - api/management/2018-12-04/maintenance
   - api/management/2018-12-04/pods
   - pkg/encoding
   - pkg/errors
@@ -39,6 +42,7 @@ imports:
   subpackages:
   - pkg/apis/apps/v1beta1
   - pkg/apis/core/v1beta1
+  - pkg/apis/maintenance/v1beta1
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kataras/tablewriter
@@ -116,7 +120,7 @@ imports:
   - pkg/watch
   - third_party/forked/golang/reflect
 - name: sigs.k8s.io/controller-runtime
-  version: 2027a413747f2a8cada813dd98b3b1473c253913
+  version: 6443f37724542b887b17f51fa6024ac976f15faf
   subpackages:
   - pkg/runtime/scheme
 testImports: []

@@ -171,7 +171,7 @@ func main() {
 
 	injections := []interface{}{devRepo, podsRepo, appsRepo, deploysRepo, mainRepo}
 	mgmtInjections := append(injections, mgmtAp)
-	devInjections := append(injections, devAp)
+	devInjections := append(injections, []interface{}{devAp, jwtGen}...)
 
 	// setup all middlewares
 	globalMiddlewares := []router.Middleware{

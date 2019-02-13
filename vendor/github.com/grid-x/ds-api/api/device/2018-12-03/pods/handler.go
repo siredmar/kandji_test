@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/gorilla/mux"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -219,11 +220,11 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 		)
 	}
 
-	deviceID, err := s.ap.DeviceIDFromContext(req.Context())
-	if err != nil {
+	podID := mux.Vars(req)["podID"]
+	if podID == "" {
 		return nil, errors.E(
-			errors.Internal,
-			fmt.Errorf("Cannot get deviceID: %+v", err),
+			errors.Validation,
+			fmt.Errorf("Missing pod ID"),
 		)
 	}
 
@@ -233,7 +234,7 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 	pod := &corev1beta1.DevicePod{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: model.AccountNamespaceName(accountID),
-			Name:      deviceID,
+			Name:      podID,
 		},
 		Status: *payload.Status,
 	}

@@ -70,13 +70,19 @@ func NewJWTGenerator(issuer string, privateKey *rsa.PrivateKey) *JWTGenerator {
 }
 
 // genToken methods that takes all claims as parameters for easier testing
-func (g *JWTGenerator) genToken(issuedAt, notBefore, exp time.Time, sub string) (string, error) {
-	claims := jwt.StandardClaims{
-		Issuer:    g.issuer,
-		IssuedAt:  issuedAt.Unix(),
-		NotBefore: notBefore.Unix(),
-		ExpiresAt: exp.Unix(),
-		Subject:   sub,
+func (g *JWTGenerator) genToken(issuedAt, notBefore, exp time.Time, sub, accountID string) (string, error) {
+	claims := struct {
+		AccountID string `json:"accountID"`
+		jwt.StandardClaims
+	}{
+		AccountID: accountID,
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    g.issuer,
+			IssuedAt:  issuedAt.Unix(),
+			NotBefore: notBefore.Unix(),
+			ExpiresAt: exp.Unix(),
+			Subject:   sub,
+		},
 	}
 	// Create the token
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -85,8 +91,8 @@ func (g *JWTGenerator) genToken(issuedAt, notBefore, exp time.Time, sub string) 
 }
 
 // GenerateToken generates a token with the settings of the generator for the given subject
-func (g *JWTGenerator) GenerateToken(exp time.Time, sub string) (string, error) {
-	return g.genToken(time.Now(), time.Now(), exp, sub)
+func (g *JWTGenerator) GenerateToken(exp time.Time, sub, accountID string) (string, error) {
+	return g.genToken(time.Now(), time.Now(), exp, sub, accountID)
 }
 
 // Valid returns the claims of the token if the token is valid and an error otherwise
