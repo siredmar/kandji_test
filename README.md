@@ -25,10 +25,11 @@ When performing an operation on multiple resources, you can specify each resourc
 $ gxctl get pod 57e82f8e-08f4-48f9-8e75-28552d09701f 21d7d72a-ceac-437d-bf57-816a43efbaba
 ```
 
-It's possible to abbreviate every uuid independent of it's type eg. Please not that identifiers not of the format of an uuid needs to be specified fully.
+It is possible to abbreviate uuids which are used as an identifier eg. for pods or deployments. Please note that identifiers not of the format of an uuid eg. in the case of applications needs to be specified with it's full name.
 
 ```shell
-$ gxctl get pod 57e 21d
+$ gxctl get pods 57e 21d
+$ gxctl get apps testapp testapp2
 ```
 
 * **flags**   Specifies optional flags. For example, you can use the -o or --output flags to specify the output format of your command
