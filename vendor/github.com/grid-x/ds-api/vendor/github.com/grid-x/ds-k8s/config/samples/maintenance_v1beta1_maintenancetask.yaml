@@ -1,9 +1,0 @@
-apiVersion: maintenance.gridx.ai/v1beta1
-kind: MaintenanceTask
-metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: maintenancetask-sample
-spec:
-  # Add fields here
-  foo: bar

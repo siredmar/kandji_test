@@ -9,9 +9,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	mainv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/maintenance/v1beta1"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -157,7 +157,7 @@ func (s *Service) Create(req *http.Request, payload CreateRequest) (*encoding.Re
 		)
 	}
 
-	taskID := uuid.NewV4().String()
+	taskID := uuid.New().String()
 	task := &mainv1beta1.MaintenanceTask{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      taskID,

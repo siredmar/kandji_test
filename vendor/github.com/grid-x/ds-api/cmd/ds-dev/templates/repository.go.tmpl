@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"golang.org/x/net/context"
 
   "github.com/grid-x/ds-api/pkg/model"
@@ -215,7 +215,7 @@ func (r *{{ $repo }}) Create(ctx context.Context, e *{{ $entity }}) (*{{ $entity
         // TODO: add validation
 
 	// New ID for the {{ $ident }}
-	e.UUID = uuid.NewV4().String()
+	e.UUID = uuid.New().String()
 	_, err := NamedStmt(ctx, r.create).ExecContext(ctx, e)
 	if err != nil {
 		return nil, err

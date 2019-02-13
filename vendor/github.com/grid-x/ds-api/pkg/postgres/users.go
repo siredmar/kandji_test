@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 
 	"github.com/grid-x/ds-api/pkg/model"
@@ -280,7 +280,7 @@ func (r *UsersRepository) Create(ctx context.Context, e *model.User) (*model.Use
 	}
 
 	// New ID for the users
-	e.UUID = uuid.NewV4().String()
+	e.UUID = uuid.New().String()
 	_, err := NamedStmt(ctx, r.create).ExecContext(ctx, e)
 	if err != nil {
 		return nil, err

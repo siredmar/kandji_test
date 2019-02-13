@@ -1,16 +1,15 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
+	errors "github.com/grid-x/gxctl/pkg/error"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type PatchDevice struct {
@@ -19,74 +18,54 @@ type PatchDevice struct {
 
 func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 	var patchDeviceCmd = &cobra.Command{
-		Use:              "device",
-		TraverseChildren: true,
-		Short:            "patch device",
-		Long:             `Patches a device`,
+		Use:                   "device ID [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Short:                 "patch device",
+		Long:                  `Patches a device`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return errors.MissingParameter("ID", "gxctl create application -h")
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			patchDeviceCmdFilename, _ := cmd.Flags().GetString("filename")
 			patchDeviceCmdMaintenanceWindow, _ := cmd.Flags().GetString("maintenance-window")
 			patchDeviceCmdMacAddress, _ := cmd.Flags().GetString("mac-address")
 			patchDeviceCmdLabels, _ := cmd.Flags().GetString("labels")
 
-			if patchDeviceCmdFilename != "" && (patchDeviceCmdMaintenanceWindow != "" || patchDeviceCmdMacAddress != "" || patchDeviceCmdLabels != "") {
-				return errors.New("You can either specify a patchfile or maintenance-window/mac-address/labels but not both")
-			}
-			if patchDeviceCmdFilename == "" && patchDeviceCmdMaintenanceWindow == "" && patchDeviceCmdMacAddress == "" && patchDeviceCmdLabels == "" {
-				cmd.Usage()
-				return errors.New("Nothing to do")
+			if patchDeviceCmdMaintenanceWindow == "" && patchDeviceCmdMacAddress == "" && patchDeviceCmdLabels == "" {
+				return errors.NothingToDo("gxctl patch device -h")
 			}
 
 			client := client.NewAPIClient()
 
-			if len(args) != 1 {
-				return errors.New("Missing device ID")
+			//Lookup all existing devices to validate ids and autocomplete them if necessary
+			devices, err := getDevices(client)
+			if err != nil {
+				return err
+			}
+			deviceIDs := devices.GetIds()
+
+			d := api.PatchDevice{}
+
+			if patchDeviceCmdMaintenanceWindow != "" {
+				d.Spec.MaintenanceWindow = &patchDeviceCmdMaintenanceWindow
+			}
+			if patchDeviceCmdMacAddress != "" {
+				d.Spec.MACAddress = &patchDeviceCmdMacAddress
 			}
 
-			var res interface{}
-
-			if patchDeviceCmdFilename != "" {
-				jsonFile, err := os.Open(patchDeviceCmdFilename)
-				if err != nil {
-					return err
-				}
-				defer jsonFile.Close()
-
-				bytes, err := ioutil.ReadAll(jsonFile)
-				if err != nil {
-					return err
+			if patchDeviceCmdLabels != "" {
+				labels := strings.Split(patchDeviceCmdLabels, ",")
+				m := make(map[string]string)
+				for _, pair := range labels {
+					z := strings.Split(pair, ":")
+					m[z[0]] = z[1]
 				}
 
-				res, err = checkPatchResourceFile(bytes)
-				if err != nil {
-					return err
-				}
-
-			} else {
-				d := api.PatchDevice{}
-
-				if patchDeviceCmdMaintenanceWindow != "" {
-					d.Spec.MaintenanceWindow = &patchDeviceCmdMaintenanceWindow
-				}
-				if patchDeviceCmdMacAddress != "" {
-					d.Spec.MACAddress = &patchDeviceCmdMacAddress
-				}
-
-				if patchDeviceCmdLabels != "" {
-					labels := strings.Split(patchDeviceCmdLabels, ",")
-					m := make(map[string]string)
-					for _, pair := range labels {
-						z := strings.Split(pair, ":")
-						m[z[0]] = z[1]
-					}
-
-					d.Metadata.Labels = m
-				}
-
-				res = d
+				d.Metadata.Labels = m
 			}
-
-			message, err := patchResource(client, res, args[0])
+			message, err := patchResource(client, d, args[0], deviceIDs)
 			if err != nil {
 				return err
 			}
@@ -99,6 +78,9 @@ func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 	patchDeviceCmd.Flags().StringP("maintenance-window", "m", "", "Maintenance window for the device")
 	patchDeviceCmd.Flags().StringP("mac-address", "a", "", "Mac address for the device")
 	patchDeviceCmd.Flags().StringP("labels", "l", "", "A comma seperated list of labels eg. gridx.de/channel:stable,gridx.de/area:west-1")
+
+	patchDeviceCmd.SetHelpTemplate(template.HelpTemplate())
+	patchDeviceCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(patchDeviceCmd)
 
 	return &PatchDevice{

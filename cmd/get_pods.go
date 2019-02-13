@@ -9,6 +9,7 @@ import (
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
 	printer "github.com/grid-x/gxctl/pkg/printer"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetPods struct {
@@ -17,10 +18,12 @@ type GetPods struct {
 
 func NewGetPods(parent *cobra.Command) *GetPods {
 	var getPodsCmd = &cobra.Command{
-		Use:     "pods",
-		Aliases: []string{"po", "pod"},
-		Short:   "get pods",
-		Long:    `Prints a list of all pods you have access to`,
+		Use:                   "pod [NAME] [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Aliases:               []string{"pods", "po"},
+		Short:                 "get pod",
+		Long:                  `Prints a list of all pods you have access to`,
+		Example:               "# Get all pods \n  gxctl get pods\n\n  # Get information about an pod with abbreviation a1n \n  gxctl get pod a1n",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
@@ -44,9 +47,16 @@ func NewGetPods(parent *cobra.Command) *GetPods {
 					return err
 				}
 			} else if len(args) > 0 {
+				//Lookup all existing pods to validate ids and autocomplete them if necessary
+				pods, err := getPods(client)
+				if err != nil {
+					return err
+				}
+				podIds := pods.GetIds()
+
 				//Get pods
 				for _, a := range args {
-					pod, err := getPodById(client, a)
+					pod, err := getPodById(client, a, podIds)
 					if err != nil {
 						return err
 					}
@@ -72,6 +82,8 @@ func NewGetPods(parent *cobra.Command) *GetPods {
 		},
 	}
 
+	getPodsCmd.SetHelpTemplate(template.HelpTemplate())
+	getPodsCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getPodsCmd)
 	getPodsCmd.Flags().StringP("device-id", "d", "", "specify device id")
 
@@ -98,8 +110,13 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 	return podList, nil
 }
 
-func getPodById(client *client.APIClient, id string) (api.Pod, error) {
-	endpoint := fmt.Sprintf("%s/%s", api.PodsEndpoint, id)
+func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, error) {
+	podID, err := api.LookupID(id, podIds)
+	if err != nil {
+		return api.Pod{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s", api.PodsEndpoint, podID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Pod{}, err
@@ -108,11 +125,6 @@ func getPodById(client *client.APIClient, id string) (api.Pod, error) {
 	pod, err := api.NewPod(response)
 	if err != nil {
 		return pod, err
-	}
-
-	if pod.IsEmpty() {
-		msg := fmt.Sprintf("pod \"%s\"", id)
-		return pod, errors.GetNotFoundError(msg)
 	}
 
 	return pod, nil

@@ -22,8 +22,16 @@ $ gxctl get deploy deployment1
 When performing an operation on multiple resources, you can specify each resource by name:
 
 ```shell
-$ gxctl get pod example-pod1 example-pod2
+$ gxctl get pod 57e82f8e-08f4-48f9-8e75-28552d09701f 21d7d72a-ceac-437d-bf57-816a43efbaba
 ```
+
+It is possible to abbreviate uuids which are used as an identifier eg. for pods or deployments. Please note that identifiers not of the format of an uuid eg. in the case of applications need to be specified with it's full name.
+
+```shell
+$ gxctl get pods 57e 21d
+$ gxctl get apps testapp testapp2
+```
+
 * **flags**   Specifies optional flags. For example, you can use the -o or --output flags to specify the output format of your command
 
 ## Operations
@@ -31,6 +39,7 @@ $ gxctl get pod example-pod1 example-pod2
 * **create**   `gxctl create [[-f | ----filename]=Filename]`
 * **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
 * **patch**   `gxctl patch [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
+* **delete**   `gxctl delete [TYPE] [NAME] [flags]`
 
 
 ## Resource types
@@ -51,7 +60,7 @@ $ gxctl [command] [TYPE] [NAME] -o=<output_format>
 
 * **-o=json**   Output a JSON formatted API object.
 * **-o=wide**   Output in the plain-text format with any additional information.
-* **-o=yaml**   utput a YAML formatted API object.
+* **-o=yaml**   Output a YAML formatted API object.
 
 ## Examples: Common operations
 
@@ -72,6 +81,10 @@ $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f 8st62f8e-22gd-ab45-ll23-
 $ gxctl get pods
 # Get a List of all pods on a certain device
 $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
+# Get a List of all deployments 
+$ gxctl get deploy
+# Get a information of a deployment include additional information using uuid abbreviation
+$ gxctl get deploy c78 -o wide
 ```
 
 `gxctl create` - Create a new resource.
@@ -79,13 +92,17 @@ $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
 ```shell
 # Create a new deployment
 $ gxctl create -f new_deployment.json
+# Create a new app
+$ gxctl create app testapp
+# Create a new nginx deployment for app testapp
+$ gxctl create deployment nginx:1.15.8 -a testapp -l gridx.de/channel:stable
 ```
 
 `gxctl patch` - Patch a existing resource.
 
 ```shell
-# Patch a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -f patch_device.json
+# Patch a device using a patchfile
+$ gxctl patch -f patch_device.json
 # Patch labels of a device
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -l "gridx.de/channel:stable,gridx.de/area:west"
 # Patch mac address of a device
@@ -93,3 +110,15 @@ $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-
 # Patch maintanence window of a device
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
 ```
+
+`gxctl delete` - Delete a existing resource.
+
+```shell
+# Delete an app
+$ gxctl delete app testapp
+# Delete an Deployment using the uuid abbreviation
+$ gxctl delete deploy c78
+# Delete two Deployments using both uuid abbreviation and full qualified name
+$ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05 
+```
+

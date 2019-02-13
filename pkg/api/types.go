@@ -6,8 +6,14 @@ import (
 	devicesApi "github.com/grid-x/ds-api/api/management/2018-11-02/devices"
 	applicationsApi "github.com/grid-x/ds-api/api/management/2018-11-27/application"
 	deploymentsApi "github.com/grid-x/ds-api/api/management/2018-11-28/deployments"
+	maintenanceApi "github.com/grid-x/ds-api/api/management/2018-12-04/maintenance"
 	podsApi "github.com/grid-x/ds-api/api/management/2018-12-04/pods"
 )
+
+type FullObjectMeta struct {
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
 
 type Device devicesApi.Device
 
@@ -15,7 +21,10 @@ type Devices struct {
 	Devices []Device `json:"devices"`
 }
 
-type PatchDevice devicesApi.UpdateRequest
+type PatchDevice struct {
+	FullMeta FullObjectMeta `json:"metadata,omitempty"`
+	devicesApi.UpdateRequest
+}
 
 type Pod podsApi.Pod
 
@@ -27,7 +36,10 @@ type Deployment deploymentsApi.Deployment
 
 type CreateDeployment deploymentsApi.CreateRequest
 
-type PatchDeployment deploymentsApi.UpdateRequest
+type PatchDeployment struct {
+	FullMeta FullObjectMeta `json:"metadata,omitempty"`
+	deploymentsApi.UpdateRequest
+}
 
 type Deployments struct {
 	Deployments []Deployment `json:"deployments"`
@@ -41,6 +53,14 @@ type Applications struct {
 
 type CreateApplication applicationsApi.CreateRequest
 
+type MaintenanceTask maintenanceApi.Task
+
+type MaintenanceTasks struct {
+	MaintenanceTasks []MaintenanceTask `json:"maintenanceTasks"`
+}
+
+type CreateMaintenanceTask maintenanceApi.CreateRequest
+
 func (d *Device) IsEmpty() bool {
 	if cmp.Diff(Device{}, *d) == "" {
 		return true
@@ -53,6 +73,14 @@ func (d *Devices) IsEmpty() bool {
 		return true
 	}
 	return false
+}
+
+func (d *Devices) GetIds() []string {
+	out := make([]string, len(d.Devices))
+	for _, dev := range d.Devices {
+		out = append(out, dev.Metadata.ID)
+	}
+	return out
 }
 
 func (d *PatchDevice) IsEmpty() bool {
@@ -84,6 +112,14 @@ func (p *Pods) IsEmpty() bool {
 	return false
 }
 
+func (p *Pods) GetIds() []string {
+	out := make([]string, len(p.Pods))
+	for _, po := range p.Pods {
+		out = append(out, po.Metadata.ID)
+	}
+	return out
+}
+
 func (d *Deployment) IsEmpty() bool {
 	if cmp.Diff(Deployment{}, *d) == "" {
 		return true
@@ -96,6 +132,14 @@ func (d *Deployments) IsEmpty() bool {
 		return true
 	}
 	return false
+}
+
+func (d *Deployments) GetIds() []string {
+	out := make([]string, len(d.Deployments))
+	for _, dep := range d.Deployments {
+		out = append(out, dep.Metadata.ID)
+	}
+	return out
 }
 
 func (d *CreateDeployment) IsEmpty() bool {

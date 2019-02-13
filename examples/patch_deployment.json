@@ -1,0 +1,24 @@
+{
+  "metadata": {
+      "id": "b701cf3b-c5eb-451a-af73-480b370c1744"
+  },
+  "spec": {
+      "app": "testapp123",
+      "selector": {
+          "matchByLabels": {
+              "gridx.de/channel": "stable"
+          }
+      },
+      "template": {
+          "spec": {
+              "containers": [
+                  {
+                      "name": "nginx",
+                      "image": "nginx:1.19.8"
+                  }
+              ]
+          }
+      }
+  },
+  "status": {}
+}

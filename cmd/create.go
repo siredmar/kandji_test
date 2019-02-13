@@ -10,6 +10,7 @@ import (
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type Create struct {
@@ -18,9 +19,11 @@ type Create struct {
 
 func NewCreate(parent *cobra.Command) *Create {
 	var createCmd = &cobra.Command{
-		Use:   "create",
-		Short: "Create different resources",
-		Long:  `TODO`,
+		Use:                   "create [OPTIONS]",
+		Short:                 "Create different resources",
+		DisableFlagsInUseLine: true,
+		Long:                  `TODO`,
+		Example:               "# Create a deployment resource from file \n  gxctl create -f deployment.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			createCmdFilename, _ := cmd.Flags().GetString("filename")
 
@@ -58,6 +61,10 @@ func NewCreate(parent *cobra.Command) *Create {
 	}
 
 	createCmd.Flags().StringP("filename", "f", "", "Filename to file to use to create the resource")
+
+	createCmd.SetHelpTemplate(template.HelpTemplate())
+	createCmd.SetUsageTemplate(template.UsageTemplate())
+
 	parent.AddCommand(createCmd)
 
 	return &Create{

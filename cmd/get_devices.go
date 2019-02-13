@@ -9,6 +9,7 @@ import (
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
 	printer "github.com/grid-x/gxctl/pkg/printer"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetDevices struct {
@@ -17,11 +18,12 @@ type GetDevices struct {
 
 func NewGetDevices(parent *cobra.Command) *GetDevices {
 	var getDevicesCmd = &cobra.Command{
-		Use:              "devices",
-		TraverseChildren: true,
-		Aliases:          []string{"device"},
-		Short:            "get devices",
-		Long:             `Prints a list of all devices you have access to`,
+		Use:                   "device [ID] [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Aliases:               []string{"devices"},
+		Short:                 "get device",
+		Example:               "# Get all devices \n  gxctl get devices\n\n  # Get information about an device with abbreviation c72 \n  gxctl get device c72",
+		Long:                  `Prints a list of all devices you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
@@ -30,8 +32,15 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 
 			if len(args) > 0 {
 				//Get multiple devices
+				//Lookup all existing devices to validate ids and autocomplete them if necessary
+				devices, err := getDevices(client)
+				if err != nil {
+					return err
+				}
+				deviceIDs := devices.GetIds()
+
 				for _, a := range args {
-					device, err := getDeviceById(client, a)
+					device, err := getDeviceById(client, a, deviceIDs)
 					if err != nil {
 						return err
 					}
@@ -57,6 +66,8 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 		},
 	}
 
+	getDevicesCmd.SetHelpTemplate(template.HelpTemplate())
+	getDevicesCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDevicesCmd)
 
 	return &GetDevices{
@@ -82,8 +93,13 @@ func getDevices(client *client.APIClient) (api.Devices, error) {
 	return deviceList, nil
 }
 
-func getDeviceById(client *client.APIClient, id string) (api.Device, error) {
-	endpoint := fmt.Sprintf("%s/%s", api.DevicesEndpoint, id)
+func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api.Device, error) {
+	deviceID, err := api.LookupID(id, deviceIds)
+	if err != nil {
+		return api.Device{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s", api.DevicesEndpoint, deviceID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Device{}, err
@@ -92,11 +108,6 @@ func getDeviceById(client *client.APIClient, id string) (api.Device, error) {
 	device, err := api.NewDevice(response)
 	if err != nil {
 		return device, err
-	}
-
-	if device.IsEmpty() {
-		msg := fmt.Sprintf("device \"%s\"", id)
-		return device, errors.GetNotFoundError(msg)
 	}
 
 	return device, nil

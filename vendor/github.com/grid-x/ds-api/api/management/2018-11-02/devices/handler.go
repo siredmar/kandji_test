@@ -9,9 +9,9 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -178,7 +178,7 @@ func (s *Service) Create(req *http.Request, payload CreateRequest) (*encoding.Re
 
 	serialnumber := payload.Spec.Serialnumber
 	maintenanceWindow := "Sun:04:00-Sun:06:00"
-	deviceID := uuid.NewV4()
+	deviceID := uuid.New()
 
 	if payload.Spec.MaintenanceWindow != nil {
 		maintenanceWindow = *payload.Spec.MaintenanceWindow

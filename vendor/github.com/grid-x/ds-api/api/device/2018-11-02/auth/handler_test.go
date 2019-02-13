@@ -137,7 +137,7 @@ func Test_GetToken(t *testing.T) {
 				IDData:    "{}",
 			},
 			wantErr:         false,
-			wantTokenLength: 490,
+			wantTokenLength: 510,
 		},
 	}
 

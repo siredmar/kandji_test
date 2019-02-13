@@ -145,6 +145,7 @@ func (s *Service) GetToken(req *http.Request, payload GetTokenRequest) (*encodin
 	token, err := s.jwtGen.GenerateToken(
 		time.Now().Add(s.jwtExpTimeout),
 		dev.Name,
+		dev.Spec.AccountID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("internal server error: %+v", err)

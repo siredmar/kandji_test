@@ -10,6 +10,7 @@ import (
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/grid-x/ds-api/pkg/model"
 	"github.com/grid-x/ds-api/pkg/router"
 )
 
@@ -124,7 +125,7 @@ func (ap *AuthProvider) Middleware() router.Middleware {
 			ctx, cancel := context.WithTimeout(r.Context(), defaultTimeout)
 			defer cancel()
 
-			_, err = ap.devRepo.Get(ctx, accountID, deviceID)
+			_, err = ap.devRepo.Get(ctx, model.AccountNamespaceName(accountID), deviceID)
 			if err != nil {
 				ap.logger.WithFields(fields).Errorf("cannot get device: %+v", err)
 				http.Error(w, `{}`, http.StatusInternalServerError)

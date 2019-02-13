@@ -9,6 +9,7 @@ import (
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
 	printer "github.com/grid-x/gxctl/pkg/printer"
+	template "github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetDeployments struct {
@@ -17,11 +18,12 @@ type GetDeployments struct {
 
 func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 	var getDeploymentsCmd = &cobra.Command{
-		Use:              "deployments",
-		TraverseChildren: true,
-		Aliases:          []string{"deployment", "deploy"},
-		Short:            "get deployments",
-		Long:             `Prints a list of all deployments you have access to`,
+		Use:                   "deployment [ID] [OPTIONS]",
+		DisableFlagsInUseLine: true,
+		Aliases:               []string{"deployments", "deploy"},
+		Short:                 "get deployment",
+		Long:                  `Prints a list of all deployments you have access to`,
+		Example:               "# Get all deployments \n  gxctl get deployments\n\n  # Get information about an deployment with abbreviation 3cc \n  gxctl get deployment 3cc",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
@@ -30,8 +32,15 @@ func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 
 			if len(args) > 0 {
 				//Get multiple deployments
+				//Lookup all existing deployments to validate ids and autocomplete them if necessary
+				deployments, err := getDeployments(client)
+				if err != nil {
+					return err
+				}
+				deploymentIDs := deployments.GetIds()
+
 				for _, a := range args {
-					deployment, err := getDeploymentById(client, a)
+					deployment, err := getDeploymentById(client, a, deploymentIDs)
 					if err != nil {
 						return err
 					}
@@ -57,6 +66,8 @@ func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 		},
 	}
 
+	getDeploymentsCmd.SetHelpTemplate(template.HelpTemplate())
+	getDeploymentsCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDeploymentsCmd)
 
 	return &GetDeployments{
@@ -82,8 +93,13 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 	return deploymentList, nil
 }
 
-func getDeploymentById(client *client.APIClient, id string) (api.Deployment, error) {
-	endpoint := fmt.Sprintf("%s/%s", api.DeploymentsEndpoint, id)
+func getDeploymentById(client *client.APIClient, id string, deploymentsIds []string) (api.Deployment, error) {
+	deploymentID, err := api.LookupID(id, deploymentsIds)
+	if err != nil {
+		return api.Deployment{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s", api.DeploymentsEndpoint, deploymentID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Deployment{}, err
@@ -92,11 +108,6 @@ func getDeploymentById(client *client.APIClient, id string) (api.Deployment, err
 	deployment, err := api.NewDeployment(response)
 	if err != nil {
 		return deployment, err
-	}
-
-	if deployment.IsEmpty() {
-		msg := fmt.Sprintf("deployment \"%s\"", id)
-		return deployment, errors.GetNotFoundError(msg)
 	}
 
 	return deployment, nil

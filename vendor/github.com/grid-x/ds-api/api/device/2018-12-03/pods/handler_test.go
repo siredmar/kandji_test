@@ -200,7 +200,7 @@ func Test_Update(t *testing.T) {
 				Payload: &UpdateResponse{
 					Pod: &Pod{
 						Metadata: api.Metadata{
-							ID: "foo",
+							ID: "c91ffe91-e44b-4fa3-946a-b153d9a9ecbb",
 						},
 						Status: corev1beta1.DevicePodStatus{
 							StartTime: &now,
