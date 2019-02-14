@@ -24,7 +24,7 @@ func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 		Long:                  `Patches a device`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("ID", "gxctl create application -h")
+				return errors.MissingParameter("ID", "gxctl patch device -h")
 			}
 			return nil
 		},
@@ -56,10 +56,10 @@ func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 			}
 
 			if patchDeviceCmdLabels != "" {
-				labels := strings.Split(patchDeviceCmdLabels, ",")
+				labels := strings.Split(patchDeviceCmdLabels, " ")
 				m := make(map[string]string)
 				for _, pair := range labels {
-					z := strings.Split(pair, ":")
+					z := strings.Split(pair, "=")
 					m[z[0]] = z[1]
 				}
 
@@ -77,7 +77,7 @@ func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 
 	patchDeviceCmd.Flags().StringP("maintenance-window", "m", "", "Maintenance window for the device")
 	patchDeviceCmd.Flags().StringP("mac-address", "a", "", "Mac address for the device")
-	patchDeviceCmd.Flags().StringP("labels", "l", "", "A comma seperated list of labels eg. gridx.de/channel:stable,gridx.de/area:west-1")
+	patchDeviceCmd.Flags().StringP("labels", "l", "", "A space seperated list of labels eg. gridx.de/channel=stable gridx.de/area=west-1")
 
 	patchDeviceCmd.SetHelpTemplate(template.HelpTemplate())
 	patchDeviceCmd.SetUsageTemplate(template.UsageTemplate())

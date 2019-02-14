@@ -1,13 +1,15 @@
 {
   "metadata": {
-    "id": "b701cf3b-c5eb-451a-af73-480b370c1744",
-    "labels": {
-      "gridx.de/area": "west",
-      "gridx.de/channel": "stable"
-    }
+      "id": "80a5dbb9-f409-4ed8-ac2f-a1dc687bcf19",
+      "labels": {
+          "gridx.de/channel": "alpha",
+          "hello": "world"
+      }
   },
   "spec": {
-    "macAddress": "1234",
-    "maintenanceWindow": "Sun:11:00-Sun:13:00"
-  }
+      "serialnumber": "B143-110-000-000-040-B-X",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAzAP3nC7TFtrWplw2pgP+\np5CJu1Qyw8Tm8/4ktSenaugQYWsTNIOq9fbS133GNIELHiXp0ZwJa216cpebMQ3I\nq+pTtfUA3T1TD9x8NdlWELlYotR/b96ImEvMp2Bvb39yZZ5ZjcBSKWq4y1SH8aF+\nDpb6hiORT24bHXjxh0LQaL7t72RYT/InvIxw2cd7MyzXA49V3SmvNIr3bd7OfZw5\nFly/EkZecAhfN1CshRq/pRux8CasBtb4SpuWj0/wKzBvqEKA1jo1Tu+72+AoxdC8\nITypxUDNyIzAsjrZjSDXWDeU9AnEGWah9jiF4Rw1Z0wtniZh94fkJRxutqTvV7D7\necK6AAxA2ZuJm+fRZITho9gBVs7c3MBbn7DrfYl1+kS8sn/8mxcdD1BwB5/K/zLv\nhmtyFWc/JBlbWoOh+4BpWvvsCCqe+01CL+sxICaFFs71j9JX2FHU9rQa4kkN71WN\ngSPzDDU16xx3azJmgt5ocBO+V41dKTynRbBnGHEvths1AgMBAAE=\n-----END PUBLIC KEY-----\n",
+      "maintenanceWindow": "Fri:09:00-Fri:10:00"
+  },
+  "status": {}
 }

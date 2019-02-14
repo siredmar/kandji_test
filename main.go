@@ -24,6 +24,7 @@ import (
 func main() {
 	root := cmd.NewRoot()
 	get := cmd.NewGet(root.Command)
+	label := cmd.NewLabel(root.Command)
 	patch := cmd.NewPatch(root.Command)
 	delete := cmd.NewDelete(root.Command)
 	create := cmd.NewCreate(root.Command)
@@ -36,8 +37,10 @@ func main() {
 	cmd.NewCreateApplication(create.Command)
 	cmd.NewCreateDeployment(create.Command)
 	cmd.NewPatchDevice(patch.Command)
+	cmd.NewPatchDeployment(patch.Command)
 	cmd.NewDeleteDeployment(delete.Command)
 	cmd.NewDeleteApplication(delete.Command)
+	cmd.NewLabelDevice(label.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
