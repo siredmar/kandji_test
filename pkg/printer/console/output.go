@@ -64,9 +64,9 @@ func (c *ConsolePrinter) PrintWide(v interface{}) error {
 	case api.Devices:
 		out = DevicesConsoleOutputWide{}.Map(v).Sort()
 	case api.Pod:
-		out = PodConsoleOutput{}.Map(v) //TODO make wide mapping
+		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+		out = PodsConsoleOutputWide{}.Map(v).Sort()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v) //TODO make wide mapping
 	case api.Deployments:
