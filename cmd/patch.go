@@ -45,12 +45,12 @@ func NewPatch(parent *cobra.Command) *Patch {
 				return err
 			}
 
-			res, err := checkPatchResourceFile(bytes)
+			res, resId, err := checkPatchResourceFile(bytes)
 			if err != nil {
 				return err
 			}
 
-			message, err := patchResource(client, res, "", nil)
+			message, err := patchResource(client, res, resId, nil)
 			if err != nil {
 				return err
 			}
@@ -71,25 +71,27 @@ func NewPatch(parent *cobra.Command) *Patch {
 	}
 }
 
-func checkPatchResourceFile(bytes []byte) (interface{}, error) {
+func checkPatchResourceFile(bytes []byte) (interface{}, string, error) {
+	resId := resolveIdentifierFromFile(bytes)
+
 	deploymentPatch, err := api.NewPatchDeployment(bytes)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if !deploymentPatch.IsEmpty() && deploymentPatch.IsValid() {
-		return deploymentPatch, nil
+		return deploymentPatch, resId, nil
 	}
 
 	devicePatch, err := api.NewPatchDevice(bytes)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if !devicePatch.IsEmpty() && devicePatch.IsValid() {
-		return devicePatch, nil
+		return devicePatch, resId, nil
 	}
 
 	//Nothing found
-	return nil, errors.InvalidFormat()
+	return nil, "", errors.InvalidFormat()
 }
 
 func patchResource(client *client.APIClient, v interface{}, id string, ids []string) (string, error) {
@@ -104,9 +106,6 @@ func patchResource(client *client.APIClient, v interface{}, id string, ids []str
 
 	switch v := v.(type) {
 	case api.PatchDevice:
-		if resId == "" {
-			resId = v.FullMeta.Id
-		}
 		response, err := client.PatchRequest(api.DevicesEndpoint, v, resId)
 		if err != nil {
 			return "", err
@@ -119,9 +118,6 @@ func patchResource(client *client.APIClient, v interface{}, id string, ids []str
 
 		return fmt.Sprintf("Device %s patched successfully", device.Metadata.ID), nil
 	case api.PatchDeployment:
-		if resId == "" {
-			resId = v.FullMeta.Id
-		}
 		response, err := client.PatchRequest(api.DeploymentsEndpoint, v, resId)
 		if err != nil {
 			return "", err
@@ -137,4 +133,20 @@ func patchResource(client *client.APIClient, v interface{}, id string, ids []str
 		s := fmt.Sprintf("Creating resource of type %s.", v)
 		return "", errors.NotImplementedError(s)
 	}
+}
+
+func resolveIdentifierFromFile(bytes []byte) string {
+	fullMeta, err := api.NewFullObjectMeta(bytes)
+	if err != nil {
+		return ""
+	}
+
+	if fullMeta.Meta.Name != "" {
+		return fullMeta.Meta.Name
+	}
+	if fullMeta.Meta.Id != "" {
+		return fullMeta.Meta.Id
+	}
+
+	return ""
 }

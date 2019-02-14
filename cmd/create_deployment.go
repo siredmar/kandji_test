@@ -20,7 +20,7 @@ type CreateDeployment struct {
 
 func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 	var createDeploymentCmd = &cobra.Command{
-		Use:                   "deployment IMAGE --app=APP --labels=LABELS [OPTIONS]",
+		Use:                   "deployment IMAGE --app=APP --selector=SELECTOR [OPTIONS]",
 		Short:                 "Creates an deployment",
 		DisableFlagsInUseLine: true,
 		Long:                  `TODO`,
@@ -35,20 +35,20 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			createDeploymentCmdImage := args[0]
 			createDeploymentCmdApp, _ := cmd.Flags().GetString("app")
-			createDeploymentCmdLabels, _ := cmd.Flags().GetString("labels")
+			createDeploymentCmdSelector, _ := cmd.Flags().GetString("selector")
 
 			if createDeploymentCmdApp == "" {
 				return errors.MissingParameter("APP", "gxctl create deployment -h")
 			}
-			if createDeploymentCmdLabels == "" {
-				return errors.MissingParameter("LABELS", "gxctl create deployment -h")
+			if createDeploymentCmdSelector == "" {
+				return errors.MissingParameter("SELECTOR", "gxctl create deployment -h")
 			}
 
 			matchByLabels := make(map[string]string)
-			if createDeploymentCmdLabels != "" {
-				labels := strings.Split(createDeploymentCmdLabels, ",")
+			if createDeploymentCmdSelector != "" {
+				labels := strings.Split(createDeploymentCmdSelector, " ")
 				for _, pair := range labels {
-					z := strings.Split(pair, ":")
+					z := strings.Split(pair, "=")
 					matchByLabels[z[0]] = z[1]
 				}
 			}
@@ -86,7 +86,7 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 	}
 
 	createDeploymentCmd.Flags().StringP("app", "a", "", "App for the deployment")
-	createDeploymentCmd.Flags().StringP("labels", "l", "", "A comma seperated list of labels eg. gridx.de/channel:stable,gridx.de/area:west-1")
+	createDeploymentCmd.Flags().StringP("selector", "s", "", "A space seperated list of labels to match a device eg. gridx.de/channel=stable gridx.de/area=west-1")
 
 	createDeploymentCmd.SetHelpTemplate(template.HelpTemplate())
 	createDeploymentCmd.SetUsageTemplate(template.UsageTemplate())

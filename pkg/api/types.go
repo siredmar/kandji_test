@@ -11,8 +11,10 @@ import (
 )
 
 type FullObjectMeta struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	Meta struct {
+		Id   string `json:"id,omitempty"`
+		Name string `json:"name,omitempty"`
+	} `json:"metadata"`
 }
 
 type Device devicesApi.Device
@@ -21,10 +23,7 @@ type Devices struct {
 	Devices []Device `json:"devices"`
 }
 
-type PatchDevice struct {
-	FullMeta FullObjectMeta `json:"metadata,omitempty"`
-	devicesApi.UpdateRequest
-}
+type PatchDevice devicesApi.UpdateRequest
 
 type Pod podsApi.Pod
 
@@ -36,10 +35,7 @@ type Deployment deploymentsApi.Deployment
 
 type CreateDeployment deploymentsApi.CreateRequest
 
-type PatchDeployment struct {
-	FullMeta FullObjectMeta `json:"metadata,omitempty"`
-	deploymentsApi.UpdateRequest
-}
+type PatchDeployment deploymentsApi.UpdateRequest
 
 type Deployments struct {
 	Deployments []Deployment `json:"deployments"`

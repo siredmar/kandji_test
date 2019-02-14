@@ -4,6 +4,16 @@ import (
 	"encoding/json"
 )
 
+func NewFullObjectMeta(j []byte) (FullObjectMeta, error) {
+	d := FullObjectMeta{}
+	err := json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
+
 func NewDevice(j []byte) (Device, error) {
 	d := Device{}
 	err := json.Unmarshal(j, &d)
