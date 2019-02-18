@@ -90,7 +90,7 @@ func checkCreateResourceFile(bytes []byte) (interface{}, error) {
 	}
 
 	//Nothing found
-	return nil, errors.InvalidFormat()
+	return nil, errors.InvalidFileFormat()
 }
 
 func createResource(client *client.APIClient, v interface{}) (string, error) {

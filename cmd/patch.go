@@ -91,7 +91,7 @@ func checkPatchResourceFile(bytes []byte) (interface{}, string, error) {
 	}
 
 	//Nothing found
-	return nil, "", errors.InvalidFormat()
+	return nil, "", errors.InvalidFileFormat()
 }
 
 func patchResource(client *client.APIClient, v interface{}, id string, ids []string) (string, error) {
