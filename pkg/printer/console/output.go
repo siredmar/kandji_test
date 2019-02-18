@@ -43,6 +43,10 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 		out = ApplicationConsoleOutput{}.Map(v)
 	case api.Applications:
 		out = ApplicationsConsoleOutput{}.Map(v).Sort()
+	case api.MaintenanceTask:
+		out = MaintenanceConsoleOutput{}.Map(v)
+	case api.MaintenanceTasks:
+		out = MaintenancesConsoleOutput{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)

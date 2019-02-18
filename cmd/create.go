@@ -119,6 +119,18 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Application %s created successfully", application.Name), nil
+	case api.CreateMaintenanceTask:
+		response, err := client.PostRequest(api.MaintenanceEndpoint, v)
+		if err != nil {
+			return "", err
+		}
+
+		task, err := api.NewMaintenanceTask(response)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("Maintenance task %s created successfully", task.Metadata.ID), nil
 	default:
 		s := fmt.Sprintf("Creating resource of type %s.", v)
 		return "", errors.NotImplementedError(s)

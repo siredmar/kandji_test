@@ -25,7 +25,7 @@ func NewDeleteDeployment(parent *cobra.Command) *DeleteDeployment {
 		Example:          "# Delete a deployment \n  gxctl delete deployment 337df243-2cc9-46f4-bfeb-3c978ece4252",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.MissingParameter("ID", "gxctl create application -h")
+				return errors.MissingParameter("ID", "gxctl delete deployment -h")
 			}
 			return nil
 		},

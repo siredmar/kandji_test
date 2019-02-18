@@ -6,4 +6,5 @@ const (
 	PodsEndpoint         = "api/management/pods"
 	DeploymentsEndpoint  = "api/management/deployments"
 	ApplicationsEndpoint = "api/management/applications"
+	MaintenanceEndpoint  = "api/management/maintenance"
 )

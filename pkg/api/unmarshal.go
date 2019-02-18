@@ -133,3 +133,33 @@ func NewCreateApplication(j []byte) (CreateApplication, error) {
 	}
 	return a, nil
 }
+
+func NewMaintenanceTask(j []byte) (MaintenanceTask, error) {
+	m := MaintenanceTask{}
+	err := json.Unmarshal(j, &m)
+
+	if err != nil {
+		return m, err
+	}
+	return m, nil
+}
+
+func NewMaintenanceTasks(j []byte) (MaintenanceTasks, error) {
+	m := MaintenanceTasks{}
+	err := json.Unmarshal(j, &m)
+
+	if err != nil {
+		return m, err
+	}
+	return m, nil
+}
+
+func NewCreateMaintenanceTask(j []byte) (CreateMaintenanceTask, error) {
+	m := CreateMaintenanceTask{}
+	err := json.Unmarshal(j, &m)
+
+	if err != nil {
+		return m, err
+	}
+	return m, nil
+}
