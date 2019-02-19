@@ -205,3 +205,25 @@ func (a *CreateApplication) IsValid() bool {
 	//Todo: Check if it's valid eg. mandatory fields
 	return true
 }
+
+func (m *MaintenanceTask) IsEmpty() bool {
+	if cmp.Diff(MaintenanceTask{}, *m) == "" {
+		return true
+	}
+	return false
+}
+
+func (m *MaintenanceTasks) IsEmpty() bool {
+	if len(m.MaintenanceTasks) == 0 {
+		return true
+	}
+	return false
+}
+
+func (m *MaintenanceTasks) GetIds() []string {
+	out := make([]string, len(m.MaintenanceTasks))
+	for _, dev := range m.MaintenanceTasks {
+		out = append(out, dev.Metadata.ID)
+	}
+	return out
+}

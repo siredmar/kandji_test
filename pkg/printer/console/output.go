@@ -43,6 +43,10 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 		out = ApplicationConsoleOutput{}.Map(v)
 	case api.Applications:
 		out = ApplicationsConsoleOutput{}.Map(v).Sort()
+	case api.MaintenanceTask:
+		out = MaintenanceConsoleOutput{}.Map(v)
+	case api.MaintenanceTasks:
+		out = MaintenancesConsoleOutput{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)
@@ -75,6 +79,10 @@ func (c *ConsolePrinter) PrintWide(v interface{}) error {
 		out = ApplicationConsoleOutput{}.Map(v) //TODO make wide mapping
 	case api.Applications:
 		out = ApplicationsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+	case api.MaintenanceTask:
+		out = MaintenanceConsoleOutputWide{}.Map(v)
+	case api.MaintenanceTasks:
+		out = MaintenancesConsoleOutputWide{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)

@@ -25,7 +25,7 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 		DisableFlagsInUseLine: true,
 		Long:                  `TODO`,
 		Aliases:               []string{"deployments", "deploy"},
-		Example:               "# Create an nginx deployment for app test \n  gxctl create deployment nginx:1.15.8 -a test -l gridx.de/channel:stable",
+		Example:               "# Create an nginx deployment for app test \n  gxctl create deployment nginx:1.15.8 -a test -s gridx.de/channel=stable",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return errors.MissingParameter("IMAGE", "gxctl create deployment -h")
