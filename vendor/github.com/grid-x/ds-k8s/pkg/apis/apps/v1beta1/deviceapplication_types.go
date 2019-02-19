@@ -22,6 +22,7 @@ type DeviceApplicationStatus struct{}
 
 // DeviceApplication is the Schema for the deviceapplications API
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type DeviceApplication struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

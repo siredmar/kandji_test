@@ -17,15 +17,11 @@ limitations under the License.
 package controllerutil
 
 import (
-	"context"
 	"fmt"
-	"reflect"
 
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
@@ -101,63 +97,3 @@ func referSameObject(a, b v1.OwnerReference) bool {
 
 	return aGV == bGV && a.Kind == b.Kind && a.Name == b.Name
 }
-
-// OperationResult is the action result of a CreateOrUpdate call
-type OperationResult string
-
-const ( // They should complete the sentence "Deployment default/foo has been ..."
-	// OperationResultNone means that the resource has not been changed
-	OperationResultNone OperationResult = "unchanged"
-	// OperationResultCreated means that a new resource is created
-	OperationResultCreated OperationResult = "created"
-	// OperationResultUpdated means that an existing resource is updated
-	OperationResultUpdated OperationResult = "updated"
-)
-
-// CreateOrUpdate creates or updates the given object obj in the Kubernetes
-// cluster. The object's desired state should be reconciled with the existing
-// state using the passed in ReconcileFn. obj must be a struct pointer so that
-// obj can be updated with the content returned by the Server.
-//
-// It returns the executed operation and an error.
-func CreateOrUpdate(ctx context.Context, c client.Client, obj runtime.Object, f MutateFn) (OperationResult, error) {
-	key, err := client.ObjectKeyFromObject(obj)
-	if err != nil {
-		return OperationResultNone, err
-	}
-
-	if err := c.Get(ctx, key, obj); err != nil {
-		if errors.IsNotFound(err) {
-			if err := c.Create(ctx, obj); err != nil {
-				return OperationResultNone, err
-			}
-			return OperationResultCreated, nil
-		}
-		return OperationResultNone, err
-	}
-
-	existing := obj.DeepCopyObject()
-	if err := f(obj); err != nil {
-		return OperationResultNone, err
-	}
-
-	if reflect.DeepEqual(existing, obj) {
-		return OperationResultNone, nil
-	}
-
-	newKey, err := client.ObjectKeyFromObject(obj)
-	if err != nil {
-		return OperationResultNone, err
-	}
-	if key != newKey {
-		return OperationResultNone, fmt.Errorf("MutateFn cannot mutate object namespace and/or object name")
-	}
-
-	if err := c.Update(ctx, obj); err != nil {
-		return OperationResultNone, err
-	}
-	return OperationResultUpdated, nil
-}
-
-// MutateFn is a function which mutates the existing object into it's desired state.
-type MutateFn func(existing runtime.Object) error

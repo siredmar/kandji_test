@@ -21,8 +21,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 func TestSource(t *testing.T) {
@@ -33,7 +32,7 @@ func TestSource(t *testing.T) {
 var env *Environment
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logf.SetLogger(logf.ZapLoggerTo(GinkgoWriter, true))
 	env = &Environment{}
 	_, err := env.Start()
 	Expect(err).NotTo(HaveOccurred())

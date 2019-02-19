@@ -17,8 +17,6 @@ limitations under the License.
 package reconcile
 
 import (
-	"time"
-
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -26,10 +24,6 @@ import (
 type Result struct {
 	// Requeue tells the Controller to requeue the reconcile key.  Defaults to false.
 	Requeue bool
-
-	// RequeueAfter if greater than 0, tells the Controller to requeue the reconcile key after the Duration.
-	// Implies that Requeue is true, there is no need to set Requeue to true at the same time as RequeueAfter.
-	RequeueAfter time.Duration
 }
 
 // Request contains the information necessary to reconcile a Kubernetes object.  This includes the

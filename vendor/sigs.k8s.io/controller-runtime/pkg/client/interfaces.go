@@ -19,7 +19,6 @@ package client
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
@@ -29,15 +28,6 @@ import (
 
 // ObjectKey identifies a Kubernetes Object.
 type ObjectKey = types.NamespacedName
-
-// ObjectKeyFromObject returns the ObjectKey given a runtime.Object
-func ObjectKeyFromObject(obj runtime.Object) (ObjectKey, error) {
-	accessor, err := meta.Accessor(obj)
-	if err != nil {
-		return ObjectKey{}, err
-	}
-	return ObjectKey{Namespace: accessor.GetNamespace(), Name: accessor.GetName()}, nil
-}
 
 // TODO(directxman12): is there a sane way to deal with get/delete options?
 
@@ -51,7 +41,7 @@ type Reader interface {
 	// List retrieves list of objects for a given namespace and list options. On a
 	// successful call, Items field in the list will be populated with the
 	// result returned from the server.
-	List(ctx context.Context, list runtime.Object, opts ...ListOptionFunc) error
+	List(ctx context.Context, opts *ListOptions, list runtime.Object) error
 }
 
 // Writer knows how to create, delete, and update Kubernetes objects.
@@ -60,7 +50,7 @@ type Writer interface {
 	Create(ctx context.Context, obj runtime.Object) error
 
 	// Delete deletes the given obj from Kubernetes cluster.
-	Delete(ctx context.Context, obj runtime.Object, opts ...DeleteOptionFunc) error
+	Delete(ctx context.Context, obj runtime.Object) error
 
 	// Update updates the given obj in the Kubernetes cluster. obj must be a
 	// struct pointer so that obj can be updated with the content returned by the Server.
@@ -103,89 +93,7 @@ type FieldIndexer interface {
 	IndexField(obj runtime.Object, field string, extractValue IndexerFunc) error
 }
 
-// DeleteOptions contains options for delete requests. It's generally a subset
-// of metav1.DeleteOptions.
-type DeleteOptions struct {
-	// GracePeriodSeconds is the duration in seconds before the object should be
-	// deleted. Value must be non-negative integer. The value zero indicates
-	// delete immediately. If this value is nil, the default grace period for the
-	// specified type will be used.
-	GracePeriodSeconds *int64
-
-	// Preconditions must be fulfilled before a deletion is carried out. If not
-	// possible, a 409 Conflict status will be returned.
-	Preconditions *metav1.Preconditions
-
-	// PropagationPolicy determined whether and how garbage collection will be
-	// performed. Either this field or OrphanDependents may be set, but not both.
-	// The default policy is decided by the existing finalizer set in the
-	// metadata.finalizers and the resource-specific default policy.
-	// Acceptable values are: 'Orphan' - orphan the dependents; 'Background' -
-	// allow the garbage collector to delete the dependents in the background;
-	// 'Foreground' - a cascading policy that deletes all dependents in the
-	// foreground.
-	PropagationPolicy *metav1.DeletionPropagation
-
-	// Raw represents raw DeleteOptions, as passed to the API server.
-	Raw *metav1.DeleteOptions
-}
-
-// AsDeleteOptions returns these options as a metav1.DeleteOptions.
-// This may mutate the Raw field.
-func (o *DeleteOptions) AsDeleteOptions() *metav1.DeleteOptions {
-
-	if o == nil {
-		return &metav1.DeleteOptions{}
-	}
-	if o.Raw == nil {
-		o.Raw = &metav1.DeleteOptions{}
-	}
-
-	o.Raw.GracePeriodSeconds = o.GracePeriodSeconds
-	o.Raw.Preconditions = o.Preconditions
-	o.Raw.PropagationPolicy = o.PropagationPolicy
-	return o.Raw
-}
-
-// ApplyOptions executes the given DeleteOptionFuncs and returns the mutated
-// DeleteOptions.
-func (o *DeleteOptions) ApplyOptions(optFuncs []DeleteOptionFunc) *DeleteOptions {
-	for _, optFunc := range optFuncs {
-		optFunc(o)
-	}
-	return o
-}
-
-// DeleteOptionFunc is a function that mutates a DeleteOptions struct. It implements
-// the functional options pattern. See
-// https://github.com/tmrts/go-patterns/blob/master/idiom/functional-options.md.
-type DeleteOptionFunc func(*DeleteOptions)
-
-// GracePeriodSeconds is a functional option that sets the GracePeriodSeconds
-// field of a DeleteOptions struct.
-func GracePeriodSeconds(gp int64) DeleteOptionFunc {
-	return func(opts *DeleteOptions) {
-		opts.GracePeriodSeconds = &gp
-	}
-}
-
-// Preconditions is a functional option that sets the Preconditions field of a
-// DeleteOptions struct.
-func Preconditions(p *metav1.Preconditions) DeleteOptionFunc {
-	return func(opts *DeleteOptions) {
-		opts.Preconditions = p
-	}
-}
-
-// PropagationPolicy is a functional option that sets the PropagationPolicy
-// field of a DeleteOptions struct.
-func PropagationPolicy(p metav1.DeletionPropagation) DeleteOptionFunc {
-	return func(opts *DeleteOptions) {
-		opts.PropagationPolicy = &p
-	}
-}
-
-// ListOptions contains options for limiting or filtering results.
+// ListOptions contains options for limitting or filtering results.
 // It's generally a subset of metav1.ListOptions, with support for
 // pre-parsed selectors (since generally, selectors will be executed
 // against the cache).
@@ -248,20 +156,6 @@ func (o *ListOptions) AsListOptions() *metav1.ListOptions {
 	return o.Raw
 }
 
-// ApplyOptions executes the given ListOptionFuncs and returns the mutated
-// ListOptions.
-func (o *ListOptions) ApplyOptions(optFuncs []ListOptionFunc) *ListOptions {
-	for _, optFunc := range optFuncs {
-		optFunc(o)
-	}
-	return o
-}
-
-// ListOptionFunc is a function that mutates a ListOptions struct. It implements
-// the functional options pattern. See
-// https://github.com/tmrts/go-patterns/blob/master/idiom/functional-options.md.
-type ListOptionFunc func(*ListOptions)
-
 // MatchingLabels is a convenience function that sets the label selector
 // to match the given labels, and then returns the options.
 // It mutates the list options.
@@ -287,39 +181,20 @@ func (o *ListOptions) InNamespace(ns string) *ListOptions {
 	return o
 }
 
-// MatchingLabels is a functional option that sets the LabelSelector field of
-// a ListOptions struct.
-func MatchingLabels(lbls map[string]string) ListOptionFunc {
-	sel := labels.SelectorFromSet(lbls)
-	return func(opts *ListOptions) {
-		opts.LabelSelector = sel
-	}
+// MatchingLabels is a convenience function that constructs list options
+// to match the given labels.
+func MatchingLabels(lbls map[string]string) *ListOptions {
+	return (&ListOptions{}).MatchingLabels(lbls)
 }
 
-// MatchingField is a functional option that sets the FieldSelector field of
-// a ListOptions struct.
-func MatchingField(name, val string) ListOptionFunc {
-	sel := fields.SelectorFromSet(fields.Set{name: val})
-	return func(opts *ListOptions) {
-		opts.FieldSelector = sel
-	}
+// MatchingField is a convenience function that constructs list options
+// to match the given field.
+func MatchingField(name, val string) *ListOptions {
+	return (&ListOptions{}).MatchingField(name, val)
 }
 
-// InNamespace is a functional option that sets the Namespace field of
-// a ListOptions struct.
-func InNamespace(ns string) ListOptionFunc {
-	return func(opts *ListOptions) {
-		opts.Namespace = ns
-	}
-}
-
-// UseListOptions is a functional option that replaces the fields of a
-// ListOptions struct with those of a different ListOptions struct.
-//
-// Example:
-// cl.List(ctx, list, client.UseListOptions(lo.InNamespace(ns).MatchingLabels(labels)))
-func UseListOptions(newOpts *ListOptions) ListOptionFunc {
-	return func(opts *ListOptions) {
-		*opts = *newOpts
-	}
+// InNamespace is a convenience function that constructs list
+// options to list in the given namespace.
+func InNamespace(ns string) *ListOptions {
+	return (&ListOptions{}).InNamespace(ns)
 }

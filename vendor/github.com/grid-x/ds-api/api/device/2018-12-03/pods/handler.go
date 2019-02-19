@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/mux"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/grid-x/ds-api/api"
 	"github.com/grid-x/ds-api/pkg/encoding"
@@ -38,6 +37,7 @@ type authProvider interface {
 
 type podClient interface {
 	ListByDeviceID(ctx context.Context, namespace string, deviceID string) ([]*corev1beta1.DevicePod, error)
+	Get(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error)
 	UpdateStatus(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error)
 }
 
@@ -231,15 +231,17 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 	ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()
 
-	pod := &corev1beta1.DevicePod{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: model.AccountNamespaceName(accountID),
-			Name:      podID,
-		},
-		Status: *payload.Status,
+	p, err := s.podClient.Get(ctx, model.AccountNamespaceName(accountID), podID)
+	if err != nil {
+		return nil, errors.E(
+			errors.Internal,
+			fmt.Errorf("Cannot get pod: %+v", err),
+		)
 	}
 
-	pod, err = s.podClient.UpdateStatus(ctx, pod)
+	p.Status = *payload.Status
+
+	p, err = s.podClient.UpdateStatus(ctx, p)
 	if err != nil {
 		return nil, errors.E(
 			errors.Internal,
@@ -249,7 +251,7 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 
 	return &encoding.Response{
 		Payload: &UpdateResponse{
-			Pod: podFromK8s(pod),
+			Pod: podFromK8s(p),
 		},
 	}, nil
 }

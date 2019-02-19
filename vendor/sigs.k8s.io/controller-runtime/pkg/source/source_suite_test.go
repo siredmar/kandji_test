@@ -25,8 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 func TestSource(t *testing.T) {
@@ -42,7 +41,7 @@ var stop chan struct{}
 
 var _ = BeforeSuite(func(done Done) {
 	stop = make(chan struct{})
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logf.SetLogger(logf.ZapLoggerTo(GinkgoWriter, true))
 
 	testenv = &envtest.Environment{}
 

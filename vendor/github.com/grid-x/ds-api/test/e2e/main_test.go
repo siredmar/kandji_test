@@ -18,16 +18,16 @@ const (
 	PodsEndpoint         = "api/management/pods"
 	DeploymentsEndpoint  = "api/management/deployments"
 	ApplicationsEndpoint = "api/management/applications"
+	MaintenanceEndpoint  = "api/management/maintenance"
 )
 
-var ()
-
 var (
-	APIClient                *apiClient.APIClient
-	APIVersion               = "application/vnd.gridx.ai.2018-12-04"
-	logger                   = log.New()
-	ExtractedDeviceUUIDs     []string
-	ExtractedDeploymentUUIDs []string
+	APIClient                     *apiClient.APIClient
+	APIVersion                    = "application/vnd.gridx.ai.2018-12-04"
+	logger                        = log.New()
+	ExtractedDeviceUUIDs          []string
+	ExtractedDeploymentUUIDs      []string
+	ExtractedMaintenanceTaskUUIDs []string
 )
 
 type Testcase struct {

@@ -88,13 +88,44 @@ func updatePodForDevice(g *gomega.GomegaWithT, namespacedName types.NamespacedNa
 				if err := c.Get(context.TODO(), types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}, pod); err != nil {
 					return err
 				}
-				pod.Labels = map[string]string{
-					"hello": "world",
+				if err := update(pod); err != nil {
+					return err
+				}
+				if err := c.Update(context.TODO(), pod); err != nil {
+					return err
+				}
+				return nil
+			}
+		}
+		return fmt.Errorf("pod not found for deviceID: %s", deviceID)
+	}()).NotTo(gomega.HaveOccurred())
+}
+
+func updatePodStatusForDevice(g *gomega.GomegaWithT, namespacedName types.NamespacedName, deviceID string, update func(*corev1beta1.DevicePod) error) {
+	g.Expect(func() error {
+		pods, err := findPods(namespacedName)
+		if err != nil {
+			return err
+		}
+		if len(pods) < 1 {
+			return fmt.Errorf("no pods found")
+		}
+
+		for _, pod := range pods {
+			if pod.DeletionTimestamp != nil {
+				continue
+			}
+			if pod.Spec.DeviceID == deviceID {
+				if err := c.Get(context.TODO(), types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}, pod); err != nil {
+					return err
 				}
 				if err := update(pod); err != nil {
 					return err
 				}
-				return c.Update(context.TODO(), pod)
+				if err := c.Status().Update(context.TODO(), pod); err != nil {
+					return err
+				}
+				return nil
 			}
 		}
 		return fmt.Errorf("pod not found for deviceID: %s", deviceID)
@@ -271,7 +302,7 @@ func TestReconcile_Basic(t *testing.T) {
 
 	// Update container status
 	t.Logf("Updating pod...")
-	updatePodForDevice(g, expectedRequest.NamespacedName, gridBox001Stable.Name, func(pod *corev1beta1.DevicePod) error {
+	updatePodStatusForDevice(g, expectedRequest.NamespacedName, gridBox001Stable.Name, func(pod *corev1beta1.DevicePod) error {
 		pod.Status.Conditions = []corev1beta1.PodCondition{
 			{
 				Type:               corev1beta1.PodConditionCompleted,

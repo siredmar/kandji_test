@@ -24,9 +24,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 func TestSource(t *testing.T) {
@@ -39,7 +37,7 @@ var cfg *rest.Config
 var clientset *kubernetes.Clientset
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logf.SetLogger(logf.ZapLoggerTo(GinkgoWriter, true))
 
 	testenv = &envtest.Environment{}
 
@@ -50,15 +48,9 @@ var _ = BeforeSuite(func(done Done) {
 	clientset, err = kubernetes.NewForConfig(cfg)
 	Expect(err).NotTo(HaveOccurred())
 
-	// Prevent the metrics listener being created
-	metrics.DefaultBindAddress = "0"
-
 	close(done)
 }, 60)
 
 var _ = AfterSuite(func() {
 	testenv.Stop()
-
-	// Put the DefaultBindAddress back
-	metrics.DefaultBindAddress = ":8080"
 })

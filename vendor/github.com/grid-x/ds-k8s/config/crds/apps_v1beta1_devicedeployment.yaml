@@ -11,6 +11,8 @@ spec:
     kind: DeviceDeployment
     plural: devicedeployments
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:

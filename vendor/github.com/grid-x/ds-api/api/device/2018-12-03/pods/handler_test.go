@@ -27,10 +27,12 @@ func (m *mockAuthProvider) DeviceIDFromContext(context.Context) (string, error) 
 	return m.deviceID, nil
 }
 
+type getFunc func(context.Context, string, string) (*corev1beta1.DevicePod, error)
 type listFunc func(context.Context, string, string) ([]*corev1beta1.DevicePod, error)
 type updateFunc func(context.Context, *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error)
 
 type mockPodClient struct {
+	get    getFunc
 	list   listFunc
 	update updateFunc
 }
@@ -40,6 +42,9 @@ func (m *mockPodClient) ListByDeviceID(ctx context.Context, namespace string, de
 }
 func (m *mockPodClient) UpdateStatus(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
 	return m.update(ctx, pod)
+}
+func (m *mockPodClient) Get(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+	return m.get(ctx, namespace, name)
 }
 
 func newReq(id string, t *testing.T) *http.Request {
@@ -167,6 +172,9 @@ func Test_Update(t *testing.T) {
 					update: func(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
 						return nil, fmt.Errorf("not yet implemented")
 					},
+					get: func(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+						return nil, fmt.Errorf("not yet implemented")
+					},
 				},
 			},
 			input: UpdateRequest{
@@ -187,6 +195,16 @@ func Test_Update(t *testing.T) {
 				&mockPodClient{
 					update: func(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
 						return pod, nil
+					},
+					get: func(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+						return &corev1beta1.DevicePod{
+							ObjectMeta: metav1.ObjectMeta{
+								Namespace: namespace,
+								Name:      "c91ffe91-e44b-4fa3-946a-b153d9a9ecbb",
+							},
+							Spec:   corev1beta1.DevicePodSpec{},
+							Status: corev1beta1.DevicePodStatus{},
+						}, nil
 					},
 				},
 			},

@@ -399,6 +399,7 @@ type Container struct {
 
 // DevicePod is the Schema for the devicecontainers API
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type DevicePod struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

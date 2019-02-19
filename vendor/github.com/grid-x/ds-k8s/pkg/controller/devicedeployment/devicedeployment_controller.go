@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -322,7 +322,7 @@ func (r *ReconcileDeviceDeployment) mkContainerFromDeploy(deploy *appsv1beta1.De
 	appName := deploy.Spec.App
 	return &corev1beta1.DevicePod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      uuid.NewV4().String(),
+			Name:      uuid.New().String(),
 			Namespace: deploy.Namespace,
 			Annotations: map[string]string{
 				appsv1beta1.AppNameAnnotation: appName,

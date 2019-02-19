@@ -1,19 +1,3 @@
-/*
-Copyright 2018 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package scheme_test
 
 import (
@@ -37,7 +21,7 @@ var _ = Describe("Scheme", func() {
 				Build()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(s.AllKnownTypes()).To(HaveLen(15))
+			Expect(s.AllKnownTypes()).To(HaveLen(13))
 			Expect(s.AllKnownTypes()[gv.WithKind("Pod")]).To(Equal(reflect.TypeOf(corev1.Pod{})))
 			Expect(s.AllKnownTypes()[gv.WithKind("PodList")]).To(Equal(reflect.TypeOf(corev1.PodList{})))
 
@@ -71,7 +55,7 @@ var _ = Describe("Scheme", func() {
 				Build()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(s.AllKnownTypes()).To(HaveLen(25))
+			Expect(s.AllKnownTypes()).To(HaveLen(21))
 
 			// Types from b1
 			Expect(s.AllKnownTypes()[gv1.WithKind("Pod")]).To(Equal(reflect.TypeOf(corev1.Pod{})))

@@ -1,10 +1,12 @@
-hash: bb3191f03ef9ba12fd0bb29089c3202b04a1f4693141702ffa76f28cdfc62837
-updated: 2019-02-13T09:34:40.455889+01:00
+hash: 48596db95b512aec427bdc52350ac1d6bbc9e98655b0dccdf4406f5fbfaabaaa
+updated: 2019-02-19T10:53:53.807649+01:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
 - name: github.com/dustin/go-humanize
   version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
+- name: github.com/ghodss/yaml
+  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
@@ -24,9 +26,9 @@ imports:
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
-  version: a7962380ca08b5a188038c69871b8d3fbdf31e89
+  version: 8559a4f775fc329165fe32bd4c2543de8ada8fce
 - name: github.com/grid-x/ds-api
-  version: a1ce1b903cd336d5632af1ca77ccb10b2a9e6058
+  version: d35b30edf036975365c872a790cc766d74aafafe
   subpackages:
   - api
   - api/management/2018-11-02/devices
@@ -38,7 +40,7 @@ imports:
   - pkg/errors
   - pkg/model
 - name: github.com/grid-x/ds-k8s
-  version: 55f04b2eaa1f1b7397c55863402cedbce76eb5e3
+  version: 10282333c3dca8fbcec0cde2ba3a040d80e47a77
   subpackages:
   - pkg/apis/apps/v1beta1
   - pkg/apis/core/v1beta1
@@ -47,16 +49,16 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kataras/tablewriter
   version: e063d29b7c2363c8e21a25fdb4109f03beb50230
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/landoop/tableprinter
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
 - name: github.com/mattn/go-runewidth
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
-- name: github.com/satori/go.uuid
-  version: b2ce2384e17bbe0c6d34077efa39dbab3e09123b
 - name: github.com/sirupsen/logrus
-  version: 3e01752db0189b9157070a0e1668a620f9a85da2
+  version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/pflag
@@ -91,6 +93,8 @@ imports:
   - unicode/norm
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
+- name: gopkg.in/yaml.v2
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
   version: 73d903622b7391f3312dcbac6483fed484e185f8
   subpackages:
@@ -120,7 +124,7 @@ imports:
   - pkg/watch
   - third_party/forked/golang/reflect
 - name: sigs.k8s.io/controller-runtime
-  version: 6443f37724542b887b17f51fa6024ac976f15faf
+  version: 67e28744a963c78a34108c3b52aadbc5e02f4384
   subpackages:
   - pkg/runtime/scheme
 testImports: []
