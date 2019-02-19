@@ -50,6 +50,7 @@ type PodTemplate struct {
 
 // DeviceDeployment is the Schema for the devicedeployments API
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type DeviceDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

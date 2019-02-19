@@ -41,6 +41,7 @@ type MaintenanceTaskStatus struct {
 
 // MaintenanceTask is the Schema for the maintenancetasks API
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type MaintenanceTask struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

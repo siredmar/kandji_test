@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -215,17 +215,17 @@ func (r *ReconcileDeviceJob) Reconcile(request reconcile.Request) (reconcile.Res
 		instance.Status.Conditions = []batchv1beta1.JobCondition{cond}
 	}
 
-	// Update status of instance
 	ctxx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	err = r.Update(ctxx, instance)
+	err = r.Status().Update(ctxx, instance)
+
 	return reconcile.Result{}, err
 }
 
 func (r *ReconcileDeviceJob) createPodWithControllerRef(ctx context.Context, dev *corev1beta1.Device, job *batchv1beta1.DeviceJob) (*corev1beta1.DevicePod, error) {
 	pod := &corev1beta1.DevicePod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      uuid.NewV4().String(),
+			Name:      uuid.New().String(),
 			Namespace: job.Namespace,
 		},
 		Spec: corev1beta1.DevicePodSpec{

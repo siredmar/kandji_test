@@ -11,6 +11,8 @@ spec:
     kind: DeviceJob
     plural: devicejobs
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:

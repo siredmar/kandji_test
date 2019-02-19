@@ -120,7 +120,9 @@ func ManagementRoutes(
 					Methods: []string{
 						"POST",
 					},
-					Middlewares: []router.Middleware{},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
 					Func: func(w http.ResponseWriter, r *http.Request) {
 						payload := v20181204ManagementMaintenance.CreateRequest{}
 						if err := encoding.UnmarshalRequest(&payload, r); err != nil {
@@ -150,7 +152,9 @@ func ManagementRoutes(
 						"GET",
 						"OPTIONS",
 					},
-					Middlewares: []router.Middleware{},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
 					Func: func(w http.ResponseWriter, r *http.Request) {
 						resp, err := service20181204.Maintenance.List(r)
 						if err != nil {
@@ -170,7 +174,9 @@ func ManagementRoutes(
 						"GET",
 						"OPTIONS",
 					},
-					Middlewares: []router.Middleware{},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
 					Func: func(w http.ResponseWriter, r *http.Request) {
 						resp, err := service20181204.Maintenance.Get(r)
 						if err != nil {
@@ -189,7 +195,9 @@ func ManagementRoutes(
 					Methods: []string{
 						"DELETE",
 					},
-					Middlewares: []router.Middleware{},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
 					Func: func(w http.ResponseWriter, r *http.Request) {
 						resp, err := service20181204.Maintenance.Delete(r)
 						if err != nil {

@@ -21,10 +21,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 func TestEventhandler(t *testing.T) {
@@ -32,18 +30,6 @@ func TestEventhandler(t *testing.T) {
 	RunSpecsWithDefaultAndCustomReporters(t, "Eventhandler Suite", []Reporter{envtest.NewlineReporter{}})
 }
 
-var testenv *envtest.Environment
-var cfg *rest.Config
-
 var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
-
-	testenv = &envtest.Environment{}
-	var err error
-	cfg, err = testenv.Start()
-	Expect(err).NotTo(HaveOccurred())
-})
-
-var _ = AfterSuite(func() {
-	testenv.Stop()
+	logf.SetLogger(logf.ZapLoggerTo(GinkgoWriter, true))
 })

@@ -107,6 +107,7 @@ type JobCondition struct {
 
 // DeviceJob is the Schema for the devicejobs API
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type DeviceJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

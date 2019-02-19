@@ -148,6 +148,7 @@ func (resp *CreateResponse) WriteJSON(w io.Writer) error {
 // @action: maintenance:Create
 // @resource: maintenance:*
 // @endpoint: POST /maintenance
+// @middlewares: auth
 func (s *Service) Create(req *http.Request, payload CreateRequest) (*encoding.Response, error) {
 	accountID, err := s.auth.AccountIDFromContext(req.Context())
 	if err != nil {
@@ -207,6 +208,7 @@ func (resp *ListResponse) WriteJSON(w io.Writer) error {
 // @action: maintenance:List
 // @resource: maintenance:*
 // @endpoint: GET /maintenance
+// @middlewares: auth
 func (s *Service) List(req *http.Request) (*encoding.Response, error) {
 	accountID, err := s.auth.AccountIDFromContext(req.Context())
 	if err != nil {
@@ -229,7 +231,7 @@ func (s *Service) List(req *http.Request) (*encoding.Response, error) {
 
 	// Sort results to preserve order within responses https://github.com/grid-x/ds-api/issues/113
 	sort.Slice(ms, func(i, j int) bool {
-		return ms[i].Name < ms[j].Name
+		return ms[i].Spec.Type < ms[j].Spec.Type
 	})
 
 	result := make([]*Task, len(ms))
@@ -267,6 +269,7 @@ func (resp *GetResponse) WriteJSON(w io.Writer) error {
 // @action: maintenance:Get
 // @resource: maintenance:{taskID}
 // @endpoint: GET /maintenance/{taskID}
+// @middlewares: auth
 func (s *Service) Get(req *http.Request) (*encoding.Response, error) {
 	accountID, err := s.auth.AccountIDFromContext(req.Context())
 	if err != nil {
@@ -323,6 +326,7 @@ func (resp *DeleteResponse) WriteJSON(w io.Writer) error {
 // @action: maintenance:Delete
 // @resource: maintenance:{taskID}
 // @endpoint: DELETE /maintenance/{taskID}
+// @middlewares: auth
 func (s *Service) Delete(req *http.Request) (*encoding.Response, error) {
 	accountID, err := s.auth.AccountIDFromContext(req.Context())
 	if err != nil {

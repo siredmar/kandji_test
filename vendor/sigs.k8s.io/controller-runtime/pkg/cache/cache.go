@@ -29,10 +29,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache/internal"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/internal/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
-var log = logf.RuntimeLog.WithName("object-cache")
+var log = logf.KBLog.WithName("object-cache")
 
 // Cache implements CacheReader by reading objects from a cache populated by InformersMap
 type Cache interface {
@@ -79,10 +79,6 @@ type Options struct {
 
 	// Resync is the resync period. Defaults to defaultResyncTime.
 	Resync *time.Duration
-
-	// Namespace restricts the cache's ListWatch to the desired namespace
-	// Default watches all namespaces
-	Namespace string
 }
 
 var defaultResyncTime = 10 * time.Hour
@@ -93,7 +89,7 @@ func New(config *rest.Config, opts Options) (Cache, error) {
 	if err != nil {
 		return nil, err
 	}
-	im := internal.NewInformersMap(config, opts.Scheme, opts.Mapper, *opts.Resync, opts.Namespace)
+	im := internal.NewInformersMap(config, opts.Scheme, opts.Mapper, *opts.Resync)
 	return &informerCache{InformersMap: im}, nil
 }
 

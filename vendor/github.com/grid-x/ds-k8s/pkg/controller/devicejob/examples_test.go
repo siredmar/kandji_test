@@ -1,7 +1,7 @@
 package devicejob
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -32,7 +32,7 @@ func mkDevice(name string, labels map[string]string) *corev1beta1.Device {
 			Name:      name,
 			Namespace: gridXdeNamespace,
 			Labels:    labels,
-			UID:       types.UID(uuid.NewV4().String()),
+			UID:       types.UID(uuid.New().String()),
 		},
 		Spec:   corev1beta1.DeviceSpec{},
 		Status: corev1beta1.DeviceStatus{},

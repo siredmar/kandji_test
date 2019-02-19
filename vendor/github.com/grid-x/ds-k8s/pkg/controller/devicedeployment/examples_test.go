@@ -1,7 +1,7 @@
 package devicedeployment
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -60,7 +60,7 @@ func mkDevice(name string, labels map[string]string) *corev1beta1.Device {
 			Name:      name,
 			Namespace: gridXdeNamespace,
 			Labels:    labels,
-			UID:       types.UID(uuid.NewV4().String()),
+			UID:       types.UID(uuid.New().String()),
 		},
 		Spec:   corev1beta1.DeviceSpec{},
 		Status: corev1beta1.DeviceStatus{},
@@ -72,7 +72,7 @@ func mkDeployment(name, app string, deviceID *string, labels map[string]string) 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: gridXdeNamespace,
-			UID:       types.UID(uuid.NewV4().String()),
+			UID:       types.UID(uuid.New().String()),
 		},
 		Spec: appsv1beta1.DeviceDeploymentSpec{
 			App:      app,
@@ -107,7 +107,7 @@ func mkDeployment(name, app string, deviceID *string, labels map[string]string) 
 func mkContainer(deploy *appsv1beta1.DeviceDeployment, deviceID string) *corev1beta1.DevicePod {
 	return &corev1beta1.DevicePod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      uuid.NewV4().String(),
+			Name:      uuid.New().String(),
 			Namespace: gridXdeNamespace,
 			Annotations: map[string]string{
 				appsv1beta1.AppNameAnnotation: deploy.Spec.App,

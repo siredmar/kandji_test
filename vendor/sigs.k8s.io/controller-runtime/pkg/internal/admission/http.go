@@ -23,12 +23,12 @@ import (
 
 	"k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/internal/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 var (
 	// TODO(directxman12): this shouldn't be a global log
-	log = logf.RuntimeLog.WithName("admission").WithName("http-handler")
+	log = logf.KBLog.WithName("admission").WithName("http-handler")
 )
 
 func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// verify the content type is accurate
 	contentType := r.Header.Get("Content-Type")
 	if contentType != "application/json" {
-		log.Error(nil, "invalid content type, expected application/json", "content type", contentType)
+		log.Error(nil, "invalid content type, expected application/json", "context type", contentType)
 		return
 	}
 

@@ -8,3 +8,8 @@ import:
   version: 1.0.3
 - package: github.com/spf13/viper
 - package: github.com/google/go-cmp
+- package: github.com/ghodss/yaml
+# Needed to fix to v0.1.1
+# vendor/github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1/register.go:21:19: undefined: scheme.Builder
+- package: sigs.k8s.io/controller-runtime 
+  version: v0.1.1
