@@ -30,6 +30,11 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 			if len(args) != 1 {
 				return errors.MissingParameter("IMAGE", "gxctl create deployment -h")
 			}
+
+			if !api.IsDockerImageValid(args[0]) {
+				return errors.InvalidParameter("IMAGE", "gxctl create deployment -h")
+			}
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -52,8 +57,13 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 					matchByLabels[z[0]] = z[1]
 				}
 			}
+
 			image := createDeploymentCmdImage
-			name := strings.Split(createDeploymentCmdImage, ":")
+			name, err := api.GetDockerImageName(image)
+			if err != nil {
+				return err
+			}
+
 			app := createDeploymentCmdApp
 
 			client := client.NewAPIClient()
@@ -66,7 +76,7 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 					Spec: corev1beta1.PodConfig{
 						Containers: []corev1beta1.Container{
 							{
-								Name:  name[0],
+								Name:  name,
 								Image: image,
 							},
 						},

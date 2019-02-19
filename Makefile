@@ -7,6 +7,9 @@ GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
 lint:
 	golint -set_exit_status $(shell go list ./...)
 
+test:
+	go test -v $(shell go list ./...)
+
 build: 
 	${GO_BUILD}
 

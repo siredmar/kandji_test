@@ -28,6 +28,11 @@ func NewPatchDeployment(parent *cobra.Command) *PatchDevice {
 			if len(args) != 1 {
 				return errors.MissingParameter("ID", "gxctl patch deployment -h")
 			}
+
+			if !api.IsDockerImageValid(args[0]) {
+				return errors.InvalidParameter("IMAGE", "gxctl create deployment -h")
+			}
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +72,12 @@ func NewPatchDeployment(parent *cobra.Command) *PatchDevice {
 			}
 
 			if patchDeploymentCmdImage != "" {
-				deployment.Spec.Template.Spec.Containers[0].Name = strings.Split(patchDeploymentCmdImage, ":")[0]
+				name, err := api.GetDockerImageName(patchDeploymentCmdImage)
+				if err != nil {
+					return err
+				}
+
+				deployment.Spec.Template.Spec.Containers[0].Name = name
 				deployment.Spec.Template.Spec.Containers[0].Image = patchDeploymentCmdImage
 			}
 			if patchDeploymentCmdApp != "" {

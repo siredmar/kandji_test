@@ -20,8 +20,13 @@ func NotImplementedError(msg string) error {
 	return errors.New(s)
 }
 
-func InvalidFormat() error {
+func InvalidFileFormat() error {
 	return errors.New("The provided file is not in a valid format")
+}
+
+func InvalidParameter(param string, hint string) error {
+	s := fmt.Sprintf("The parameter %s is invalid. \n See '%s' for help and examples.", param, hint)
+	return errors.New(s)
 }
 
 func MissingParameter(param string, hint string) error {
