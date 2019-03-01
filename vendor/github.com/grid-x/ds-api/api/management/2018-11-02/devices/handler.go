@@ -67,7 +67,7 @@ type DeviceStatus struct {
 
 func fromK8sType(d *corev1beta1.Device) *Device {
 	return &Device{
-		Metadata: api.ConvertFromK8sMetadata(d.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(d.ObjectMeta, false),
 		Spec: DeviceSpec{
 			Serialnumber:      d.Spec.Serialnumber,
 			MACAddress:        d.Spec.MACAddress,
@@ -441,7 +441,7 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 	}
 
 	if payload.Metadata.Labels != nil {
-		dev.Labels = payload.Metadata.Labels
+		dev.Labels = model.ComputeLabels(dev.Labels, payload.Metadata.Labels)
 	}
 
 	ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)

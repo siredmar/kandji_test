@@ -57,7 +57,7 @@ type Deployment struct {
 
 func deployFromK8s(deploy *appsv1beta1.DeviceDeployment) *Deployment {
 	return &Deployment{
-		Metadata: api.ConvertFromK8sMetadata(deploy.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(deploy.ObjectMeta, false),
 		Spec:     deploy.Spec,
 		Status:   deploy.Status,
 	}
@@ -142,6 +142,14 @@ func (req *CreateRequest) Validate() error {
 			errors.Validation,
 			fmt.Errorf("Missing containers definition"),
 		)
+	}
+	for _, v := range req.Spec.Template.Spec.Containers {
+		if !model.IsDockerImageValid(v.Image) {
+			return errors.E(
+				errors.Validation,
+				fmt.Errorf("Docker image %s is not valid", v.Image),
+			)
+		}
 	}
 
 	return nil
@@ -337,34 +345,45 @@ func (s *Service) Get(req *http.Request) (*encoding.Response, error) {
 
 // UpdateRequest represents the request type
 type UpdateRequest struct {
-	Spec *appsv1beta1.DeviceDeploymentSpec `json:"spec"`
+	Metadata api.UpdateMetadata                `json:"metadata"`
+	Spec     *appsv1beta1.DeviceDeploymentSpec `json:"spec"`
 }
 
 // Validate validates an UpdateRequest
 func (req *UpdateRequest) Validate() error {
-	if req.Spec == nil {
+	if req.Spec == nil && req.Metadata.Labels == nil {
 		return errors.E(
 			errors.Validation,
-			fmt.Errorf("Missing spec"),
+			fmt.Errorf("Nothing to update"),
 		)
 	}
-	if req.Spec.App == "" {
-		return errors.E(
-			errors.Validation,
-			fmt.Errorf("Missing application name"),
-		)
-	}
-	if req.Spec.Selector.MatchByLabels == nil {
-		return errors.E(
-			errors.Validation,
-			fmt.Errorf("Missing labels to match"),
-		)
-	}
-	if req.Spec.Template.Spec.Containers == nil {
-		return errors.E(
-			errors.Validation,
-			fmt.Errorf("Missing containers definition"),
-		)
+	if req.Spec != nil {
+		if req.Spec.App == "" {
+			return errors.E(
+				errors.Validation,
+				fmt.Errorf("Missing application name"),
+			)
+		}
+		if req.Spec.Selector.MatchByLabels == nil {
+			return errors.E(
+				errors.Validation,
+				fmt.Errorf("Missing labels to match"),
+			)
+		}
+		if req.Spec.Template.Spec.Containers == nil {
+			return errors.E(
+				errors.Validation,
+				fmt.Errorf("Missing containers definition"),
+			)
+		}
+		for _, v := range req.Spec.Template.Spec.Containers {
+			if !model.IsDockerImageValid(v.Image) {
+				return errors.E(
+					errors.Validation,
+					fmt.Errorf("Docker image %s is not valid", v.Image),
+				)
+			}
+		}
 	}
 
 	return nil
@@ -419,17 +438,6 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 	ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()
 
-	_, err = s.appRepo.Get(ctx, model.AccountNamespaceName(accountID), payload.Spec.App)
-	if err != nil {
-		return nil, errors.E(
-			errors.NotExists,
-			fmt.Errorf("Application with name %s does not exist", payload.Spec.App),
-		)
-	}
-
-	ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)
-	defer cancel()
-
 	deploy, err := s.k8sDeploy.Get(ctx, model.AccountNamespaceName(accountID), deploymentID)
 	if err != nil {
 		return nil, errors.E(
@@ -437,8 +445,27 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 			fmt.Errorf("Deployment with ID %s does not exist", deploymentID),
 		)
 	}
-	deploy.Spec = *payload.Spec
+
 	deploy.Namespace = model.AccountNamespaceName(accountID)
+
+	if payload.Spec != nil {
+		ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)
+		defer cancel()
+
+		_, err = s.appRepo.Get(ctx, model.AccountNamespaceName(accountID), payload.Spec.App)
+		if err != nil {
+			return nil, errors.E(
+				errors.NotExists,
+				fmt.Errorf("Application with name %s does not exist", payload.Spec.App),
+			)
+		}
+
+		deploy.Spec = *payload.Spec
+	}
+
+	if payload.Metadata.Labels != nil {
+		deploy.Labels = model.ComputeLabels(deploy.Labels, payload.Metadata.Labels)
+	}
 
 	ctx, cancel = context.WithTimeout(req.Context(), 10*time.Second)
 	defer cancel()

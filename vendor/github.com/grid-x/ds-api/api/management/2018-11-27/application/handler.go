@@ -54,7 +54,7 @@ type Application struct {
 
 func fromK8s(app *appsv1beta1.DeviceApplication) Application {
 	return Application{
-		Metadata: api.ConvertFromK8sMetadata(app.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(app.ObjectMeta, false),
 		Name:     app.Name,
 	}
 }

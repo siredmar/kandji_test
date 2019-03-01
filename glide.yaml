@@ -13,3 +13,4 @@ import:
 # vendor/github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1/register.go:21:19: undefined: scheme.Builder
 - package: sigs.k8s.io/controller-runtime 
   version: v0.1.1
+- package: github.com/gorilla/websocket

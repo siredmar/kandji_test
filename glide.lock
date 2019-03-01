@@ -1,5 +1,5 @@
-hash: 48596db95b512aec427bdc52350ac1d6bbc9e98655b0dccdf4406f5fbfaabaaa
-updated: 2019-02-19T10:53:53.807649+01:00
+hash: a93dcdb6ce10073af276455190e36ef24b672eefdd8c6ccb21d6b87a37bef0cb
+updated: 2019-02-20T20:01:29.829113+01:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
@@ -27,8 +27,10 @@ imports:
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
   version: 8559a4f775fc329165fe32bd4c2543de8ada8fce
+- name: github.com/gorilla/websocket
+  version: 7c8e298727d149d7c329b4dec7e94e1932ac5c11
 - name: github.com/grid-x/ds-api
-  version: d35b30edf036975365c872a790cc766d74aafafe
+  version: 962353b497a869e70d91dbc1b6f41aa60195272c
   subpackages:
   - api
   - api/management/2018-11-02/devices

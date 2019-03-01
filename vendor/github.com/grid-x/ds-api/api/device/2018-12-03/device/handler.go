@@ -53,7 +53,7 @@ type Device struct {
 
 func deviceFromK8s(dev *corev1beta1.Device) *Device {
 	return &Device{
-		Metadata: api.ConvertFromK8sMetadata(dev.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(dev.ObjectMeta, true),
 		Spec:     dev.Spec,
 		Status:   dev.Status,
 	}

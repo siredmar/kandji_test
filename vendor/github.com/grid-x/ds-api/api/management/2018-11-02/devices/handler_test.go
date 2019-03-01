@@ -670,6 +670,62 @@ func Test_Update(t *testing.T) {
 				},
 			},
 		},
+		{
+			req: newReqWithDeviceID("2a598bf6-7591-45f1-979f-1fd07f97704c"),
+			injections: []interface{}{
+				&mockDeviceClient{
+					get: func(ctx context.Context, accountID, id string) (*corev1beta1.Device, error) {
+						if id != "2a598bf6-7591-45f1-979f-1fd07f97704c" {
+							return nil, fmt.Errorf("got unexpected deviceID")
+						}
+
+						return &corev1beta1.Device{
+							ObjectMeta: metav1.ObjectMeta{
+								Namespace: accountID,
+								Name:      "2a598bf6-7591-45f1-979f-1fd07f97704c",
+								Labels:    map[string]string{"gridx.de/channel": "stable"},
+							},
+							Spec: corev1beta1.DeviceSpec{
+								Serialnumber:      "serial-123",
+								MaintenanceWindow: "Sun:04:00-Sun:06:00",
+							},
+							Status: corev1beta1.DeviceStatus{},
+						}, nil
+					},
+					update: func(ctx context.Context, dev *corev1beta1.Device) (*corev1beta1.Device, error) {
+						if dev.Name != "2a598bf6-7591-45f1-979f-1fd07f97704c" {
+							return nil, fmt.Errorf("got unexpected deviceID")
+						}
+						return dev, nil
+					},
+				},
+				&mockAuthProvider{
+					f: func(ctx context.Context) (string, error) {
+						return "default", nil
+					},
+				},
+			},
+			input: UpdateRequest{
+				Metadata: api.UpdateMetadata{
+					Labels: map[string]string{"gridx.de/channel-": ""},
+				},
+			},
+			wantErr: false,
+			want: &encoding.Response{
+				Payload: &UpdateResponse{
+					Device: &Device{
+						Metadata: api.Metadata{
+							ID:     "2a598bf6-7591-45f1-979f-1fd07f97704c",
+							Labels: map[string]string{},
+						},
+						Spec: DeviceSpec{
+							Serialnumber:      "serial-123",
+							MaintenanceWindow: mkString("Sun:04:00-Sun:06:00"),
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for i, tc := range testcases {
