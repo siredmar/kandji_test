@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/gorilla/websocket"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	auth "github.com/grid-x/gxctl/pkg/auth"
@@ -16,8 +17,8 @@ import (
 )
 
 const (
-	baseURL = "https://api.ds.gridx.ai"
-	//baseURL = "http://127.0.0.1:8080"
+	baseURL = "api.ds.gridx.ai"
+	//baseURL = "127.0.0.1:8080"
 )
 
 type APIClient struct {
@@ -32,6 +33,32 @@ func NewAPIClient() *APIClient {
 	return &APIClient{
 		Http: &http.Client{Timeout: 10 * time.Second},
 	}
+}
+
+//GetWebsocketConnection returns a websocket connection
+func (apiclient *APIClient) GetWebsocketConnection(endpoint string) (*websocket.Conn, error) {
+	token, err := auth.GenerateJWTToken()
+	if err != nil {
+		return nil, err
+	}
+
+	h := http.Header{}
+	h.Set("Origin", fmt.Sprintf("https://%s/%s", baseURL, endpoint))
+	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	h.Set("Accept", api.APIVersion)
+
+	url := fmt.Sprintf("wss://%s/%s", baseURL, endpoint)
+
+	conn, resp, err := websocket.DefaultDialer.Dial(url, h)
+	if err != nil {
+		if err == websocket.ErrBadHandshake {
+			fmt.Printf("handshake failed with status %d", resp.StatusCode)
+		}
+
+		return nil, err
+	}
+
+	return conn, nil
 }
 
 //GetRequest to call via GET
@@ -70,7 +97,7 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/%s", baseURL, endpoint)
+	url := fmt.Sprintf("https://%s/%s", baseURL, endpoint)
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 
 	if err != nil {

@@ -28,6 +28,7 @@ func main() {
 	patch := cmd.NewPatch(root.Command)
 	delete := cmd.NewDelete(root.Command)
 	create := cmd.NewCreate(root.Command)
+	cmd.NewSSH(root.Command)
 	cmd.NewCompletion(root.Command)
 	cmd.NewGetDevices(get.Command)
 	cmd.NewGetPods(get.Command)
