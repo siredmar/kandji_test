@@ -7,9 +7,9 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/grid-x/ds-api/pkg/ssh"
 	"github.com/spf13/cobra"
 
-	ssh "github.com/grid-x/ds-api/pkg/ssh"
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
@@ -79,7 +79,7 @@ func createSession(client *client.APIClient, deviceID string) error {
 	signal.Notify(interruptChannel, os.Interrupt)
 	go func() {
 		<-interruptChannel
-		os.Exit(1)
+		conn.Close()
 	}()
 
 	var processId string
@@ -96,7 +96,7 @@ func createSession(client *client.APIClient, deviceID string) error {
 			err = json.Unmarshal(message, &messageType)
 			if err != nil {
 				fmt.Println("Unknown message received. Closing connection...")
-				os.Exit(0)
+				return
 			}
 
 			switch messageType.Type {
@@ -105,7 +105,7 @@ func createSession(client *client.APIClient, deviceID string) error {
 				err = json.Unmarshal(message, &output)
 				if err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
-					os.Exit(0)
+					return
 				}
 				os.Stdout.Write(output.Data)
 			case ssh.ProcessCreatedMessageType:
@@ -113,11 +113,11 @@ func createSession(client *client.APIClient, deviceID string) error {
 				err = json.Unmarshal(message, &created)
 				if err != nil {
 					fmt.Println("Not able to unmarshall process created. Closing connection...")
-					os.Exit(0)
+					return
 				}
 				processId = created.ID
 			case ssh.ProcessTerminatedMessageType:
-				os.Exit(0)
+				return
 			default:
 				fmt.Println("Received an unknown message type")
 			}
@@ -132,7 +132,8 @@ func createSession(client *client.APIClient, deviceID string) error {
 			if err == io.EOF {
 				return nil
 			} else if err != nil {
-				panic(err)
+				fmt.Println("Unknown error: ", err)
+				return err
 			} else {
 				m := ssh.NewExecuteCommandMessage(processId, msg[0:size])
 				conn.WriteJSON(m)
