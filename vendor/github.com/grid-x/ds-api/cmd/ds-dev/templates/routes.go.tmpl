@@ -65,6 +65,13 @@ func {{title .Type}}Routes(
           {{- end }}
           },
 					Func: func(w http.ResponseWriter, r *http.Request) {
+						{{- if eq .Protocol "ws"}}
+						conn, err := webSocketUpgrader.Upgrade(w, r, nil)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						{{- end}}
 						{{- if .ExpectBody}}
 						payload := {{.PkgName}}.{{.RequestStruct}}{}
 						if err := encoding.UnmarshalRequest(&payload, r); err != nil {
@@ -75,17 +82,30 @@ func {{title .Type}}Routes(
 							 encoding.Write(w, encoding.ResponseFromError(err))
 							 return
 						}
-
+						{{- if eq .Protocol "ws"}}
+						err = {{$serviceName}}.{{$field}}.{{.HandlerName}}(conn, r, payload)
+						{{- else}}
 						resp, err := {{$serviceName}}.{{$field}}.{{.HandlerName}}(r, payload)
+						{{- end}}
+						{{- else}}
+						{{- if eq .Protocol "ws"}}
+						err = {{$serviceName}}.{{$field}}.{{.HandlerName}}(conn, r)
 						{{- else}}
 						resp, err := {{$serviceName}}.{{$field}}.{{.HandlerName}}(r)
 						{{- end}}
+						{{- end}}
 						if err != nil {
+							{{- if eq .Protocol "ws"}}
+							conn.Close()
+							{{- end}}
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+						{{- if not (eq .Protocol "ws")}}
+
 						encoding.Write(w, resp)
 						return
+						{{- end}}
 					},
 				},
 				{{- end}}

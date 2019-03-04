@@ -40,7 +40,6 @@ var (
 			default:
 				return "TODO -- unsupported"
 			}
-			return ""
 		},
 	}
 )

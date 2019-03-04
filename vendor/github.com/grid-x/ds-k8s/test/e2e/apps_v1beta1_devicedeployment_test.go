@@ -606,3 +606,137 @@ func Test_Appsv1beta1_DeviceDeployment_Create_UpdateImage(t *testing.T) {
 		}
 	}()
 }
+
+// This tests creates two deployments which both match. We will delete one and
+// expect the other one to take over after a while
+func Test_Appsv1beta1_DeviceDeployment_Delete_TakeOver(t *testing.T) {
+	t.Parallel()
+	client := GLOBAL.CRClient()
+	g := gomega.NewGomegaWithT(t)
+
+	logger := log.New().WithField("component", "test")
+
+	ns, err := GLOBAL.NewTestNamespace()
+	if err != nil {
+		t.Fatalf("error while requesting test namespace: %+v", err)
+	}
+
+	deploy1 := &appsv1beta1.DeviceDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "monitoring-latest-stable",
+			Namespace: ns,
+		},
+		Spec: appsv1beta1.DeviceDeploymentSpec{
+			App: "monitoring",
+			Selector: appsv1beta1.Selector{
+				MatchByLabels: map[string]string{
+					"apps.gridx.de/channel": "stable",
+				},
+			},
+			Template: appsv1beta1.PodTemplate{
+				Spec: corev1beta1.PodConfig{
+					Containers: []corev1beta1.Container{
+						{
+							Name:  "foo",
+							Image: "bar",
+						},
+					},
+				},
+			},
+		},
+		Status: appsv1beta1.DeviceDeploymentStatus{},
+	}
+	deploy2 := &appsv1beta1.DeviceDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ems-latest-stable",
+			Namespace: ns,
+		},
+		Spec: appsv1beta1.DeviceDeploymentSpec{
+			App: "monitoring",
+			Selector: appsv1beta1.Selector{
+				MatchByLabels: map[string]string{
+					"apps.gridx.de/channel": "stable",
+					"features.gridx.de/ems": "true",
+				},
+			},
+			Template: appsv1beta1.PodTemplate{
+				Spec: corev1beta1.PodConfig{
+					Containers: []corev1beta1.Container{
+						{
+							Name:  "baz",
+							Image: "qaz",
+						},
+					},
+				},
+			},
+		},
+		Status: appsv1beta1.DeviceDeploymentStatus{},
+	}
+
+	for _, deploy := range []*appsv1beta1.DeviceDeployment{deploy1, deploy2} {
+		logger.Infof("creating deployment %s/%s", ns, deploy.Name)
+		deploy, err = client.AppsV1beta1().DeviceDeployments(ns).Create(deploy)
+		if err != nil {
+			t.Fatalf("error while creating deployment: %+v", err)
+		}
+	}
+
+	numMatchingBoxes := 20
+
+	logger.Info("creating devices")
+	_, err = GLOBAL.CreateNewDevices(map[string]string{
+		"apps.gridx.de/channel": "stable",
+		"features.gridx.de/ems": "true",
+	}, ns, numMatchingBoxes)
+
+	for _, deploy := range []*appsv1beta1.DeviceDeployment{deploy1, deploy2} {
+		logger.Infof("waiting for deployment %s/%s to appear", ns, deploy.Name)
+		g.Eventually(func() error {
+			_, err := client.AppsV1beta1().DeviceDeployments(ns).Get(deploy.Name, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			return nil
+		}, defaultTimeout).Should(gomega.Succeed())
+		logger.Infof("deployment %s/%s ready", ns, deploy.Name)
+	}
+
+	validate := func(deploy *appsv1beta1.DeviceDeployment, num int) func() error {
+		return func() error {
+			pods, err := client.CoreV1beta1().DevicePods(ns).List(metav1.ListOptions{})
+			if err != nil {
+				return err
+			}
+			if len(pods.Items) != num {
+				return fmt.Errorf("not enough pods found")
+			}
+
+			for _, pod := range pods.Items {
+				want := deploy.Spec.Template.Spec
+				got := pod.Spec.Config
+				if !cmp.Equal(want, got) {
+					return fmt.Errorf("invalid pod config for pod %s/%s: %s", pod.Namespace, pod.Name, cmp.Diff(want, got))
+				}
+			}
+			return nil
+		}
+	}
+	logger.Info("waiting for pods to appear")
+	g.Eventually(validate(deploy2, numMatchingBoxes), longTimeout).Should(gomega.Succeed())
+	logger.Info("pods ready")
+
+	logger.Infof("deleting deployment %s/%s", ns, deploy2.Name)
+	if err = client.AppsV1beta1().DeviceDeployments(ns).Delete(deploy2.Name, nil); err != nil {
+		t.Fatalf("error while creating deployment: %+v", err)
+	}
+
+	logger.Info("waiting for pods to changed")
+	g.Eventually(validate(deploy1, numMatchingBoxes), longTimeout).Should(gomega.Succeed())
+
+	defer func() {
+		logger.Infof("deleting deployment %s/%s", ns, deploy1.Name)
+		if err := client.AppsV1beta1().DeviceDeployments(ns).Delete(deploy1.Name, nil); err != nil {
+			t.Errorf("cannot delete device deployment %s/%s: %+v", ns, deploy1.Name, err)
+		}
+	}()
+}

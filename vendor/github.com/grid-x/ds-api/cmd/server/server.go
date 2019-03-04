@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/grid-x/ds-k8s/pkg/client/clientset/versioned"
 	appsinformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/apps/v1beta1"
 	coreinformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/core/v1beta1"
@@ -26,6 +28,14 @@ import (
 	"github.com/grid-x/ds-api/pkg/postgres"
 	"github.com/grid-x/ds-api/pkg/responselog"
 	"github.com/grid-x/ds-api/pkg/router"
+	"github.com/grid-x/ds-api/pkg/ssh"
+)
+
+var (
+	webSocketUpgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 )
 
 type mgmtMiddlewareProvider struct {
@@ -157,6 +167,16 @@ func main() {
 		time.Sleep(time.Second)
 	}
 
+	sshConnectionRepo, err := ssh.NewConnectionRepository(logger, uuid.New)
+	if err != nil {
+		logger.Fatalf("cannot create ssh connections repo: %+v", err)
+	}
+
+	sshSessionRepo, err := ssh.NewSessionRepository(logger, uuid.New)
+	if err != nil {
+		logger.Fatalf("cannot create ssh connections repo: %+v", err)
+	}
+
 	accRepo, err := postgres.NewAccountsRepository(db)
 	if err != nil {
 		logger.Fatalf("cannot create accounts repo: %+v", err)
@@ -169,7 +189,7 @@ func main() {
 	jwtGen := device.NewJWTGenerator(*authJWTIssuer, devRSAKey)
 	devAp := device.NewAuthProvider(logger, jwtGen, devRepo)
 
-	injections := []interface{}{devRepo, podsRepo, appsRepo, deploysRepo, mainRepo}
+	injections := []interface{}{devRepo, podsRepo, appsRepo, deploysRepo, mainRepo, sshConnectionRepo, sshSessionRepo}
 	mgmtInjections := append(injections, mgmtAp)
 	devInjections := append(injections, []interface{}{devAp, jwtGen}...)
 

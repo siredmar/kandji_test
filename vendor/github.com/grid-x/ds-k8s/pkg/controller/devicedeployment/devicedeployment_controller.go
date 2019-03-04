@@ -62,7 +62,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to DeviceDeployment
-	err = c.Watch(&source.Kind{Type: &appsv1beta1.DeviceDeployment{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{
+		Type: &appsv1beta1.DeviceDeployment{}}, &enqueueDeviceDeployment{cl: mgr.GetClient()})
 	if err != nil {
 		return err
 	}
@@ -130,13 +131,17 @@ type ReconcileDeviceDeployment struct {
 // +kubebuilder:rbac:groups=core.gridx.ai,resources=devicepods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.gridx.ai,resources=devicedeployments,verbs=get;list;watch;create;update;patch;delete
 func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.Result, error) {
-	r.logger.Infof("starting to sync deployment %s/%s", req.NamespacedName.Namespace, req.NamespacedName.Name)
+	logger := r.logger.WithFields(log.Fields{
+		"name":      req.NamespacedName.Name,
+		"namespace": req.NamespacedName.Namespace,
+	})
+	logger.Infof("starting to sync deployment %s/%s", req.NamespacedName.Namespace, req.NamespacedName.Name)
 
 	deploy := &appsv1beta1.DeviceDeployment{}
 	err := r.Get(context.Background(), req.NamespacedName, deploy)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			r.logger.Infof("deployment %+v not found. Probably already deleted.", req.NamespacedName)
+			logger.Infof("deployment %+v not found. Probably already deleted.", req.NamespacedName)
 			// let GC handle it
 			return reconcile.Result{}, nil
 		}
@@ -156,7 +161,7 @@ func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.
 	// currentState contains all owned containers indexed by deviceID
 	// otherCs contains all other containers with the same appName indexed
 	// by deviceID
-	r.logger.Infof("getting current state...")
+	logger.Infof("getting current state...")
 	currentState, otherCs, err := r.getCurrentState(req.NamespacedName, deploy)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, err
@@ -164,27 +169,27 @@ func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.
 
 	// 2. Get desired state
 	// Get list of all gridBoxes
-	r.logger.Infof("getting desired state...")
+	logger.Infof("getting desired state...")
 	desiredState, err := r.getDesiredState(req.NamespacedName, deploy)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, err
 	}
 
-	r.logger.Infof("desired state is of len %d", len(desiredState))
-	r.logger.Infof("current state is of len %d", len(currentState))
+	logger.Infof("desired state is of len %d", len(desiredState))
+	logger.Infof("current state is of len %d", len(currentState))
 	// Sync the state
 	// First delete all containers that are not wanted
 	for k, cs := range currentState {
 		des, ok := desiredState[k]
 		alreadyExists := false
-		r.logger.Infof("found current state for device %s/%s with %d pods", req.NamespacedName.Namespace, k, len(cs))
+		logger.Infof("found current state for device %s/%s with %d pods", req.NamespacedName.Namespace, k, len(cs))
 		for _, c := range cs {
 			// If !ok is true there is no container in the desired
 			// state so we need to delete it
 			if !ok {
-				r.logger.Infof("Deleting pod %s/%s for %s because it is not desired", c.Namespace, c.Name, c.Spec.DeviceID)
+				logger.Infof("Deleting pod %s/%s for %s because it is not desired", c.Namespace, c.Name, c.Spec.DeviceID)
 				if err := r.Delete(context.Background(), c); err != nil {
-					r.logger.Errorf("cannot delete %s/%s for %s: %+v", c.Namespace, c.Name, c.Spec.DeviceID, err)
+					logger.Errorf("cannot delete %s/%s for %s: %+v", c.Namespace, c.Name, c.Spec.DeviceID, err)
 					return reconcile.Result{Requeue: true}, err
 				}
 
@@ -198,13 +203,13 @@ func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.
 				appDiff := cmp.Diff(appsv1beta1.ExtractAppName(*c), appName)
 				specDiff := cmp.Diff(c.Spec.Config, des.Spec.Config)
 
-				r.logger.WithFields(log.Fields{
+				logger.WithFields(log.Fields{
 					"appDiff":       appDiff,
 					"specDiff":      specDiff,
 					"alreadyExists": alreadyExists,
 				}).Infof("Spec or app differs for pod %s/%s for %s. Deleting...", c.Namespace, c.Name, k)
 				if err := r.Delete(context.Background(), c); err != nil {
-					r.logger.Errorf("cannot delete %s/%s for %s: %+v", c.Namespace, c.Name, c.Spec.DeviceID, err)
+					logger.Errorf("cannot delete %s/%s for %s: %+v", c.Namespace, c.Name, c.Spec.DeviceID, err)
 					return reconcile.Result{Requeue: true}, err
 				}
 			} else {
@@ -215,7 +220,7 @@ func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.
 			}
 		}
 	}
-	r.logger.Infof("after pruning: desired state is of len %d", len(desiredState))
+	logger.Infof("after pruning: desired state is of len %d", len(desiredState))
 
 	// Second: process whats left from the desired state, i.e. create new
 	// containers, and if necessary remove conflicting containers
@@ -223,20 +228,20 @@ func (r *ReconcileDeviceDeployment) Reconcile(req reconcile.Request) (reconcile.
 		cs, ok := otherCs[k]
 		if ok {
 			for _, c := range cs {
-				r.logger.Infof("Deleting pod %s/%s because it conflicts with %s/%s", c.Namespace, c.Name, newC.Namespace, newC.Name)
+				logger.Infof("Deleting pod %s/%s because it conflicts with %s/%s", c.Namespace, c.Name, newC.Namespace, newC.Name)
 				if err := r.Delete(context.Background(), c); err != nil {
 					return reconcile.Result{Requeue: true}, err
 				}
 			}
 		}
 
-		r.logger.Infof("Creating new pod %s/%s for %s", newC.Namespace, newC.Name, newC.Spec.DeviceID)
+		logger.Infof("Creating new pod %s/%s for %s", newC.Namespace, newC.Name, newC.Spec.DeviceID)
 		if err := r.Create(context.Background(), newC); err != nil {
 			return reconcile.Result{Requeue: true}, err
 		}
 	}
 
-	r.logger.Infof("Syncing done")
+	logger.Infof("Syncing done")
 	return reconcile.Result{}, nil
 }
 

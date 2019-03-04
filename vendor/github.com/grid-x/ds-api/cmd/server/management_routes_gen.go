@@ -76,6 +76,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -101,12 +102,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181204.Account.UpdateAuthenticated(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -133,12 +134,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181204.Maintenance.Create(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -161,6 +162,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -183,6 +185,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -204,6 +207,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -227,6 +231,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -249,6 +254,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -272,6 +278,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -294,6 +301,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -316,6 +324,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -341,12 +350,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181204.Users.Create(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -372,12 +381,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181204.Users.Update(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -399,6 +408,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -428,12 +438,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181128.Deployments.Create(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -456,6 +466,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -478,6 +489,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -503,12 +515,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181128.Deployments.Update(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -530,6 +542,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -559,12 +572,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181127.Application.Create(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -587,6 +600,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -609,6 +623,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -630,6 +645,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -659,12 +675,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181102.Devices.Create(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -687,6 +703,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -709,6 +726,7 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -734,12 +752,12 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181102.Devices.Update(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -761,8 +779,35 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
+					},
+				},
+				"device:SSHCreate": &router.Endpoint{
+					Version:  "2018-11-02",
+					Action:   "device:SSHCreate",
+					Resource: "devices:{deviceID}",
+					Path:     "/devices/{deviceID}/ssh",
+					Methods: []string{
+						"GET",
+						"OPTIONS",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						conn, err := webSocketUpgrader.Upgrade(w, r, nil)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						err = service20181102.Devices.SSHCreate(conn, r)
+						if err != nil {
+							conn.Close()
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
 					},
 				},
 			},

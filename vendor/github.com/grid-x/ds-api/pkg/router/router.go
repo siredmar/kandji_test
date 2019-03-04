@@ -75,6 +75,7 @@ type Endpoint struct {
 	Path        string
 	Middlewares []Middleware
 	Methods     []string
+	Protocol    string
 	Func        func(w http.ResponseWriter, r *http.Request)
 }
 

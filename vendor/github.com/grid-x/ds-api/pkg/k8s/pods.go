@@ -110,6 +110,16 @@ func (p *PodsRepository) Get(ctx context.Context, namespace, name string) (*core
 	return nil, fmt.Errorf("not found")
 }
 
+// Create creates a new pod
+func (p *PodsRepository) Create(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
+	return p.client.DevicePods(pod.Namespace).Create(pod)
+}
+
+// Delete deletes the pod with the given name in the given namespace
+func (p *PodsRepository) Delete(ctx context.Context, namespace, name string) error {
+	return p.client.DevicePods(namespace).Delete(name, nil)
+}
+
 // List returns the list of pods in the given namespace
 func (p *PodsRepository) List(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error) {
 	p.mutex.RLock()

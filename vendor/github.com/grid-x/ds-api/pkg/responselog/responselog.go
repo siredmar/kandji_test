@@ -1,7 +1,10 @@
 package responselog
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 	"runtime"
 )
@@ -61,6 +64,15 @@ func (w *LogResponseWriter) StatusCode() int {
 		return code
 	}
 	return 0
+}
+
+// Hijack allows connection hijacking
+func (w *LogResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hijacker, ok := w.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, errors.New("the ResponseWriter doesn't support the Hijacker interface")
+	}
+	return hijacker.Hijack()
 }
 
 // Write writes the data to the connetion as part of an HTTP reply.
