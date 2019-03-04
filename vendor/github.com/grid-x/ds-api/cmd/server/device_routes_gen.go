@@ -63,6 +63,7 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -88,14 +89,40 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181203.Device.Update(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
+					},
+				},
+				"device:SSHAgentConnect": &router.Endpoint{
+					Version:  "2018-12-03",
+					Action:   "device:SSHAgentConnect",
+					Resource: "device",
+					Path:     "/ssh",
+					Methods: []string{
+						"GET",
+						"OPTIONS",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						conn, err := webSocketUpgrader.Upgrade(w, r, nil)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						err = service20181203.Device.SSHAgentConnect(conn, r)
+						if err != nil {
+							conn.Close()
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
 					},
 				},
 				// Group: Pods
@@ -117,6 +144,7 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -142,12 +170,12 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181203.Pods.Update(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},
@@ -175,12 +203,12 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						resp, err := service20181102.Auth.GetToken(r, payload)
 						if err != nil {
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
+
 						encoding.Write(w, resp)
 						return
 					},

@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,6 +20,7 @@ import (
 	"github.com/grid-x/ds-api/pkg/encoding"
 	"github.com/grid-x/ds-api/pkg/errors"
 	"github.com/grid-x/ds-api/pkg/model"
+	"github.com/grid-x/ds-api/pkg/ssh"
 )
 
 const (
@@ -45,6 +47,24 @@ type deviceRepository interface {
 	Delete(ctx context.Context, namespace string, id string) error
 }
 
+type podRepository interface {
+	Create(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error)
+}
+
+type connectionRepository interface {
+	// Get retrieves the stored websocket connection of an device. Returns nil if not yet connected
+	Get(deviceID string) (connection *ssh.Connection)
+	// Get retrieves a random v4 uuid
+	GetUUID() uuid.UUID
+}
+
+type sessionRepository interface {
+	// Get retrieves the stored ssh session. Returns nil if not yet setup
+	Get(sessionID string) *ssh.Session
+	// Get retrieves a random v4 uuid
+	GetUUID() uuid.UUID
+}
+
 // Device as used by this API version
 type Device struct {
 	Metadata api.Metadata `json:"metadata"`
@@ -67,7 +87,7 @@ type DeviceStatus struct {
 
 func fromK8sType(d *corev1beta1.Device) *Device {
 	return &Device{
-		Metadata: api.ConvertFromK8sMetadata(d.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(d.ObjectMeta, false),
 		Spec: DeviceSpec{
 			Serialnumber:      d.Spec.Serialnumber,
 			MACAddress:        d.Spec.MACAddress,
@@ -82,9 +102,12 @@ func fromK8sType(d *corev1beta1.Device) *Device {
 
 // Service implements the handlers for this group
 type Service struct {
-	logger log.FieldLogger
-	auth   authProvider
-	client deviceRepository
+	logger        log.FieldLogger
+	auth          authProvider
+	client        deviceRepository
+	podClient     podRepository
+	sshConnection connectionRepository
+	sshSession    sessionRepository
 }
 
 // NewService creates a new service and injects all dependencies
@@ -99,6 +122,12 @@ func NewService(injections ...interface{}) *Service {
 			s.auth = i
 		case deviceRepository:
 			s.client = i
+		case podRepository:
+			s.podClient = i
+		case connectionRepository:
+			s.sshConnection = i
+		case sessionRepository:
+			s.sshSession = i
 		}
 	}
 
@@ -441,7 +470,7 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 	}
 
 	if payload.Metadata.Labels != nil {
-		dev.Labels = payload.Metadata.Labels
+		dev.Labels = model.ComputeLabels(dev.Labels, payload.Metadata.Labels)
 	}
 
 	ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)
@@ -524,4 +553,209 @@ func (s *Service) Delete(req *http.Request) (*encoding.Response, error) {
 	return &encoding.Response{
 		Payload: &DeleteResponse{},
 	}, nil
+}
+
+// SSHCreate implements the HTTP handler for creating a ssh connection
+//
+// @name: SSHCreate
+// @description: Creates a ssh connection
+// @action: device:SSHCreate
+// @resource: devices:{deviceID}
+// @endpoint: GET /devices/{deviceID}/ssh
+// @protocol: WS
+// @middlewares: auth
+func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) error {
+	accountID, err := s.auth.AccountIDFromContext(req.Context())
+	if err != nil {
+		return errors.E(
+			errors.Internal,
+			fmt.Errorf("Cannot get accountID: %+v", err),
+		)
+	}
+
+	deviceID := mux.Vars(req)["deviceID"]
+	if deviceID == "" {
+		return errors.E(
+			errors.Validation,
+			fmt.Errorf("Missing Device ID"),
+		)
+	}
+
+	// Check for existing device connetions
+	deviceConnection := s.sshConnection.Get(deviceID)
+
+	if deviceConnection == nil {
+		// No connection from this device yet. Create a new pod and wait for the device to be connected
+		connectionToken := s.sshConnection.GetUUID().String()
+
+		var socket corev1beta1.HostPathType = "Socket"
+		sshPodTemplate := &corev1beta1.DevicePod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      connectionToken,
+				Namespace: model.AccountNamespaceName(accountID),
+			},
+			Spec: corev1beta1.DevicePodSpec{
+				DeviceID: deviceID,
+				Config: corev1beta1.PodConfig{
+					Volumes: []corev1beta1.Volume{
+						{
+							Name: "supervisorAPI",
+							VolumeSource: corev1beta1.VolumeSource{
+								HostPath: &corev1beta1.HostPathVolumeSource{
+									Path: "/var/run/supervisor.sock",
+									Type: &socket,
+								},
+							},
+						},
+					},
+					Network: "Host",
+					Containers: []corev1beta1.Container{
+						{
+							VolumeMounts: []corev1beta1.VolumeMount{
+								{
+									Name:      "supervisorAPI",
+									MountPath: "/var/run/supervisor.sock",
+								},
+							},
+							Name:  "ssh-agent",
+							Image: "ds-ssh-agent:latest",
+							Environment: []corev1beta1.EnvVar{
+								{
+									Name:  "DROPBEAR_PASSWORD",
+									Value: "fa",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
+		defer cancel()
+
+		pod, err := s.podClient.Create(ctx, sshPodTemplate)
+		if err != nil {
+			return errors.E(
+				errors.Internal,
+				fmt.Errorf("Cannot create pod for ssh connection %s: %+v", pod.Name, err),
+			)
+		}
+		s.logger.Infof("Pod %s created to server SSH connections", pod.Name)
+
+		connectionTick := time.NewTicker(50 * time.Millisecond)
+		defer connectionTick.Stop()
+
+		connectionTimer := time.NewTimer(30 * time.Second)
+		defer connectionTimer.Stop()
+
+		var connected bool
+		for {
+			select {
+			case <-connectionTimer.C:
+				return errors.E(
+					errors.Internal,
+					fmt.Errorf("Not able to create ssh connection"),
+				)
+			case <-connectionTick.C:
+				deviceConnection = s.sshConnection.Get(deviceID)
+
+				if deviceConnection != nil {
+					connected = true
+				}
+			}
+			if connected {
+				break
+			}
+		}
+
+		// Setting PodName into connection to delete it once the connection gets closed
+		deviceConnection.PodName = pod.Name
+
+		s.logger.Infof("Device connected")
+	}
+
+	sessionID := s.sshSession.GetUUID().String()
+
+	// Issue initial command
+	init := ssh.CreateProcessMessage{
+		ID:      sessionID,
+		Command: []byte("/dbclient -y root@127.0.0.1"),
+	}
+
+	s.logger.Infof("Creating session %s", sessionID)
+	if err = deviceConnection.Conn.WriteJSON(init); err != nil {
+		return errors.E(
+			errors.Internal,
+			fmt.Errorf("Not able to write message"),
+		)
+	}
+
+	// Wait for session to be started
+	sessionTick := time.NewTicker(50 * time.Millisecond)
+	defer sessionTick.Stop()
+
+	sessionTimer := time.NewTimer(5 * time.Second)
+	defer sessionTimer.Stop()
+
+	var session *ssh.Session
+	var sessionCreated bool
+	for {
+		select {
+		case <-sessionTimer.C:
+			return errors.E(
+				errors.Internal,
+				fmt.Errorf("Not able to get ssh session"),
+			)
+		case <-sessionTick.C:
+			session = s.sshSession.Get(sessionID)
+
+			if session != nil {
+				sessionCreated = true
+			}
+		}
+		if sessionCreated {
+			break
+		}
+	}
+
+	session.ClientConn = conn
+
+	go func() {
+		defer conn.Close()
+
+		for {
+			var messageType ssh.MessageType
+
+			_, message, err := conn.ReadMessage()
+
+			if err != nil {
+				s.logger.Infof("ReadMessage error on the clientChannel: %s", err)
+				return
+			}
+
+			err = json.Unmarshal(message, &messageType)
+			if err != nil {
+				s.logger.Infof("Unmarshal error on the clientChannel: %s", err)
+				return
+			}
+
+			switch messageType.Type {
+			case ssh.CreateProcessMessageType:
+				// Forward to the device
+				if err = session.DeviceConn.WriteMessage(websocket.BinaryMessage, message); err != nil {
+					return
+				}
+			case ssh.ExecuteCommandMessageType:
+				// Forward to the device
+				if err = session.DeviceConn.WriteMessage(websocket.BinaryMessage, message); err != nil {
+					return
+				}
+			default:
+				s.logger.Infof("Received an unknown message on the clientChannel: %v", message)
+			}
+		}
+	}()
+
+	return nil
 }

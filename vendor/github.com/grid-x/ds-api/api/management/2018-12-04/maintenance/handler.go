@@ -52,7 +52,7 @@ type Task struct {
 
 func taskFromK8s(task *mainv1beta1.MaintenanceTask) *Task {
 	return &Task{
-		Metadata: api.ConvertFromK8sMetadata(task.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(task.ObjectMeta, false),
 		Spec:     task.Spec,
 		Status:   task.Status,
 	}

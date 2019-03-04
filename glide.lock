@@ -1,5 +1,5 @@
-hash: 48596db95b512aec427bdc52350ac1d6bbc9e98655b0dccdf4406f5fbfaabaaa
-updated: 2019-02-19T10:53:53.807649+01:00
+hash: a93dcdb6ce10073af276455190e36ef24b672eefdd8c6ccb21d6b87a37bef0cb
+updated: 2019-03-04T14:09:43.365081+01:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
@@ -24,11 +24,13 @@ imports:
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/google/uuid
-  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
+  version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/gorilla/mux
-  version: 8559a4f775fc329165fe32bd4c2543de8ada8fce
+  version: 15a353a636720571d19e37b34a14499c3afa9991
+- name: github.com/gorilla/websocket
+  version: 7c8e298727d149d7c329b4dec7e94e1932ac5c11
 - name: github.com/grid-x/ds-api
-  version: d35b30edf036975365c872a790cc766d74aafafe
+  version: a36e815b790f0824ad2d755ac734891b408db628
   subpackages:
   - api
   - api/management/2018-11-02/devices
@@ -39,8 +41,9 @@ imports:
   - pkg/encoding
   - pkg/errors
   - pkg/model
+  - pkg/ssh
 - name: github.com/grid-x/ds-k8s
-  version: 10282333c3dca8fbcec0cde2ba3a040d80e47a77
+  version: f401d160782bbd4b01573dea455280c9881ff0d3
   subpackages:
   - pkg/apis/apps/v1beta1
   - pkg/apis/core/v1beta1
@@ -50,7 +53,7 @@ imports:
 - name: github.com/kataras/tablewriter
   version: e063d29b7c2363c8e21a25fdb4109f03beb50230
 - name: github.com/konsorten/go-windows-terminal-sequences
-  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
+  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/landoop/tableprinter
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
 - name: github.com/mattn/go-runewidth

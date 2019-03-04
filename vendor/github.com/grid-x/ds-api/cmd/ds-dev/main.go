@@ -73,7 +73,7 @@ func main() {
 								case "device", "dev":
 									apiPath = "device"
 								default:
-									fmt.Errorf("invalid API type %s", t)
+									return fmt.Errorf("invalid API type %s", t)
 								}
 
 							} else {
@@ -257,7 +257,7 @@ func main() {
 					case "device", "dev":
 						subRoute = "device"
 					default:
-						fmt.Errorf("invalid API type %s", t)
+						return fmt.Errorf("invalid API type %s", t)
 					}
 
 				} else {

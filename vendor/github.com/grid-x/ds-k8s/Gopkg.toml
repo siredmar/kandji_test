@@ -18,6 +18,14 @@ required = [
 [prune]
   go-tests = true
 
+[[constraint]]
+  name = "github.com/google/go-cmp"
+  version = "0.2.0"
+
+[[constraint]]
+  name = "github.com/google/uuid"
+  version = "1.1.0"
+
 
 # STANZAS BELOW ARE GENERATED AND MAY BE WRITTEN - DO NOT MODIFY BELOW THIS LINE.
 
@@ -34,11 +42,3 @@ required = [
 name = "gopkg.in/fsnotify.v1"
 source = "https://github.com/fsnotify/fsnotify.git"
 version="v1.4.7"
-
-[[constraint]]
-  name = "github.com/google/go-cmp"
-  version = "0.2.0"
-
-[[constraint]]
-  name = "github.com/google/uuid"
-  version = "1.1.0"

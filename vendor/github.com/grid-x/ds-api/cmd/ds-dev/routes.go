@@ -100,6 +100,8 @@ type Endpoint struct {
 	// Methods represents the allowed HTTP methods.
 	Methods []string
 	// ExpectBody reports if a request body needs to be read.
+	Protocol string
+	// ExpectBody reports if a request body needs to be read.
 	ExpectBody bool
 	// RequestStruct is the name of the request struct.
 	RequestStruct string
@@ -378,6 +380,7 @@ func collectImports(f *ast.File) (map[string]string, error) {
 func collectEndpoint(n *ast.FuncDecl) (Endpoint, error) {
 	endpoint := Endpoint{
 		HandlerName: n.Name.String(),
+		Protocol:    "http", //Default value
 	}
 	scan := bufio.NewScanner(strings.NewReader(n.Doc.Text()))
 	for scan.Scan() {
@@ -400,6 +403,12 @@ func collectEndpoint(n *ast.FuncDecl) (Endpoint, error) {
 			if parts[0] == "GET" {
 				endpoint.Methods = append(endpoint.Methods, "OPTIONS")
 			}
+		case "@protocol":
+			val := strings.ToLower(value)
+			if val != "http" && val != "ws" {
+				return endpoint, fmt.Errorf("Protocol %s is not supported", value)
+			}
+			endpoint.Protocol = val
 		case "@middlewares":
 			// we support multiple middlewares separated by ','
 			middlewares := strings.Split(value, ",")

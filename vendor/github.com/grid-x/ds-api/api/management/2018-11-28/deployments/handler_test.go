@@ -162,6 +162,32 @@ func Test_Create_Validate(t *testing.T) {
 			wantErr: true,
 			want:    nil,
 		},
+		{ // Test invalid docker image
+			req:        &http.Request{},
+			injections: []interface{}{},
+			input: CreateRequest{
+				Spec: &appsv1beta1.DeviceDeploymentSpec{
+					App: "monitoring",
+					Selector: appsv1beta1.Selector{
+						MatchByLabels: map[string]string{
+							"foo": "bar",
+						},
+					},
+					Template: appsv1beta1.PodTemplate{
+						Spec: corev1beta1.PodConfig{
+							Containers: []corev1beta1.Container{
+								{
+									Name:  "testcontainer",
+									Image: "gridx/UPPERCASE_IS_NOT_VALID:1234567",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+			want:    nil,
+		},
 	}
 
 	for i, tc := range testcases {
@@ -579,6 +605,32 @@ func Test_Update_Validate(t *testing.T) {
 			wantErr: true,
 			want:    nil,
 		},
+		{ // Test missing container spec
+			req:        &http.Request{},
+			injections: []interface{}{},
+			input: UpdateRequest{
+				Spec: &appsv1beta1.DeviceDeploymentSpec{
+					App: "monitoring",
+					Selector: appsv1beta1.Selector{
+						MatchByLabels: map[string]string{
+							"foo": "bar",
+						},
+					},
+					Template: appsv1beta1.PodTemplate{
+						Spec: corev1beta1.PodConfig{
+							Containers: []corev1beta1.Container{
+								{
+									Name:  "testcontainer",
+									Image: "gridx/UPPERCASE_IS_NOT_VALID:1234567",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+			want:    nil,
+		},
 	}
 
 	for i, tc := range testcases {
@@ -726,6 +778,97 @@ func Test_Update(t *testing.T) {
 										{
 											Name:  "testcontainer",
 											Image: "test:99",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}, {
+			req: newReq("ca009f17-12f9-43c7-98bc-b6863bbc787a", t),
+			injections: []interface{}{
+				&mockK8sDeploy{
+					get: func(ctx context.Context, accountID, uuid string) (*appsv1beta1.DeviceDeployment, error) {
+						if uuid != "ca009f17-12f9-43c7-98bc-b6863bbc787a" {
+							return nil, fmt.Errorf("got unexpected deviceID")
+						}
+						return &appsv1beta1.DeviceDeployment{
+							ObjectMeta: metav1.ObjectMeta{
+								Namespace: accountID,
+								Name:      uuid,
+							},
+							Spec: appsv1beta1.DeviceDeploymentSpec{
+								App: "monitoring",
+								Selector: appsv1beta1.Selector{
+									MatchByLabels: map[string]string{
+										"foo": "bar",
+									},
+								},
+								Template: appsv1beta1.PodTemplate{
+									Spec: corev1beta1.PodConfig{
+										Containers: []corev1beta1.Container{
+											{
+												Name:  "testcontainer",
+												Image: "test:1234567",
+											},
+										},
+									},
+								},
+							},
+							Status: appsv1beta1.DeviceDeploymentStatus{},
+						}, nil
+					},
+					update: func(ctx context.Context, deploy *appsv1beta1.DeviceDeployment) (*appsv1beta1.DeviceDeployment, error) {
+						if deploy.Name != "ca009f17-12f9-43c7-98bc-b6863bbc787a" {
+							return nil, fmt.Errorf("unexpected deployment ID")
+						}
+						return deploy, nil
+					},
+				},
+				&mockAppRepo{
+					get: func(ctx context.Context, accountID, name string) (*appsv1beta1.DeviceApplication, error) {
+						return &appsv1beta1.DeviceApplication{
+							ObjectMeta: metav1.ObjectMeta{
+								Name:      "monitoring",
+								Namespace: accountID,
+							},
+						}, nil
+					},
+				},
+				&mockAuthProvider{
+					f: func(ctx context.Context) (string, error) {
+						return "default", nil
+					},
+				},
+			},
+			input: UpdateRequest{
+				Metadata: api.UpdateMetadata{
+					Labels: map[string]string{"gridx.de/channel": "stable"},
+				},
+			},
+			wantErr: false,
+			want: &encoding.Response{
+				Payload: &UpdateResponse{
+					Deployment: &Deployment{
+						Metadata: api.Metadata{
+							ID:     "ca009f17-12f9-43c7-98bc-b6863bbc787a",
+							Labels: map[string]string{"gridx.de/channel": "stable"},
+						},
+						Spec: appsv1beta1.DeviceDeploymentSpec{
+							App: "monitoring",
+							Selector: appsv1beta1.Selector{
+								MatchByLabels: map[string]string{
+									"foo": "bar",
+								},
+							},
+							Template: appsv1beta1.PodTemplate{
+								Spec: corev1beta1.PodConfig{
+									Containers: []corev1beta1.Container{
+										{
+											Name:  "testcontainer",
+											Image: "test:1234567",
 										},
 									},
 								},

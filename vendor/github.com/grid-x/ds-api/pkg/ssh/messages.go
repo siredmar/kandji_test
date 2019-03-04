@@ -1,0 +1,105 @@
+package ssh
+
+import (
+	"github.com/google/uuid"
+)
+
+// Message types
+const (
+	CreateProcessMessageType = iota
+	ExecuteCommandMessageType
+	ProcessOutputMessageType
+	ProcessCreatedMessageType
+	ProcessTerminatedMessageType
+)
+
+// GetUUID represents a function returning a v4 uuid
+type GetUUID func() uuid.UUID
+
+// MessageType represents a ssh message
+type MessageType struct {
+	Type int `json:"type"`
+}
+
+// CreateProcessMessage represents a ssh message of type create process
+type CreateProcessMessage struct {
+	MessageType
+	ID      string `json:"id"`
+	Command []byte `json:"command"`
+}
+
+// NewCreateProcessMessage creates a new ssh message of type create process
+func NewCreateProcessMessage(i string, c []byte) CreateProcessMessage {
+	msg := CreateProcessMessage{}
+	msg.Type = CreateProcessMessageType
+	msg.ID = i
+	msg.Command = c
+
+	return msg
+}
+
+// ExecuteCommandMessage represents a ssh message of type execute command
+type ExecuteCommandMessage struct {
+	MessageType
+	ID      string `json:"id"`
+	Command []byte `json:"command"`
+}
+
+// NewExecuteCommandMessage creates a new ssh message of type execute command
+func NewExecuteCommandMessage(i string, c []byte) ExecuteCommandMessage {
+	msg := ExecuteCommandMessage{}
+	msg.Type = ExecuteCommandMessageType
+	msg.ID = i
+	msg.Command = c
+
+	return msg
+}
+
+// ProcessCreatedMessage represents a ssh message of type process create
+type ProcessCreatedMessage struct {
+	MessageType
+	ID string `json:"id"`
+}
+
+// NewProcessCreatedMessage creates a new ssh message of type process created
+func NewProcessCreatedMessage(i string) CreateProcessMessage {
+	msg := CreateProcessMessage{}
+	msg.Type = ProcessCreatedMessageType
+	msg.ID = i
+
+	return msg
+}
+
+// ProcessOutputMessage represents a ssh message of type process output
+type ProcessOutputMessage struct {
+	MessageType
+	ID   string `json:"id"`
+	Data []byte `json:"data"`
+}
+
+// NewProcessOutputMessage creates a new ssh message of type process output
+func NewProcessOutputMessage(i string, d []byte) ProcessOutputMessage {
+	msg := ProcessOutputMessage{}
+	msg.Type = ProcessOutputMessageType
+	msg.ID = i
+	msg.Data = d
+
+	return msg
+}
+
+// ProcessTerminatedMessage represents a ssh message of type process terminated
+type ProcessTerminatedMessage struct {
+	MessageType
+	ID     string `json:"id"`
+	Reason []byte `json:"reason"`
+}
+
+// NewProcessTerminatedMessage creates a new ssh message of type process terminated
+func NewProcessTerminatedMessage(i string, r []byte) ProcessTerminatedMessage {
+	msg := ProcessTerminatedMessage{}
+	msg.Type = ProcessTerminatedMessageType
+	msg.ID = i
+	msg.Reason = r
+
+	return msg
+}

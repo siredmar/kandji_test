@@ -47,7 +47,7 @@ type Pod struct {
 
 func podFromK8s(pod *corev1beta1.DevicePod) *Pod {
 	return &Pod{
-		Metadata: api.ConvertFromK8sMetadata(pod.ObjectMeta),
+		Metadata: api.ConvertFromK8sMetadata(pod.ObjectMeta, false),
 		Spec:     pod.Spec,
 		Status:   pod.Status,
 	}
