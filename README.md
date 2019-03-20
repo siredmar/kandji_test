@@ -46,7 +46,6 @@ $ gxctl get apps testapp testapp2
 * **applications**   Abbreviated alias `application`,`app`
 * **devices**   Abbreviated alias `device`
 * **deployments**   Abbreviated alias `deployment`,`deploy`
-* **maintenance**   Abbreviated alias `maintenances`
 * **pods**   Abbreviated alias `pod`,`po`
 
 
@@ -85,8 +84,6 @@ $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
 $ gxctl get deploy
 # Get a information of a deployment include additional information using uuid abbreviation
 $ gxctl get deploy c78 -o wide
-# Get a List of all maintenance tasks
-$ gxctl get maintenances
 ```
 
 `gxctl create` - Create a new resource.
@@ -98,8 +95,6 @@ $ gxctl create -f new_deployment.json
 $ gxctl create app testapp
 # Create a new nginx deployment for app testapp
 $ gxctl create deployment nginx:1.15.8 -a testapp -s gridx.de/channel=stable
-# Create a maintenance task of type restart for all devices with stable selector
-$ gxctl create maintenance restart -s gridx.de/channel=stable
 ```
 
 `gxctl patch` - Patch a existing resource.
@@ -111,7 +106,7 @@ $ gxctl patch -f patch_device.json
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -s "gridx.de/channel=stable gridx.de=area:west"
 # Patch mac address of a device
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-77-88-99"
-# Patch maintanence window of a device
+# Patch maintenance window of a device
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
 ```
 
@@ -124,7 +119,5 @@ $ gxctl delete app testapp
 $ gxctl delete deploy c78
 # Delete two Deployments using both uuid abbreviation and full qualified name
 $ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05 
-# Delete a maintenance task
-$ gxctl delete maintenance a54
 ```
 
