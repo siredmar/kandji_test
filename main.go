@@ -34,15 +34,12 @@ func main() {
 	cmd.NewGetPods(get.Command)
 	cmd.NewGetDeployments(get.Command)
 	cmd.NewGetApplications(get.Command)
-	cmd.NewGetMaintenance(get.Command)
 	cmd.NewCreateApplication(create.Command)
 	cmd.NewCreateDeployment(create.Command)
-	cmd.NewCreateMaintenance(create.Command)
 	cmd.NewPatchDevice(patch.Command)
 	cmd.NewPatchDeployment(patch.Command)
 	cmd.NewDeleteDeployment(delete.Command)
 	cmd.NewDeleteApplication(delete.Command)
-	cmd.NewDeleteMaintenance(delete.Command)
 	cmd.NewLabelDevice(label.Command)
 
 	if err := root.Command.Execute(); err != nil {
