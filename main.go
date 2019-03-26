@@ -29,6 +29,7 @@ func main() {
 	delete := cmd.NewDelete(root.Command)
 	create := cmd.NewCreate(root.Command)
 	cmd.NewSSH(root.Command)
+	cmd.NewSyslog(root.Command)
 	cmd.NewCompletion(root.Command)
 	cmd.NewGetDevices(get.Command)
 	cmd.NewGetPods(get.Command)
