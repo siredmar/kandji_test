@@ -1,10 +1,11 @@
 package api
 
 const (
-	APIVersion           = "application/vnd.gridx.ai.2018-12-04"
-	DevicesEndpoint      = "api/management/devices"
-	PodsEndpoint         = "api/management/pods"
-	DeploymentsEndpoint  = "api/management/deployments"
-	ApplicationsEndpoint = "api/management/applications"
-	MaintenanceEndpoint  = "api/management/maintenance"
+	APIVersion            = "application/vnd.gridx.ai.2019-04-01"
+	DevicesEndpoint       = "api/management/devices"
+	PodsEndpoint          = "api/management/pods"
+	DeploymentsEndpoint   = "api/management/deployments"
+	ApplicationsEndpoint  = "api/management/applications"
+	MaintenanceEndpoint   = "api/management/maintenance"
+	DockerConfigsEndpoint = "api/management/dockerconfigs"
 )

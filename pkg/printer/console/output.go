@@ -47,6 +47,10 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 		out = MaintenanceConsoleOutput{}.Map(v)
 	case api.MaintenanceTasks:
 		out = MaintenancesConsoleOutput{}.Map(v).Sort()
+	case api.DockerConfig:
+		out = DockerConfigConsoleOutput{}.Map(v)
+	case api.DockerConfigs:
+		out = DockerConfigsConsoleOutput{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)
@@ -83,6 +87,10 @@ func (c *ConsolePrinter) PrintWide(v interface{}) error {
 		out = MaintenanceConsoleOutputWide{}.Map(v)
 	case api.MaintenanceTasks:
 		out = MaintenancesConsoleOutputWide{}.Map(v).Sort()
+	case api.DockerConfig:
+		out = DockerConfigConsoleOutputWide{}.Map(v)
+	case api.DockerConfigs:
+		out = DockerConfigsConsoleOutputWide{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)
