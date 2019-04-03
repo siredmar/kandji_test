@@ -10,7 +10,7 @@ import (
 func TestPodsEndpoint(t *testing.T) {
 	tt := []Testcase{{
 		name:            "Get all pods",
-		endpoint:        PodsEndpoint,
+		endpoint:        ManagementPodsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -31,7 +31,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Creating Prereqs (Device, App and Deployment)
 	tt = []Testcase{{
 		name:     "Create device",
-		endpoint: DevicesEndpoint,
+		endpoint: ManagementDevicesEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -61,7 +61,7 @@ func TestPodsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create device",
-		endpoint: DevicesEndpoint,
+		endpoint: ManagementDevicesEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -91,7 +91,7 @@ func TestPodsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create application",
-		endpoint: ApplicationsEndpoint,
+		endpoint: ManagementApplicationsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -110,7 +110,7 @@ func TestPodsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create deployment",
-		endpoint: DeploymentsEndpoint,
+		endpoint: ManagementDeploymentsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -169,10 +169,10 @@ func TestPodsEndpoint(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			uuid := runTestcase(tc, t)
 			if uuid != "" {
-				if tc.endpoint == DevicesEndpoint {
+				if tc.endpoint == ManagementDevicesEndpoint {
 					ExtractedDeviceUUIDs = append(ExtractedDeviceUUIDs, uuid)
 				}
-				if tc.endpoint == DeploymentsEndpoint {
+				if tc.endpoint == ManagementDeploymentsEndpoint {
 					ExtractedDeploymentUUIDs = append(ExtractedDeploymentUUIDs, uuid)
 				}
 			}
@@ -182,7 +182,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Checking that there are still no pods and adding the appropiate label to the device
 	tt = []Testcase{{
 		name:            "Get all pods",
-		endpoint:        PodsEndpoint,
+		endpoint:        ManagementPodsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -196,7 +196,7 @@ func TestPodsEndpoint(t *testing.T) {
 	}, {
 		// Adding label to "gridx.de/channel": "stable"
 		name:     "Patch single device",
-		endpoint: fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -225,7 +225,7 @@ func TestPodsEndpoint(t *testing.T) {
 	}, {
 		// Adding label to "gridx.de/channel": "stable"
 		name:     "Patch single device",
-		endpoint: fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[1]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[1]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -264,7 +264,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Checking that there are now pods available for the second device matching alpha group
 	tt = []Testcase{{
 		name:            "Get all pods",
-		endpoint:        PodsEndpoint,
+		endpoint:        ManagementPodsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -308,7 +308,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Patching the deployment matchByLabels to check if pods getting removed on first device and scheduled on seconed one
 	tt = []Testcase{{
 		name:     "Patch single deployment",
-		endpoint: fmt.Sprintf("%s/%s", DeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -373,7 +373,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Checking that there are now pods available for the second device matching stable group
 	tt = []Testcase{{
 		name:            "Get all pods",
-		endpoint:        PodsEndpoint,
+		endpoint:        ManagementPodsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -416,7 +416,7 @@ func TestPodsEndpoint(t *testing.T) {
 	// Cleanup
 	tt = []Testcase{{
 		name:             "Delete deployment",
-		endpoint:         fmt.Sprintf("%s/%s", DeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -426,7 +426,7 @@ func TestPodsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete device",
-		endpoint:         fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -436,7 +436,7 @@ func TestPodsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete device",
-		endpoint:         fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[1]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[1]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -446,7 +446,7 @@ func TestPodsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete application",
-		endpoint:         fmt.Sprintf("%s/%s", ApplicationsEndpoint, "testapp"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "testapp"),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,

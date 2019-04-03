@@ -23,19 +23,19 @@ func (m *mockAuthProvider) AccountIDFromContext(ctx context.Context) (string, er
 	return m.f(ctx)
 }
 
-type listF func(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error)
-type getF func(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error)
+type listF func(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error)
+type getF func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error)
 
 type mockPodClient struct {
 	list listF
 	get  getF
 }
 
-func (m *mockPodClient) List(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error) {
-	return m.list(ctx, namespace)
+func (m *mockPodClient) List(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error) {
+	return m.list(ctx, namespace, unfiltered)
 }
-func (m *mockPodClient) Get(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
-	return m.get(ctx, namespace, name)
+func (m *mockPodClient) Get(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
+	return m.get(ctx, namespace, name, unfiltered)
 }
 
 func newReq(id string, t *testing.T) *http.Request {
@@ -62,7 +62,7 @@ func Test_List(t *testing.T) {
 			req: &http.Request{},
 			injections: []interface{}{
 				&mockPodClient{
-					list: func(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error) {
+					list: func(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error) {
 						return nil, fmt.Errorf("not yet implemented")
 					},
 				},
@@ -80,7 +80,7 @@ func Test_List(t *testing.T) {
 			req: &http.Request{},
 			injections: []interface{}{
 				&mockPodClient{
-					list: func(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error) {
+					list: func(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error) {
 						return []*corev1beta1.DevicePod{
 							{
 								ObjectMeta: metav1.ObjectMeta{
@@ -169,7 +169,7 @@ func Test_Get(t *testing.T) {
 			req: newReq("7b509d9a-86f2-4f78-88ee-3e130bccb456", t),
 			injections: []interface{}{
 				&mockPodClient{
-					get: func(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+					get: func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
 						return nil, fmt.Errorf("not implemented")
 					},
 				},
@@ -187,7 +187,7 @@ func Test_Get(t *testing.T) {
 			req: newReq("7b509d9a-86f2-4f78-88ee-3e130bccb456", t),
 			injections: []interface{}{
 				&mockPodClient{
-					get: func(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+					get: func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
 						return &corev1beta1.DevicePod{
 							ObjectMeta: metav1.ObjectMeta{
 								Name:      name,

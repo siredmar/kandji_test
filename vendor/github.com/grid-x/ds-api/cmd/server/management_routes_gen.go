@@ -19,6 +19,8 @@ import (
 	v20181204ManagementAccount "github.com/grid-x/ds-api/api/management/2018-12-04/account"
 	v20181204ManagementMaintenance "github.com/grid-x/ds-api/api/management/2018-12-04/maintenance"
 	v20181204ManagementUsers "github.com/grid-x/ds-api/api/management/2018-12-04/users"
+	v20190401Management "github.com/grid-x/ds-api/api/management/2019-04-01"
+	v20190401ManagementDockerconfigs "github.com/grid-x/ds-api/api/management/2019-04-01/dockerconfigs"
 )
 
 // ManagementMiddlewareProvider is the most minimal interface for
@@ -35,6 +37,10 @@ func ManagementRoutes(
 	mProvider ManagementMiddlewareProvider,
 	injections []interface{},
 ) (*router.Routes, error) {
+	service20190401, err := v20190401Management.NewService(injections...)
+	if err != nil {
+		return nil, fmt.Errorf("v20190401Management.NewService: %+v", err)
+	}
 	service20181204, err := v20181204Management.NewService(injections...)
 	if err != nil {
 		return nil, fmt.Errorf("v20181204Management.NewService: %+v", err)
@@ -55,6 +61,105 @@ func ManagementRoutes(
 	routes := &router.Routes{
 		Middlewares: globalMiddlewares,
 		Endpoints: []map[string]*router.Endpoint{
+			// Version: 2019-04-01
+			map[string]*router.Endpoint{
+				// Group: Dockerconfigs
+				"dockerconfigs:Create": &router.Endpoint{
+					Version:  "2019-04-01",
+					Action:   "dockerconfigs:Create",
+					Resource: "dockerconfigs:*",
+					Path:     "/dockerconfigs",
+					Methods: []string{
+						"POST",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						payload := v20190401ManagementDockerconfigs.CreateRequest{}
+						if err := encoding.UnmarshalRequest(&payload, r); err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						if err := payload.Validate(); err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						resp, err := service20190401.Dockerconfigs.Create(r, payload)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						encoding.Write(w, resp)
+						return
+					},
+				},
+				"dockerconfigs:Get": &router.Endpoint{
+					Version:  "2019-04-01",
+					Action:   "dockerconfigs:Get",
+					Resource: "dockerconfigs:{dockerConfigID}",
+					Path:     "/dockerconfigs/{dockerConfigID}",
+					Methods: []string{
+						"GET",
+						"OPTIONS",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						resp, err := service20190401.Dockerconfigs.Get(r)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						encoding.Write(w, resp)
+						return
+					},
+				},
+				"dockerconfigs:List": &router.Endpoint{
+					Version:  "2019-04-01",
+					Action:   "dockerconfigs:List",
+					Resource: "dockerconfigs:*",
+					Path:     "/dockerconfigs",
+					Methods: []string{
+						"GET",
+						"OPTIONS",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						resp, err := service20190401.Dockerconfigs.List(r)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						encoding.Write(w, resp)
+						return
+					},
+				},
+				"dockerconfigs:Delete": &router.Endpoint{
+					Version:  "2019-04-01",
+					Action:   "dockerconfigs:Delete",
+					Resource: "dockerconfigs:{dockerConfigID}",
+					Path:     "/dockerconfigs/{dockerConfigID}",
+					Methods: []string{
+						"DELETE",
+					},
+					Middlewares: []router.Middleware{
+						mProvider.Auth(),
+					},
+					Func: func(w http.ResponseWriter, r *http.Request) {
+						resp, err := service20190401.Dockerconfigs.Delete(r)
+						if err != nil {
+							encoding.Write(w, encoding.ResponseFromError(err))
+							return
+						}
+						encoding.Write(w, resp)
+						return
+					},
+				},
+			},
 			// Version: 2018-12-04
 			map[string]*router.Endpoint{
 				// Group: Account
@@ -76,7 +181,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -107,7 +211,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -139,7 +242,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -162,7 +264,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -185,7 +286,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -207,7 +307,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -231,7 +330,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -254,7 +352,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -278,7 +375,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -301,7 +397,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -324,7 +419,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -355,7 +449,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -386,7 +479,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -408,7 +500,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -443,7 +534,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -466,7 +556,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -489,7 +578,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -520,7 +608,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -542,7 +629,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -577,7 +663,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -600,7 +685,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -623,7 +707,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -645,7 +728,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -680,7 +762,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -703,7 +784,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -726,7 +806,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -757,7 +836,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -779,7 +857,6 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -802,12 +879,8 @@ func ManagementRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-						err = service20181102.Devices.SSHCreate(conn, r)
-						if err != nil {
-							conn.Close()
-							encoding.Write(w, encoding.ResponseFromError(err))
-							return
-						}
+						service20181102.Devices.SSHCreate(conn, r)
+						// Errors, communication and connection closure will be handled within the func. Nothing to do from here
 					},
 				},
 			},

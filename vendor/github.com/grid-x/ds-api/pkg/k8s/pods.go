@@ -97,13 +97,15 @@ func (p *PodsRepository) UpdateStatus(ctx context.Context, pod *corev1beta1.Devi
 }
 
 // Get gets the pod with the given name in the given namespace
-func (p *PodsRepository) Get(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error) {
+func (p *PodsRepository) Get(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
 	for dev := range p.cache[namespace] {
 		if pod, ok := p.cache[namespace][dev][name]; ok {
-			return pod, nil
+			if IsAllowed(pod.ObjectMeta, unfiltered) {
+				return pod, nil
+			}
 		}
 	}
 
@@ -121,7 +123,7 @@ func (p *PodsRepository) Delete(ctx context.Context, namespace, name string) err
 }
 
 // List returns the list of pods in the given namespace
-func (p *PodsRepository) List(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error) {
+func (p *PodsRepository) List(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
@@ -129,7 +131,9 @@ func (p *PodsRepository) List(ctx context.Context, namespace string) ([]*corev1b
 		var result []*corev1beta1.DevicePod
 		for _, pods := range devices {
 			for _, pod := range pods {
-				result = append(result, pod)
+				if IsAllowed(pod.ObjectMeta, unfiltered) {
+					result = append(result, pod)
+				}
 			}
 		}
 		return result, nil
@@ -140,7 +144,7 @@ func (p *PodsRepository) List(ctx context.Context, namespace string) ([]*corev1b
 
 // ListByDeviceID returns the pods scheduled for a specific device with ID
 // deviceID in the given namespace
-func (p *PodsRepository) ListByDeviceID(ctx context.Context, namespace, deviceID string) ([]*corev1beta1.DevicePod, error) {
+func (p *PodsRepository) ListByDeviceID(ctx context.Context, namespace, deviceID string, unfiltered bool) ([]*corev1beta1.DevicePod, error) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
@@ -148,7 +152,9 @@ func (p *PodsRepository) ListByDeviceID(ctx context.Context, namespace, deviceID
 		if _, ok := p.cache[namespace][deviceID]; ok {
 			var result []*corev1beta1.DevicePod
 			for _, pod := range p.cache[namespace][deviceID] {
-				result = append(result, pod)
+				if IsAllowed(pod.ObjectMeta, unfiltered) {
+					result = append(result, pod)
+				}
 			}
 			return result, nil
 		}

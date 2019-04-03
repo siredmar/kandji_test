@@ -2,6 +2,7 @@ package devices
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,10 +15,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/grid-x/ds-api/api"
 	"github.com/grid-x/ds-api/pkg/encoding"
+	"github.com/grid-x/ds-api/pkg/messaging"
+	natsTest "github.com/grid-x/ds-api/pkg/messaging/test"
 	"github.com/grid-x/ds-api/pkg/ssh"
 	testutils "github.com/grid-x/ds-api/pkg/testing"
 )
@@ -79,13 +83,28 @@ func (c *mockDeviceClient) Delete(ctx context.Context, accountID, id string) err
 }
 
 type podCreateF func(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error)
+type podGetF func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error)
 
 type mockPodClient struct {
 	create podCreateF
+	get    podGetF
 }
 
 func (m *mockPodClient) Create(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
 	return m.create(ctx, pod)
+}
+func (m *mockPodClient) Get(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
+	return m.get(ctx, namespace, name, unfiltered)
+}
+
+type getUUIDF func() uuid.UUID
+
+type mockUUIDClient struct {
+	get getUUIDF
+}
+
+func (m *mockUUIDClient) Get() uuid.UUID {
+	return m.get()
 }
 
 func mkString(s string) *string {
@@ -434,6 +453,8 @@ func Test_List(t *testing.T) {
 }
 
 func Test_Get(t *testing.T) {
+	now := metav1.Now().Rfc3339Copy()
+	nowOutput := metav1.Now().Rfc3339Copy().UTC().Format(time.RFC3339)
 
 	testcases := []struct {
 		req        *http.Request
@@ -460,7 +481,9 @@ func Test_Get(t *testing.T) {
 								Serialnumber:      "serial-123",
 								MaintenanceWindow: "Sun:04:00-Sun:06:00",
 							},
-							Status: corev1beta1.DeviceStatus{},
+							Status: corev1beta1.DeviceStatus{
+								LastHeartbeat: &now,
+							},
 						}, nil
 					},
 				},
@@ -481,7 +504,9 @@ func Test_Get(t *testing.T) {
 							Serialnumber:      "serial-123",
 							MaintenanceWindow: mkString("Sun:04:00-Sun:06:00"),
 						},
-						Status: DeviceStatus{},
+						Status: DeviceStatus{
+							LastHeartbeat: nowOutput,
+						},
 					},
 				},
 			},
@@ -855,6 +880,7 @@ func Test_Delete(t *testing.T) {
 }
 
 var upgrader = websocket.Upgrader{}
+var output = make(chan []byte)
 
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -867,14 +893,57 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			break
 		}
-		err = c.WriteMessage(mt, message)
+		var messageType ssh.MessageType
+		err = json.Unmarshal(message, &messageType)
 		if err != nil {
 			break
+		}
+
+		switch messageType.Type {
+		case ssh.CreateProcessMessageType:
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				break
+			}
+		case ssh.ExecuteCommandMessageType:
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				break
+			}
+		case ssh.ProcessCreatedMessageType:
+			output <- message
+		case ssh.ProcessOutputMessageType:
+			output <- message
+		case ssh.ProcessTerminatedMessageType:
+			output <- message
 		}
 	}
 }
 
-func TestSSHCreate(t *testing.T) {
+func TestSSHConcurrentConnections(t *testing.T) {
+	server := natsTest.RunDefaultServer()
+	defer server.Shutdown()
+
+	nc, err := natsTest.NewEConn()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer nc.Close()
+
+	natsRepo, err := messaging.NewNATSRepository(nc)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Some UUIDs to use within the test...
+	deviceUUID := "f61f78fb-c52e-4df9-8b1a-2219b2188bd4"
+	sessionUUID := "2a598bf6-7591-45f1-979f-1fd07f97704c"
+	sessionUUID2 := "13d49cd8-3c17-4f73-9ccc-c898a60f842b"
+
+	var podCreatedCounter = 0
+	var podGetCounter = 0
+	var uuidGetCounter = 0
+
 	injections := []interface{}{
 		&mockAuthProvider{
 			f: func(ctx context.Context) (string, error) {
@@ -883,9 +952,114 @@ func TestSSHCreate(t *testing.T) {
 		},
 		&mockPodClient{
 			create: func(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
-				if pod.Name != "894e3aa3-8beb-4e79-9785-3bd35fa671bc" {
-					t.Fatalf("Wrong pod name: %s", pod.Name)
+				if pod.Spec.Config.Network != "Host" {
+					t.Fatalf("No host network in podconfig %s", pod.Spec.Config.Network)
 				}
+				if pod.Spec.Config.Containers[0].Image != "ds-ssh-agent:latest" {
+					t.Fatalf("Wrong image name: %s", pod.Spec.Config.Containers[0].Image)
+				}
+
+				podCreatedCounter++
+				return pod, nil
+			},
+			get: func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
+				podGetCounter++
+				if podGetCounter == 1 {
+					return nil, fmt.Errorf("No pod found")
+				}
+				return &corev1beta1.DevicePod{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: namespace,
+						Name:      deviceUUID + "-ssh",
+					},
+					Spec:   corev1beta1.DevicePodSpec{},
+					Status: corev1beta1.DevicePodStatus{},
+				}, nil
+			},
+		},
+		&mockUUIDClient{
+			get: func() uuid.UUID {
+				uuidGetCounter++
+				if uuidGetCounter == 1 {
+					u, _ := uuid.Parse(sessionUUID)
+					return u
+				}
+				u, _ := uuid.Parse(sessionUUID2)
+				return u
+			},
+		},
+		natsRepo,
+	}
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/devices/%s", deviceUUID), nil)
+	req = mux.SetURLVars(req, map[string]string{"deviceID": deviceUUID})
+
+	// Create test server with the echo handler.
+	s := httptest.NewServer(http.HandlerFunc(echo))
+	defer s.Close()
+
+	// Convert http://127.0.0.1 to ws://127.0.0.1
+	u := "ws" + strings.TrimPrefix(s.URL, "http")
+
+	// Connect to the server
+	client1, _, err := websocket.DefaultDialer.Dial(u, nil)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer client1.Close()
+
+	// Connect to the server
+	client2, _, err := websocket.DefaultDialer.Dial(u, nil)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer client2.Close()
+
+	svc := NewService(injections...)
+	go svc.SSHCreate(client1, req)
+	go svc.SSHCreate(client2, req)
+
+	// Wait until everything is setup
+	time.Sleep(time.Second * 10)
+
+	if podGetCounter != 2 {
+		t.Fatalf("Wrong number of SSH pods checks... Wanted: %d, Got %d", 2, podGetCounter)
+	}
+	if podCreatedCounter != 1 {
+		t.Fatalf("Wrong number of SSH pods created... Wanted: %d, Got %d", 1, podCreatedCounter)
+	}
+
+	nc.Close()
+	server.Shutdown()
+}
+
+func TestSSHCreate(t *testing.T) {
+	server := natsTest.RunDefaultServer()
+	defer server.Shutdown()
+
+	nc, err := natsTest.NewEConn()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer nc.Close()
+
+	natsRepo, err := messaging.NewNATSRepository(nc)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Some UUIDs to use within the test...
+	deviceUUID := "f61f78fb-c52e-4df9-8b1a-2219b2188bd4"
+	sessionUUID := "2a598bf6-7591-45f1-979f-1fd07f97704c"
+
+	injections := []interface{}{
+		&mockAuthProvider{
+			f: func(ctx context.Context) (string, error) {
+				return "default", nil
+			},
+		},
+		&mockPodClient{
+			create: func(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error) {
 				if pod.Spec.Config.Network != "Host" {
 					t.Fatalf("No host network in podconfig %s", pod.Spec.Config.Network)
 				}
@@ -894,35 +1068,18 @@ func TestSSHCreate(t *testing.T) {
 				}
 				return pod, nil
 			},
+			get: func(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error) {
+				return nil, fmt.Errorf("No pod found")
+			},
 		},
+		&mockUUIDClient{
+			get: func() uuid.UUID {
+				u, _ := uuid.Parse(sessionUUID)
+				return u
+			},
+		},
+		natsRepo,
 	}
-
-	// Some UUIDs to use within the test...
-	deviceUUID := "f61f78fb-c52e-4df9-8b1a-2219b2188bd4"
-	connectionUUID := "894e3aa3-8beb-4e79-9785-3bd35fa671bc"                                                // Will also be the pod name, being injected via uuidConnectionFaker
-	sessionUUID := []string{"ff8a5861-824b-4246-9457-94f04d665d7b", "2a598bf6-7591-45f1-979f-1fd07f97704c"} // Being injected via uuidSessionFaker
-
-	uuidConnectionFaker := func() uuid.UUID {
-		u, _ := uuid.Parse(connectionUUID)
-		return u
-	}
-	sshConnectionRepo, err := ssh.NewConnectionRepository(nil, uuidConnectionFaker)
-	if err != nil {
-		t.Fatalf("cannot create ssh connections repo: %+v", err)
-	}
-
-	var sessionCounter = 0
-	uuidSessionFaker := func() uuid.UUID {
-		u, _ := uuid.Parse(sessionUUID[sessionCounter])
-		sessionCounter++
-		return u
-	}
-	sshSessionRepo, err := ssh.NewSessionRepository(nil, uuidSessionFaker)
-	if err != nil {
-		t.Fatalf("cannot create ssh connections repo: %+v", err)
-	}
-
-	injections = append(injections, []interface{}{sshConnectionRepo, sshSessionRepo}...)
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/devices/%s", deviceUUID), nil)
 	req = mux.SetURLVars(req, map[string]string{"deviceID": deviceUUID})
@@ -941,82 +1098,84 @@ func TestSSHCreate(t *testing.T) {
 	}
 	defer ws.Close()
 
-	// Create second test server with the echo handler.
-	deviceServer := httptest.NewServer(http.HandlerFunc(echo))
-	defer deviceServer.Close()
+	go func() {
+		time.Sleep(time.Second * 5)
 
-	// Convert http://127.0.0.1 to ws://127.0.0.1
-	u = "ws" + strings.TrimPrefix(deviceServer.URL, "http")
+		// Bring up the fake device after a few seconds by responding to the ping request
+		pingSub, err := natsRepo.ListenForClientPing(deviceUUID)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer pingSub.Unsubscribe()
 
-	// Connect to the server
-	deviceServerWS, _, err := websocket.DefaultDialer.Dial(u, nil)
+		// Wait for client regs
+		sessionC := make(chan string)
+		defer close(sessionC)
+		sessionSub, err := natsRepo.ListenForClientReg(deviceUUID, sessionC)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer sessionSub.Unsubscribe()
+
+		sessionReg := <-sessionC
+		splitted := strings.Split(sessionReg, "$")
+		sessionID := splitted[0]
+
+		if sessionID != sessionUUID {
+			t.Fatalf("%v", err)
+		}
+	}()
+
+	// Subscribe to messages from client
+	sshDeviceC := make(chan []byte)
+	defer close(sshDeviceC)
+	msgSub, err := natsRepo.SubscribeToSSHMessagesForDevice(deviceUUID, sshDeviceC)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	defer deviceServerWS.Close()
-
-	go func() {
-		//Bring up the fake device after a few seconds
-		time.Sleep(time.Second * 3)
-		sshConnectionRepo.Add(&ssh.Connection{PodName: connectionUUID, Conn: deviceServerWS}, deviceUUID)
-	}()
-
-	go func() {
-		//Bring up the first fake session
-		time.Sleep(time.Second * 5)
-		session := ssh.Session{
-			ID:         sessionUUID[0],
-			DeviceConn: deviceServerWS,
-		}
-		sshSessionRepo.Add(&session)
-
-		//Bring up the second fake session
-		time.Sleep(time.Second * 5)
-		session = ssh.Session{
-			ID:         sessionUUID[1],
-			DeviceConn: deviceServerWS,
-		}
-		sshSessionRepo.Add(&session)
-	}()
+	defer msgSub.Unsubscribe()
 
 	svc := NewService(injections...)
-	err = svc.SSHCreate(ws, req)
+	go svc.SSHCreate(ws, req)
 
-	var createProcess ssh.CreateProcessMessage
-	err = deviceServerWS.ReadJSON(&createProcess)
+	// Wait until everything is setup (ping / request)
+	time.Sleep(time.Second * 10)
+
+	// Send some messages on the client channel and test if they get picked up by the client
+	msg := ssh.NewProcessCreatedMessage(sessionUUID)
+	marshalled, err := json.Marshal(msg)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	if string(createProcess.ID) != sessionUUID[0] {
-		t.Fatalf("bad session id" + string(createProcess.ID))
-	}
-	if string(createProcess.Command) != "/dbclient -y root@127.0.0.1" {
-		t.Fatalf("bad message" + string(createProcess.Command))
-	}
 
-	if err = ws.WriteJSON(ssh.NewExecuteCommandMessage(sessionUUID[0], []byte("whoami"))); err != nil {
-		t.Fatal("write", err)
-	}
+	natsRepo.PublishSSHMessageToClient(deviceUUID, sessionUUID, marshalled)
 
-	var executeCommand ssh.ExecuteCommandMessage
-	err = deviceServerWS.ReadJSON(&executeCommand)
+	// Message should come up at the echo server
+	var processCreated ssh.ProcessCreatedMessage
+	err = json.Unmarshal(<-output, &processCreated)
+
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	if string(executeCommand.Command) != "whoami" {
-		t.Fatalf("bad message" + string(executeCommand.Command))
+	if string(processCreated.ID) != sessionUUID {
+		t.Fatalf("bad session id" + string(processCreated.ID))
 	}
 
-	err = svc.SSHCreate(ws, req)
-
-	err = deviceServerWS.ReadJSON(&createProcess)
+	// Issue a command on the client side and test if it gets into the NATS subject for the device
+	execute := ssh.NewExecuteCommandMessage(sessionUUID, []byte("whoami"))
+	err = ws.WriteJSON(execute)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	if string(createProcess.ID) != sessionUUID[1] {
-		t.Fatalf("bad session id" + string(createProcess.ID))
+
+	// Correct command should get picked up by NATS subscriber for device
+	var executeNew ssh.ExecuteCommandMessage
+	err = json.Unmarshal(<-sshDeviceC, &executeNew)
+
+	if !cmp.Equal(execute, executeNew) {
+		t.Errorf("unexpected response: %s", cmp.Diff(execute, executeNew))
 	}
-	if string(createProcess.Command) != "/dbclient -y root@127.0.0.1" {
-		t.Fatalf("bad message" + string(createProcess.Command))
-	}
+
+	nc.Close()
+	server.Shutdown()
 }

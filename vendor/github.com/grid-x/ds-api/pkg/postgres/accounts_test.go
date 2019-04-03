@@ -11,7 +11,6 @@ import (
 
 	"github.com/grid-x/ds-api/pkg/model"
 	"github.com/grid-x/ds-api/pkg/postgres"
-	testutils "github.com/grid-x/ds-api/pkg/testing"
 )
 
 func TestAccountsList(t *testing.T) {
@@ -178,8 +177,11 @@ func TestAccountsList(t *testing.T) {
 				t.Errorf("accounts list length = %d, want %d", len(items), len(tc.want))
 			}
 
-			if !cmp.Equal(tc.want, items, testutils.CmpWithIgnore("UUID")) {
-				t.Errorf("accounts list: %s ", cmp.Diff(tc.want, items, testutils.CmpWithIgnore("UUID")))
+			opts := cmpopts.IgnoreFields(model.Account{},
+				"UUID", "CreatedAt", "UpdatedAt",
+			)
+			if !cmp.Equal(tc.want, items, opts) {
+				t.Errorf("accounts list: %s ", cmp.Diff(tc.want, items, opts))
 			}
 		})
 	}
@@ -234,6 +236,10 @@ func TestAccountsCreate(t *testing.T) {
 			)
 			if !cmp.Equal(got, want, opts) {
 				t.Errorf("create = %+v, want %+v", got, want)
+			}
+
+			if got.CreatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("Accounts creation time should be set with now()")
 			}
 		})
 	}
@@ -297,12 +303,15 @@ func TestAccountsUpdate(t *testing.T) {
 			if !cmp.Equal(got, tc.want, opts) {
 				t.Errorf("create = %+v, want %+v", got, tc.want)
 			}
+
+			if got.UpdatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("Accounts update time should be set with now()")
+			}
 		})
 	}
 }
 
 func TestAccountsDelete(t *testing.T) {
-
 	testCases := []struct {
 		name        string
 		accountName string
@@ -344,8 +353,11 @@ func TestAccountsDelete(t *testing.T) {
 				t.Error(err)
 			}
 
-			_, err = repo.GetByID(ctx, item.UUID)
-			if err != sql.ErrNoRows {
+			got, err := repo.GetByIDWithSoftDeleted(ctx, item.UUID)
+			if tc.hard && err != sql.ErrNoRows {
+				t.Error(err)
+			}
+			if !tc.hard && err == sql.ErrNoRows {
 				t.Error(err)
 			}
 
@@ -356,6 +368,10 @@ func TestAccountsDelete(t *testing.T) {
 
 			if len(items) != len(wantItems) {
 				t.Errorf("Delete = %d, want %d", len(items), len(wantItems))
+			}
+
+			if !tc.hard && (got.DeletedAt == nil || got.DeletedAt.String() == "0001-01-01 00:00:00 +0000 UTC") {
+				t.Errorf("Accounts soft deletion time should be set with now()")
 			}
 		})
 	}

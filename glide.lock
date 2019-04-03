@@ -1,5 +1,5 @@
-hash: a93dcdb6ce10073af276455190e36ef24b672eefdd8c6ccb21d6b87a37bef0cb
-updated: 2019-03-29T09:57:17.953463+01:00
+hash: 7b06f4c395552df1a95ed01f7633672697acfa66adba6cf5d6704ecb80b0b3e1
+updated: 2019-04-02T22:08:15.257353+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -30,7 +30,7 @@ imports:
 - name: github.com/gorilla/websocket
   version: 0ec3d1bd7fe50c503d6df98ee649d81f4857c564
 - name: github.com/grid-x/ds-api
-  version: a36e815b790f0824ad2d755ac734891b408db628
+  version: ac4a1c5835c99c194e59c8a4a5bfc36b779c61c5
   subpackages:
   - api
   - api/management/2018-11-02/devices
@@ -38,14 +38,17 @@ imports:
   - api/management/2018-11-28/deployments
   - api/management/2018-12-04/maintenance
   - api/management/2018-12-04/pods
+  - api/management/2019-04-01/dockerconfigs
   - pkg/encoding
   - pkg/errors
+  - pkg/messaging
   - pkg/model
   - pkg/ssh
 - name: github.com/grid-x/ds-k8s
-  version: f401d160782bbd4b01573dea455280c9881ff0d3
+  version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
   subpackages:
   - pkg/apis/apps/v1beta1
+  - pkg/apis/config/v1beta1
   - pkg/apis/core/v1beta1
   - pkg/apis/maintenance/v1beta1
 - name: github.com/inconshreveable/mousetrap
@@ -60,6 +63,15 @@ imports:
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
+- name: github.com/nats-io/go-nats
+  version: c528ff487513eec69347b5598eb35d91f0a63820
+  subpackages:
+  - encoders/builtin
+  - util
+- name: github.com/nats-io/nkeys
+  version: 1546a3320a8f195a5b5c84aef8309377c2e411d5
+- name: github.com/nats-io/nuid
+  version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
@@ -75,8 +87,10 @@ imports:
 - name: github.com/tj/go-spin
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: golang.org/x/crypto
-  version: 81e90905daefcd6fd217b62423c0908922eadb30
+  version: a5d413f7728c81fb97d96a2b722368945f651e78
   subpackages:
+  - ed25519
+  - ed25519/internal/edwards25519
   - ssh/terminal
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f

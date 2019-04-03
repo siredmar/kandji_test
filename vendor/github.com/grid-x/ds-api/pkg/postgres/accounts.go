@@ -35,20 +35,17 @@ const (
 	accountsSelectByID = accountsSelectBase +
 		` WHERE uuid = $1 AND ` + accountsNotDeletedFilter
 
+	accountsSelectByIDWithSoftDeleted = accountsSelectBase +
+		` WHERE uuid = $1`
+
 	accountsInsert = `
 	INSERT INTO accounts
 	(
 		uuid,
-		created_at,
-		updated_at,
-		deleted_at,
 		account_name
 	)
 	VALUES (
 		:uuid,
-		:created_at,
-		:updated_at,
-		:deleted_at,
 		:account_name
 	)
 	`
@@ -57,14 +54,14 @@ const (
 	UPDATE accounts
 	SET
 		account_name = :account_name,
-		updated_at = DEFAULT
+		updated_at = now()
 	WHERE uuid = :uuid
 	`
 
 	accountsSoftDelete = `
 	UPDATE accounts
 	SET
-		updated_at = DEFAULT,
+		updated_at = now(),
 		deleted_at = now()
 	WHERE uuid = $1
 	`
@@ -83,8 +80,9 @@ var (
 
 // AccountsRepository manages the access to the underlying postgres database.
 type AccountsRepository struct {
-	lists   map[string]*sqlx.Stmt
-	getByID *sqlx.Stmt
+	lists                  map[string]*sqlx.Stmt
+	getByID                *sqlx.Stmt
+	getByIDWithSoftDeleted *sqlx.Stmt
 
 	create *sqlx.NamedStmt
 	update *sqlx.NamedStmt
@@ -115,6 +113,11 @@ func NewAccountsRepository(db *sqlx.DB) (*AccountsRepository, error) {
 		return nil, err
 	}
 
+	getByIDWithSoftDeleted, err := db.PreparexContext(ctx, accountsSelectByIDWithSoftDeleted)
+	if err != nil {
+		return nil, err
+	}
+
 	create, err := db.PrepareNamedContext(ctx, accountsInsert)
 	if err != nil {
 		return nil, err
@@ -134,12 +137,13 @@ func NewAccountsRepository(db *sqlx.DB) (*AccountsRepository, error) {
 	}
 
 	return &AccountsRepository{
-		lists:      lists,
-		getByID:    getByID,
-		create:     create,
-		update:     update,
-		softDelete: softDelete,
-		hardDelete: hardDelete,
+		lists:                  lists,
+		getByID:                getByID,
+		getByIDWithSoftDeleted: getByIDWithSoftDeleted,
+		create:                 create,
+		update:                 update,
+		softDelete:             softDelete,
+		hardDelete:             hardDelete,
 	}, nil
 }
 
@@ -152,6 +156,9 @@ func (r *AccountsRepository) Close() error {
 		}
 	}
 	if err := r.getByID.Close(); err != nil {
+		final = err
+	}
+	if err := r.getByIDWithSoftDeleted.Close(); err != nil {
 		final = err
 	}
 	if err := r.create.Close(); err != nil {
@@ -203,6 +210,19 @@ func (r *AccountsRepository) GetByID(ctx context.Context, id string) (*model.Acc
 	return &entity, nil
 }
 
+// GetByIDWithSoftDeleted fetches a accounts by its id also including accounts which got soft deleted.
+func (r *AccountsRepository) GetByIDWithSoftDeleted(ctx context.Context, id string) (*model.Account, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no model.Account uuid provided")
+	}
+	var entity model.Account
+	err := r.getByIDWithSoftDeleted.GetContext(ctx, &entity, id)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
 // Create creates a new accounts
 func (r *AccountsRepository) Create(ctx context.Context, e *model.Account) (*model.Account, error) {
 
@@ -216,7 +236,13 @@ func (r *AccountsRepository) Create(ctx context.Context, e *model.Account) (*mod
 	if err != nil {
 		return nil, err
 	}
-	return e, nil
+
+	var entity model.Account
+	err = r.getByID.GetContext(ctx, &entity, e.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
 }
 
 // Update updates the accounts

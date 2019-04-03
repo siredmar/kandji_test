@@ -39,18 +39,21 @@ const (
 	{{ $ident }}SelectByID = {{ $ident }}SelectBase +
 		` WHERE uuid = $1 AND ` + {{ $ident }}NotDeletedFilter
 
+	{{ $ident }}SelectByIDWithSoftDeleted = {{ $ident }}SelectBase +
+		` WHERE uuid = $1`
+
 	{{ $ident }}Insert = `
 	INSERT INTO {{ $table }}
 	(
 		{{- $c := counter -}}
-		{{- range $index, $attribute := .Attributes }}{{ if call $c }},{{end}}
-		{{ dbColumn .Name }}
+		{{- range $index, $attribute := .Attributes }}{{ if not ( contains .Type "time.Time" ) }}{{ if call $c }},{{end}}
+		{{ dbColumn .Name }}{{ end }}
 		{{- end }}
 	)
 	VALUES (
 		{{- $c := counter -}}
-		{{- range $index, $attribute := .Attributes }}{{ if call $c }},{{end}}
-		{{ printf ":%s" (dbColumn .Name) }}
+		{{- range $index, $attribute := .Attributes }}{{ if not ( contains .Type "time.Time" ) }}{{ if call $c }},{{end}}
+		{{ printf ":%s" (dbColumn .Name) }}{{ end }}
 		{{- end }}
 	)
 	`
@@ -58,14 +61,14 @@ const (
 	{{ $ident }}Update = `
 	UPDATE {{ $table }}
 	SET
-		updated_at = DEFAULT
+		updated_at = now()
 	WHERE uuid = :uuid
 	`
 
 	{{ $ident }}SoftDelete = `
 	UPDATE {{ $table }}
 	SET
-		updated_at = DEFAULT,
+		updated_at = now(),
 		deleted_at = now()
 	WHERE uuid = $1
 	`
@@ -84,8 +87,9 @@ var (
 
 // {{ $repo }} manages the access to the underlying postgres database.
 type {{ $repo }} struct {
-	lists   map[string]*sqlx.Stmt
-	getByID *sqlx.Stmt
+	lists                  map[string] *sqlx.Stmt
+	getByID                *sqlx.Stmt
+	getByIDWithSoftDeleted *sqlx.Stmt
 
 	create *sqlx.NamedStmt
 	update *sqlx.NamedStmt
@@ -117,6 +121,11 @@ func New{{ $repo }}(db *sqlx.DB) (*{{ $repo }}, error) {
 		return nil, err
 	}
 
+	getByIDWithSoftDeleted, err := db.PreparexContext(ctx, accountsSelectByIDWithSoftDeleted)
+	if err != nil {
+		return nil, err
+	}
+
 	create, err := db.PrepareNamedContext(ctx, {{ $ident }}Insert)
 	if err != nil {
 		return nil, err
@@ -136,12 +145,13 @@ func New{{ $repo }}(db *sqlx.DB) (*{{ $repo }}, error) {
 	}
 
 	return &{{$repo}}{
-		lists:      lists,
-		getByID:    getByID,
-		create:     create,
-		update:     update,
-		softDelete: softDelete,
-		hardDelete: hardDelete,
+		lists:                  lists,
+		getByID:                getByID,
+		getByIDWithSoftDeleted: getByIDWithSoftDeleted,
+		create:                 create,
+		update:                 update,
+		softDelete:             softDelete,
+		hardDelete:             hardDelete,
 	}, nil
 }
 
@@ -154,6 +164,9 @@ func (r *{{ $repo }}) Close() error {
 		}
 	}
 	if err := r.getByID.Close(); err != nil {
+		final = err
+	}
+	if err := r.getByIDWithSoftDeleted.Close(); err != nil {
 		final = err
 	}
 	if err := r.create.Close(); err != nil {
@@ -206,13 +219,26 @@ func (r *{{ $repo }}) GetByID(ctx context.Context, id string) (*{{ $entity }}, e
 	return &entity, nil
 }
 
+// GetByIDWithSoftDeleted fetches a accounts by its id also including accounts which got soft deleted.
+func (r *{{ $repo }}) GetByIDWithSoftDeleted(ctx context.Context, id string) (*{{ $entity }}, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no {{ $entity }} uuid provided")
+	}
+	var entity {{ $entity }}
+	err := r.getByIDWithSoftDeleted.GetContext(ctx, &entity, id)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
 // Create creates a new {{ $ident }}
 func (r *{{ $repo }}) Create(ctx context.Context, e *{{ $entity }}) (*{{ $entity }}, error) {
 
 	if e == nil {
 		return nil, fmt.Errorf("couldn't create nil object")
 	}
-        // TODO: add validation
+	// TODO: add validation
 
 	// New ID for the {{ $ident }}
 	e.UUID = uuid.New().String()
@@ -220,7 +246,12 @@ func (r *{{ $repo }}) Create(ctx context.Context, e *{{ $entity }}) (*{{ $entity
 	if err != nil {
 		return nil, err
 	}
-	return e, nil
+	var entity {{ $entity }}
+	err = r.getByID.GetContext(ctx, &entity, e.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
 }
 
 // Update updates the {{ $ident }}

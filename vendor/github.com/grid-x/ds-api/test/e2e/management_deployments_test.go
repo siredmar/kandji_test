@@ -9,7 +9,7 @@ import (
 func TestDeploymentsEndpoint(t *testing.T) {
 	tt := []Testcase{{
 		name:            "Get all deployments",
-		endpoint:        DeploymentsEndpoint,
+		endpoint:        ManagementDeploymentsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -21,7 +21,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create application",
-		endpoint: ApplicationsEndpoint,
+		endpoint: ManagementApplicationsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -39,7 +39,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create deployment",
-		endpoint: DeploymentsEndpoint,
+		endpoint: ManagementDeploymentsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -92,7 +92,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create deployment",
-		endpoint: DeploymentsEndpoint,
+		endpoint: ManagementDeploymentsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -292,7 +292,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 	tt = []Testcase{{
 		// Changing image to testbar-u28391389
 		name:     "Patch single deployment",
-		endpoint: fmt.Sprintf("%s/%s", DeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -353,7 +353,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 	// Cleanup
 	tt = []Testcase{{
 		name:             "Delete deployment",
-		endpoint:         fmt.Sprintf("%s/%s", DeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDeploymentsEndpoint, ExtractedDeploymentUUIDs[0]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -362,7 +362,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete deployment",
-		endpoint:         fmt.Sprintf("%s/%s", DeploymentsEndpoint, ExtractedDeploymentUUIDs[1]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDeploymentsEndpoint, ExtractedDeploymentUUIDs[1]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -371,7 +371,7 @@ func TestDeploymentsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete application",
-		endpoint:         fmt.Sprintf("%s/%s", ApplicationsEndpoint, "testapp"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "testapp"),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,

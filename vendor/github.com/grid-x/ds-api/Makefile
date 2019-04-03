@@ -1,11 +1,12 @@
 GO_FILES := $(shell find . -type f -name "*.go")
 GO_BUILD := CGO_ENABLED=0 go build -ldflags="-w -s"
-GO_TOOLS := gridx/golang-tools:1.11
+GO_TOOLS := gridx/golang-dev:1.12.latest-linux-amd64
 GO_PROJECT := github.com/grid-x/ds-api
 DOCKER_RUN := docker run -it ${DOCKER_LINK} --rm -v $$PWD:/go/src/${GO_PROJECT} -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
 DOCKER_TEST_NET := test_${BUILDKITE_BUILD_NUMBER}_${BUILDKITE_COMMIT}
 POSTGRES_TEST_NAME := postgres_test_${BUILDKITE_BUILD_NUMBER}_${BUILDKITE_COMMIT}
+NATS_TEST_NAME := nats_test_${BUILDKITE_BUILD_NUMBER}_${BUILDKITE_COMMIT}
 
 BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
 IMAGE_TAG := ${BRANCH}.${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT}
@@ -39,7 +40,7 @@ test_postgres: pkg/postgres/*.go pkg/postgres/migrations/migrations_gen.go
 
 .PHONY: test
 test: cmd/ds-dev/templates_gen.go  test_postgres cmd/server/device_routes_gen.go cmd/server/management_routes_gen.go
-	go test -v $(shell go list ./... | grep -v "postgres" | grep -v "e2e")
+	go test -p=1 -v $(shell go list ./... | grep -v "postgres" | grep -v "e2e")
 
 .PHONY: lint
 lint:
@@ -91,10 +92,12 @@ ci_docker_push:
 test_e2e:
 	minikube start
 	docker run -d -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=testdb --name testdb postgres:10
+	docker run -d -p 4222:4222 --name testnats nats:1.4.1
 	eval $(minikube docker-env)
 	export AWS_PROFILE=ds-prod
 	eval $(aws ecr get-login --no-include-email)
-	docker pull 485611583707.dkr.ecr.eu-central-1.amazonaws.com/gridx/ds-k8s:master.96-55f04b2eaa1f1b7397c55863402cedbce76eb5e3
+	docker pull 485611583707.dkr.ecr.eu-central-1.amazonaws.com/gridx/ds-k8s:master.118-e008aaef615327966b9775260ade744c69afe9ff
 	make bin/server
-	kubectl apply -f test/e2e/k8s-manager
-	bin/server --k8s.config ~/.kube/config --auth.rsa-key=./test-certs/jwt.pem --auth.dev-rsa-key=./test-certs/jwt-key.pem --postgres.url="postgres://postgres:pw@192.168.168.55:5432/testdb?sslmode=disable" --postgres.migrate
+	kubectl apply -f test/e2e/k8s-manager/01-crds/
+	kubectl apply -f test/e2e/k8s-manager/02-manager/
+	bin/server --k8s.config ~/.kube/config --auth.rsa-key=./test-certs/jwt.pem --auth.dev-rsa-key=./test-certs/jwt-key.pem --postgres.url="postgres://postgres:pw@192.168.168.55:5432/testdb?sslmode=disable" --postgres.migrate --nats.url="http://192.168.168.55:4222"

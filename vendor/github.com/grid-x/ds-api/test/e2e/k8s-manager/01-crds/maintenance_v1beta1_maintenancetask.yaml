@@ -11,6 +11,8 @@ spec:
     kind: MaintenanceTask
     plural: maintenancetasks
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:

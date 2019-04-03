@@ -13,10 +13,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grid-x/ds-k8s/pkg/client/clientset/versioned"
 	appsinformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/apps/v1beta1"
+	configinformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/config/v1beta1"
 	coreinformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/core/v1beta1"
 	maininformers "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/maintenance/v1beta1"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	nats "github.com/nats-io/go-nats"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -24,11 +26,13 @@ import (
 
 	"github.com/grid-x/ds-api/pkg/auth/device"
 	"github.com/grid-x/ds-api/pkg/auth/management"
+	"github.com/grid-x/ds-api/pkg/identifier"
 	"github.com/grid-x/ds-api/pkg/k8s"
+	"github.com/grid-x/ds-api/pkg/messaging"
 	"github.com/grid-x/ds-api/pkg/postgres"
 	"github.com/grid-x/ds-api/pkg/responselog"
 	"github.com/grid-x/ds-api/pkg/router"
-	"github.com/grid-x/ds-api/pkg/ssh"
+	"github.com/grid-x/ds-api/pkg/timeout"
 )
 
 var (
@@ -69,6 +73,9 @@ func main() {
 		databaseMaxOpenConns = flag.Int("postgres.max-open-conns", 10, "Max open connections for postgres")
 		databaseMigration    = flag.Bool("postgres.migrate", false, "Whether to perform migration")
 
+		// NATS
+		natsURL = flag.String("nats.url", "nats://nats:4222", "NATS address")
+
 		// K8s integration
 		k8sConfig       = flag.String("k8s.config", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 		k8sAPI          = flag.String("k8s.api", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
@@ -104,6 +111,16 @@ func main() {
 		logger.Fatalf("Error building gridx clientset: %+v", err)
 	}
 
+	nc, err := nats.Connect(*natsURL)
+	if err != nil {
+		logger.Fatalf("failed to connect to nats: %+v", err)
+	}
+	natsConn, err := nats.NewEncodedConn(nc, nats.DEFAULT_ENCODER)
+	if err != nil {
+		logger.Fatalf("failed to connect to nats: %+v", err)
+	}
+	defer natsConn.Close()
+
 	db, err := sqlx.Open("postgres", *databaseURL)
 	if err != nil {
 		logger.Fatalf("postgres: %+v", err)
@@ -127,6 +144,7 @@ func main() {
 	deployInformer := appsinformers.NewDeviceDeploymentInformer(k8sClient, "", *k8sResyncPeriod, cache.Indexers{})
 	appsInformer := appsinformers.NewDeviceApplicationInformer(k8sClient, "", *k8sResyncPeriod, cache.Indexers{})
 	mainInformer := maininformers.NewMaintenanceTaskInformer(k8sClient, "", *k8sResyncPeriod, cache.Indexers{})
+	dockerConfigInformer := configinformers.NewDockerConfigInformer(k8sClient, "", *k8sResyncPeriod, cache.Indexers{})
 
 	// core/v1beta1
 	devRepo, err := k8s.NewDevicesRepository(logger, k8sClient.CoreV1beta1(), deviceInformer, *k8sResyncPeriod)
@@ -151,30 +169,42 @@ func main() {
 	if err != nil {
 		logger.Fatalf("cannot create maintenance tasks repo: %+v", err)
 	}
+	// config/v1beta1
+	dockerConfigRepo, err := k8s.NewDockerConfigRepository(logger, k8sClient.ConfigV1beta1(), dockerConfigInformer, *k8sResyncPeriod)
+	if err != nil {
+		logger.Fatalf("cannot create deployments repo: %+v", err)
+	}
 
 	go deviceInformer.Run(ctx.Done())
 	go podInformer.Run(ctx.Done())
 	go appsInformer.Run(ctx.Done())
 	go deployInformer.Run(ctx.Done())
 	go mainInformer.Run(ctx.Done())
+	go dockerConfigInformer.Run(ctx.Done())
 
 	for !deviceInformer.HasSynced() ||
 		!podInformer.HasSynced() ||
 		!appsInformer.HasSynced() ||
 		!deployInformer.HasSynced() ||
-		!mainInformer.HasSynced() {
+		!mainInformer.HasSynced() ||
+		!dockerConfigInformer.HasSynced() {
 		logger.Infof("waiting for informers to sync")
 		time.Sleep(time.Second)
 	}
 
-	sshConnectionRepo, err := ssh.NewConnectionRepository(logger, uuid.New)
+	uuidRepo, err := identifier.NewUUIDRepository(uuid.New)
 	if err != nil {
-		logger.Fatalf("cannot create ssh connections repo: %+v", err)
+		logger.Fatalf("cannot create uuid repo: %+v", err)
 	}
 
-	sshSessionRepo, err := ssh.NewSessionRepository(logger, uuid.New)
+	natsRepo, err := messaging.NewNATSRepository(natsConn)
 	if err != nil {
-		logger.Fatalf("cannot create ssh connections repo: %+v", err)
+		logger.Fatalf("cannot create nats repo: %+v", err)
+	}
+
+	timeoutRepo, err := timeout.NewDurationRepository()
+	if err != nil {
+		logger.Fatalf("cannot create timeout repo: %+v", err)
 	}
 
 	accRepo, err := postgres.NewAccountsRepository(db)
@@ -189,7 +219,7 @@ func main() {
 	jwtGen := device.NewJWTGenerator(*authJWTIssuer, devRSAKey)
 	devAp := device.NewAuthProvider(logger, jwtGen, devRepo)
 
-	injections := []interface{}{devRepo, podsRepo, appsRepo, deploysRepo, mainRepo, sshConnectionRepo, sshSessionRepo}
+	injections := []interface{}{devRepo, podsRepo, appsRepo, deploysRepo, mainRepo, dockerConfigRepo, uuidRepo, natsRepo, timeoutRepo}
 	mgmtInjections := append(injections, mgmtAp)
 	devInjections := append(injections, []interface{}{devAp, jwtGen}...)
 

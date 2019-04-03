@@ -9,7 +9,7 @@ import (
 func TestMaintenanceEndpoint(t *testing.T) {
 	tt := []Testcase{{
 		name:            "Get all maintenances",
-		endpoint:        MaintenanceEndpoint,
+		endpoint:        ManagementMaintenanceEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -21,7 +21,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create maintenance task",
-		endpoint: MaintenanceEndpoint,
+		endpoint: ManagementMaintenanceEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -58,7 +58,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create maintenance task",
-		endpoint: MaintenanceEndpoint,
+		endpoint: ManagementMaintenanceEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -108,7 +108,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 
 	tt = []Testcase{{
 		name:             "Get non existing task",
-		endpoint:         fmt.Sprintf("%s/%s", MaintenanceEndpoint, "Nothingthere"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementMaintenanceEndpoint, "Nothingthere"),
 		version:          APIVersion,
 		method:           http.MethodGet,
 		body:             nil,
@@ -118,7 +118,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 		expectedResponse: nil,
 	}, {
 		name:            "Get single task",
-		endpoint:        fmt.Sprintf("%s/%s", MaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[0]),
+		endpoint:        fmt.Sprintf("%s/%s", ManagementMaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[0]),
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -146,7 +146,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 			}`, ExtractedMaintenanceTaskUUIDs[0])),
 	}, {
 		name:            "Get all maintenances",
-		endpoint:        MaintenanceEndpoint,
+		endpoint:        ManagementMaintenanceEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -204,7 +204,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 	// Cleanup
 	tt = []Testcase{{
 		name:             "Delete task",
-		endpoint:         fmt.Sprintf("%s/%s", MaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[0]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementMaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[0]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -213,7 +213,7 @@ func TestMaintenanceEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete task",
-		endpoint:         fmt.Sprintf("%s/%s", MaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[1]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementMaintenanceEndpoint, ExtractedMaintenanceTaskUUIDs[1]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,

@@ -14,11 +14,14 @@ import (
 )
 
 const (
-	DevicesEndpoint      = "api/management/devices"
-	PodsEndpoint         = "api/management/pods"
-	DeploymentsEndpoint  = "api/management/deployments"
-	ApplicationsEndpoint = "api/management/applications"
-	MaintenanceEndpoint  = "api/management/maintenance"
+	DeviceAuthEndpoint             = "api/device/auth"
+	DeviceDevicesEndpoint          = "api/device"
+	DevicePodsEndpoint             = "api/device/pods"
+	ManagementDevicesEndpoint      = "api/management/devices"
+	ManagementPodsEndpoint         = "api/management/pods"
+	ManagementDeploymentsEndpoint  = "api/management/deployments"
+	ManagementApplicationsEndpoint = "api/management/applications"
+	ManagementMaintenanceEndpoint  = "api/management/maintenance"
 )
 
 var (
@@ -28,6 +31,7 @@ var (
 	ExtractedDeviceUUIDs          []string
 	ExtractedDeploymentUUIDs      []string
 	ExtractedMaintenanceTaskUUIDs []string
+	ExtractedPodUUIDs             []string
 )
 
 type Testcase struct {
@@ -36,6 +40,7 @@ type Testcase struct {
 	version          string
 	method           string
 	body             []byte
+	token            string
 	expectedCode     int
 	wanntErr         bool
 	compareResponse  bool
@@ -71,12 +76,12 @@ func areEqualJSON(s1, s2 []byte) (bool, string, error) {
 	if result == "" {
 		return true, "", nil
 	}
-	var acceptUUID = regexp.MustCompile(`(?m:^root(\[\".*\"\]\[.*\])?\[\"metadata\"\]\[\"id\"\]:(\r\n|\r|\n)\t\-: "(.*)"(\r\n|\r|\n)\t\+: "@UUID"(\r\n|\r|\n)$)`)
+	var acceptUUID = regexp.MustCompile(`(?m:^root(\[\".*\"\]\[.*\])?\[\"(metadata|spec)\"\]\[\"(id|accountID)\"\]:(\r\n|\r|\n)\t\-: "(.*)"(\r\n|\r|\n)\t\+: "@UUID"(\r\n|\r|\n)$)`)
 	var uuid string
 	uuidmatch := acceptUUID.FindStringSubmatch(result)
 
-	if len(uuidmatch) == 6 && uuidmatch[3] != "" {
-		uuid = uuidmatch[3]
+	if len(uuidmatch) == 8 && uuidmatch[5] != "" {
+		uuid = uuidmatch[5]
 	}
 	res := acceptUUID.ReplaceAllString(result, "")
 
@@ -88,7 +93,7 @@ func areEqualJSON(s1, s2 []byte) (bool, string, error) {
 }
 
 func runTestcase(tc Testcase, t *testing.T) string {
-	status, resp, err := APIClient.Request(tc.endpoint, tc.version, tc.method, tc.body)
+	status, resp, err := APIClient.Request(tc.endpoint, tc.version, tc.method, tc.body, map[string]string{}, tc.token)
 	if err != nil && !tc.wanntErr {
 		t.Fatalf("unexpected error %v", err)
 	}

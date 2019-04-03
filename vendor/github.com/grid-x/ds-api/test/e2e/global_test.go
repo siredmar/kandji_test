@@ -8,7 +8,7 @@ import (
 func TestVersion(t *testing.T) {
 	tt := []Testcase{{
 		name:             "Without version",
-		endpoint:         DevicesEndpoint,
+		endpoint:         ManagementDevicesEndpoint,
 		version:          "",
 		method:           http.MethodGet,
 		body:             nil,
@@ -18,7 +18,7 @@ func TestVersion(t *testing.T) {
 		expectedResponse: nil,
 	}, {
 		name:             "Wrong version",
-		endpoint:         DevicesEndpoint,
+		endpoint:         ManagementDevicesEndpoint,
 		version:          "vnd.gridx.ai.2018-12-04",
 		method:           http.MethodGet,
 		body:             nil,
@@ -28,7 +28,7 @@ func TestVersion(t *testing.T) {
 		expectedResponse: nil,
 	}, {
 		name:             "Correct version",
-		endpoint:         DevicesEndpoint,
+		endpoint:         ManagementDevicesEndpoint,
 		version:          APIVersion,
 		method:           http.MethodGet,
 		body:             nil,

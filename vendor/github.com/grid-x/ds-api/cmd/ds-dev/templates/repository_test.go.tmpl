@@ -90,8 +90,11 @@ func Test{{ title $ident }}List(t *testing.T) {
 				t.Errorf("{{ tolower $ident }} list length = %d, want %d", len(items), len(tc.want))
 			}
 
-			if !cmp.Equal(tc.want, items) {
-				t.Errorf("{{ tolower $ident }} list = %+v, want %+v", items, tc.want)
+			opts := cmpopts.IgnoreFields({{ $entity }}{},
+				"UUID", "CreatedAt", "UpdatedAt",
+			)
+			if !cmp.Equal(tc.want, items, opts) {
+				t.Errorf("{{ tolower $ident }} list: %s ", cmp.Diff(tc.want, items, opts))
 			}
 		})
 	}
@@ -139,6 +142,9 @@ func Test{{ title $ident }}Create(t *testing.T) {
 			)
 			if !cmp.Equal(got, want, opts) {
 				t.Errorf("create = %+v, want %+v", got, want)
+			}
+			if got.CreatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("{{ tolower $ident }} creation time should be set with now()")
 			}
 		})
 	}
@@ -191,12 +197,14 @@ func Test{{ title $ident }}Update(t *testing.T) {
 			if !cmp.Equal(got, tc.want, opts) {
 				t.Errorf("create = %+v, want %+v", got, tc.want)
 			}
+			if got.UpdatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("{{ tolower $ident }} update time should be set with now()")
+			}
 		})
 	}
 }
 
 func Test{{ title $ident }}Delete(t *testing.T) {
-
 	_, repo := create{{ title $ident }}(0, t)
 	defer repo.Close()
 
@@ -234,8 +242,11 @@ func Test{{ title $ident }}Delete(t *testing.T) {
 				t.Error(err)
 			}
 
-			_, err = repo.GetByID(ctx, item.UUID)
-			if err != sql.ErrNoRows {
+			got, err := repo.GetByIDWithSoftDeleted(ctx, item.UUID)
+			if tc.hard && err != sql.ErrNoRows {
+				t.Error(err)
+			}
+			if !tc.hard && err == sql.ErrNoRows {
 				t.Error(err)
 			}
 
@@ -246,6 +257,9 @@ func Test{{ title $ident }}Delete(t *testing.T) {
 
 			if len(items) != len(wantItems) {
 				t.Errorf("Delete = %d, want %d", len(items), len(wantItems))
+			}
+			if !tc.hard && (got.DeletedAt == nil || got.DeletedAt.String() == "0001-01-01 00:00:00 +0000 UTC") {
+				t.Errorf("{{ tolower $ident }} soft deletion time should be set with now()")
 			}
 		})
 	}

@@ -11,6 +11,7 @@ import (
 
 	v1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
 	batchv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/batch/v1beta1"
+	configv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/config/v1beta1"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	maintenancev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/maintenance/v1beta1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -52,6 +53,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		// Group=batch.gridx.ai, Version=v1beta1
 	case batchv1beta1.SchemeGroupVersion.WithResource("devicejobs"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Batch().V1beta1().DeviceJobs().Informer()}, nil
+
+		// Group=config.gridx.ai, Version=v1beta1
+	case configv1beta1.SchemeGroupVersion.WithResource("dockerconfigs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Config().V1beta1().DockerConfigs().Informer()}, nil
 
 		// Group=core.gridx.ai, Version=v1beta1
 	case corev1beta1.SchemeGroupVersion.WithResource("devices"):

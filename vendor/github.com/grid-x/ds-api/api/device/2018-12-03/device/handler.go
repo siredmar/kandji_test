@@ -6,17 +6,22 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
+	nats "github.com/nats-io/go-nats"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/grid-x/ds-api/api"
 	"github.com/grid-x/ds-api/pkg/encoding"
 	"github.com/grid-x/ds-api/pkg/errors"
+	"github.com/grid-x/ds-api/pkg/messaging"
 	"github.com/grid-x/ds-api/pkg/model"
 	"github.com/grid-x/ds-api/pkg/ssh"
+	"github.com/grid-x/ds-api/types"
+	v20181203 "github.com/grid-x/ds-api/types/device/2018-12-03/device"
 )
 
 const (
@@ -40,52 +45,65 @@ type deviceClient interface {
 }
 
 type podClient interface {
+	Create(ctx context.Context, pod *corev1beta1.DevicePod) (*corev1beta1.DevicePod, error)
 	Delete(ctx context.Context, namespace, name string) error
 }
 
-type connectionRepository interface {
-	// Add stores the websocket connection of an device and the corresponding pod name once the device connects to the API
-	Add(connection *ssh.Connection, deviceID string)
-	// Remove deletes a websocket connection of an device from the storage once all corresponding sessions are closed
-	Remove(deviceID string)
-	// Get retrieves the stored websocket connection of an device. Returns nil if not yet connected
-	Get(deviceID string) (conn *ssh.Connection)
+type natsRepository interface {
+	// Subscribes to ssh messages coming from 1-n clients to route them to the connected device
+	SubscribeToSSHMessagesForDevice(deviceID string, sshC chan []byte) (*nats.Subscription, error)
+	// Publish messages coming from the connected device to a certain client
+	PublishSSHMessageToClient(deviceID string, sessionID string, b []byte) error
+	// Listens for ping requests from 1-n clients and respond with a Pong
+	ListenForClientPing(deviceID string) (*nats.Subscription, error)
+	// Listens for registration requests from 1-n clients to create a new session
+	ListenForClientReg(deviceID string, sessionC chan string) (*nats.Subscription, error)
 }
 
-type sessionRepository interface {
-	// Add stores the ssh session bridging a device connection with a client connection
-	Add(session *ssh.Session)
-	// Remove deletes a session once the communication between device and client is closed
-	Remove(sessionID string)
-	// Get retrieves the stored ssh session. Returns nil if not yet setup
-	Get(sessionID string) *ssh.Session
-	// GetByConnection retrieves an array of stored ssh sessions by using a connection to eg. clean the sessions once a connection breaks up.
-	// Returns an empty array if not session found
-	GetByConnection(conn *websocket.Conn) []*ssh.Session
+type uuidRepository interface {
+	Get() uuid.UUID
+}
+
+type durationRepository interface {
+	GetSSHInactiveTimeout() time.Duration
+	GetSSHInactiveTicker() time.Duration
 }
 
 // Service implements the HTTP endpoints for the device API
 type Service struct {
-	logger        log.FieldLogger
-	deviceClient  deviceClient
-	podClient     podClient
-	ap            authProvider
-	sshConnection connectionRepository
-	sshSession    sessionRepository
+	logger       log.FieldLogger
+	deviceClient deviceClient
+	podClient    podClient
+	ap           authProvider
+	nats         natsRepository
+	uuid         uuidRepository
+	timeout      durationRepository
 }
 
-// Device as exported by this API version
-type Device struct {
-	Metadata api.Metadata             `json:"metadata"`
-	Spec     corev1beta1.DeviceSpec   `json:"spec"`
-	Status   corev1beta1.DeviceStatus `json:"status"`
+func deviceFromK8s(dev *corev1beta1.Device) *v20181203.Device {
+	return &v20181203.Device{
+		Metadata: types.ConvertFromK8sMetadata(dev.ObjectMeta, true),
+		Spec: v20181203.DeviceSpec{
+			AccountID:         dev.Spec.AccountID,
+			Serialnumber:      dev.Spec.Serialnumber,
+			MenderDeviceID:    dev.Spec.MenderDeviceID,
+			PublicKey:         dev.Spec.PublicKey,
+			MACAddress:        dev.Spec.MACAddress,
+			MaintenanceWindow: dev.Spec.MaintenanceWindow,
+		},
+		Status: statusFromK8s(dev.Status),
+	}
 }
 
-func deviceFromK8s(dev *corev1beta1.Device) *Device {
-	return &Device{
-		Metadata: api.ConvertFromK8sMetadata(dev.ObjectMeta, true),
-		Spec:     dev.Spec,
-		Status:   dev.Status,
+func statusFromK8s(s corev1beta1.DeviceStatus) v20181203.DeviceStatus {
+	return v20181203.DeviceStatus{
+		LastHeartbeat: s.LastHeartbeat,
+	}
+}
+
+func statusToK8s(s v20181203.DeviceStatus) corev1beta1.DeviceStatus {
+	return corev1beta1.DeviceStatus{
+		LastHeartbeat: s.LastHeartbeat,
 	}
 }
 
@@ -103,10 +121,12 @@ func NewService(injections ...interface{}) *Service {
 			s.podClient = i
 		case authProvider:
 			s.ap = i
-		case connectionRepository:
-			s.sshConnection = i
-		case sessionRepository:
-			s.sshSession = i
+		case natsRepository:
+			s.nats = i
+		case uuidRepository:
+			s.uuid = i
+		case durationRepository:
+			s.timeout = i
 		}
 	}
 
@@ -121,9 +141,7 @@ func NewService(injections ...interface{}) *Service {
 }
 
 // GetResponse represents the response type
-type GetResponse struct {
-	*Device
-}
+type GetResponse v20181203.GetResponse
 
 // WriteText creates a text representation from GetResponse
 func (resp *GetResponse) WriteText(w io.Writer) error {
@@ -180,9 +198,7 @@ func (s *Service) Get(req *http.Request) (*encoding.Response, error) {
 }
 
 // UpdateRequest represents the request type
-type UpdateRequest struct {
-	Status *corev1beta1.DeviceStatus `json:"status"`
-}
+type UpdateRequest v20181203.UpdateRequest
 
 // Validate validates an UpdateRequest
 func (req *UpdateRequest) Validate() error {
@@ -202,9 +218,7 @@ func (req *UpdateRequest) ReadJSON(r io.Reader) error {
 }
 
 // UpdateResponse represents the response type
-type UpdateResponse struct {
-	*Device
-}
+type UpdateResponse v20181203.UpdateResponse
 
 // WriteText creates a text representation from UpdateResponse
 func (resp *UpdateResponse) WriteText(w io.Writer) error {
@@ -259,7 +273,7 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 			fmt.Errorf("Device with ID %s does not exist", deviceID),
 		)
 	}
-	dev.Status = *payload.Status
+	dev.Status = statusToK8s(*payload.Status)
 
 	ctx, cancel = context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()
@@ -288,70 +302,126 @@ func (s *Service) Update(req *http.Request, payload UpdateRequest) (*encoding.Re
 // @protocol: WS
 // @endpoint: GET /ssh
 // @middlewares: auth
-func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) error {
+func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
+	// Make sure we close client socket connection properly
+	defer conn.Close()
+
+	// Inialize a new WebsocketWriter to avoid concurrent writes
+	socketWriter := messaging.NewWebsocketWriter(conn)
+
 	accountID, err := s.ap.AccountIDFromContext(req.Context())
 	if err != nil {
-		return errors.E(
-			errors.Internal,
-			fmt.Errorf("Cannot get accountID: %+v", err),
-		)
+		handleWebsocketError(socketWriter, "Cannot get accountID", "Internal server error", err, s.logger)
+		return
 	}
 
 	deviceID, err := s.ap.DeviceIDFromContext(req.Context())
 	if err != nil {
-		return errors.E(
-			errors.Internal,
-			fmt.Errorf("Cannot get deviceID: %+v", err),
-		)
+		handleWebsocketError(socketWriter, "Cannot get deviceID", "Internal server error", err, s.logger)
+		return
 	}
 
-	s.logger.Infof("Device '%s' connected.", deviceID)
+	logger := s.logger.WithField("deviceID", deviceID)
+	logger.Infof("Device connected.")
 
-	sshConnection := &ssh.Connection{Conn: conn}
-	s.sshConnection.Add(sshConnection, deviceID)
+	// Check every 60sec if the pod should be delete due to inactivity
+	inactiveTick := time.NewTicker(s.timeout.GetSSHInactiveTicker())
+	defer inactiveTick.Stop()
+
+	lastCommand := time.Now()
+
+	var expired bool
+	go func() {
+		for {
+			select {
+			case <-inactiveTick.C:
+				t := time.Now()
+				l := &lastCommand
+
+				expiresAt := l.Add(s.timeout.GetSSHInactiveTimeout())
+
+				if t.After(expiresAt) {
+					// SSH connection expired. Close the socket in order to get the regular cleanup process kicked in
+					conn.Close()
+					expired = true
+				}
+			}
+			if expired {
+				break
+			}
+		}
+	}()
+
+	// Start listener for device pings
+	pingSub, err := s.nats.ListenForClientPing(deviceID)
+	if err != nil {
+		handleWebsocketError(socketWriter, "Could not subscribe to client pings", "Internal server error", err, logger)
+		return
+	}
+	defer pingSub.Unsubscribe()
+
+	// Start Listener for new sessions
+	sessionC := make(chan string)
+	defer close(sessionC)
+	sessionSub, err := s.nats.ListenForClientReg(deviceID, sessionC)
+	if err != nil {
+		handleWebsocketError(socketWriter, "Could not subscribe to client regs", "Internal server error", err, logger)
+		return
+	}
+	defer sessionSub.Unsubscribe()
 
 	go func() {
-		defer conn.Close()
-
 		for {
-			var messageType ssh.MessageType
+			// Received new client reg (Format sessionID$initCommand)
+			sessionReg, ok := <-sessionC
+			if !ok {
+				break
+			}
+
+			splitted := strings.Split(sessionReg, "$")
+			sessionID := splitted[0]
+			initCommand := splitted[1]
+
+			logger.WithField("sessionID", sessionID).Infof("Starting new session")
+			init := ssh.NewCreateProcessMessage(sessionID, []byte(initCommand))
+
+			err := socketWriter.WriteJSON(init)
+			if err != nil {
+				logger.WithField("sessionID", sessionID).Errorf("Device could not init a new session! Reason: %s", err)
+			}
+		}
+	}()
+
+	// Subscribe to messages from clients on the device channel
+	sshClientC := make(chan []byte)
+
+	sub, err := s.nats.SubscribeToSSHMessagesForDevice(deviceID, sshClientC)
+	if err != nil {
+		close(sshClientC)
+		handleWebsocketError(socketWriter, "Could not subscribe to ssh messages", "Internal server error", err, logger)
+		return
+	}
+	defer sub.Unsubscribe()
+
+	// Forward messages from device to client
+	go func() {
+		for {
+			var messageType ssh.RAWMessage
 
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				s.logger.Infof("Device '%s' disconnected unexpected. Clearing sessions and removing pod! Reason: %s", deviceID, err)
+				logger.Infof("Device disconnected")
 
-				ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
-				defer cancel()
-
-				err := s.podClient.Delete(ctx, model.AccountNamespaceName(accountID), sshConnection.PodName)
-				if err != nil {
-					s.logger.Errorf("Could not delete ssh pod %s", sshConnection.PodName)
-					return
-				}
-				s.logger.Infof("SSH Pod %s deleted", sshConnection.PodName)
-
-				sessions := s.sshSession.GetByConnection(conn)
-				for _, ses := range sessions {
-					s.logger.Infof("Session '%s' was lost due to agent failure", ses.ID)
-					a := ssh.ProcessTerminatedMessage{
-						ID:     ses.ID,
-						Reason: []byte("Agent failure"),
-					}
-					if ses.ClientConn != nil {
-						if err = ses.ClientConn.WriteJSON(a); err != nil {
-							return
-						}
-					}
-					s.sshSession.Remove(ses.ID)
-				}
-				s.sshConnection.Remove(deviceID)
-				return
+				// Todo...
+				// + Inform clients
+				// + Store Session to DB
+				break
 			}
 
 			err = json.Unmarshal(message, &messageType)
 			if err != nil {
-				s.logger.Infof("Unmarshal error on the agentChannel: %s", err)
-				return
+				handleWebsocketError(socketWriter, "Unmarshal error on the deviceChannel", "Internal server error", err, logger)
+				break
 			}
 
 			switch messageType.Type {
@@ -359,82 +429,105 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) error
 				var output ssh.ProcessOutputMessage
 				err = json.Unmarshal(message, &output)
 				if err != nil {
-					s.logger.Errorf("Not able to unmarshall process output: %s", err)
+					handleWebsocketError(socketWriter, "Not able to unmarshall process output", "Internal server error", err, logger)
+					break
 				}
-
-				session := s.sshSession.Get(output.ID)
-				if session == nil {
-					s.logger.Warnf("That's bad session was lost %s", output.ID)
-				} else {
-					if session.ClientConn == nil {
-						// client comnnection is not yet bound, wait for it
-						tick := time.NewTicker(50 * time.Millisecond)
-						defer tick.Stop()
-
-						timer := time.NewTimer(5 * time.Second)
-						defer timer.Stop()
-
-						var sessionBound bool
-						for {
-							select {
-							case <-timer.C:
-								s.logger.Errorf("Could not get client connection")
-								return
-							case <-tick.C:
-								if session.ClientConn != nil {
-									sessionBound = true
-								}
-							}
-							if sessionBound {
-								break
-							}
-						}
-					}
-					// Forward the message to the client
-					if err = session.ClientConn.WriteJSON(output); err != nil {
-						return
-					}
+				// Forward to the client on session channel
+				if err = s.nats.PublishSSHMessageToClient(deviceID, output.ID, message); err != nil {
+					handleWebsocketError(socketWriter, "Not able to publish to ssh messages", "Internal server error", err, logger.WithField("sessionID", output.ID))
+					break
 				}
-
 			case ssh.ProcessCreatedMessageType:
 				var created ssh.ProcessCreatedMessage
 				err = json.Unmarshal(message, &created)
 				if err != nil {
-					s.logger.Errorf("Not able to unmarshall process created: %s", err)
+					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+					break
 				}
 
-				s.logger.Infof("Device '%s' created a new ssh session", deviceID)
-				session := ssh.Session{
-					ID:         created.ID,
-					DeviceConn: conn,
+				// Forward to the client on session channel
+				if err = s.nats.PublishSSHMessageToClient(deviceID, created.ID, message); err != nil {
+					handleWebsocketError(socketWriter, "Not able to publish to ssh messages", "Internal server error", err, logger.WithField("sessionID", created.ID))
+					break
 				}
-				s.sshSession.Add(&session)
-
 			case ssh.ProcessTerminatedMessageType:
 				var terminated ssh.ProcessTerminatedMessage
 				err = json.Unmarshal(message, &terminated)
 				if err != nil {
-					s.logger.Errorf("Not able to unmarshall process created: %s", err)
+					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+					break
 				}
-
-				ses := s.sshSession.Get(terminated.ID)
-				if ses == nil {
-					s.logger.Warnf("That's bad session was lost %s", terminated.ID)
-				} else {
-					if ses.ClientConn != nil {
-						// Forward the message to the client
-						if err = ses.ClientConn.WriteJSON(terminated); err != nil {
-							return
-						}
-					}
-					s.sshSession.Remove(ses.ID)
+				// Forward to the client on session channel
+				if err = s.nats.PublishSSHMessageToClient(deviceID, terminated.ID, message); err != nil {
+					handleWebsocketError(socketWriter, "Not able to subscribe to ssh messages", "Internal server error", err, logger.WithField("sessionID", terminated.ID))
+					break
 				}
-
 			default:
-				s.logger.Infof("Received Agent an unknown message type: %v", message)
+				logger.Infof("Received an unknown message type on deviceChannel: %v", string(message))
 			}
+		}
+
+		// At this point we stopt communicating with the device. Close sshClientC in order to exit the client loop and return
+		close(sshClientC)
+
+		// Remove Pod
+		logger.Infof("Deleting SSH pod")
+		ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
+		defer cancel()
+
+		err := s.podClient.Delete(ctx, model.AccountNamespaceName(accountID), deviceID+"-ssh")
+		if err != nil {
+			logger.Errorf("Pod '%s' could not be deleted after being inactive: %+v", deviceID+"-ssh", err)
 		}
 	}()
 
-	return nil
+	var messageType ssh.RAWMessage
+	for {
+		msg, ok := <-sshClientC
+		if !ok {
+			break
+		}
+
+		err = json.Unmarshal(msg, &messageType)
+		if err != nil {
+			handleWebsocketError(socketWriter, "Unmarshal error on the deviceChannel", "Internal server error", err, logger)
+			return
+		}
+
+		lastCommand = time.Now()
+
+		// Determine kind of message
+		switch messageType.Type {
+		case ssh.ExecuteCommandMessageType:
+			var execute ssh.ExecuteCommandMessage
+			err = json.Unmarshal(msg, &execute)
+			if err != nil {
+				handleWebsocketError(socketWriter, "Not able to unmarshall execute command", "Internal server error", err, logger)
+				return
+			}
+
+			// Message could be correctly unmarshaled, forward it to the client
+			if err = socketWriter.WriteJSON(execute); err != nil {
+				handleWebsocketError(socketWriter, "Not able to forward message to the device", "Internal server error", err, logger)
+				return
+			}
+		default:
+			logger.Infof("Received an unknown message type on clientChannel: %v", string(msg))
+		}
+	}
+
+	logger.Infof("SSH connection for device closed")
+	return
+}
+
+func handleWebsocketError(writer *messaging.WebsocketWriter, internalMsg, externalMsg string, err error, logger log.FieldLogger) {
+	internal := fmt.Sprintf("%s: %+v", internalMsg, err)
+	external := externalMsg
+
+	// Add internal log
+	logger.Errorf(internal)
+
+	// Forward error to the device
+	e := ssh.NewErrorMessage(external)
+	writer.WriteJSON(e)
 }

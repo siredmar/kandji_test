@@ -138,6 +138,17 @@ func Test_Pods_Get(t *testing.T) {
 		Spec:   corev1beta1.DevicePodSpec{},
 		Status: corev1beta1.DevicePodStatus{},
 	}
+	wantInternal := &corev1beta1.DevicePod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fooInt",
+			Namespace: "barInt",
+			Annotations: map[string]string{
+				"core.gridx.ai/ds-system": "true",
+			},
+		},
+		Spec:   corev1beta1.DevicePodSpec{},
+		Status: corev1beta1.DevicePodStatus{},
+	}
 	informer := &mockPodInformer{}
 	repo, err := NewPodsRepository(
 		log.New(),
@@ -150,15 +161,33 @@ func Test_Pods_Get(t *testing.T) {
 	}
 
 	informer.add(want)
+	informer.add(wantInternal)
 
+	// Test plain get
 	ctx := context.TODO()
-	got, err := repo.Get(ctx, "bar", "foo")
+	got, err := repo.Get(ctx, "bar", "foo", true)
 	if err != nil {
 		t.Fatalf("cannot get pod: %+v", err)
 	}
-
 	if !cmp.Equal(want, got) {
 		t.Errorf("unexpected pod: %s", cmp.Diff(want, got))
+	}
+
+	// Test get with internal element and unfiltered set to true
+	ctx = context.TODO()
+	got, err = repo.Get(ctx, "barInt", "fooInt", true)
+	if err != nil {
+		t.Fatalf("cannot get pod: %+v", err)
+	}
+	if !cmp.Equal(wantInternal, got) {
+		t.Errorf("unexpected pod: %s", cmp.Diff(wantInternal, got))
+	}
+
+	// Test get with internal element and unfiltered set to false
+	ctx = context.TODO()
+	got, err = repo.Get(ctx, "barInt", "fooInt", false)
+	if err == nil {
+		t.Fatalf("should not be able to get pod: %+v", err)
 	}
 }
 
@@ -177,7 +206,7 @@ func (n PodByName) Less(i, j int) bool {
 }
 
 func Test_Pods_List(t *testing.T) {
-	want := make([]*corev1beta1.DevicePod, 10)
+	want := make([]*corev1beta1.DevicePod, 11)
 
 	for i := 0; i < 10; i++ {
 		want[i] = &corev1beta1.DevicePod{
@@ -189,6 +218,20 @@ func Test_Pods_List(t *testing.T) {
 			Status: corev1beta1.DevicePodStatus{},
 		}
 	}
+
+	// Internal one
+	want[10] = &corev1beta1.DevicePod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo10",
+			Namespace: "bar",
+			Annotations: map[string]string{
+				"core.gridx.ai/ds-system": "true",
+			},
+		},
+		Spec:   corev1beta1.DevicePodSpec{},
+		Status: corev1beta1.DevicePodStatus{},
+	}
+
 	informer := &mockPodInformer{}
 	repo, err := NewPodsRepository(
 		log.New(),
@@ -205,7 +248,7 @@ func Test_Pods_List(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	got, err := repo.List(ctx, "bar")
+	got, err := repo.List(ctx, "bar", true)
 	if err != nil {
 		t.Fatalf("cannot get pods: %+v", err)
 	}
@@ -214,10 +257,22 @@ func Test_Pods_List(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Errorf("unexpected pods: %s", cmp.Diff(want, got))
 	}
+
+	// Test list with internal element and unfiltered set to false
+	ctx = context.TODO()
+	got, err = repo.List(ctx, "bar", false)
+	if err != nil {
+		t.Fatalf("cannot get pods: %+v", err)
+	}
+
+	sort.Sort(PodByName(got))
+	if !cmp.Equal(want[:len(want)-1], got) {
+		t.Errorf("unexpected pods: %s", cmp.Diff(want[:len(want)-1], got))
+	}
 }
 
 func Test_Pods_ListByDeviceID(t *testing.T) {
-	want := make([]*corev1beta1.DevicePod, 10)
+	want := make([]*corev1beta1.DevicePod, 11)
 
 	for i := 0; i < 10; i++ {
 		want[i] = &corev1beta1.DevicePod{
@@ -230,6 +285,20 @@ func Test_Pods_ListByDeviceID(t *testing.T) {
 			},
 			Status: corev1beta1.DevicePodStatus{},
 		}
+	}
+	// Internal one
+	want[10] = &corev1beta1.DevicePod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo10",
+			Namespace: "bar",
+			Annotations: map[string]string{
+				"core.gridx.ai/ds-system": "true",
+			},
+		},
+		Spec: corev1beta1.DevicePodSpec{
+			DeviceID: "qaz",
+		},
+		Status: corev1beta1.DevicePodStatus{},
 	}
 	informer := &mockPodInformer{}
 	repo, err := NewPodsRepository(
@@ -259,7 +328,7 @@ func Test_Pods_ListByDeviceID(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	got, err := repo.ListByDeviceID(ctx, "bar", "qaz")
+	got, err := repo.ListByDeviceID(ctx, "bar", "qaz", true)
 	if err != nil {
 		t.Fatalf("cannot get pods: %+v", err)
 	}
@@ -267,5 +336,16 @@ func Test_Pods_ListByDeviceID(t *testing.T) {
 	sort.Sort(PodByName(got))
 	if !cmp.Equal(want, got) {
 		t.Errorf("unexpected pods: %s", cmp.Diff(want, got))
+	}
+
+	ctx = context.TODO()
+	got, err = repo.ListByDeviceID(ctx, "bar", "qaz", false)
+	if err != nil {
+		t.Fatalf("cannot get pods: %+v", err)
+	}
+
+	sort.Sort(PodByName(got))
+	if !cmp.Equal(want[:len(want)-1], got) {
+		t.Errorf("unexpected pods: %s", cmp.Diff(want[:len(want)-1], got))
 	}
 }

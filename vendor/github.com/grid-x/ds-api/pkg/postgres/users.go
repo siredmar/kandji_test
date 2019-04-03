@@ -39,6 +39,9 @@ const (
 	usersSelectByID = usersSelectBase +
 		` WHERE uuid = $1 AND ` + usersNotDeletedFilter
 
+	usersSelectByIDWithSoftDeleted = usersSelectBase +
+		` WHERE uuid = $1`
+
 	usersSelectByEmail = usersSelectBase +
 		` WHERE email = $1 AND ` + usersNotDeletedFilter
 
@@ -49,9 +52,6 @@ const (
 	INSERT INTO users
 	(
 		uuid,
-		created_at,
-		updated_at,
-		deleted_at,
 		account_id,
 		first_name,
 		last_name,
@@ -60,9 +60,6 @@ const (
 	)
 	VALUES (
 		:uuid,
-		:created_at,
-		:updated_at,
-		:deleted_at,
 		:account_id,
 		:first_name,
 		:last_name,
@@ -76,14 +73,14 @@ const (
 	SET
 		first_name = :first_name,
 		last_name = :last_name,
-		updated_at = DEFAULT
+		updated_at = now()
 	WHERE uuid = :uuid
 	`
 
 	usersSoftDelete = `
 	UPDATE users
 	SET
-		updated_at = DEFAULT,
+		updated_at = now(),
 		deleted_at = now()
 	WHERE uuid = $1
 	`
@@ -102,10 +99,11 @@ var (
 
 // UsersRepository manages the access to the underlying postgres database.
 type UsersRepository struct {
-	lists        map[string]*sqlx.Stmt
-	getByID      *sqlx.Stmt
-	getByEmail   *sqlx.Stmt
-	getByAuth0ID *sqlx.Stmt
+	lists                  map[string]*sqlx.Stmt
+	getByID                *sqlx.Stmt
+	getByIDWithSoftDeleted *sqlx.Stmt
+	getByEmail             *sqlx.Stmt
+	getByAuth0ID           *sqlx.Stmt
 
 	create *sqlx.NamedStmt
 	update *sqlx.NamedStmt
@@ -131,6 +129,10 @@ func NewUsersRepository(db *sqlx.DB) (*UsersRepository, error) {
 		}
 	}
 
+	getByIDWithSoftDeleted, err := db.PreparexContext(ctx, usersSelectByIDWithSoftDeleted)
+	if err != nil {
+		return nil, err
+	}
 	getByID, err := db.PreparexContext(ctx, usersSelectByID)
 	if err != nil {
 		return nil, err
@@ -163,14 +165,15 @@ func NewUsersRepository(db *sqlx.DB) (*UsersRepository, error) {
 	}
 
 	return &UsersRepository{
-		lists:        lists,
-		getByID:      getByID,
-		getByEmail:   getByEmail,
-		getByAuth0ID: getByAuth0ID,
-		create:       create,
-		update:       update,
-		softDelete:   softDelete,
-		hardDelete:   hardDelete,
+		lists:                  lists,
+		getByID:                getByID,
+		getByIDWithSoftDeleted: getByIDWithSoftDeleted,
+		getByEmail:             getByEmail,
+		getByAuth0ID:           getByAuth0ID,
+		create:                 create,
+		update:                 update,
+		softDelete:             softDelete,
+		hardDelete:             hardDelete,
 	}, nil
 }
 
@@ -183,6 +186,9 @@ func (r *UsersRepository) Close() error {
 		}
 	}
 	if err := r.getByID.Close(); err != nil {
+		final = err
+	}
+	if err := r.getByIDWithSoftDeleted.Close(); err != nil {
 		final = err
 	}
 	if err := r.getByEmail.Close(); err != nil {
@@ -240,6 +246,19 @@ func (r *UsersRepository) GetByID(ctx context.Context, id string) (*model.User, 
 	return &entity, nil
 }
 
+// GetByIDWithSoftDeleted fetches a accounts by its id also including accounts which got soft deleted.
+func (r *UsersRepository) GetByIDWithSoftDeleted(ctx context.Context, id string) (*model.User, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no model.User uuid provided")
+	}
+	var entity model.User
+	err := r.getByIDWithSoftDeleted.GetContext(ctx, &entity, id)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
+}
+
 // GetByEmail fetches a users by its email.
 func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	if email == "" {
@@ -285,7 +304,13 @@ func (r *UsersRepository) Create(ctx context.Context, e *model.User) (*model.Use
 	if err != nil {
 		return nil, err
 	}
-	return e, nil
+
+	var entity model.User
+	err = r.getByID.GetContext(ctx, &entity, e.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return &entity, nil
 }
 
 // Update updates the users

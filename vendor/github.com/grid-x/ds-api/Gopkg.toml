@@ -28,7 +28,7 @@
 
 [[constraint]]
   name = "github.com/grid-x/ds-k8s"
-  revision = "453cac38e3d2898d5285e9ece330a05085dcef0f"
+  revision = "409350262e183eb00cab704e5ba47c0dac2b6e6d"
 
 [[constraint]]
   name = "github.com/google/go-cmp"
@@ -65,3 +65,15 @@
 [[constraint]]
   name = "github.com/gorilla/websocket"
   version = "1.4.0"
+
+[[constraint]]
+  name = "github.com/dgrijalva/jwt-go"
+  version = "v3.2.0"
+
+[[constraint]]
+  name = "github.com/nats-io/go-nats"
+  version = "v1.7.2"
+
+[[constraint]]
+  name = "github.com/nats-io/gnatsd"
+  version = "v1.4.1"

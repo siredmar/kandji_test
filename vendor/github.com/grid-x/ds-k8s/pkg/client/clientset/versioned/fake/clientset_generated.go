@@ -12,6 +12,8 @@ import (
 	fakeappsv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/apps/v1beta1/fake"
 	batchv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/batch/v1beta1"
 	fakebatchv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/batch/v1beta1/fake"
+	configv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/config/v1beta1"
+	fakeconfigv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/config/v1beta1/fake"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/core/v1beta1"
 	fakecorev1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/core/v1beta1/fake"
 	maintenancev1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/maintenance/v1beta1"
@@ -83,6 +85,16 @@ func (c *Clientset) BatchV1beta1() batchv1beta1.BatchV1beta1Interface {
 // Batch retrieves the BatchV1beta1Client
 func (c *Clientset) Batch() batchv1beta1.BatchV1beta1Interface {
 	return &fakebatchv1beta1.FakeBatchV1beta1{Fake: &c.Fake}
+}
+
+// ConfigV1beta1 retrieves the ConfigV1beta1Client
+func (c *Clientset) ConfigV1beta1() configv1beta1.ConfigV1beta1Interface {
+	return &fakeconfigv1beta1.FakeConfigV1beta1{Fake: &c.Fake}
+}
+
+// Config retrieves the ConfigV1beta1Client
+func (c *Clientset) Config() configv1beta1.ConfigV1beta1Interface {
+	return &fakeconfigv1beta1.FakeConfigV1beta1{Fake: &c.Fake}
 }
 
 // CoreV1beta1 retrieves the CoreV1beta1Client

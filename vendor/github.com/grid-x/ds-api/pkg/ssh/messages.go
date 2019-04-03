@@ -11,10 +11,16 @@ const (
 	ProcessOutputMessageType
 	ProcessCreatedMessageType
 	ProcessTerminatedMessageType
+	ErrorMessageType
 )
 
 // GetUUID represents a function returning a v4 uuid
 type GetUUID func() uuid.UUID
+
+// RAWMessage represents a ssh message
+type RAWMessage struct {
+	MessageType
+}
 
 // MessageType represents a ssh message
 type MessageType struct {
@@ -100,6 +106,21 @@ func NewProcessTerminatedMessage(i string, r []byte) ProcessTerminatedMessage {
 	msg.Type = ProcessTerminatedMessageType
 	msg.ID = i
 	msg.Reason = r
+
+	return msg
+}
+
+// ErrorMessage represents a ssh message of type error
+type ErrorMessage struct {
+	MessageType
+	ErrorMsg string `json:"error"`
+}
+
+// NewErrorMessage creates a new ssh message of type error
+func NewErrorMessage(m string) ErrorMessage {
+	msg := ErrorMessage{}
+	msg.Type = ErrorMessageType
+	msg.ErrorMsg = m
 
 	return msg
 }

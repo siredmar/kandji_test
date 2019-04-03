@@ -63,7 +63,6 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -94,7 +93,6 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -117,12 +115,8 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-						err = service20181203.Device.SSHAgentConnect(conn, r)
-						if err != nil {
-							conn.Close()
-							encoding.Write(w, encoding.ResponseFromError(err))
-							return
-						}
+						service20181203.Device.SSHAgentConnect(conn, r)
+						// Errors, communication and connection closure will be handled within the func. Nothing to do from here
 					},
 				},
 				// Group: Pods
@@ -144,7 +138,6 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -175,7 +168,6 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
@@ -208,7 +200,6 @@ func DeviceRoutes(
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-
 						encoding.Write(w, resp)
 						return
 					},
