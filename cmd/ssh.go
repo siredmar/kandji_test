@@ -62,7 +62,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 				return err
 			}
 
-			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand, true)
+			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand)
 			if err != nil {
 				return err
 			}
@@ -81,7 +81,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 	}
 }
 
-func createSession(client *client.APIClient, deviceID, waitText, initCommand string, handleInput bool) error {
+func createSession(client *client.APIClient, deviceID, waitText, initCommand string) error {
 	connectedChannel := make(chan int)
 	defer close(connectedChannel)
 
@@ -93,7 +93,7 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 			case <-connectedChannel:
 				return
 			default:
-				fmt.Printf("\r\033[36m%s\033[m %s ", waitText, s.Next())
+				fmt.Printf("\r\033[36m%s\033[m %s", waitText, s.Next())
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
@@ -124,6 +124,19 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 	// Exit channel
 	exitChannel := make(chan int)
 	defer close(exitChannel)
+
+	// Support ctrl+c
+	interruptChannel := make(chan os.Signal, 1)
+	defer close(interruptChannel)
+
+	signal.Notify(interruptChannel, os.Interrupt)
+	go func() {
+		for {
+			<-interruptChannel
+			m := ssh.NewExecuteCommandMessage(processId, crtlC)
+			websocketWriter.WriteJSON(m)
+		}
+	}()
 
 	go func() {
 		for {
@@ -170,22 +183,13 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 				}
 				processId = created.ID
 			case ssh.ProcessTerminatedMessageType:
+			case ssh.ErrorMessageType:
+				fmt.Println("Unknown error encountered... Closing")
+				exitChannel <- 0
+				return
 			default:
 				fmt.Println("Received an unknown message type")
 			}
-		}
-	}()
-
-	// Support ctrl+c
-	interruptChannel := make(chan os.Signal, 1)
-	defer close(interruptChannel)
-
-	signal.Notify(interruptChannel, os.Interrupt)
-	go func() {
-		for {
-			<-interruptChannel
-			m := ssh.NewExecuteCommandMessage(processId, crtlC)
-			websocketWriter.WriteJSON(m)
 		}
 	}()
 
@@ -193,10 +197,6 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 	term.RawMode(t)
 
 	go func() {
-		if !handleInput {
-			return
-		}
-
 		// Handler for user input
 		info, err := os.Stdin.Stat()
 		if err != nil {
@@ -229,9 +229,7 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 	}()
 
 	<-exitChannel
-
 	t.Restore()
-	t.Close()
 	return nil
 }
 

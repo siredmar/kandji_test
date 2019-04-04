@@ -40,7 +40,7 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 				return err
 			}
 
-			err = createSession(client, deviceID, "Connecting to the device...", "/dbclient -y root@127.0.0.1 'journalctl -f'", false)
+			err = createSession(client, deviceID, "Connecting to the device...", "/dbclient -y root@127.0.0.1 'journalctl -f'")
 			if err != nil {
 				return err
 			}
