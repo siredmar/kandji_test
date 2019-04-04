@@ -9,7 +9,7 @@ import (
 func TestApplicationsEndpoint(t *testing.T) {
 	tt := []Testcase{{
 		name:            "Get all applications",
-		endpoint:        ApplicationsEndpoint,
+		endpoint:        ManagementApplicationsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -22,7 +22,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create application",
-		endpoint: ApplicationsEndpoint,
+		endpoint: ManagementApplicationsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -41,7 +41,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create application",
-		endpoint: ApplicationsEndpoint,
+		endpoint: ManagementApplicationsEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -60,7 +60,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:             "Get non existing application",
-		endpoint:         fmt.Sprintf("%s/%s", ApplicationsEndpoint, "Nothingthere"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "Nothingthere"),
 		version:          APIVersion,
 		method:           http.MethodGet,
 		body:             nil,
@@ -70,7 +70,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 		expectedResponse: nil,
 	}, {
 		name:            "Get single application",
-		endpoint:        fmt.Sprintf("%s/%s", ApplicationsEndpoint, "testapp"),
+		endpoint:        fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "testapp"),
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -86,7 +86,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:            "Get all applications",
-		endpoint:        ApplicationsEndpoint,
+		endpoint:        ManagementApplicationsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -117,7 +117,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 	// Cleanup
 	tt = []Testcase{{
 		name:             "Delete application",
-		endpoint:         fmt.Sprintf("%s/%s", ApplicationsEndpoint, "testapp"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "testapp"),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -127,7 +127,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete application",
-		endpoint:         fmt.Sprintf("%s/%s", ApplicationsEndpoint, "testapp2"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementApplicationsEndpoint, "testapp2"),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -137,7 +137,7 @@ func TestApplicationsEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:            "Get all applications",
-		endpoint:        ApplicationsEndpoint,
+		endpoint:        ManagementApplicationsEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,

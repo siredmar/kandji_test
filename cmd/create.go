@@ -131,6 +131,18 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Maintenance task %s created successfully", task.Metadata.ID), nil
+	case api.CreateDockerConfig:
+		response, err := client.PostRequest(api.DockerConfigsEndpoint, v)
+		if err != nil {
+			return "", err
+		}
+
+		config, err := api.NewDockerConfig(response)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("Docker config %s created successfully", config.Metadata.ID), nil
 	default:
 		s := fmt.Sprintf("Creating resource of type %s.", v)
 		return "", errors.NotImplementedError(s)

@@ -36,7 +36,7 @@ func NewAPIClient() *APIClient {
 }
 
 //GetWebsocketConnection returns a websocket connection
-func (apiclient *APIClient) GetWebsocketConnection(endpoint string) (*websocket.Conn, error) {
+func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHeaders map[string]string) (*websocket.Conn, error) {
 	token, err := auth.GenerateJWTToken()
 	if err != nil {
 		return nil, err
@@ -46,6 +46,9 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string) (*websocket.
 	h.Set("Origin", fmt.Sprintf("https://%s/%s", baseURL, endpoint))
 	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	h.Set("Accept", api.APIVersion)
+	for k, v := range additionalHeaders {
+		h.Set(k, v)
+	}
 
 	url := fmt.Sprintf("wss://%s/%s", baseURL, endpoint)
 

@@ -9,8 +9,16 @@ import:
 - package: github.com/spf13/viper
 - package: github.com/google/go-cmp
 - package: github.com/ghodss/yaml
+- package: github.com/gorilla/websocket
+- package: github.com/grid-x/ds-api
+  version: ac4a1c5835c99c194e59c8a4a5bfc36b779c61c5
+- package: github.com/grid-x/ds-k8s
+  version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
+# Needed to fix to a5d413f7728c81fb97d96a2b722368945f651e78
+# vendor/github.com/nats-io/nkeys/strkey.go:92:17: undefined: ed25519.SeedSize
+- package: golang.org/x/crypto
+  version: a5d413f7728c81fb97d96a2b722368945f651e78
 # Needed to fix to v0.1.1
 # vendor/github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1/register.go:21:19: undefined: scheme.Builder
 - package: sigs.k8s.io/controller-runtime 
   version: v0.1.1
-- package: github.com/gorilla/websocket

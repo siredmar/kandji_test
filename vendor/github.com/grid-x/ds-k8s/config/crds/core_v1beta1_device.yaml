@@ -114,6 +114,7 @@ spec:
                   type: string
               type: object
             lastHeartbeat:
+              format: date-time
               type: string
           type: object
   version: v1beta1

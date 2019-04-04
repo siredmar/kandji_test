@@ -18,6 +18,8 @@ const (
 	GridXStableChannel = "stable"
 )
 
+var now = metav1.NewTime(time.Now())
+
 func createGBx(name string, labels map[string]string) corev1beta1.Device {
 	return corev1beta1.Device{
 		ObjectMeta: metav1.ObjectMeta{
@@ -26,7 +28,7 @@ func createGBx(name string, labels map[string]string) corev1beta1.Device {
 		},
 		Spec: corev1beta1.DeviceSpec{},
 		Status: corev1beta1.DeviceStatus{
-			LastHeartbeat: mkString(time.Now().Format(time.RFC3339)),
+			LastHeartbeat: &now,
 		},
 	}
 }

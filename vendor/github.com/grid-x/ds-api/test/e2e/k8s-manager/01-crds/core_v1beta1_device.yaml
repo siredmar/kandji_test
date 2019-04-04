@@ -11,6 +11,8 @@ spec:
     kind: Device
     plural: devices
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -111,7 +113,8 @@ spec:
                 supervisorVersion:
                   type: string
               type: object
-            lastHeartBeat:
+            lastHeartbeat:
+              format: date-time
               type: string
           type: object
   version: v1beta1

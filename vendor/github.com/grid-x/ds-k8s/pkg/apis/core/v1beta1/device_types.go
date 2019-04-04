@@ -29,7 +29,7 @@ type DeviceStatus struct {
 	// The time of the last heartbeat
 	// In case the device never contacted us this will be null
 	// +optional
-	LastHeartbeat *string `json:"lastHeartbeat,omitempty"`
+	LastHeartbeat *metav1.Time `json:"lastHeartbeat,omitempty"`
 	// Capacity represents the total capacity of this device
 	// +optional
 	Capacity ResourceList `json:"capacity,omitempty"`

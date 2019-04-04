@@ -440,8 +440,7 @@ func (in *DeviceStatus) DeepCopyInto(out *DeviceStatus) {
 	*out = *in
 	if in.LastHeartbeat != nil {
 		in, out := &in.LastHeartbeat, &out.LastHeartbeat
-		*out = new(string)
-		**out = **in
+		*out = (*in).DeepCopy()
 	}
 	if in.Capacity != nil {
 		in, out := &in.Capacity, &out.Capacity

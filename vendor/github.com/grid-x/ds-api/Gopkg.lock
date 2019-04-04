@@ -144,17 +144,19 @@
   revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
 
 [[projects]]
-  digest = "1:6e53ea8f056f5c95a64020fdc89cb01879107e54baf8eefb65a6ae9377546f63"
+  digest = "1:a69d54ec27154e07f131aa69711c49075f81f814510bf49fdc8201137042535a"
   name = "github.com/grid-x/ds-k8s"
   packages = [
     "pkg/apis/apps/v1beta1",
     "pkg/apis/batch/v1beta1",
+    "pkg/apis/config/v1beta1",
     "pkg/apis/core/v1beta1",
     "pkg/apis/maintenance/v1beta1",
     "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/apps/v1beta1",
     "pkg/client/clientset/versioned/typed/batch/v1beta1",
+    "pkg/client/clientset/versioned/typed/config/v1beta1",
     "pkg/client/clientset/versioned/typed/core/v1beta1",
     "pkg/client/clientset/versioned/typed/maintenance/v1beta1",
     "pkg/client/informers/externalversions/apps/v1beta1",
@@ -166,7 +168,7 @@
     "pkg/client/listers/maintenance/v1beta1",
   ]
   pruneopts = ""
-  revision = "453cac38e3d2898d5285e9ece330a05085dcef0f"
+  revision = "409350262e183eb00cab704e5ba47c0dac2b6e6d"
 
 [[projects]]
   digest = "1:3313a63031ae281e5f6fd7b0bbca733dfa04d2429df86519e3b4d4c016ccb836"
@@ -241,6 +243,48 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:924de68772551e1c0ede154e219174315aa2e40d626871acac021044f78cc772"
+  name = "github.com/nats-io/gnatsd"
+  packages = [
+    "conf",
+    "logger",
+    "server",
+    "server/pse",
+    "test",
+  ]
+  pruneopts = ""
+  revision = "3e64f0bfd1fe4c2cf6599f064ff72fa7af439663"
+  version = "v1.4.1"
+
+[[projects]]
+  digest = "1:2b5ed2cf6e8623bddd5653cffb8c6e462c2390b70186eb01546539aa177bb194"
+  name = "github.com/nats-io/go-nats"
+  packages = [
+    ".",
+    "encoders/builtin",
+    "util",
+  ]
+  pruneopts = ""
+  revision = "70fe06cee50d4b6f98248d9675fb55f2a3aa7228"
+  version = "v1.7.2"
+
+[[projects]]
+  digest = "1:0006112541eed60bdfa279c8965c038865f05a677d980305dae7a0eec5bd133c"
+  name = "github.com/nats-io/nkeys"
+  packages = ["."]
+  pruneopts = ""
+  revision = "1546a3320a8f195a5b5c84aef8309377c2e411d5"
+  version = "v0.0.2"
+
+[[projects]]
+  digest = "1:be61e8224b84064109eaba8157cbb4bbe6ca12443e182b6624fdfa1c0dcf53d9"
+  name = "github.com/nats-io/nuid"
+  packages = ["."]
+  pruneopts = ""
+  revision = "289cccf02c178dc782430d534e3c1f5b72af807f"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:c24598ffeadd2762552269271b3b1510df2d83ee6696c1e543a0ff653af494bc"
   name = "github.com/petar/GoLLRB"
@@ -294,7 +338,13 @@
 [[projects]]
   digest = "1:d263c39e9144265037f7473751f48b4193df3efe4763cc72e925c13d5bdbe551"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "bcrypt",
+    "blowfish",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "ssh/terminal",
+  ]
   pruneopts = ""
   revision = "7c1a557ab941a71c619514f229f0b27ccb0c27cf"
 
@@ -318,6 +368,11 @@
   packages = [
     "unix",
     "windows",
+    "windows/registry",
+    "windows/svc",
+    "windows/svc/debug",
+    "windows/svc/eventlog",
+    "windows/svc/mgr",
   ]
   pruneopts = ""
   revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
@@ -557,6 +612,9 @@
     "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/maintenance/v1beta1",
     "github.com/jmoiron/sqlx",
     "github.com/lib/pq",
+    "github.com/nats-io/gnatsd/server",
+    "github.com/nats-io/gnatsd/test",
+    "github.com/nats-io/go-nats",
     "github.com/rubenv/sql-migrate",
     "github.com/sirupsen/logrus",
     "github.com/urfave/cli",

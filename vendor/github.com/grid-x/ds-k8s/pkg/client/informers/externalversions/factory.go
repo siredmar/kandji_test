@@ -14,6 +14,7 @@ import (
 	versioned "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned"
 	apps "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/apps"
 	batch "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/batch"
+	config "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/config"
 	core "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/core"
 	internalinterfaces "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/internalinterfaces"
 	maintenance "github.com/grid-x/ds-k8s/pkg/client/informers/externalversions/maintenance"
@@ -165,6 +166,7 @@ type SharedInformerFactory interface {
 
 	Apps() apps.Interface
 	Batch() batch.Interface
+	Config() config.Interface
 	Core() core.Interface
 	Maintenance() maintenance.Interface
 }
@@ -175,6 +177,10 @@ func (f *sharedInformerFactory) Apps() apps.Interface {
 
 func (f *sharedInformerFactory) Batch() batch.Interface {
 	return batch.New(f, f.namespace, f.tweakListOptions)
+}
+
+func (f *sharedInformerFactory) Config() config.Interface {
+	return config.New(f, f.namespace, f.tweakListOptions)
 }
 
 func (f *sharedInformerFactory) Core() core.Interface {

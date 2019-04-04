@@ -11,7 +11,6 @@ import (
 
 	"github.com/grid-x/ds-api/pkg/model"
 	"github.com/grid-x/ds-api/pkg/postgres"
-	testutils "github.com/grid-x/ds-api/pkg/testing"
 )
 
 func mkString(s string) *string {
@@ -62,8 +61,11 @@ func TestGet(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(tc.want, got, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")) {
-				t.Errorf("unexpected user: %s", cmp.Diff(tc.want, got, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")))
+			opts := cmpopts.IgnoreFields(model.User{},
+				"AccountID", "UUID", "CreatedAt", "UpdatedAt",
+			)
+			if !cmp.Equal(tc.want, got, opts) {
+				t.Errorf("unexpected user: %s", cmp.Diff(tc.want, got, opts))
 			}
 		})
 	}
@@ -328,8 +330,11 @@ func TestUsersList(t *testing.T) {
 				t.Errorf("users list length = %d, want %d", len(items), len(tc.want))
 			}
 
-			if !cmp.Equal(tc.want, items, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")) {
-				t.Errorf("unexpected users list: %s", cmp.Diff(tc.want, items, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")))
+			opts := cmpopts.IgnoreFields(model.User{},
+				"AccountID", "UUID", "CreatedAt", "UpdatedAt",
+			)
+			if !cmp.Equal(tc.want, items, opts) {
+				t.Errorf("unexpected users list: %s", cmp.Diff(tc.want, items, opts))
 			}
 		})
 	}
@@ -409,6 +414,10 @@ func TestUsersCreate(t *testing.T) {
 			)
 			if !cmp.Equal(got, want, opts) {
 				t.Errorf("create = %+v, want %+v", got, want)
+			}
+
+			if got.CreatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("Users creation time should be set with now()")
 			}
 		})
 	}
@@ -502,10 +511,14 @@ func TestUsersUpdate(t *testing.T) {
 			}
 
 			opts := cmpopts.IgnoreFields(model.User{},
-				"CreatedAt", "UpdatedAt",
+				"AccountID", "UUID", "CreatedAt", "UpdatedAt",
 			)
-			if !cmp.Equal(got, tc.want, opts, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")) {
-				t.Errorf("unexpected user: %s", cmp.Diff(tc.want, got, testutils.CmpWithIgnore("UUID"), testutils.CmpWithIgnore("AccountID")))
+			if !cmp.Equal(got, tc.want, opts) {
+				t.Errorf("unexpected user: %s", cmp.Diff(tc.want, got, opts))
+			}
+
+			if got.UpdatedAt.String() == "0001-01-01 00:00:00 +0000 UTC" {
+				t.Errorf("Users update time should be set with now()")
 			}
 		})
 	}
@@ -567,8 +580,11 @@ func TestUsersDelete(t *testing.T) {
 				t.Error(err)
 			}
 
-			_, err = repo.GetByID(ctx, item.UUID)
-			if err != sql.ErrNoRows {
+			got, err := repo.GetByIDWithSoftDeleted(ctx, item.UUID)
+			if tc.hard && err != sql.ErrNoRows {
+				t.Error(err)
+			}
+			if !tc.hard && err == sql.ErrNoRows {
 				t.Error(err)
 			}
 
@@ -579,6 +595,10 @@ func TestUsersDelete(t *testing.T) {
 
 			if len(items) != len(wantItems) {
 				t.Errorf("Delete = %d, want %d", len(items), len(wantItems))
+			}
+
+			if !tc.hard && (got.DeletedAt == nil || got.DeletedAt.String() == "0001-01-01 00:00:00 +0000 UTC") {
+				t.Errorf("Accounts soft deletion time should be set with now()")
 			}
 		})
 	}

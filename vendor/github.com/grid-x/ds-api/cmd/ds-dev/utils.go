@@ -67,3 +67,7 @@ func counter() func() int {
 		return i
 	}
 }
+
+func contains(s1 string, s2 string) bool {
+	return strings.Contains(s1, s2)
+}

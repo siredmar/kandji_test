@@ -9,6 +9,7 @@ package fake
 import (
 	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
 	batchv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/batch/v1beta1"
+	configv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/config/v1beta1"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
 	maintenancev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/maintenance/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,6 +25,7 @@ var parameterCodec = runtime.NewParameterCodec(scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
 	appsv1beta1.AddToScheme,
 	batchv1beta1.AddToScheme,
+	configv1beta1.AddToScheme,
 	corev1beta1.AddToScheme,
 	maintenancev1beta1.AddToScheme,
 }

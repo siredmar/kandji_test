@@ -89,20 +89,18 @@ func {{title .Type}}Routes(
 						{{- end}}
 						{{- else}}
 						{{- if eq .Protocol "ws"}}
-						err = {{$serviceName}}.{{$field}}.{{.HandlerName}}(conn, r)
+						{{$serviceName}}.{{$field}}.{{.HandlerName}}(conn, r)
 						{{- else}}
 						resp, err := {{$serviceName}}.{{$field}}.{{.HandlerName}}(r)
 						{{- end}}
 						{{- end}}
+						{{- if eq .Protocol "ws"}}
+						// Errors, communication and connection closure will be handled within the func. Nothing to do from here
+						{{- else}}
 						if err != nil {
-							{{- if eq .Protocol "ws"}}
-							conn.Close()
-							{{- end}}
 							encoding.Write(w, encoding.ResponseFromError(err))
 							return
 						}
-						{{- if not (eq .Protocol "ws")}}
-
 						encoding.Write(w, resp)
 						return
 						{{- end}}

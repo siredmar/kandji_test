@@ -34,8 +34,8 @@ type authProvider interface {
 }
 
 type podClient interface {
-	List(ctx context.Context, namespace string) ([]*corev1beta1.DevicePod, error)
-	Get(ctx context.Context, namespace, name string) (*corev1beta1.DevicePod, error)
+	List(ctx context.Context, namespace string, unfiltered bool) ([]*corev1beta1.DevicePod, error)
+	Get(ctx context.Context, namespace, name string, unfiltered bool) (*corev1beta1.DevicePod, error)
 }
 
 // Pod as exposed by this API version
@@ -121,7 +121,7 @@ func (s *Service) List(req *http.Request) (*encoding.Response, error) {
 	ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()
 
-	ps, err := s.podClient.List(ctx, model.AccountNamespaceName(accountID))
+	ps, err := s.podClient.List(ctx, model.AccountNamespaceName(accountID), false)
 	if err != nil {
 		return nil, errors.E(
 			errors.Internal,
@@ -190,7 +190,7 @@ func (s *Service) Get(req *http.Request) (*encoding.Response, error) {
 	ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
 	defer cancel()
 
-	p, err := s.podClient.Get(ctx, model.AccountNamespaceName(accountID), podID)
+	p, err := s.podClient.Get(ctx, model.AccountNamespaceName(accountID), podID, false)
 	if err != nil {
 		return nil, errors.E(
 			errors.NotExists,

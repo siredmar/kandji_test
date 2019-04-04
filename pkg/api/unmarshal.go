@@ -245,3 +245,35 @@ func NewCreateMaintenanceTask(j []byte) (CreateMaintenanceTask, error) {
 	}
 	return m, nil
 }
+
+func NewDockerConfig(j []byte) (DockerConfig, error) {
+	d := DockerConfig{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	err = json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
+
+func NewDockerConfigs(j []byte) (DockerConfigs, error) {
+	d := DockerConfigs{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	err = json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}

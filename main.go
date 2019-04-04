@@ -28,7 +28,12 @@ func main() {
 	patch := cmd.NewPatch(root.Command)
 	delete := cmd.NewDelete(root.Command)
 	create := cmd.NewCreate(root.Command)
+	config := cmd.NewConfig(root.Command)
+	configGet := cmd.NewConfigGet(config.Command)
+	configCreate := cmd.NewConfigCreate(config.Command)
+	configDelete := cmd.NewConfigDelete(config.Command)
 	cmd.NewSSH(root.Command)
+	cmd.NewSyslog(root.Command)
 	cmd.NewCompletion(root.Command)
 	cmd.NewGetDevices(get.Command)
 	cmd.NewGetPods(get.Command)
@@ -41,6 +46,9 @@ func main() {
 	cmd.NewDeleteDeployment(delete.Command)
 	cmd.NewDeleteApplication(delete.Command)
 	cmd.NewLabelDevice(label.Command)
+	cmd.NewConfigGetDocker(configGet.Command)
+	cmd.NewConfigCreateDockerAWS(configCreate.Command)
+	cmd.NewConfigDeleteDocker(configDelete.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)

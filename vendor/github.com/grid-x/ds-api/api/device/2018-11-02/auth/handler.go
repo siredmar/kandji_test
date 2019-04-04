@@ -14,6 +14,7 @@ import (
 	"github.com/grid-x/ds-api/pkg/auth/device"
 	"github.com/grid-x/ds-api/pkg/encoding"
 	"github.com/grid-x/ds-api/pkg/errors"
+	v20181102 "github.com/grid-x/ds-api/types/device/2018-11-02/auth"
 )
 
 const (
@@ -68,22 +69,23 @@ func NewService(injections ...interface{}) *Service {
 }
 
 // GetTokenRequest represents the request type
-type GetTokenRequest struct {
-	PublicKey string `json:"publicKey"`
-	IDData    string `json:"idData"`
-}
+type GetTokenRequest v20181102.GetTokenRequest
 
 // Validate validates the GetTokenRequest
 func (req *GetTokenRequest) Validate() error {
 	if req.PublicKey == "" {
 		return errors.E(
 			errors.Validation,
+			errors.Action("device/auth/GetToken"),
+			"Missing public key",
 			fmt.Errorf("Missing public key"),
 		)
 	}
 	if req.IDData == "" {
 		return errors.E(
 			errors.Validation,
+			errors.Action("device/auth/GetToken"),
+			"Missing id data",
 			fmt.Errorf("Missing id data"),
 		)
 	}
@@ -96,9 +98,7 @@ func (req *GetTokenRequest) ReadJSON(r io.Reader) error {
 }
 
 // GetTokenResponse represents the response type
-type GetTokenResponse struct {
-	Token string `json:"token"`
-}
+type GetTokenResponse v20181102.GetTokenResponse
 
 // WriteText creates a text representation from GetTokenResponse
 func (resp *GetTokenResponse) WriteText(w io.Writer) error {
@@ -121,17 +121,32 @@ func (resp *GetTokenResponse) WriteJSON(w io.Writer) error {
 func (s *Service) GetToken(req *http.Request, payload GetTokenRequest) (*encoding.Response, error) {
 	signature := req.Header.Get(signatureHeader)
 	if len(signature) == 0 {
-		return nil, fmt.Errorf("empty %s header", signatureHeader)
+		return nil, errors.E(
+			errors.Validation,
+			errors.Action("device/auth/GetToken"),
+			fmt.Sprintf("Missing %s header", signatureHeader),
+			fmt.Errorf("empty %s header", signatureHeader),
+		)
 	}
 
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(
+			errors.Internal,
+			errors.Action("device/auth/GetToken"),
+			"Internal error",
+			fmt.Errorf("Could not marshall get token request: %+v", err),
+		)
 	}
 
 	// verify signature
 	if err := device.Verify(signature, payload.PublicKey, data); err != nil {
-		return nil, fmt.Errorf("internal server error: %+v", err)
+		return nil, errors.E(
+			errors.Permission,
+			errors.Action("device/auth/GetToken"),
+			"Signature verification failed",
+			fmt.Errorf("Verify failed: %+v", err),
+		)
 	}
 
 	ctx, cancel := context.WithTimeout(req.Context(), 10*time.Second)
@@ -139,7 +154,12 @@ func (s *Service) GetToken(req *http.Request, payload GetTokenRequest) (*encodin
 
 	dev, err := s.repo.GetByPublicKey(ctx, payload.PublicKey)
 	if err != nil {
-		return nil, fmt.Errorf("internal server error: %+v", err)
+		return nil, errors.E(
+			errors.Internal,
+			errors.Action("device/auth/GetToken"),
+			"Internal error",
+			fmt.Errorf("Error while looking up device by public key: %+v", err),
+		)
 	}
 
 	token, err := s.jwtGen.GenerateToken(
@@ -148,7 +168,12 @@ func (s *Service) GetToken(req *http.Request, payload GetTokenRequest) (*encodin
 		dev.Spec.AccountID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("internal server error: %+v", err)
+		return nil, errors.E(
+			errors.Internal,
+			errors.Action("device/auth/GetToken"),
+			"Internal error",
+			fmt.Errorf("Error while generating jwt token: %+v", err),
+		)
 	}
 
 	return &encoding.Response{

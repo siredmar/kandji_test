@@ -9,6 +9,7 @@ package versioned
 import (
 	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/apps/v1beta1"
 	batchv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/batch/v1beta1"
+	configv1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/config/v1beta1"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/core/v1beta1"
 	maintenancev1beta1 "github.com/grid-x/ds-k8s/pkg/client/clientset/versioned/typed/maintenance/v1beta1"
 	discovery "k8s.io/client-go/discovery"
@@ -24,6 +25,9 @@ type Interface interface {
 	BatchV1beta1() batchv1beta1.BatchV1beta1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Batch() batchv1beta1.BatchV1beta1Interface
+	ConfigV1beta1() configv1beta1.ConfigV1beta1Interface
+	// Deprecated: please explicitly pick a version if possible.
+	Config() configv1beta1.ConfigV1beta1Interface
 	CoreV1beta1() corev1beta1.CoreV1beta1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Core() corev1beta1.CoreV1beta1Interface
@@ -38,6 +42,7 @@ type Clientset struct {
 	*discovery.DiscoveryClient
 	appsV1beta1        *appsv1beta1.AppsV1beta1Client
 	batchV1beta1       *batchv1beta1.BatchV1beta1Client
+	configV1beta1      *configv1beta1.ConfigV1beta1Client
 	coreV1beta1        *corev1beta1.CoreV1beta1Client
 	maintenanceV1beta1 *maintenancev1beta1.MaintenanceV1beta1Client
 }
@@ -62,6 +67,17 @@ func (c *Clientset) BatchV1beta1() batchv1beta1.BatchV1beta1Interface {
 // Please explicitly pick a version.
 func (c *Clientset) Batch() batchv1beta1.BatchV1beta1Interface {
 	return c.batchV1beta1
+}
+
+// ConfigV1beta1 retrieves the ConfigV1beta1Client
+func (c *Clientset) ConfigV1beta1() configv1beta1.ConfigV1beta1Interface {
+	return c.configV1beta1
+}
+
+// Deprecated: Config retrieves the default version of ConfigClient.
+// Please explicitly pick a version.
+func (c *Clientset) Config() configv1beta1.ConfigV1beta1Interface {
+	return c.configV1beta1
 }
 
 // CoreV1beta1 retrieves the CoreV1beta1Client
@@ -110,6 +126,10 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs.configV1beta1, err = configv1beta1.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
 	cs.coreV1beta1, err = corev1beta1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
@@ -132,6 +152,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.appsV1beta1 = appsv1beta1.NewForConfigOrDie(c)
 	cs.batchV1beta1 = batchv1beta1.NewForConfigOrDie(c)
+	cs.configV1beta1 = configv1beta1.NewForConfigOrDie(c)
 	cs.coreV1beta1 = corev1beta1.NewForConfigOrDie(c)
 	cs.maintenanceV1beta1 = maintenancev1beta1.NewForConfigOrDie(c)
 
@@ -144,6 +165,7 @@ func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.appsV1beta1 = appsv1beta1.New(c)
 	cs.batchV1beta1 = batchv1beta1.New(c)
+	cs.configV1beta1 = configv1beta1.New(c)
 	cs.coreV1beta1 = corev1beta1.New(c)
 	cs.maintenanceV1beta1 = maintenancev1beta1.New(c)
 

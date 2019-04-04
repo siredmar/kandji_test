@@ -3,12 +3,16 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
+	"sync"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/grid-x/ds-api/pkg/ssh"
+	"github.com/pkg/term"
 	"github.com/spf13/cobra"
+	"github.com/tj/go-spin"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
@@ -33,6 +37,17 @@ func NewSSH(parent *cobra.Command) *SSH {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			initCommand, _ := cmd.Flags().GetString("command")
+
+			info, err := os.Stdin.Stat()
+			if err != nil {
+				return fmt.Errorf("Unknown error")
+			}
+			if (info.Mode() & os.ModeCharDevice) != os.ModeCharDevice {
+				// Piped input
+				return fmt.Errorf("Piped input is currently not supported")
+			}
+
 			client := client.NewAPIClient()
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
@@ -47,7 +62,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 				return err
 			}
 
-			err = createSession(client, deviceID)
+			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand)
 			if err != nil {
 				return err
 			}
@@ -58,6 +73,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 
 	sshCmd.SetHelpTemplate(template.HelpTemplate())
 	sshCmd.SetUsageTemplate(template.UsageTemplate())
+	sshCmd.Flags().StringP("command", "c", "", "specify a command to issue")
 	parent.AddCommand(sshCmd)
 
 	return &SSH{
@@ -65,38 +81,88 @@ func NewSSH(parent *cobra.Command) *SSH {
 	}
 }
 
-func createSession(client *client.APIClient, deviceID string) error {
-	fmt.Println("Setting up ssh infrastructure...")
+func createSession(client *client.APIClient, deviceID, waitText, initCommand string) error {
+	connectedChannel := make(chan int)
+	defer close(connectedChannel)
+
+	s := spin.New()
+	s.Set(spin.Box1)
+	go func() {
+		for {
+			select {
+			case <-connectedChannel:
+				return
+			default:
+				fmt.Printf("\r\033[36m%s\033[m %s", waitText, s.Next())
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
+
 	endpoint := fmt.Sprintf("%s/%s/ssh", api.DevicesEndpoint, deviceID)
 
-	conn, err := client.GetWebsocketConnection(endpoint)
+	additionalHeaders := make(map[string]string)
+	if initCommand == "" {
+		initCommand = "/dbclient -y root@127.0.0.1"
+	}
+	additionalHeaders["command"] = initCommand
+
+	conn, err := client.GetWebsocketConnection(endpoint, additionalHeaders)
+	defer conn.Close()
+
+	websocketWriter := NewWebsocketWriter(conn)
+
 	if err != nil {
 		return err
 	}
 
-	// Support Proxy
-	interruptChannel := make(chan os.Signal, 1)
-	signal.Notify(interruptChannel, os.Interrupt)
-	go func() {
-		<-interruptChannel
-		conn.Close()
-	}()
-
 	var processId string
 
+	// Common controls
+	var crtlC = []byte("\x03")
+
+	// Exit channel
+	exitChannel := make(chan int)
+	defer close(exitChannel)
+
+	// Support ctrl+c
+	interruptChannel := make(chan os.Signal, 1)
+	defer close(interruptChannel)
+
+	signal.Notify(interruptChannel, os.Interrupt)
 	go func() {
-		defer conn.Close()
+		for {
+			<-interruptChannel
+			m := ssh.NewExecuteCommandMessage(processId, crtlC)
+			websocketWriter.WriteJSON(m)
+		}
+	}()
+
+	go func() {
+		for {
+			// Websocket connection will close after 60s of inactivity. Send a keepalive every 30s.
+			time.Sleep(30 * time.Second)
+			err := websocketWriter.WriteMessage(websocket.PingMessage, []byte("keepalive"))
+			if err != nil {
+				break
+			}
+		}
+	}()
+
+	go func() {
+		// Read messages from the device
 		for {
 			var messageType ssh.MessageType
 
 			_, message, err := conn.ReadMessage()
 			if err != nil {
 				fmt.Println("Connection closed")
+				exitChannel <- 0
+				break
 			}
 			err = json.Unmarshal(message, &messageType)
 			if err != nil {
 				fmt.Println("Unknown message received. Closing connection...")
-				return
 			}
 
 			switch messageType.Type {
@@ -105,18 +171,21 @@ func createSession(client *client.APIClient, deviceID string) error {
 				err = json.Unmarshal(message, &output)
 				if err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
-					return
 				}
 				os.Stdout.Write(output.Data)
 			case ssh.ProcessCreatedMessageType:
+				connectedChannel <- 0
+
 				var created ssh.ProcessCreatedMessage
 				err = json.Unmarshal(message, &created)
 				if err != nil {
 					fmt.Println("Not able to unmarshall process created. Closing connection...")
-					return
 				}
 				processId = created.ID
 			case ssh.ProcessTerminatedMessageType:
+			case ssh.ErrorMessageType:
+				fmt.Println("Unknown error encountered... Closing")
+				exitChannel <- 0
 				return
 			default:
 				fmt.Println("Received an unknown message type")
@@ -124,20 +193,97 @@ func createSession(client *client.APIClient, deviceID string) error {
 		}
 	}()
 
-	for {
-		select {
-		default:
-			var msg = make([]byte, 1024)
-			size, err := os.Stdin.Read(msg)
-			if err == io.EOF {
-				return nil
-			} else if err != nil {
-				fmt.Println("Unknown error: ", err)
-				return err
-			} else {
-				m := ssh.NewExecuteCommandMessage(processId, msg[0:size])
-				conn.WriteJSON(m)
-			}
+	t, _ := term.Open("/dev/tty")
+	term.RawMode(t)
+
+	go func() {
+		// Handler for user input
+		info, err := os.Stdin.Stat()
+		if err != nil {
+			fmt.Println("Unknown error: ", err)
+			exitChannel <- 0
 		}
+		if (info.Mode() & os.ModeCharDevice) != os.ModeCharDevice {
+			// Piped input - Return as other handler will read it
+			return
+		} else {
+			// User input
+			for {
+				b, err := getChar(t)
+				if err != nil {
+					fmt.Println("Unknown error: ", err)
+					exitChannel <- 0
+					break
+				}
+
+				m := ssh.NewExecuteCommandMessage(processId, b)
+				err = websocketWriter.WriteJSON(m)
+				if err != nil {
+					fmt.Println("Unknown error: ", err)
+					exitChannel <- 0
+					break
+				}
+			}
+
+		}
+	}()
+
+	<-exitChannel
+	t.Restore()
+	return nil
+}
+
+type WebsocketWriter struct {
+	Socket *websocket.Conn // websocket connection of the player
+	mu     sync.Mutex
+}
+
+func NewWebsocketWriter(c *websocket.Conn) *WebsocketWriter {
+	w := &WebsocketWriter{
+		Socket: c,
 	}
+	return w
+}
+
+func (w *WebsocketWriter) WriteJSON(v interface{}) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.Socket.WriteJSON(v)
+}
+
+func (w *WebsocketWriter) WriteMessage(messageType int, data []byte) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.Socket.WriteMessage(messageType, data)
+}
+
+func getChar(t *term.Term) ([]byte, error) {
+	bytes := make([]byte, 3)
+
+	var n int
+	n, err := t.Read(bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	if n == 3 && bytes[0] == 27 && bytes[1] == 91 {
+		// Three-character control sequence, beginning with "ESC-[".
+		if bytes[2] == 65 {
+			// Up
+			bytes = []byte{27, 91, 65}
+		} else if bytes[2] == 66 {
+			// Down
+			bytes = []byte{27, 91, 66}
+		} else if bytes[2] == 67 {
+			// Right
+			bytes = []byte{27, 91, 67}
+		} else if bytes[2] == 68 {
+			// Left
+			bytes = []byte{27, 91, 68}
+		}
+
+		return bytes, nil
+	}
+
+	return bytes[:1], nil
 }

@@ -24,6 +24,7 @@ var (
 		"dbColumn":   underscore,
 		"jsonField":  untitle,
 		"counter":    counter,
+		"contains":   contains,
 		"underscore": underscore,
 		"dbType": func(t string) string {
 			switch t {

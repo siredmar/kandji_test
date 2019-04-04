@@ -9,7 +9,7 @@ import (
 func TestDevicesEndpoint(t *testing.T) {
 	tt := []Testcase{{
 		name:            "Get all devices",
-		endpoint:        DevicesEndpoint,
+		endpoint:        ManagementDevicesEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -22,7 +22,7 @@ func TestDevicesEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create device",
-		endpoint: DevicesEndpoint,
+		endpoint: ManagementDevicesEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -52,7 +52,7 @@ func TestDevicesEndpoint(t *testing.T) {
 			}`),
 	}, {
 		name:     "Create device",
-		endpoint: DevicesEndpoint,
+		endpoint: ManagementDevicesEndpoint,
 		version:  APIVersion,
 		method:   http.MethodPost,
 		body: []byte(
@@ -88,7 +88,7 @@ func TestDevicesEndpoint(t *testing.T) {
 
 	tt = []Testcase{{
 		name:             "Get non existing device",
-		endpoint:         fmt.Sprintf("%s/%s", DevicesEndpoint, "Nothingthere"),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, "Nothingthere"),
 		version:          APIVersion,
 		method:           http.MethodGet,
 		body:             nil,
@@ -98,7 +98,7 @@ func TestDevicesEndpoint(t *testing.T) {
 		expectedResponse: nil,
 	}, {
 		name:            "Get single device",
-		endpoint:        fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint:        fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -122,7 +122,7 @@ func TestDevicesEndpoint(t *testing.T) {
 		// Changing macAddress to "99-88-77-66-55-55"
 		// Changing maintenanceWindow to "Sun:22:00-Sun:23:00"
 		name:     "Patch single device",
-		endpoint: fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -151,7 +151,7 @@ func TestDevicesEndpoint(t *testing.T) {
 	}, {
 		// Adding label to "gridx.de/channel": "stable"
 		name:     "Patch single device",
-		endpoint: fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint: fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:  APIVersion,
 		method:   http.MethodPatch,
 		body: []byte(
@@ -179,7 +179,7 @@ func TestDevicesEndpoint(t *testing.T) {
 			}`, ExtractedDeviceUUIDs[0])),
 	}, {
 		name:            "Get all devices",
-		endpoint:        DevicesEndpoint,
+		endpoint:        ManagementDevicesEndpoint,
 		version:         APIVersion,
 		method:          http.MethodGet,
 		body:            nil,
@@ -222,7 +222,7 @@ func TestDevicesEndpoint(t *testing.T) {
 	// Cleanup
 	tt = []Testcase{{
 		name:             "Delete device",
-		endpoint:         fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[0]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[0]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
@@ -232,7 +232,7 @@ func TestDevicesEndpoint(t *testing.T) {
 		expectedResponse: []byte(`{}`),
 	}, {
 		name:             "Delete device",
-		endpoint:         fmt.Sprintf("%s/%s", DevicesEndpoint, ExtractedDeviceUUIDs[1]),
+		endpoint:         fmt.Sprintf("%s/%s", ManagementDevicesEndpoint, ExtractedDeviceUUIDs[1]),
 		version:          APIVersion,
 		method:           http.MethodDelete,
 		body:             nil,
