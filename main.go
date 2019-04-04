@@ -31,6 +31,7 @@ func main() {
 	config := cmd.NewConfig(root.Command)
 	configGet := cmd.NewConfigGet(config.Command)
 	configCreate := cmd.NewConfigCreate(config.Command)
+	configDelete := cmd.NewConfigDelete(config.Command)
 	cmd.NewSSH(root.Command)
 	cmd.NewSyslog(root.Command)
 	cmd.NewCompletion(root.Command)
@@ -47,6 +48,7 @@ func main() {
 	cmd.NewLabelDevice(label.Command)
 	cmd.NewConfigGetDocker(configGet.Command)
 	cmd.NewConfigCreateDockerAWS(configCreate.Command)
+	cmd.NewConfigDeleteDocker(configDelete.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
