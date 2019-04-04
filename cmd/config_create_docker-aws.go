@@ -75,8 +75,6 @@ func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
 				},
 			}
 
-			fmt.Println(d.Spec.Credentials.AWS)
-
 			message, err := createResource(client, d)
 			if err != nil {
 				return err

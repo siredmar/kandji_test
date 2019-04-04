@@ -18,6 +18,7 @@ func NewConfigGet(parent *cobra.Command) *ConfigGet {
 		Long:                  `TODO`,
 	}
 
+	configGetCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json/wide/yaml")
 	configGetCmd.SetHelpTemplate(template.HelpTemplate())
 	configGetCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(configGetCmd)
