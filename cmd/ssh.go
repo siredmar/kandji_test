@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/signal"
 	"sync"
 	"time"
 
@@ -62,10 +61,41 @@ func NewSSH(parent *cobra.Command) *SSH {
 				return err
 			}
 
-			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand)
+			input := make(chan []byte)
+			defer close(input)
+			output := make(chan []byte)
+			defer close(output)
+
+			t, _ := term.Open("/dev/tty")
+			term.RawMode(t)
+
+			// Forward output from SSH session
+			go func() {
+				for {
+					b := <-output
+
+					os.Stdout.Write(b)
+				}
+			}()
+
+			// Forward input to SSH session
+			go func() {
+				for {
+					b, err := getChar(t)
+					if err != nil {
+						fmt.Println("Unknown error: ", err)
+						break
+					}
+					input <- b
+				}
+			}()
+
+			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand, input, output)
 			if err != nil {
 				return err
 			}
+
+			t.Restore()
 
 			return nil
 		},
@@ -81,7 +111,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 	}
 }
 
-func createSession(client *client.APIClient, deviceID, waitText, initCommand string) error {
+func createSession(client *client.APIClient, deviceID, waitText, initCommand string, inputChannel, outputChannel chan []byte) error {
 	connectedChannel := make(chan int)
 	defer close(connectedChannel)
 
@@ -91,6 +121,8 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 		for {
 			select {
 			case <-connectedChannel:
+				fmt.Print("\r\n")
+				fmt.Print("Connection established!\r\n")
 				return
 			default:
 				fmt.Printf("\r\033[36m%s\033[m %s", waitText, s.Next())
@@ -108,35 +140,18 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 	additionalHeaders["command"] = initCommand
 
 	conn, err := client.GetWebsocketConnection(endpoint, additionalHeaders)
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 
 	websocketWriter := NewWebsocketWriter(conn)
 
-	if err != nil {
-		return err
-	}
-
 	var processId string
-
-	// Common controls
-	var crtlC = []byte("\x03")
 
 	// Exit channel
 	exitChannel := make(chan int)
 	defer close(exitChannel)
-
-	// Support ctrl+c
-	interruptChannel := make(chan os.Signal, 1)
-	defer close(interruptChannel)
-
-	signal.Notify(interruptChannel, os.Interrupt)
-	go func() {
-		for {
-			<-interruptChannel
-			m := ssh.NewExecuteCommandMessage(processId, crtlC)
-			websocketWriter.WriteJSON(m)
-		}
-	}()
 
 	go func() {
 		for {
@@ -149,8 +164,8 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 		}
 	}()
 
+	// Read messages from the device and send it to the client
 	go func() {
-		// Read messages from the device
 		for {
 			var messageType ssh.MessageType
 
@@ -172,7 +187,7 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 				if err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
 				}
-				os.Stdout.Write(output.Data)
+				outputChannel <- output.Data
 			case ssh.ProcessCreatedMessageType:
 				connectedChannel <- 0
 
@@ -193,43 +208,20 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 		}
 	}()
 
-	t, _ := term.Open("/dev/tty")
-	term.RawMode(t)
-
+	// Handle input and send it to the device
 	go func() {
-		// Handler for user input
-		info, err := os.Stdin.Stat()
-		if err != nil {
-			fmt.Println("Unknown error: ", err)
-			exitChannel <- 0
-		}
-		if (info.Mode() & os.ModeCharDevice) != os.ModeCharDevice {
-			// Piped input - Return as other handler will read it
-			return
-		} else {
-			// User input
-			for {
-				b, err := getChar(t)
-				if err != nil {
-					fmt.Println("Unknown error: ", err)
-					exitChannel <- 0
-					break
-				}
-
-				m := ssh.NewExecuteCommandMessage(processId, b)
-				err = websocketWriter.WriteJSON(m)
-				if err != nil {
-					fmt.Println("Unknown error: ", err)
-					exitChannel <- 0
-					break
-				}
+		for {
+			b := <-inputChannel
+			m := ssh.NewExecuteCommandMessage(processId, b)
+			err = websocketWriter.WriteJSON(m)
+			if err != nil {
+				exitChannel <- 0
+				break
 			}
-
 		}
 	}()
 
 	<-exitChannel
-	t.Restore()
 	return nil
 }
 

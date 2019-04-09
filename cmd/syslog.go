@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/pkg/term"
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -40,7 +44,35 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 				return err
 			}
 
-			err = createSession(client, deviceID, "Connecting to the device...", "/dbclient -y root@127.0.0.1 'journalctl -f'")
+			input := make(chan []byte)
+			defer close(input)
+			output := make(chan []byte)
+			defer close(output)
+
+			// Forward output from SSH session
+			go func() {
+				for {
+					b := <-output
+					os.Stdout.Write(b)
+				}
+			}()
+
+			t, _ := term.Open("/dev/tty")
+			term.RawMode(t)
+
+			// Forward input to SSH session
+			go func() {
+				for {
+					b, err := getChar(t)
+					if err != nil {
+						fmt.Println("Unknown error: ", err)
+						break
+					}
+					input <- b
+				}
+			}()
+
+			err = createSession(client, deviceID, "Connecting to the device...", "/dbclient -y root@127.0.0.1 'journalctl -f'", input, output)
 			if err != nil {
 				return err
 			}
