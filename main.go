@@ -34,6 +34,7 @@ func main() {
 	configDelete := cmd.NewConfigDelete(config.Command)
 	cmd.NewSSH(root.Command)
 	cmd.NewSyslog(root.Command)
+	cmd.NewPortForward(root.Command)
 	cmd.NewCompletion(root.Command)
 	cmd.NewGetDevices(get.Command)
 	cmd.NewGetPods(get.Command)
