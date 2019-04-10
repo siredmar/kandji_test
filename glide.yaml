@@ -11,7 +11,7 @@ import:
 - package: github.com/ghodss/yaml
 - package: github.com/gorilla/websocket
 - package: github.com/grid-x/ds-api
-  version: ac4a1c5835c99c194e59c8a4a5bfc36b779c61c5
+  version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
 - package: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
 # Needed to fix to a5d413f7728c81fb97d96a2b722368945f651e78

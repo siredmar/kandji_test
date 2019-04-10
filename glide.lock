@@ -1,5 +1,5 @@
-hash: 7b06f4c395552df1a95ed01f7633672697acfa66adba6cf5d6704ecb80b0b3e1
-updated: 2019-04-02T22:08:15.257353+02:00
+hash: f61c4df45c796c5686456873a50b59607556eea2b3c1f7df8e5b5c3f731bbc24
+updated: 2019-04-10T10:45:51.051316+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -30,7 +30,7 @@ imports:
 - name: github.com/gorilla/websocket
   version: 0ec3d1bd7fe50c503d6df98ee649d81f4857c564
 - name: github.com/grid-x/ds-api
-  version: ac4a1c5835c99c194e59c8a4a5bfc36b779c61c5
+  version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
   - api
   - api/management/2018-11-02/devices
@@ -71,7 +71,7 @@ imports:
 - name: github.com/nats-io/nkeys
   version: 1546a3320a8f195a5b5c84aef8309377c2e411d5
 - name: github.com/nats-io/nuid
-  version: 3024a71c3cbe30667286099921591e6fcc328230
+  version: 4b96681fa6d28dd0ab5fe79bac63b3a493d9ee94
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
@@ -83,7 +83,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/spf13/viper
-  version: 9e56dacc08fbbf8c9ee2dbc717553c758ce42bc9
+  version: 7a605a50e69cd1ea431c4a1e6eebe9b287ef6de4
 - name: github.com/tj/go-spin
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: golang.org/x/crypto

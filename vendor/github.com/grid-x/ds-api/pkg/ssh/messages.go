@@ -11,6 +11,8 @@ const (
 	ProcessOutputMessageType
 	ProcessCreatedMessageType
 	ProcessTerminatedMessageType
+	CreateFileMessageType
+	WriteToFileMessageType
 	ErrorMessageType
 )
 
@@ -44,6 +46,28 @@ func NewCreateProcessMessage(i string, c []byte) CreateProcessMessage {
 	return msg
 }
 
+// CreateFileMessage represents a ssh message of type create file
+// Inverse can be used to trigger a backcopy from device->client
+// if set to true, the ssh-agent on the device will start reading
+// the file and send it's content to the client.
+type CreateFileMessage struct {
+	MessageType
+	ID       string `json:"id"`
+	Filename string `json:"filename"`
+	Inverse  bool   `json:"inverse"`
+}
+
+// NewCreateFileMessage creates a new ssh message of type create process
+func NewCreateFileMessage(i, f string, in bool) CreateFileMessage {
+	msg := CreateFileMessage{}
+	msg.Type = CreateFileMessageType
+	msg.ID = i
+	msg.Filename = f
+	msg.Inverse = in
+
+	return msg
+}
+
 // ExecuteCommandMessage represents a ssh message of type execute command
 type ExecuteCommandMessage struct {
 	MessageType
@@ -57,6 +81,27 @@ func NewExecuteCommandMessage(i string, c []byte) ExecuteCommandMessage {
 	msg.Type = ExecuteCommandMessageType
 	msg.ID = i
 	msg.Command = c
+
+	return msg
+}
+
+// WriteToFileMessage represents a ssh message of type write to file
+type WriteToFileMessage struct {
+	MessageType
+	ID       string `json:"id"`
+	Filename string `json:"filename"`
+	Content  []byte `json:"content"`
+	EOF      bool   `json:"eof"`
+}
+
+// NewWriteToFileMessage creates a new ssh message of type execute command
+func NewWriteToFileMessage(i, f string, c []byte, e bool) WriteToFileMessage {
+	msg := WriteToFileMessage{}
+	msg.Type = WriteToFileMessageType
+	msg.ID = i
+	msg.Filename = f
+	msg.Content = c
+	msg.EOF = e
 
 	return msg
 }

@@ -119,10 +119,16 @@ func (req *CreateRequest) Validate() error {
 			fmt.Errorf("Missing registry"),
 		)
 	}
-	if req.Spec.Credentials.AWS == nil || req.Spec.Credentials.DockerHub == nil {
+	if req.Spec.Credentials.AWS == nil && req.Spec.Credentials.DockerHub == nil {
 		return errors.E(
 			errors.Validation,
 			fmt.Errorf("Missing credentials"),
+		)
+	}
+	if req.Spec.Credentials.AWS != nil && req.Spec.Credentials.DockerHub != nil {
+		return errors.E(
+			errors.Validation,
+			fmt.Errorf("Multiple credential providers are not allowed"),
 		)
 	}
 	if req.Spec.Credentials.AWS != nil {

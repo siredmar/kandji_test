@@ -64,7 +64,9 @@ func (m *NATSRepository) ListenForClientReg(deviceID string, sessionC chan strin
 			sessionC <- string(msg.Data)
 			m.nc.Publish(msg.Reply, []byte("OK"))
 		})
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 	return sub, nil
 }
@@ -115,7 +117,9 @@ func (m *NATSRepository) subscribe(deviceID string, sessionID string, channel st
 		sub, err = m.nc.Subscribe(subject, func(msg *nats.Msg) {
 			sshC <- msg.Data
 		})
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 	return sub, nil
 }
@@ -133,8 +137,11 @@ func (m *NATSRepository) ListenForClientPing(deviceID string) (*nats.Subscriptio
 		sub, err = m.nc.Subscribe(subject, func(msg *nats.Msg) {
 			m.nc.Publish(msg.Reply, []byte("Pong"))
 		})
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	return sub, nil
 }
 
