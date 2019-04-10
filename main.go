@@ -23,6 +23,7 @@ import (
 
 func main() {
 	root := cmd.NewRoot()
+	cmd.NewCopy(root.Command)
 	get := cmd.NewGet(root.Command)
 	label := cmd.NewLabel(root.Command)
 	patch := cmd.NewPatch(root.Command)

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/grid-x/ds-api/pkg/ssh"
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -66,39 +68,50 @@ func NewPortForward(parent *cobra.Command) *PortForward {
 
 			socketInputChannel := make(chan []byte)
 			socketOutputChannel := make(chan []byte)
+			sessionChannel := make(chan []byte)
+			interruptChannel := make(chan os.Signal, 1)
+			signal.Notify(interruptChannel, os.Interrupt)
 
 			connectionCache := make(map[string]net.Conn)
 
+			// asynchronously accepting connections on the listen port
 			go func() {
-				for {
-					conn, err := local.Accept()
-					if err != nil {
-						return
+				sessionID := <-sessionChannel
+				go func() {
+					for {
+						conn, err := local.Accept()
+						if err != nil {
+							return
+						}
+
+						u := uuid.New().String()
+						connectionCache[u] = conn
+
+						go readFromLocalConnection(conn, u, socketInputChannel, string(sessionID))
 					}
+				}()
 
-					u := uuid.New().String()
-					connectionCache[u] = conn
-
-					go handleConnection(conn, u, socketInputChannel, socketOutputChannel)
-				}
+				// Support ctrl+c to exit the forwarding
+				go func() {
+					for {
+						<-interruptChannel
+						msg := ssh.NewExecuteCommandMessage(string(sessionID), []byte("exit\r\n"))
+						m, err := json.Marshal(msg)
+						if err != nil {
+							fmt.Println("Unknown error: ", err)
+							break
+						}
+						socketInputChannel <- m
+						time.Sleep(1 * time.Second)
+						// Make sure exit message is forwarded to the device.
+						// The session will then be exited in background as dbclient might wait for some tcp connections to timeout
+						// and shutdown gracefully afterwards. This is however something we do not want to wait for
+						os.Exit(0)
+					}
+				}()
 			}()
 
-			// Support ctrl+c to exit
-
-			interruptChannel := make(chan os.Signal, 1)
-			defer close(interruptChannel)
-
-			signal.Notify(interruptChannel, os.Interrupt)
-			go func() {
-				for {
-					<-interruptChannel
-					socketInputChannel <- []byte("exit\r\n")
-					time.Sleep(1 * time.Second)
-					// Make sure exit is forwarded to the device. The session will then be exited in background
-					os.Exit(0)
-				}
-			}()
-
+			// Read websocket outputs from the device and forward them to the belonging connection
 			go func() {
 				for {
 					b := <-socketOutputChannel
@@ -110,9 +123,20 @@ func NewPortForward(parent *cobra.Command) *PortForward {
 				}
 			}()
 
+			// Setup SSH connection
 			// LOCALPORT will be replaced with a free port on the device by the ssh-agent
-			sshCommand := fmt.Sprintf("/dbclient -y -L LOCALPORT:%s root@127.0.0.1", portForwardCmdTarget)
-			err = createSession(client, deviceID, "Connecting to the device...", sshCommand, socketInputChannel, socketOutputChannel)
+			conf := &SSHConfig{
+				Client:         client,
+				DeviceID:       deviceID,
+				WaitText:       "Connecting to the device...",
+				InitCommand:    fmt.Sprintf("/dbclient -y -L LOCALPORT:%s root@127.0.0.1", portForwardCmdTarget),
+				InputChannel:   socketInputChannel,
+				OutputChannel:  socketOutputChannel,
+				SessionChannel: sessionChannel,
+				Silent:         false,
+			}
+
+			err = createSession(conf)
 			if err != nil {
 				return err
 			}
@@ -133,11 +157,7 @@ func NewPortForward(parent *cobra.Command) *PortForward {
 	}
 }
 
-func handleConnection(local net.Conn, uuid string, socketInputChannel, socketOutputChannel chan []byte) {
-	go readFromLocalConnection(local, uuid, socketInputChannel)
-}
-
-func readFromLocalConnection(local net.Conn, uuid string, socketInputChannel chan []byte) {
+func readFromLocalConnection(local net.Conn, uuid string, socketInputChannel chan []byte, sessionID string) {
 	buf := make([]byte, 32*1024)
 	for {
 		nr, err := local.Read(buf)
@@ -146,8 +166,16 @@ func readFromLocalConnection(local net.Conn, uuid string, socketInputChannel cha
 		}
 		if nr > 0 {
 			// Port forward messages are prefixed with a 36 char uuid v4 to allow multiple concurrent connections
-			msg := append([]byte(uuid), buf[0:nr]...)
-			socketInputChannel <- msg
+			content := append([]byte(uuid), buf[0:nr]...)
+
+			msg := ssh.NewExecuteCommandMessage(sessionID, content)
+			m, err := json.Marshal(msg)
+			if err != nil {
+				fmt.Println("Unknown error: ", err)
+				break
+			}
+
+			socketInputChannel <- m
 		}
 	}
 }

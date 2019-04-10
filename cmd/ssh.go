@@ -23,6 +23,17 @@ type SSH struct {
 	Command *cobra.Command
 }
 
+type SSHConfig struct {
+	Client         *client.APIClient
+	DeviceID       string
+	WaitText       string
+	InitCommand    string
+	InputChannel   chan []byte
+	OutputChannel  chan []byte
+	SessionChannel chan []byte
+	Silent         bool
+}
+
 func NewSSH(parent *cobra.Command) *SSH {
 	var sshCmd = &cobra.Command{
 		Use:                   "ssh ID [OPTIONS]",
@@ -65,6 +76,8 @@ func NewSSH(parent *cobra.Command) *SSH {
 			defer close(input)
 			output := make(chan []byte)
 			defer close(output)
+			session := make(chan []byte)
+			defer close(session)
 
 			t, _ := term.Open("/dev/tty")
 			term.RawMode(t)
@@ -80,17 +93,36 @@ func NewSSH(parent *cobra.Command) *SSH {
 
 			// Forward input to SSH session
 			go func() {
+				sessionID := string(<-session)
 				for {
 					b, err := getChar(t)
 					if err != nil {
 						fmt.Println("Unknown error: ", err)
 						break
 					}
-					input <- b
+					msg := ssh.NewExecuteCommandMessage(sessionID, b)
+					m, err := json.Marshal(msg)
+					if err != nil {
+						fmt.Println("Unknown error: ", err)
+						break
+					}
+
+					input <- m
 				}
 			}()
 
-			err = createSession(client, deviceID, "Setting up ssh infrastructure...", initCommand, input, output)
+			conf := &SSHConfig{
+				Client:         client,
+				DeviceID:       deviceID,
+				WaitText:       "Setting up ssh infrastructure...",
+				InitCommand:    initCommand,
+				InputChannel:   input,
+				OutputChannel:  output,
+				SessionChannel: session,
+				Silent:         false,
+			}
+
+			err = createSession(conf)
 			if err != nil {
 				return err
 			}
@@ -111,13 +143,19 @@ func NewSSH(parent *cobra.Command) *SSH {
 	}
 }
 
-func createSession(client *client.APIClient, deviceID, waitText, initCommand string, inputChannel, outputChannel chan []byte) error {
+func createSession(conf *SSHConfig) error {
 	connectedChannel := make(chan int)
 	defer close(connectedChannel)
 
 	s := spin.New()
 	s.Set(spin.Box1)
 	go func() {
+		if conf.Silent {
+			for {
+				// Ignore it ;)
+				<-connectedChannel
+			}
+		}
 		for {
 			select {
 			case <-connectedChannel:
@@ -125,29 +163,28 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 				fmt.Print("Connection established!\r\n")
 				return
 			default:
-				fmt.Printf("\r\033[36m%s\033[m %s", waitText, s.Next())
+				fmt.Printf("\r\033[36m%s\033[m %s", conf.WaitText, s.Next())
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}()
 
-	endpoint := fmt.Sprintf("%s/%s/ssh", api.DevicesEndpoint, deviceID)
+	endpoint := fmt.Sprintf("%s/%s/ssh", api.DevicesEndpoint, conf.DeviceID)
 
 	additionalHeaders := make(map[string]string)
-	if initCommand == "" {
-		initCommand = "/dbclient -y root@127.0.0.1"
+	init := conf.InitCommand
+	if init == "" {
+		init = "/dbclient -y root@127.0.0.1"
 	}
-	additionalHeaders["command"] = initCommand
+	additionalHeaders["command"] = init
 
-	conn, err := client.GetWebsocketConnection(endpoint, additionalHeaders)
+	conn, err := conf.Client.GetWebsocketConnection(endpoint, additionalHeaders)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
 	websocketWriter := NewWebsocketWriter(conn)
-
-	var processId string
 
 	// Exit channel
 	exitChannel := make(chan int)
@@ -170,6 +207,7 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 			var messageType ssh.MessageType
 
 			_, message, err := conn.ReadMessage()
+
 			if err != nil {
 				fmt.Println("Connection closed")
 				exitChannel <- 0
@@ -187,7 +225,7 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 				if err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
 				}
-				outputChannel <- output.Data
+				conf.OutputChannel <- output.Data
 			case ssh.ProcessCreatedMessageType:
 				connectedChannel <- 0
 
@@ -196,8 +234,10 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 				if err != nil {
 					fmt.Println("Not able to unmarshall process created. Closing connection...")
 				}
-				processId = created.ID
+				conf.SessionChannel <- []byte(created.ID)
 			case ssh.ProcessTerminatedMessageType:
+				exitChannel <- 0
+				return
 			case ssh.ErrorMessageType:
 				fmt.Println("Unknown error encountered... Closing")
 				exitChannel <- 0
@@ -211,9 +251,8 @@ func createSession(client *client.APIClient, deviceID, waitText, initCommand str
 	// Handle input and send it to the device
 	go func() {
 		for {
-			b := <-inputChannel
-			m := ssh.NewExecuteCommandMessage(processId, b)
-			err = websocketWriter.WriteJSON(m)
+			b := <-conf.InputChannel
+			err = websocketWriter.WriteMessage(websocket.TextMessage, b)
 			if err != nil {
 				exitChannel <- 0
 				break
