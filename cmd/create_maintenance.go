@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
 	mainv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/maintenance/v1beta1"
+	"github.com/spf13/cobra"
+
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"

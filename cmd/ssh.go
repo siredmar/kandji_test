@@ -216,11 +216,14 @@ func createSession(conf *SSHConfig) error {
 
 			switch messageType.Type {
 			case ssh.ProcessOutputMessageType:
+
 				var output ssh.ProcessOutputMessage
 				if err := json.Unmarshal(message, &output); err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
 				}
 				conf.OutputChannel <- output.Data
+			case ssh.WriteToFileMessageType:
+				conf.OutputChannel <- message
 			case ssh.ProcessCreatedMessageType:
 				connectedChannel <- 0
 

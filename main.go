@@ -66,7 +66,7 @@ func main() {
 	cmd.NewConfigDeleteDocker(configDelete.Command, client)
 
 	// Others
-	cmd.NewCopy(root.Command)
+	cmd.NewCopy(root.Command, client)
 	cmd.NewSSH(root.Command, client)
 	cmd.NewSyslog(root.Command, client)
 	cmd.NewPortForward(root.Command, client)
