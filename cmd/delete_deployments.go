@@ -5,17 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type DeleteDeployment struct {
 	Command *cobra.Command
 }
 
-func NewDeleteDeployment(parent *cobra.Command) *DeleteDeployment {
+func NewDeleteDeployment(parent *cobra.Command, client *client.APIClient) *DeleteDeployment {
 	var deleteDeploymentCmd = &cobra.Command{
 		Use:              "deployment ID [OPTIONS]",
 		TraverseChildren: true,
@@ -30,8 +30,6 @@ func NewDeleteDeployment(parent *cobra.Command) *DeleteDeployment {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing deployments to validate ids and autocomplete them if necessary
 			deployments, err := getDeployments(client)
 			if err != nil {

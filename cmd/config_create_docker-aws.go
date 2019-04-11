@@ -8,17 +8,17 @@ import (
 	configv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/config/v1beta1"
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type ConfigCreateDockerAWS struct {
 	Command *cobra.Command
 }
 
-func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
+func NewConfigCreateDockerAWS(parent *cobra.Command, client *client.APIClient) *ConfigCreateDockerAWS {
 	var configCreateDockerAWSCmd = &cobra.Command{
 		Use:                   "docker-aws REGISTRY --access-key=ACCESS_KEY --secret-access-key=SECRET_ACCESS_KEY --region=REGION --selector=SELECTOR [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -58,7 +58,6 @@ func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
 				}
 			}
 
-			client := client.NewAPIClient()
 			d := api.CreateDockerConfig{
 				Spec: &configv1beta1.DockerConfigSpec{
 					Registry: configCreateDockerAWSCmdRegistry,

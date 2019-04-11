@@ -5,18 +5,18 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	printer "github.com/grid-x/gxctl/pkg/printer"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetDeployments struct {
 	Command *cobra.Command
 }
 
-func NewGetDeployments(parent *cobra.Command) *GetDeployments {
+func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetDeployments {
 	var getDeploymentsCmd = &cobra.Command{
 		Use:                   "deployment [ID] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -26,9 +26,6 @@ func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 		Example:               "# Get all deployments \n  gxctl get deployments\n\n  # Get information about an deployment with abbreviation 3cc \n  gxctl get deployment 3cc",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
-
-			client := client.NewAPIClient()
-			printer := printer.NewPrinter()
 
 			if len(args) > 0 {
 				//Get multiple deployments
@@ -45,8 +42,7 @@ func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 						return err
 					}
 
-					err = printer.Print(deployment, getCmdOutputType)
-					if err != nil {
+					if err := printer.Print(deployment, getCmdOutputType); err != nil {
 						return err
 					}
 				}
@@ -57,8 +53,7 @@ func NewGetDeployments(parent *cobra.Command) *GetDeployments {
 					return err
 				}
 
-				err = printer.Print(deployments, getCmdOutputType)
-				if err != nil {
+				if err := printer.Print(deployments, getCmdOutputType); err != nil {
 					return err
 				}
 			}

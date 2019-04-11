@@ -12,17 +12,17 @@ import (
 	"github.com/grid-x/ds-api/pkg/ssh"
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type PortForward struct {
 	Command *cobra.Command
 }
 
-func NewPortForward(parent *cobra.Command) *PortForward {
+func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForward {
 	var portForwardCmd = &cobra.Command{
 		Use:                   "port-forward ID --localport=PORT --target=TARGET [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -45,8 +45,6 @@ func NewPortForward(parent *cobra.Command) *PortForward {
 			if portForwardCmdTarget == "" {
 				return errors.MissingParameter("target", "gxctl port-forward -h")
 			}
-
-			client := client.NewAPIClient()
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)
@@ -136,8 +134,7 @@ func NewPortForward(parent *cobra.Command) *PortForward {
 				Silent:         false,
 			}
 
-			err = createSession(conf)
-			if err != nil {
+			if err := createSession(conf); err != nil {
 				return err
 			}
 

@@ -13,10 +13,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type SSH struct {
@@ -34,7 +34,7 @@ type SSHConfig struct {
 	Silent         bool
 }
 
-func NewSSH(parent *cobra.Command) *SSH {
+func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 	var sshCmd = &cobra.Command{
 		Use:                   "ssh ID [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -57,8 +57,6 @@ func NewSSH(parent *cobra.Command) *SSH {
 				// Piped input
 				return fmt.Errorf("Piped input is currently not supported")
 			}
-
-			client := client.NewAPIClient()
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)
@@ -122,8 +120,7 @@ func NewSSH(parent *cobra.Command) *SSH {
 				Silent:         false,
 			}
 
-			err = createSession(conf)
-			if err != nil {
+			if err := createSession(conf); err != nil {
 				return err
 			}
 
@@ -213,16 +210,14 @@ func createSession(conf *SSHConfig) error {
 				exitChannel <- 0
 				break
 			}
-			err = json.Unmarshal(message, &messageType)
-			if err != nil {
+			if err := json.Unmarshal(message, &messageType); err != nil {
 				fmt.Println("Unknown message received. Closing connection...")
 			}
 
 			switch messageType.Type {
 			case ssh.ProcessOutputMessageType:
 				var output ssh.ProcessOutputMessage
-				err = json.Unmarshal(message, &output)
-				if err != nil {
+				if err := json.Unmarshal(message, &output); err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
 				}
 				conf.OutputChannel <- output.Data
@@ -230,8 +225,7 @@ func createSession(conf *SSHConfig) error {
 				connectedChannel <- 0
 
 				var created ssh.ProcessCreatedMessage
-				err = json.Unmarshal(message, &created)
-				if err != nil {
+				if err := json.Unmarshal(message, &created); err != nil {
 					fmt.Println("Not able to unmarshall process created. Closing connection...")
 				}
 				conf.SessionChannel <- []byte(created.ID)
@@ -252,8 +246,7 @@ func createSession(conf *SSHConfig) error {
 	go func() {
 		for {
 			b := <-conf.InputChannel
-			err = websocketWriter.WriteMessage(websocket.TextMessage, b)
-			if err != nil {
+			if err := websocketWriter.WriteMessage(websocket.TextMessage, b); err != nil {
 				exitChannel <- 0
 				break
 			}

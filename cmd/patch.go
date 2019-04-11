@@ -7,17 +7,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type Patch struct {
 	Command *cobra.Command
 }
 
-func NewPatch(parent *cobra.Command) *Patch {
+func NewPatch(parent *cobra.Command, client *client.APIClient) *Patch {
 	var patchCmd = &cobra.Command{
 		Use:                   "patch [OPTIONS]",
 		Short:                 "Patch different resources",
@@ -26,8 +26,6 @@ func NewPatch(parent *cobra.Command) *Patch {
 		Example:               "# Patch a deployment resource from file \n  gxctl patch -f deployment_new.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			patchCmdFilename, _ := cmd.Flags().GetString("filename")
-
-			client := client.NewAPIClient()
 
 			if patchCmdFilename == "" {
 				cmd.Usage()

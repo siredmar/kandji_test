@@ -6,17 +6,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type LabelDevice struct {
 	Command *cobra.Command
 }
 
-func NewLabelDevice(parent *cobra.Command) *LabelDevice {
+func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevice {
 	var labelDeviceCmd = &cobra.Command{
 		Use:                   "device ID KEY_1=VAL_1 ... KEY_N=VAL_N [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -33,8 +33,6 @@ func NewLabelDevice(parent *cobra.Command) *LabelDevice {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)
 			if err != nil {

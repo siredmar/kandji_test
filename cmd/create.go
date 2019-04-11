@@ -7,17 +7,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type Create struct {
 	Command *cobra.Command
 }
 
-func NewCreate(parent *cobra.Command) *Create {
+func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 	var createCmd = &cobra.Command{
 		Use:                   "create [OPTIONS]",
 		Short:                 "Create different resources",
@@ -26,8 +26,6 @@ func NewCreate(parent *cobra.Command) *Create {
 		Example:               "# Create a deployment resource from file \n  gxctl create -f deployment.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			createCmdFilename, _ := cmd.Flags().GetString("filename")
-
-			client := client.NewAPIClient()
 
 			if createCmdFilename == "" {
 				cmd.Usage()

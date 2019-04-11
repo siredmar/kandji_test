@@ -8,17 +8,17 @@ import (
 
 	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
 	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type CreateDeployment struct {
 	Command *cobra.Command
 }
 
-func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
+func NewCreateDeployment(parent *cobra.Command, client *client.APIClient) *CreateDeployment {
 	var createDeploymentCmd = &cobra.Command{
 		Use:                   "deployment IMAGE --app=APP --selector=SELECTOR [OPTIONS]",
 		Short:                 "Creates an deployment",
@@ -66,7 +66,6 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 
 			app := createDeploymentCmdApp
 
-			client := client.NewAPIClient()
 			d := api.CreateDeployment{Spec: &appsv1beta1.DeviceDeploymentSpec{
 				App: app,
 				Selector: appsv1beta1.Selector{
@@ -90,7 +89,6 @@ func NewCreateDeployment(parent *cobra.Command) *CreateDeployment {
 			}
 
 			fmt.Println(message)
-
 			return nil
 		},
 	}

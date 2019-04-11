@@ -9,17 +9,17 @@ import (
 	"github.com/pkg/term"
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type Syslog struct {
 	Command *cobra.Command
 }
 
-func NewSyslog(parent *cobra.Command) *Syslog {
+func NewSyslog(parent *cobra.Command, client *client.APIClient) *Syslog {
 	var syslogCmd = &cobra.Command{
 		Use:                   "syslog ID [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -32,8 +32,6 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)
 			if err != nil {

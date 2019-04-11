@@ -5,17 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type DeleteApplication struct {
 	Command *cobra.Command
 }
 
-func NewDeleteApplication(parent *cobra.Command) *DeleteApplication {
+func NewDeleteApplication(parent *cobra.Command, client *client.APIClient) *DeleteApplication {
 	var deleteApplicationCmd = &cobra.Command{
 		Use:                   "application NAME [OPTIONS]",
 		Aliases:               []string{"applications", "app", "apps"},
@@ -30,8 +30,6 @@ func NewDeleteApplication(parent *cobra.Command) *DeleteApplication {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			for _, d := range args {
 				msg, err := deleteApp(client, d)
 				if err != nil {

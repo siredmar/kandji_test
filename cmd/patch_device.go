@@ -6,17 +6,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type PatchDevice struct {
 	Command *cobra.Command
 }
 
-func NewPatchDevice(parent *cobra.Command) *PatchDevice {
+func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevice {
 	var patchDeviceCmd = &cobra.Command{
 		Use:                   "device ID [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -36,8 +36,6 @@ func NewPatchDevice(parent *cobra.Command) *PatchDevice {
 			if patchDeviceCmdMaintenanceWindow == "" && patchDeviceCmdMacAddress == "" && patchDeviceCmdLabels == "" {
 				return errors.NothingToDo("gxctl patch device -h")
 			}
-
-			client := client.NewAPIClient()
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)

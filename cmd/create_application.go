@@ -5,17 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type CreateApplication struct {
 	Command *cobra.Command
 }
 
-func NewCreateApplication(parent *cobra.Command) *CreateApplication {
+func NewCreateApplication(parent *cobra.Command, client *client.APIClient) *CreateApplication {
 	var createApplicationCmd = &cobra.Command{
 		Use:                   "application NAME [OPTIONS]",
 		Short:                 "Creates an application",
@@ -31,7 +31,6 @@ func NewCreateApplication(parent *cobra.Command) *CreateApplication {
 		Long: `TODO`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			createApplicationCmdName := args[0]
-			client := client.NewAPIClient()
 			d := api.CreateApplication{}
 
 			if createApplicationCmdName != "" {

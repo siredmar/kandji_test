@@ -5,18 +5,18 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	printer "github.com/grid-x/gxctl/pkg/printer"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetDevices struct {
 	Command *cobra.Command
 }
 
-func NewGetDevices(parent *cobra.Command) *GetDevices {
+func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetDevices {
 	var getDevicesCmd = &cobra.Command{
 		Use:                   "device [ID] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -26,9 +26,6 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 		Long:                  `Prints a list of all devices you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
-
-			client := client.NewAPIClient()
-			printer := printer.NewPrinter()
 
 			if len(args) > 0 {
 				//Get multiple devices
@@ -45,8 +42,7 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 						return err
 					}
 
-					err = printer.Print(device, getCmdOutputType)
-					if err != nil {
+					if err := printer.Print(device, getCmdOutputType); err != nil {
 						return err
 					}
 				}
@@ -57,8 +53,7 @@ func NewGetDevices(parent *cobra.Command) *GetDevices {
 					return err
 				}
 
-				err = printer.Print(devices, getCmdOutputType)
-				if err != nil {
+				if err := printer.Print(devices, getCmdOutputType); err != nil {
 					return err
 				}
 			}

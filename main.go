@@ -18,39 +18,59 @@ import (
 	"fmt"
 	"os"
 
-	cmd "github.com/grid-x/gxctl/cmd"
+	"github.com/grid-x/gxctl/cmd"
+
+	"github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/printer"
 )
 
 func main() {
+	client := client.NewAPIClient()
+	printer := printer.NewPrinter()
+
 	root := cmd.NewRoot()
-	cmd.NewCopy(root.Command)
+
+	// Get
 	get := cmd.NewGet(root.Command)
+	cmd.NewGetDevices(get.Command, client, printer)
+	cmd.NewGetPods(get.Command, client, printer)
+	cmd.NewGetDeployments(get.Command, client, printer)
+	cmd.NewGetApplications(get.Command, client, printer)
+
+	// Lablel
 	label := cmd.NewLabel(root.Command)
-	patch := cmd.NewPatch(root.Command)
+	cmd.NewLabelDevice(label.Command, client)
+
+	// Delete
 	delete := cmd.NewDelete(root.Command)
-	create := cmd.NewCreate(root.Command)
+	cmd.NewDeleteDeployment(delete.Command, client)
+	cmd.NewDeleteApplication(delete.Command, client)
+
+	// Patch
+	patch := cmd.NewPatch(root.Command, client)
+	cmd.NewPatchDevice(patch.Command, client)
+	cmd.NewPatchDeployment(patch.Command, client)
+
+	// Create
+	create := cmd.NewCreate(root.Command, client)
+	cmd.NewCreateApplication(create.Command, client)
+	cmd.NewCreateDeployment(create.Command, client)
+
+	// Config
 	config := cmd.NewConfig(root.Command)
 	configGet := cmd.NewConfigGet(config.Command)
 	configCreate := cmd.NewConfigCreate(config.Command)
 	configDelete := cmd.NewConfigDelete(config.Command)
-	cmd.NewSSH(root.Command)
-	cmd.NewSyslog(root.Command)
-	cmd.NewPortForward(root.Command)
+	cmd.NewConfigGetDocker(configGet.Command, client, printer)
+	cmd.NewConfigCreateDockerAWS(configCreate.Command, client)
+	cmd.NewConfigDeleteDocker(configDelete.Command, client)
+
+	// Others
+	cmd.NewCopy(root.Command)
+	cmd.NewSSH(root.Command, client)
+	cmd.NewSyslog(root.Command, client)
+	cmd.NewPortForward(root.Command, client)
 	cmd.NewCompletion(root.Command)
-	cmd.NewGetDevices(get.Command)
-	cmd.NewGetPods(get.Command)
-	cmd.NewGetDeployments(get.Command)
-	cmd.NewGetApplications(get.Command)
-	cmd.NewCreateApplication(create.Command)
-	cmd.NewCreateDeployment(create.Command)
-	cmd.NewPatchDevice(patch.Command)
-	cmd.NewPatchDeployment(patch.Command)
-	cmd.NewDeleteDeployment(delete.Command)
-	cmd.NewDeleteApplication(delete.Command)
-	cmd.NewLabelDevice(label.Command)
-	cmd.NewConfigGetDocker(configGet.Command)
-	cmd.NewConfigCreateDockerAWS(configCreate.Command)
-	cmd.NewConfigDeleteDocker(configDelete.Command)
 
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
