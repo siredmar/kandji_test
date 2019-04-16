@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grid-x/ds-api/pkg/ssh"
+	"github.com/schollz/progressbar"
 	"github.com/spf13/cobra"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -122,6 +123,7 @@ func deviceToClient(source, dest, deviceID string, client *client.APIClient) err
 		Client:         client,
 		DeviceID:       deviceID,
 		WaitText:       "Connecting to the device...",
+		ReadyText:      "Starting file transfer...",
 		InitCommand:    fmt.Sprintf("/scp -S /dbclient root@127.0.0.1:%s /%s", source, tmpFileName),
 		InputChannel:   socketInputChannel,
 		OutputChannel:  socketOutputChannel,
@@ -248,10 +250,25 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 		}
 		socketInputChannel <- m
 
+		var size, written int64
+		var progress float32
+		var bar *progressbar.ProgressBar
+
+		fi, err := srcFile.Stat()
+		if err != nil {
+			size = 0
+			fmt.Println("Could not determine file size to display progress")
+		} else {
+			bar = progressbar.New(100)
+			size = fi.Size()
+		}
+
+		// Using a 32*1024 bytes buffer as done in io.Copy()
 		buf := make([]byte, 32*1024)
 		for {
 			n, err := srcFile.Read(buf)
 			if err != nil {
+				// EOF reached
 				msg := ssh.NewWriteToFileMessage(sessionID, tmpFileName, nil, true)
 				m, err := json.Marshal(msg)
 				if err != nil {
@@ -262,6 +279,11 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 				break
 			}
 			if n > 0 {
+				if size != 0 {
+					written += int64(n)
+					progress = float32(written) / float32(size) * 100
+					bar.Set64(int64(progress))
+				}
 				msg := ssh.NewWriteToFileMessage(sessionID, tmpFileName, buf[0:n], false)
 				m, err := json.Marshal(msg)
 				if err != nil {
@@ -271,12 +293,14 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 				socketInputChannel <- m
 			}
 		}
+		fmt.Println("\r\nThe file has been successfully transferred. Finishing...")
 	}()
 
 	conf := &SSHConfig{
 		Client:         client,
 		DeviceID:       deviceID,
 		WaitText:       "Connecting to the device...",
+		ReadyText:      "Starting file transfer...",
 		InitCommand:    "",
 		InputChannel:   socketInputChannel,
 		OutputChannel:  socketOutputChannel,

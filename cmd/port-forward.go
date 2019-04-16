@@ -93,6 +93,7 @@ func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForwar
 				go func() {
 					for {
 						<-interruptChannel
+						fmt.Println("\nClosing session...")
 						msg := ssh.NewExecuteCommandMessage(string(sessionID), []byte("exit\r\n"))
 						m, err := json.Marshal(msg)
 						if err != nil {
@@ -127,6 +128,7 @@ func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForwar
 				Client:         client,
 				DeviceID:       deviceID,
 				WaitText:       "Connecting to the device...",
+				ReadyText:      "Serving on local port " + portForwardCmdLocalPort,
 				InitCommand:    fmt.Sprintf("/dbclient -y -L LOCALPORT:%s root@127.0.0.1", portForwardCmdTarget),
 				InputChannel:   socketInputChannel,
 				OutputChannel:  socketOutputChannel,
