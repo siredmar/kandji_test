@@ -1,5 +1,5 @@
 hash: f61c4df45c796c5686456873a50b59607556eea2b3c1f7df8e5b5c3f731bbc24
-updated: 2019-04-10T10:45:51.051316+02:00
+updated: 2019-04-16T13:23:37.658472+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -61,6 +61,8 @@ imports:
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
 - name: github.com/mattn/go-runewidth
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/mitchellh/colorstring
+  version: d06e56a500db4d08c33db0b79461e7c9beafca2d
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/nats-io/go-nats
@@ -76,6 +78,8 @@ imports:
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
   - termios
+- name: github.com/schollz/progressbar
+  version: 0033c1b96c20c4b698d2200719507abe04b3b77a
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
