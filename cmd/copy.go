@@ -176,6 +176,12 @@ func deviceToClient(source, dest, deviceID string, client *client.APIClient) err
 		socketInputChannelNew <- m
 
 		f, err := os.OpenFile(dest, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Println("Unknown error: ", err)
+			return
+		}
+		defer f.Close()
+
 		for {
 			message := <-socketOutputChannelNew
 
@@ -195,7 +201,6 @@ func deviceToClient(source, dest, deviceID string, client *client.APIClient) err
 				break
 			}
 		}
-		f.Close()
 		fmt.Println("All done")
 		os.Exit(0)
 	}()
