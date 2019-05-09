@@ -293,15 +293,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var messageType ssh.MessageType
-		err = json.Unmarshal(message, &messageType)
-		if err != nil {
+		if err := json.Unmarshal(message, &messageType); err != nil {
 			break
 		}
 
 		switch messageType.Type {
 		case ssh.ProcessOutputMessageType:
-			err = c.WriteMessage(mt, message)
-			if err != nil {
+			if err := c.WriteMessage(mt, message); err != nil {
+				break
+			}
+		case ssh.CreateFileMessageType:
+			if err := c.WriteMessage(mt, message); err != nil {
+				break
+			}
+		case ssh.WriteToFileMessageType:
+			if err := c.WriteMessage(mt, message); err != nil {
 				break
 			}
 		case ssh.CreateProcessMessageType:
@@ -658,7 +664,7 @@ func TestSSHAgentConnect(t *testing.T) {
 			t.Fatalf("%v", err)
 		}
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(5 * time.Second)
 
 		// Simulate a register request by a client
 		err = natsRepo.RegisterAtDevice(deviceUUID, sessionUUID2, "bash", 3*time.Second)
@@ -808,6 +814,54 @@ func TestSSHAgentConnect(t *testing.T) {
 	}
 	if !cmp.Equal(outputMessage, outputNew) {
 		t.Errorf("unexpected response: %s", cmp.Diff(outputMessage, outputNew))
+	}
+
+	// Fake a device create file output for client2 and check if it's getting set into NATS subject
+	createFileMessage := ssh.NewCreateFileMessage(sessionUUID2, "text.txt", false)
+
+	err = socketWriter.WriteJSON(createFileMessage)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Correct output should get picked up by NATS subscriber for client2
+	var createFileMessageNew ssh.CreateFileMessage
+	err = json.Unmarshal(<-sshClientC2, &createFileMessageNew)
+
+	if string(createFileMessageNew.ID) != sessionUUID2 {
+		t.Fatalf("bad session id" + string(createFileMessageNew.ID))
+	}
+	if !cmp.Equal(createFileMessage, createFileMessageNew) {
+		t.Errorf("unexpected response: %s", cmp.Diff(createFileMessage, createFileMessageNew))
+	}
+
+	// Fake a device create file output for client2 and check if it's getting set into NATS subject
+	writeFileMessage := ssh.NewWriteToFileMessage(sessionUUID2, "text.txt", []byte("abcd"), false)
+
+	err = socketWriter.WriteJSON(writeFileMessage)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Correct output should get picked up by NATS subscriber for client2
+	var writeFileMessageNew ssh.WriteToFileMessage
+	err = json.Unmarshal(<-sshClientC2, &writeFileMessageNew)
+
+	if string(writeFileMessageNew.ID) != sessionUUID2 {
+		t.Fatalf("bad session id" + string(writeFileMessageNew.ID))
+	}
+	if !cmp.Equal(writeFileMessage, writeFileMessageNew) {
+		t.Errorf("unexpected response: %s", cmp.Diff(writeFileMessage, writeFileMessageNew))
+	}
+
+	ws.Close()
+
+	time.Sleep(5 * time.Second)
+
+	// Simulate a ping request by a client
+	err = natsRepo.SendPingToDevice(deviceUUID, sessionUUID, 3*time.Second)
+	if err == nil {
+		t.Fatalf("Expected an error to occur...")
 	}
 
 	nc.Close()

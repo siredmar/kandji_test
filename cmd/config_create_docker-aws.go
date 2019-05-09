@@ -4,27 +4,27 @@ import (
 	"fmt"
 	"strings"
 
-	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
-	configv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/config/v1beta1"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
+	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type ConfigCreateDockerAWS struct {
 	Command *cobra.Command
 }
 
-func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
+func NewConfigCreateDockerAWS(parent *cobra.Command, client *client.APIClient) *ConfigCreateDockerAWS {
 	var configCreateDockerAWSCmd = &cobra.Command{
-		Use:                   "docker-aws REGISTRY --access-key=ACCESS_KEY --secret-access-key=SECRET_ACCESS_KEY --region=REGION --selector=SELECTOR [OPTIONS]",
+		Use:                   "docker-aws REGISTRY --access-key-id=ACCESS_KEY --secret-access-key=SECRET_ACCESS_KEY --region=REGION --selector=SELECTOR [OPTIONS]",
 		DisableFlagsInUseLine: true,
 		Short:                 "Creates a aws docker config",
 		Long:                  `TODO`,
-		Example:               "# Create a docker config \n  gxctl config create docker-aws https://485611583707.dkr.ecr.eu-central-1.amazonaws.com --access-key=FOO --secret-access-key=BAR --region=eu-central-1 --selector gridx.de/channel=stable",
+		Example:               "# Create a docker config \n  gxctl config create docker-aws https://485611583707.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=FOO --secret-access-key=BAR --region=eu-central-1 --selector gridx.de/channel=stable",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return errors.MissingParameter("REGISTRY", "gxctl config create docker-aws -h")
@@ -34,7 +34,7 @@ func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configCreateDockerAWSCmdRegistry := args[0]
-			configCreateDockerAWSCmdAccessKey, _ := cmd.Flags().GetString("access-key")
+			configCreateDockerAWSCmdAccessKey, _ := cmd.Flags().GetString("access-key-id")
 			configCreateDockerAWSCmdSecretAccessKey, _ := cmd.Flags().GetString("secret-access-key")
 			configCreateDockerAWSCmdRegion, _ := cmd.Flags().GetString("region")
 			configCreateDockerAWSCmdSelector, _ := cmd.Flags().GetString("selector")
@@ -58,16 +58,15 @@ func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
 				}
 			}
 
-			client := client.NewAPIClient()
 			d := api.CreateDockerConfig{
-				Spec: &configv1beta1.DockerConfigSpec{
+				Spec: &dockerConfigApi.DockerConfigSpec{
 					Registry: configCreateDockerAWSCmdRegistry,
-					Selector: appsv1beta1.Selector{
+					Selector: deploymentsApi.Selector{
 						MatchByLabels: matchByLabels,
 					},
-					Credentials: configv1beta1.DockerConfigCredentails{
-						AWS: &configv1beta1.AWSCredentialProvider{
-							AccessKey:       configCreateDockerAWSCmdAccessKey,
+					Credentials: dockerConfigApi.DockerConfigCredentails{
+						AWS: &dockerConfigApi.AWSCredentialProvider{
+							AccessKeyID:     configCreateDockerAWSCmdAccessKey,
 							SecretAccessKey: configCreateDockerAWSCmdSecretAccessKey,
 							Region:          configCreateDockerAWSCmdRegion,
 						},
@@ -85,7 +84,7 @@ func NewConfigCreateDockerAWS(parent *cobra.Command) *ConfigCreateDockerAWS {
 		},
 	}
 
-	configCreateDockerAWSCmd.Flags().StringP("access-key", "a", "", "AWS ACCESS_KEY")
+	configCreateDockerAWSCmd.Flags().StringP("access-key-id", "a", "", "AWS ACCESS_KEY_ID")
 	configCreateDockerAWSCmd.Flags().StringP("secret-access-key", "k", "", "AWS SECRET_ACCESS_KEY")
 	configCreateDockerAWSCmd.Flags().StringP("region", "r", "", "AWS Region")
 	configCreateDockerAWSCmd.Flags().StringP("selector", "s", "", "A space seperated list of labels to match a device eg. gridx.de/channel=stable gridx.de/area=west-1")

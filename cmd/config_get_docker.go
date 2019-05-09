@@ -5,18 +5,18 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	printer "github.com/grid-x/gxctl/pkg/printer"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type ConfigGetDocker struct {
 	Command *cobra.Command
 }
 
-func NewConfigGetDocker(parent *cobra.Command) *ConfigGetDocker {
+func NewConfigGetDocker(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *ConfigGetDocker {
 	var configGetDockerCmd = &cobra.Command{
 		Use:                   "docker [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -25,9 +25,6 @@ func NewConfigGetDocker(parent *cobra.Command) *ConfigGetDocker {
 		Long:                  `Prints a list of all docker configs you have access to`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
-
-			client := client.NewAPIClient()
-			printer := printer.NewPrinter()
 
 			if len(args) > 0 {
 				//Get multiple dockerConfigs
@@ -44,8 +41,7 @@ func NewConfigGetDocker(parent *cobra.Command) *ConfigGetDocker {
 						return err
 					}
 
-					err = printer.Print(config, getCmdOutputType)
-					if err != nil {
+					if err := printer.Print(config, getCmdOutputType); err != nil {
 						return err
 					}
 				}
@@ -56,8 +52,7 @@ func NewConfigGetDocker(parent *cobra.Command) *ConfigGetDocker {
 					return err
 				}
 
-				err = printer.Print(dockerConfigs, getCmdOutputType)
-				if err != nil {
+				if err := printer.Print(dockerConfigs, getCmdOutputType); err != nil {
 					return err
 				}
 			}

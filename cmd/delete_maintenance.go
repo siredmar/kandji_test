@@ -5,17 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type DeleteMaintenance struct {
 	Command *cobra.Command
 }
 
-func NewDeleteMaintenance(parent *cobra.Command) *DeleteMaintenance {
+func NewDeleteMaintenance(parent *cobra.Command, client *client.APIClient) *DeleteMaintenance {
 	var deleteMaintenanceCmd = &cobra.Command{
 		Use:              "maintenance ID [OPTIONS]",
 		TraverseChildren: true,
@@ -30,8 +30,6 @@ func NewDeleteMaintenance(parent *cobra.Command) *DeleteMaintenance {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing deployments to validate ids and autocomplete them if necessary
 			tasks, err := getMaintenanceTasks(client)
 			if err != nil {

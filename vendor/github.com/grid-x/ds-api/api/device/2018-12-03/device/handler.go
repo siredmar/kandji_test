@@ -385,8 +385,7 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 			logger.WithField("sessionID", sessionID).Infof("Starting new session")
 			init := ssh.NewCreateProcessMessage(sessionID, []byte(initCommand))
 
-			err := socketWriter.WriteJSON(init)
-			if err != nil {
+			if err := socketWriter.WriteJSON(init); err != nil {
 				logger.WithField("sessionID", sessionID).Errorf("Device could not init a new session! Reason: %s", err)
 			}
 		}
@@ -418,8 +417,7 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 				break
 			}
 
-			err = json.Unmarshal(message, &messageType)
-			if err != nil {
+			if err := json.Unmarshal(message, &messageType); err != nil {
 				handleWebsocketError(socketWriter, "Unmarshal error on the deviceChannel", "Internal server error", err, logger)
 				break
 			}
@@ -427,8 +425,7 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 			switch messageType.Type {
 			case ssh.ProcessOutputMessageType:
 				var output ssh.ProcessOutputMessage
-				err = json.Unmarshal(message, &output)
-				if err != nil {
+				if err := json.Unmarshal(message, &output); err != nil {
 					handleWebsocketError(socketWriter, "Not able to unmarshall process output", "Internal server error", err, logger)
 					break
 				}
@@ -439,12 +436,10 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 				}
 			case ssh.ProcessCreatedMessageType:
 				var created ssh.ProcessCreatedMessage
-				err = json.Unmarshal(message, &created)
-				if err != nil {
+				if err := json.Unmarshal(message, &created); err != nil {
 					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
 					break
 				}
-
 				// Forward to the client on session channel
 				if err = s.nats.PublishSSHMessageToClient(deviceID, created.ID, message); err != nil {
 					handleWebsocketError(socketWriter, "Not able to publish to ssh messages", "Internal server error", err, logger.WithField("sessionID", created.ID))
@@ -452,14 +447,35 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 				}
 			case ssh.ProcessTerminatedMessageType:
 				var terminated ssh.ProcessTerminatedMessage
-				err = json.Unmarshal(message, &terminated)
-				if err != nil {
+				if err := json.Unmarshal(message, &terminated); err != nil {
 					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
 					break
 				}
 				// Forward to the client on session channel
-				if err = s.nats.PublishSSHMessageToClient(deviceID, terminated.ID, message); err != nil {
+				if err := s.nats.PublishSSHMessageToClient(deviceID, terminated.ID, message); err != nil {
 					handleWebsocketError(socketWriter, "Not able to subscribe to ssh messages", "Internal server error", err, logger.WithField("sessionID", terminated.ID))
+					break
+				}
+			case ssh.CreateFileMessageType:
+				var createFile ssh.CreateFileMessage
+				if err := json.Unmarshal(message, &createFile); err != nil {
+					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+					break
+				}
+				// Forward to the client on session channel
+				if err = s.nats.PublishSSHMessageToClient(deviceID, createFile.ID, message); err != nil {
+					handleWebsocketError(socketWriter, "Not able to subscribe to ssh messages", "Internal server error", err, logger.WithField("sessionID", createFile.ID))
+					break
+				}
+			case ssh.WriteToFileMessageType:
+				var writeFile ssh.WriteToFileMessage
+				if err := json.Unmarshal(message, &writeFile); err != nil {
+					handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+					break
+				}
+				// Forward to the client on session channel
+				if err = s.nats.PublishSSHMessageToClient(deviceID, writeFile.ID, message); err != nil {
+					handleWebsocketError(socketWriter, "Not able to subscribe to ssh messages", "Internal server error", err, logger.WithField("sessionID", writeFile.ID))
 					break
 				}
 			default:
@@ -467,18 +483,17 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 			}
 		}
 
-		// At this point we stopt communicating with the device. Close sshClientC in order to exit the client loop and return
-		close(sshClientC)
-
 		// Remove Pod
 		logger.Infof("Deleting SSH pod")
 		ctx, cancel := context.WithTimeout(req.Context(), defaultTimeout)
 		defer cancel()
 
-		err := s.podClient.Delete(ctx, model.AccountNamespaceName(accountID), deviceID+"-ssh")
-		if err != nil {
+		if err := s.podClient.Delete(ctx, model.AccountNamespaceName(accountID), deviceID+"-ssh"); err != nil {
 			logger.Errorf("Pod '%s' could not be deleted after being inactive: %+v", deviceID+"-ssh", err)
 		}
+
+		// At this point we stopt communicating with the device. Close sshClientC in order to exit the client loop and return
+		close(sshClientC)
 	}()
 
 	var messageType ssh.RAWMessage
@@ -488,8 +503,7 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 			break
 		}
 
-		err = json.Unmarshal(msg, &messageType)
-		if err != nil {
+		if err := json.Unmarshal(msg, &messageType); err != nil {
 			handleWebsocketError(socketWriter, "Unmarshal error on the deviceChannel", "Internal server error", err, logger)
 			return
 		}
@@ -500,14 +514,37 @@ func (s *Service) SSHAgentConnect(conn *websocket.Conn, req *http.Request) {
 		switch messageType.Type {
 		case ssh.ExecuteCommandMessageType:
 			var execute ssh.ExecuteCommandMessage
-			err = json.Unmarshal(msg, &execute)
-			if err != nil {
+			if err := json.Unmarshal(msg, &execute); err != nil {
 				handleWebsocketError(socketWriter, "Not able to unmarshall execute command", "Internal server error", err, logger)
 				return
 			}
 
 			// Message could be correctly unmarshaled, forward it to the client
 			if err = socketWriter.WriteJSON(execute); err != nil {
+				handleWebsocketError(socketWriter, "Not able to forward message to the device", "Internal server error", err, logger)
+				return
+			}
+		case ssh.WriteToFileMessageType:
+			var write ssh.WriteToFileMessage
+			if err := json.Unmarshal(msg, &write); err != nil {
+				handleWebsocketError(socketWriter, "Not able to unmarshall write to file", "Internal server error", err, logger)
+				return
+			}
+
+			// Message could be correctly unmarshaled, forward it to the client
+			if err = socketWriter.WriteJSON(write); err != nil {
+				handleWebsocketError(socketWriter, "Not able to forward message to the device", "Internal server error", err, logger)
+				return
+			}
+		case ssh.CreateFileMessageType:
+			var create ssh.CreateFileMessage
+			if err := json.Unmarshal(msg, &create); err != nil {
+				handleWebsocketError(socketWriter, "Not able to unmarshall create file", "Internal server error", err, logger)
+				return
+			}
+
+			// Message could be correctly unmarshaled, forward it to the client
+			if err = socketWriter.WriteJSON(create); err != nil {
 				handleWebsocketError(socketWriter, "Not able to forward message to the device", "Internal server error", err, logger)
 				return
 			}

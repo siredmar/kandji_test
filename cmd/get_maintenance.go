@@ -5,18 +5,18 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	printer "github.com/grid-x/gxctl/pkg/printer"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type GetMaintenance struct {
 	Command *cobra.Command
 }
 
-func NewGetMaintenance(parent *cobra.Command) *GetMaintenance {
+func NewGetMaintenance(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetMaintenance {
 	var getMaintenanceCmd = &cobra.Command{
 		Use:     "maintenance",
 		Short:   "Get different maintenances",
@@ -25,9 +25,6 @@ func NewGetMaintenance(parent *cobra.Command) *GetMaintenance {
 		Example: "# Get all maintenance tasks \n  gxctl get maintenances\n\n  # Get information about an maintenance task with abbreviation a56 \n  gxctl get maintenance a56",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
-
-			client := client.NewAPIClient()
-			printer := printer.NewPrinter()
 
 			if len(args) > 0 {
 				//Get multiple maintenance tasks
@@ -44,8 +41,7 @@ func NewGetMaintenance(parent *cobra.Command) *GetMaintenance {
 						return err
 					}
 
-					err = printer.Print(task, getCmdOutputType)
-					if err != nil {
+					if err := printer.Print(task, getCmdOutputType); err != nil {
 						return err
 					}
 				}
@@ -56,8 +52,7 @@ func NewGetMaintenance(parent *cobra.Command) *GetMaintenance {
 					return err
 				}
 
-				err = printer.Print(tasks, getCmdOutputType)
-				if err != nil {
+				if err := printer.Print(tasks, getCmdOutputType); err != nil {
 					return err
 				}
 			}

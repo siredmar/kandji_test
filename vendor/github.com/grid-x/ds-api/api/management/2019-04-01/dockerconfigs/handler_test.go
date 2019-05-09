@@ -116,7 +116,7 @@ func Test_CreateRequest_Validate(t *testing.T) {
 			wantErr: true,
 			want:    nil,
 		},
-		{ // Test valid obne
+		{ // Test valid one
 			req:        &http.Request{},
 			injections: []interface{}{},
 			input: CreateRequest{
@@ -132,6 +132,33 @@ func Test_CreateRequest_Validate(t *testing.T) {
 							AccessKey:       "foo",
 							SecretAccessKey: "foo",
 							Region:          "foo",
+						},
+					},
+				},
+			},
+			wantErr: false,
+			want:    nil,
+		},
+		{ // Test multiple credential providers
+			req:        &http.Request{},
+			injections: []interface{}{},
+			input: CreateRequest{
+				Spec: &configv1beta1.DockerConfigSpec{
+					Selector: appsv1beta1.Selector{
+						MatchByLabels: map[string]string{
+							"foo": "bar",
+						},
+					},
+					Registry: "https://630781358184.dkr.ecr.eu-central-1.amazonaws.com",
+					Credentials: configv1beta1.DockerConfigCredentails{
+						AWS: &configv1beta1.AWSCredentialProvider{
+							AccessKey:       "foo",
+							SecretAccessKey: "foo",
+							Region:          "foo",
+						},
+						DockerHub: &configv1beta1.DockerHubCredentialProvider{
+							Username: "foo",
+							Password: "foo",
 						},
 					},
 				},

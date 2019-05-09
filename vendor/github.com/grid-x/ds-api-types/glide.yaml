@@ -1,0 +1,4 @@
+package: github.com/grid-x/ds-api-types
+import:
+- package: k8s.io/apimachinery/pkg/apis/meta/v1
+  version: "kubernetes-1.11.2"

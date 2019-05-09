@@ -894,20 +894,25 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var messageType ssh.MessageType
-		err = json.Unmarshal(message, &messageType)
-		if err != nil {
+		if err := json.Unmarshal(message, &messageType); err != nil {
 			break
 		}
 
 		switch messageType.Type {
 		case ssh.CreateProcessMessageType:
-			err = c.WriteMessage(mt, message)
-			if err != nil {
+			if err := c.WriteMessage(mt, message); err != nil {
 				break
 			}
 		case ssh.ExecuteCommandMessageType:
-			err = c.WriteMessage(mt, message)
-			if err != nil {
+			if err := c.WriteMessage(mt, message); err != nil {
+				break
+			}
+		case ssh.CreateFileMessageType:
+			if err := c.WriteMessage(mt, message); err != nil {
+				break
+			}
+		case ssh.WriteToFileMessageType:
+			if err := c.WriteMessage(mt, message); err != nil {
 				break
 			}
 		case ssh.ProcessCreatedMessageType:
@@ -1174,6 +1179,36 @@ func TestSSHCreate(t *testing.T) {
 
 	if !cmp.Equal(execute, executeNew) {
 		t.Errorf("unexpected response: %s", cmp.Diff(execute, executeNew))
+	}
+
+	// Issue a command on the client side and test if it gets into the NATS subject for the device
+	fileWrite := ssh.NewWriteToFileMessage(sessionUUID, "test.txt", []byte("abcd"), false)
+	err = ws.WriteJSON(fileWrite)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Correct command should get picked up by NATS subscriber for device
+	var fileWriteNew ssh.WriteToFileMessage
+	err = json.Unmarshal(<-sshDeviceC, &fileWriteNew)
+
+	if !cmp.Equal(fileWrite, fileWriteNew) {
+		t.Errorf("unexpected response: %s", cmp.Diff(fileWrite, fileWriteNew))
+	}
+
+	// Issue a command on the client side and test if it gets into the NATS subject for the device
+	fileCreate := ssh.NewCreateFileMessage(sessionUUID, "test.txt", false)
+	err = ws.WriteJSON(fileCreate)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// Correct command should get picked up by NATS subscriber for device
+	var fileCreateNew ssh.CreateFileMessage
+	err = json.Unmarshal(<-sshDeviceC, &fileCreateNew)
+
+	if !cmp.Equal(fileCreate, fileCreateNew) {
+		t.Errorf("unexpected response: %s", cmp.Diff(fileCreate, fileCreateNew))
 	}
 
 	nc.Close()

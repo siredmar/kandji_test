@@ -1,5 +1,5 @@
-hash: 7b06f4c395552df1a95ed01f7633672697acfa66adba6cf5d6704ecb80b0b3e1
-updated: 2019-04-02T22:08:15.257353+02:00
+hash: 9600cd5ad2e71a7445016c479300e1c6c330d0f38c9ce232d843984d3b3c866d
+updated: 2019-05-09T13:28:42.923762+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -28,9 +28,9 @@ imports:
 - name: github.com/gorilla/mux
   version: c5c6c98bc25355028a63748a498942a6398ccd22
 - name: github.com/gorilla/websocket
-  version: 0ec3d1bd7fe50c503d6df98ee649d81f4857c564
+  version: 80c2d40e9b91f2ef7a9c1a403aeec64d1b89a9a6
 - name: github.com/grid-x/ds-api
-  version: ac4a1c5835c99c194e59c8a4a5bfc36b779c61c5
+  version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
   - api
   - api/management/2018-11-02/devices
@@ -44,6 +44,8 @@ imports:
   - pkg/messaging
   - pkg/model
   - pkg/ssh
+- name: github.com/grid-x/ds-api-types
+  version: 171d1af69c91b8289e3efceda1cc5759ebb8bc86
 - name: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
   subpackages:
@@ -61,21 +63,25 @@ imports:
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
 - name: github.com/mattn/go-runewidth
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/mitchellh/colorstring
+  version: d06e56a500db4d08c33db0b79461e7c9beafca2d
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/nats-io/go-nats
-  version: c528ff487513eec69347b5598eb35d91f0a63820
+  version: 36d30b0ba7aa260ae25b4f3d312b2a700106fd78
   subpackages:
   - encoders/builtin
   - util
 - name: github.com/nats-io/nkeys
   version: 1546a3320a8f195a5b5c84aef8309377c2e411d5
 - name: github.com/nats-io/nuid
-  version: 3024a71c3cbe30667286099921591e6fcc328230
+  version: 4b96681fa6d28dd0ab5fe79bac63b3a493d9ee94
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
   - termios
+- name: github.com/schollz/progressbar
+  version: 8607ead5339fbde7efa7dafff8e2d4b5e3cd046b
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
@@ -83,7 +89,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/spf13/viper
-  version: 9e56dacc08fbbf8c9ee2dbc717553c758ce42bc9
+  version: 7a605a50e69cd1ea431c4a1e6eebe9b287ef6de4
 - name: github.com/tj/go-spin
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: golang.org/x/crypto

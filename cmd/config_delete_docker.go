@@ -5,17 +5,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type ConfigDeleteDocker struct {
 	Command *cobra.Command
 }
 
-func NewConfigDeleteDocker(parent *cobra.Command) *ConfigDeleteDocker {
+func NewConfigDeleteDocker(parent *cobra.Command, client *client.APIClient) *ConfigDeleteDocker {
 	var configDeleteDockerCmd = &cobra.Command{
 		Use:                   "docker ID [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -29,8 +29,6 @@ func NewConfigDeleteDocker(parent *cobra.Command) *ConfigDeleteDocker {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing dockerConfigs to validate ids and autocomplete them if necessary
 			dockerConfigs, err := getDockerConfigs(client)
 			if err != nil {

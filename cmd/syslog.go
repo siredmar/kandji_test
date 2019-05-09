@@ -1,23 +1,25 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/grid-x/ds-api/pkg/ssh"
 	"github.com/pkg/term"
 	"github.com/spf13/cobra"
 
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type Syslog struct {
 	Command *cobra.Command
 }
 
-func NewSyslog(parent *cobra.Command) *Syslog {
+func NewSyslog(parent *cobra.Command, client *client.APIClient) *Syslog {
 	var syslogCmd = &cobra.Command{
 		Use:                   "syslog ID [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -30,8 +32,6 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := client.NewAPIClient()
-
 			//Lookup all existing devices to validate ids and autocomplete them if necessary
 			devices, err := getDevices(client)
 			if err != nil {
@@ -48,6 +48,8 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 			defer close(input)
 			output := make(chan []byte)
 			defer close(output)
+			session := make(chan []byte)
+			defer close(session)
 
 			// Forward output from SSH session
 			go func() {
@@ -62,17 +64,31 @@ func NewSyslog(parent *cobra.Command) *Syslog {
 
 			// Forward input to SSH session
 			go func() {
+				sessionID := string(<-session)
 				for {
 					b, err := getChar(t)
 					if err != nil {
 						fmt.Println("Unknown error: ", err)
 						break
 					}
+					msg := ssh.NewExecuteCommandMessage(sessionID, b)
+					_, err = json.Marshal(msg)
 					input <- b
 				}
 			}()
 
-			err = createSession(client, deviceID, "Connecting to the device...", "/dbclient -y root@127.0.0.1 'journalctl -f'", input, output)
+			conf := &SSHConfig{
+				Client:         client,
+				DeviceID:       deviceID,
+				WaitText:       "Connecting to the device...",
+				InitCommand:    "/dbclient -y root@127.0.0.1 'journalctl -f'",
+				InputChannel:   input,
+				OutputChannel:  output,
+				SessionChannel: session,
+				Silent:         false,
+			}
+
+			err = createSession(conf)
 			if err != nil {
 				return err
 			}

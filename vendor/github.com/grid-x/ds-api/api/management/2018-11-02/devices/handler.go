@@ -645,8 +645,7 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 				return
 			case <-connectionTick.C:
 				// Ping the device handler
-				err = s.nats.SendPingToDevice(deviceID, sessionID, 2*time.Second)
-				if err == nil {
+				if err := s.nats.SendPingToDevice(deviceID, sessionID, 2*time.Second); err == nil {
 					connected = true
 				}
 			}
@@ -658,8 +657,7 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 	logger.Infof("Got device connection")
 
 	// Register Session
-	err = s.nats.RegisterAtDevice(deviceID, sessionID, initCommand, 3*time.Second)
-	if err != nil {
+	if err := s.nats.RegisterAtDevice(deviceID, sessionID, initCommand, 3*time.Second); err != nil {
 		handleWebsocketError(socketWriter, "Client could not register new session", "Internal server error", err, logger)
 		return
 	}
@@ -686,8 +684,7 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 				break
 			}
 
-			err = json.Unmarshal(message, &messageType)
-			if err != nil {
+			if err := json.Unmarshal(message, &messageType); err != nil {
 				handleWebsocketError(socketWriter, "Unmarshal error on the clientChannel", "Internal server error", err, logger)
 				break
 			}
@@ -700,6 +697,18 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 					break
 				}
 			case ssh.ExecuteCommandMessageType:
+				// Forward to the device
+				if err = s.nats.PublishSSHMessageToDevice(deviceID, sessionID, message); err != nil {
+					handleWebsocketError(socketWriter, "Message could not be forwarded to the device", "Internal server error", err, logger)
+					break
+				}
+			case ssh.WriteToFileMessageType:
+				// Forward to the device
+				if err = s.nats.PublishSSHMessageToDevice(deviceID, sessionID, message); err != nil {
+					handleWebsocketError(socketWriter, "Message could not be forwarded to the device", "Internal server error", err, logger)
+					break
+				}
+			case ssh.CreateFileMessageType:
 				// Forward to the device
 				if err = s.nats.PublishSSHMessageToDevice(deviceID, sessionID, message); err != nil {
 					handleWebsocketError(socketWriter, "Message could not be forwarded to the device", "Internal server error", err, logger)
@@ -721,8 +730,7 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 			break
 		}
 
-		err = json.Unmarshal(msg, &messageType)
-		if err != nil {
+		if err := json.Unmarshal(msg, &messageType); err != nil {
 			handleWebsocketError(socketWriter, "Unmarshal error on the deviceChannel", "Internal server error", err, logger)
 			return
 		}
@@ -731,12 +739,10 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 		switch messageType.Type {
 		case ssh.ProcessOutputMessageType:
 			var output ssh.ProcessOutputMessage
-			err = json.Unmarshal(msg, &output)
-			if err != nil {
+			if err := json.Unmarshal(msg, &output); err != nil {
 				handleWebsocketError(socketWriter, "Not able to unmarshall process output", "Internal server error", err, logger)
 				return
 			}
-
 			// Message could be correctly unmarshaled, forward it to the client
 			if err = socketWriter.WriteJSON(output); err != nil {
 				handleWebsocketError(socketWriter, "Not able to forward message to the client", "Internal server error", err, logger)
@@ -744,12 +750,10 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 			}
 		case ssh.ProcessCreatedMessageType:
 			var created ssh.ProcessCreatedMessage
-			err = json.Unmarshal(msg, &created)
-			if err != nil {
+			if err := json.Unmarshal(msg, &created); err != nil {
 				handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
 				return
 			}
-
 			// Message could be correctly unmarshaled, forward it to the client
 			if err = socketWriter.WriteJSON(created); err != nil {
 				handleWebsocketError(socketWriter, "Not able to forward message to the client", "Internal server error", err, logger)
@@ -757,20 +761,39 @@ func (s *Service) SSHCreate(conn *websocket.Conn, req *http.Request) {
 			}
 		case ssh.ProcessTerminatedMessageType:
 			var terminated ssh.ProcessTerminatedMessage
-			err = json.Unmarshal(msg, &terminated)
-			if err != nil {
+			if err := json.Unmarshal(msg, &terminated); err != nil {
 				handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
 				return
 			}
-
 			// Message could be correctly unmarshaled, forward it to the client
 			if err = socketWriter.WriteJSON(terminated); err != nil {
 				handleWebsocketError(socketWriter, "Not able to forward message to the client", "Internal server error", err, logger)
 				return
 			}
-
 			// Process has terminated, exit
 			return
+		case ssh.CreateFileMessageType:
+			var createFile ssh.CreateFileMessage
+			if err := json.Unmarshal(msg, &createFile); err != nil {
+				handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+				return
+			}
+			// Message could be correctly unmarshaled, forward it to the client
+			if err = socketWriter.WriteJSON(createFile); err != nil {
+				handleWebsocketError(socketWriter, "Not able to forward message to the client", "Internal server error", err, logger)
+				return
+			}
+		case ssh.WriteToFileMessageType:
+			var writeFile ssh.WriteToFileMessage
+			if err := json.Unmarshal(msg, &writeFile); err != nil {
+				handleWebsocketError(socketWriter, "Not able to unmarshall process created", "Internal server error", err, logger)
+				return
+			}
+			// Message could be correctly unmarshaled, forward it to the client
+			if err = socketWriter.WriteJSON(writeFile); err != nil {
+				handleWebsocketError(socketWriter, "Not able to forward message to the client", "Internal server error", err, logger)
+				return
+			}
 		default:
 			logger.Infof("Received Agent an unknown message type: %v", string(msg))
 		}

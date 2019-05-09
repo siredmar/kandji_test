@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"strings"
 
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
+	maintenanceApi "github.com/grid-x/ds-api-types/management/2018-12-04/maintenance"
 	"github.com/spf13/cobra"
 
-	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
-	mainv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/maintenance/v1beta1"
-	api "github.com/grid-x/gxctl/pkg/api"
-	client "github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	template "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type CreateMaintenance struct {
 	Command *cobra.Command
 }
 
-func NewCreateMaintenance(parent *cobra.Command) *CreateMaintenance {
+func NewCreateMaintenance(parent *cobra.Command, client *client.APIClient) *CreateMaintenance {
 	var createMaintenanceCmd = &cobra.Command{
 		Use:                   "maintenance TYPE=restart/shutdown --selector=SELECTOR [OPTIONS]",
 		Short:                 "Creates an maintenance task",
@@ -46,11 +46,11 @@ func NewCreateMaintenance(parent *cobra.Command) *CreateMaintenance {
 				return errors.MissingParameter("SELECTOR", "gxctl create deployment -h")
 			}
 
-			var taskType mainv1beta1.MaintenanceTaskType
+			var taskType maintenanceApi.MaintenanceTaskType
 			if createMaintenanceCmdType == "restart" {
-				taskType = mainv1beta1.MaintenanceTaskTypeRestart
+				taskType = maintenanceApi.MaintenanceTaskTypeRestart
 			} else if createMaintenanceCmdType == "shutdown" {
-				taskType = mainv1beta1.MaintenanceTaskTypeShutdown
+				taskType = maintenanceApi.MaintenanceTaskTypeShutdown
 			}
 
 			matchByLabels := make(map[string]string)
@@ -62,10 +62,9 @@ func NewCreateMaintenance(parent *cobra.Command) *CreateMaintenance {
 				}
 			}
 
-			client := client.NewAPIClient()
-			d := api.CreateMaintenanceTask{Spec: &mainv1beta1.MaintenanceTaskSpec{
+			d := api.CreateMaintenanceTask{Spec: &maintenanceApi.MaintenanceTaskSpec{
 				Type: taskType,
-				Selector: appsv1beta1.Selector{
+				Selector: deploymentsApi.Selector{
 					MatchByLabels: matchByLabels,
 				},
 			}}
@@ -76,7 +75,6 @@ func NewCreateMaintenance(parent *cobra.Command) *CreateMaintenance {
 			}
 
 			fmt.Println(message)
-
 			return nil
 		},
 	}
