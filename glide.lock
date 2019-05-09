@@ -1,5 +1,5 @@
-hash: f61c4df45c796c5686456873a50b59607556eea2b3c1f7df8e5b5c3f731bbc24
-updated: 2019-04-16T13:23:37.658472+02:00
+hash: 9600cd5ad2e71a7445016c479300e1c6c330d0f38c9ce232d843984d3b3c866d
+updated: 2019-05-09T13:28:42.923762+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -28,7 +28,7 @@ imports:
 - name: github.com/gorilla/mux
   version: c5c6c98bc25355028a63748a498942a6398ccd22
 - name: github.com/gorilla/websocket
-  version: 0ec3d1bd7fe50c503d6df98ee649d81f4857c564
+  version: 80c2d40e9b91f2ef7a9c1a403aeec64d1b89a9a6
 - name: github.com/grid-x/ds-api
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
@@ -44,6 +44,8 @@ imports:
   - pkg/messaging
   - pkg/model
   - pkg/ssh
+- name: github.com/grid-x/ds-api-types
+  version: 171d1af69c91b8289e3efceda1cc5759ebb8bc86
 - name: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
   subpackages:
@@ -66,7 +68,7 @@ imports:
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/nats-io/go-nats
-  version: c528ff487513eec69347b5598eb35d91f0a63820
+  version: 36d30b0ba7aa260ae25b4f3d312b2a700106fd78
   subpackages:
   - encoders/builtin
   - util
@@ -79,7 +81,7 @@ imports:
   subpackages:
   - termios
 - name: github.com/schollz/progressbar
-  version: 0033c1b96c20c4b698d2200719507abe04b3b77a
+  version: 8607ead5339fbde7efa7dafff8e2d4b5e3cd046b
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra

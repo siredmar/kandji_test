@@ -1,0 +1,43 @@
+package v20190401
+
+import (
+	"github.com/grid-x/ds-api-types"
+	v20181128Deployment "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
+)
+
+// DockerConfig as exposed by this API version
+type DockerConfig struct {
+	Metadata types.Metadata     `json:"metadata,omitempty"`
+	Spec     DockerConfigSpec   `json:"spec"`
+	Status   DockerConfigStatus `json:"status"`
+}
+
+// DockerConfigSpec defines the desired state of DockerConfig
+type DockerConfigSpec struct {
+	Registry    string                       `json:"registry"`
+	Credentials DockerConfigCredentails      `json:"credentials"`
+	Selector    v20181128Deployment.Selector `json:"selector"`
+}
+
+// DockerConfigCredentails are containing credentials of different providers
+type DockerConfigCredentails struct {
+	AWS       *AWSCredentialProvider       `json:"aws,omitempty"`
+	DockerHub *DockerHubCredentialProvider `json:"dockerhub,omitempty"`
+}
+
+// AWSCredentialProvider contains credentials required to authenticate with AWS ECR
+type AWSCredentialProvider struct {
+	AccessKeyID     string `json:"accessKeyID"`
+	SecretAccessKey string `json:"secretAccessKey"`
+	Region          string `json:"region"`
+}
+
+// DockerHubCredentialProvider contains credentials required to authenticate with DockerHub
+type DockerHubCredentialProvider struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// DockerConfigStatus defines the observed state of DockerConfig
+type DockerConfigStatus struct {
+}

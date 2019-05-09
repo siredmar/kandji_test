@@ -14,6 +14,8 @@ import:
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
 - package: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
+- package: github.com/grid-x/ds-api-types
+  version: 171d1af69c91b8289e3efceda1cc5759ebb8bc86
 # Needed to fix to a5d413f7728c81fb97d96a2b722368945f651e78
 # vendor/github.com/nats-io/nkeys/strkey.go:92:17: undefined: ed25519.SeedSize
 - package: golang.org/x/crypto
