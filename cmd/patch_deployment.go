@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
 	"github.com/spf13/cobra"
 
-	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
@@ -64,7 +64,7 @@ func NewPatchDeployment(parent *cobra.Command, client *client.APIClient) *PatchD
 					matchByLabels[z[0]] = z[1]
 				}
 
-				deployment.Spec.Selector = appsv1beta1.Selector{
+				deployment.Spec.Selector = deploymentsApi.Selector{
 					MatchByLabels: matchByLabels,
 				}
 			}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	appsv1beta1 "github.com/grid-x/ds-k8s/pkg/apis/apps/v1beta1"
-	corev1beta1 "github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
+	podsApi "github.com/grid-x/ds-api-types/management/2018-11-28/pod"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
@@ -66,14 +66,14 @@ func NewCreateDeployment(parent *cobra.Command, client *client.APIClient) *Creat
 
 			app := createDeploymentCmdApp
 
-			d := api.CreateDeployment{Spec: &appsv1beta1.DeviceDeploymentSpec{
+			d := api.CreateDeployment{Spec: &deploymentsApi.DeviceDeploymentSpec{
 				App: app,
-				Selector: appsv1beta1.Selector{
+				Selector: deploymentsApi.Selector{
 					MatchByLabels: matchByLabels,
 				},
-				Template: appsv1beta1.PodTemplate{
-					Spec: corev1beta1.PodConfig{
-						Containers: []corev1beta1.Container{
+				Template: deploymentsApi.PodTemplate{
+					Spec: podsApi.PodConfig{
+						Containers: []podsApi.Container{
 							{
 								Name:  name,
 								Image: image,

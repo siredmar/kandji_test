@@ -186,19 +186,17 @@ func deviceToClient(source, dest, deviceID string, client *client.APIClient) err
 			message := <-socketOutputChannelNew
 
 			var writeFile ssh.WriteToFileMessage
-			if err := json.Unmarshal(message, &writeFile); err != nil {
-				fmt.Println("Error while getting create file message", err)
-				break
-			}
 
-			// Once EOF is reached exit the loop
-			if writeFile.EOF {
-				break
-			}
+			if err := json.Unmarshal(message, &writeFile); err == nil {
+				// If err != nil we might have got an plain process output which we are going to ignore
+				if writeFile.EOF {
+					break
+				}
 
-			if _, err := f.Write(writeFile.Content); err != nil {
-				fmt.Println("Error while writing to file", err)
-				break
+				if _, err := f.Write(writeFile.Content); err != nil {
+					fmt.Println("Error while writing to file", err)
+					break
+				}
 			}
 		}
 		fmt.Println("All done")

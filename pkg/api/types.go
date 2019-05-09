@@ -3,12 +3,12 @@ package api
 import (
 	"github.com/google/go-cmp/cmp"
 
-	devicesApi "github.com/grid-x/ds-api/api/management/2018-11-02/devices"
-	applicationsApi "github.com/grid-x/ds-api/api/management/2018-11-27/application"
-	deploymentsApi "github.com/grid-x/ds-api/api/management/2018-11-28/deployments"
-	maintenanceApi "github.com/grid-x/ds-api/api/management/2018-12-04/maintenance"
-	podsApi "github.com/grid-x/ds-api/api/management/2018-12-04/pods"
-	dockerConfigApi "github.com/grid-x/ds-api/api/management/2019-04-01/dockerconfigs"
+	devicesApi "github.com/grid-x/ds-api-types/management/2018-11-02/device"
+	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
+	podsApi "github.com/grid-x/ds-api-types/management/2018-11-28/pod"
+	maintenanceApi "github.com/grid-x/ds-api-types/management/2018-12-04/maintenance"
+	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
 )
 
 type FullObjectMeta struct {
