@@ -16,7 +16,8 @@ type DeviceDockerConfig struct {
 // DeviceDockerConfigSpec defines the desired state of DeviceDockerConfig
 type DeviceDockerConfigSpec struct {
 	// DeviceID is the ID of the device this config should applied to
-	DeviceID    string                  `json:"deviceID"`
+	DeviceID string `json:"deviceID"`
+	// Registry endpoint, eg. https://123456789.dkr.ecr.eu-central-1.amazonaws.com
 	Registry    string                  `json:"registry"`
 	Credentials DockerConfigCredentails `json:"credentials"`
 }
