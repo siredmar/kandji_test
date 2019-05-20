@@ -1,5 +1,5 @@
-hash: 9600cd5ad2e71a7445016c479300e1c6c330d0f38c9ce232d843984d3b3c866d
-updated: 2019-05-09T13:28:42.923762+02:00
+hash: c4ffaa4d89518717ec4218553c223e4b4a1b9adf8735a758155fe54d1b9fc458
+updated: 2019-05-14T16:02:13.486326+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -25,40 +25,28 @@ imports:
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
-- name: github.com/gorilla/mux
-  version: c5c6c98bc25355028a63748a498942a6398ccd22
 - name: github.com/gorilla/websocket
   version: 80c2d40e9b91f2ef7a9c1a403aeec64d1b89a9a6
 - name: github.com/grid-x/ds-api
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
-  - api
-  - api/management/2018-11-02/devices
-  - api/management/2018-11-27/application
-  - api/management/2018-11-28/deployments
-  - api/management/2018-12-04/maintenance
-  - api/management/2018-12-04/pods
-  - api/management/2019-04-01/dockerconfigs
-  - pkg/encoding
-  - pkg/errors
-  - pkg/messaging
-  - pkg/model
   - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: 171d1af69c91b8289e3efceda1cc5759ebb8bc86
+  version: e0dcda76748fadccb9e3cd22b6fed4d897595442
+  subpackages:
+  - management/2018-11-02/device
+  - management/2018-11-27/application
+  - management/2018-11-28/deployments
+  - management/2018-11-28/pod
+  - management/2018-12-04/maintenance
+  - management/2019-04-01/dockerconfigs
+  - management/2019-05-14/devicedockerconfigs
 - name: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
-  subpackages:
-  - pkg/apis/apps/v1beta1
-  - pkg/apis/config/v1beta1
-  - pkg/apis/core/v1beta1
-  - pkg/apis/maintenance/v1beta1
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kataras/tablewriter
   version: e063d29b7c2363c8e21a25fdb4109f03beb50230
-- name: github.com/konsorten/go-windows-terminal-sequences
-  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/landoop/tableprinter
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
 - name: github.com/mattn/go-runewidth
@@ -67,23 +55,12 @@ imports:
   version: d06e56a500db4d08c33db0b79461e7c9beafca2d
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
-- name: github.com/nats-io/go-nats
-  version: 36d30b0ba7aa260ae25b4f3d312b2a700106fd78
-  subpackages:
-  - encoders/builtin
-  - util
-- name: github.com/nats-io/nkeys
-  version: 1546a3320a8f195a5b5c84aef8309377c2e411d5
-- name: github.com/nats-io/nuid
-  version: 4b96681fa6d28dd0ab5fe79bac63b3a493d9ee94
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
   - termios
 - name: github.com/schollz/progressbar
   version: 8607ead5339fbde7efa7dafff8e2d4b5e3cd046b
-- name: github.com/sirupsen/logrus
-  version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/pflag
@@ -94,10 +71,6 @@ imports:
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: golang.org/x/crypto
   version: a5d413f7728c81fb97d96a2b722368945f651e78
-  subpackages:
-  - ed25519
-  - ed25519/internal/edwards25519
-  - ssh/terminal
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
@@ -112,7 +85,6 @@ imports:
   version: 95c6576299259db960f6c5b9b69ea52422860fce
   subpackages:
   - unix
-  - windows
 - name: golang.org/x/text
   version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
@@ -124,12 +96,8 @@ imports:
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
-- name: k8s.io/api
-  version: 73d903622b7391f3312dcbac6483fed484e185f8
-  subpackages:
-  - core/v1
 - name: k8s.io/apimachinery
-  version: 302974c03f7e50f16561ba237db776ab93594ef6
+  version: 103fd098999dc9c0c88536f5c9ad2e5da39373ae
   subpackages:
   - pkg/api/resource
   - pkg/apis/meta/v1
@@ -154,6 +122,4 @@ imports:
   - third_party/forked/golang/reflect
 - name: sigs.k8s.io/controller-runtime
   version: 67e28744a963c78a34108c3b52aadbc5e02f4384
-  subpackages:
-  - pkg/runtime/scheme
 testImports: []

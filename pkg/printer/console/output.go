@@ -51,6 +51,10 @@ func (c *ConsolePrinter) Print(v interface{}) error {
 		out = DockerConfigConsoleOutput{}.Map(v)
 	case api.DockerConfigs:
 		out = DockerConfigsConsoleOutput{}.Map(v).Sort()
+	case api.DeviceDockerConfig:
+		out = DeviceDockerConfigConsoleOutput{}.Map(v)
+	case api.DeviceDockerConfigs:
+		out = DeviceDockerConfigsConsoleOutput{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)
@@ -91,6 +95,10 @@ func (c *ConsolePrinter) PrintWide(v interface{}) error {
 		out = DockerConfigConsoleOutputWide{}.Map(v)
 	case api.DockerConfigs:
 		out = DockerConfigsConsoleOutputWide{}.Map(v).Sort()
+	case api.DeviceDockerConfig:
+		out = DeviceDockerConfigConsoleOutputWide{}.Map(v)
+	case api.DeviceDockerConfigs:
+		out = DeviceDockerConfigsConsoleOutputWide{}.Map(v).Sort()
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)

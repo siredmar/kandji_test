@@ -24,8 +24,18 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		Short:                 "get device",
 		Example:               "# Get all devices \n  gxctl get devices\n\n  # Get information about an device with abbreviation c72 \n  gxctl get device c72",
 		Long:                  `Prints a list of all devices you have access to`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
+
+			if getCmdShowDockerconfig && len(args) != 1 {
+				return errors.InvalidParameter("show-dockerconfig", "docker-configs can just be shown for a single device")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
 
 			if len(args) > 0 {
 				//Get multiple devices
@@ -37,13 +47,26 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 				deviceIDs := devices.GetIds()
 
 				for _, a := range args {
-					device, err := getDeviceById(client, a, deviceIDs)
-					if err != nil {
-						return err
-					}
+					if getCmdShowDockerconfig {
+						// Just show dockerconfig
+						configs, err := getDeviceDockerConfigs(client, a, deviceIDs)
+						if err != nil {
+							return err
+						}
 
-					if err := printer.Print(device, getCmdOutputType); err != nil {
-						return err
+						if err := printer.Print(configs, getCmdOutputType); err != nil {
+							return err
+						}
+					} else {
+						// List devices
+						device, err := getDeviceById(client, a, deviceIDs)
+						if err != nil {
+							return err
+						}
+
+						if err := printer.Print(device, getCmdOutputType); err != nil {
+							return err
+						}
 					}
 				}
 			} else {
@@ -60,7 +83,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 			return nil
 		},
 	}
-
+	getDevicesCmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
 	getDevicesCmd.SetHelpTemplate(template.HelpTemplate())
 	getDevicesCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDevicesCmd)
@@ -106,4 +129,24 @@ func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api
 	}
 
 	return device, nil
+}
+
+func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []string) (api.DeviceDockerConfigs, error) {
+	deviceID, err := api.LookupID(id, deviceIds)
+	if err != nil {
+		return api.DeviceDockerConfigs{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s/devicedockerconfigs", api.DevicesEndpoint, deviceID)
+	response, err := client.GetRequest(endpoint)
+	if err != nil {
+		return api.DeviceDockerConfigs{}, err
+	}
+
+	configs, err := api.NewDeviceDockerConfigs(response)
+	if err != nil {
+		return configs, err
+	}
+
+	return configs, nil
 }

@@ -277,3 +277,35 @@ func NewDockerConfigs(j []byte) (DockerConfigs, error) {
 	}
 	return d, nil
 }
+
+func NewDeviceDockerConfig(j []byte) (DeviceDockerConfig, error) {
+	d := DeviceDockerConfig{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	err = json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
+
+func NewDeviceDockerConfigs(j []byte) (DeviceDockerConfigs, error) {
+	d := DeviceDockerConfigs{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	err = json.Unmarshal(j, &d)
+
+	if err != nil {
+		return d, err
+	}
+	return d, nil
+}
