@@ -9,6 +9,7 @@ import (
 	podsApi "github.com/grid-x/ds-api-types/management/2018-11-28/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2018-12-04/maintenance"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
+	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-05-14/devicedockerconfigs"
 )
 
 type FullObjectMeta struct {
@@ -65,6 +66,12 @@ type DockerConfigs struct {
 }
 
 type CreateDockerConfig dockerConfigApi.CreateRequest
+
+type DeviceDockerConfig deviceDockerConfigApi.DeviceDockerConfig
+
+type DeviceDockerConfigs struct {
+	DeviceDockerConfigs []DeviceDockerConfig `json:"deviceDockerConfigs"`
+}
 
 func (d *Device) IsEmpty() bool {
 	if cmp.Diff(Device{}, *d) == "" {
@@ -254,6 +261,28 @@ func (d *DockerConfigs) IsEmpty() bool {
 func (d *DockerConfigs) GetIds() []string {
 	out := make([]string, len(d.DockerConfigs))
 	for _, con := range d.DockerConfigs {
+		out = append(out, con.Metadata.ID)
+	}
+	return out
+}
+
+func (d *DeviceDockerConfig) IsEmpty() bool {
+	if cmp.Diff(DeviceDockerConfig{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (d *DeviceDockerConfigs) IsEmpty() bool {
+	if len(d.DeviceDockerConfigs) == 0 {
+		return true
+	}
+	return false
+}
+
+func (d *DeviceDockerConfigs) GetIds() []string {
+	out := make([]string, len(d.DeviceDockerConfigs))
+	for _, con := range d.DeviceDockerConfigs {
 		out = append(out, con.Metadata.ID)
 	}
 	return out
