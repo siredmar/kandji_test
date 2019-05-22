@@ -195,6 +195,3 @@ $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-publickey
 # Get the docker config of a device
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-dockerconfig
 ```
-
-
-

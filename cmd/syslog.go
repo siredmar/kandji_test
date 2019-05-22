@@ -93,6 +93,8 @@ func NewSyslog(parent *cobra.Command, client *client.APIClient) *Syslog {
 				return err
 			}
 
+			t.Restore()
+
 			return nil
 		},
 	}

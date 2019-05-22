@@ -46,8 +46,8 @@ func (o PodConsoleOutputWide) Map(p api.Pod) PodConsoleOutputWide {
 	var images string
 	var containers string
 	for _, container := range p.Spec.Config.Containers {
-		images += fmt.Sprintf("%s\n", container.Image)
-		containers += fmt.Sprintf("%s\n", container.Name)
+		images += fmt.Sprintf("%s \n", container.Image)
+		containers += fmt.Sprintf("%s \n", container.Name)
 	}
 	o.Image = images
 	o.Containers = containers
