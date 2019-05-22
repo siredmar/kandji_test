@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	api "github.com/grid-x/gxctl/pkg/api"
-	auth "github.com/grid-x/gxctl/pkg/auth"
 	errors "github.com/grid-x/gxctl/pkg/error"
 )
 
@@ -21,23 +20,37 @@ const (
 	//baseURL = "127.0.0.1:8080"
 )
 
+type AuthConfig struct {
+	Profiles []struct {
+		Name    string `yaml:"name"`
+		Default bool   `yaml:"default,omitempty"`
+		Auth    struct {
+			Token string `yaml:"token"`
+		} `yaml:"auth"`
+	} `yaml:"profiles"`
+}
+
 type APIClient struct {
-	Http *http.Client
+	Http    *http.Client
+	Auth    *AuthConfig
+	Profile *string
 }
 
 type Error struct {
 	Message string `json:"error"`
 }
 
-func NewAPIClient() *APIClient {
+func NewAPIClient(auth *AuthConfig, profile *string) *APIClient {
 	return &APIClient{
-		Http: &http.Client{Timeout: 10 * time.Second},
+		Http:    &http.Client{Timeout: 10 * time.Second},
+		Auth:    auth,
+		Profile: profile,
 	}
 }
 
 //GetWebsocketConnection returns a websocket connection
 func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHeaders map[string]string) (*websocket.Conn, error) {
-	token, err := auth.GenerateJWTToken()
+	token, err := apiclient.getTokenFromAuthConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -95,14 +108,13 @@ func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, e
 }
 
 func internalRequest(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {
-	token, err := auth.GenerateJWTToken()
+	token, err := apiclient.getTokenFromAuthConfig()
 	if err != nil {
 		return nil, err
 	}
 
 	url := fmt.Sprintf("https://%s/%s", baseURL, endpoint)
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
-
 	if err != nil {
 		return nil, err
 	}
@@ -135,4 +147,34 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 	}
 
 	return bodyBytes, nil
+}
+
+func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
+	var token string
+
+	if len(apiclient.Auth.Profiles) == 0 {
+		return token, fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
+	}
+
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Default {
+			token = profile.Auth.Token
+		}
+	}
+
+	if token == "" && *apiclient.Profile == "" {
+		return token, fmt.Errorf("No default profile configured. Use --profile")
+	}
+
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Name == *apiclient.Profile {
+			token = profile.Auth.Token
+		}
+	}
+
+	if token == "" {
+		return token, fmt.Errorf("Profil %s not found", *apiclient.Profile)
+	}
+
+	return token, nil
 }

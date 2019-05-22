@@ -18,17 +18,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/grid-x/gxctl/cmd"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/grid-x/gxctl/cmd"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/printer"
 )
 
-func main() {
-	client := client.NewAPIClient()
-	printer := printer.NewPrinter()
+var (
+	cfgFile string
+	profile string
+	conf    client.AuthConfig
+)
 
+func main() {
 	root := cmd.NewRoot()
+
+	client := client.NewAPIClient(&conf, &profile)
+	printer := printer.NewPrinter()
 
 	// Get
 	get := cmd.NewGet(root.Command)
@@ -72,8 +80,33 @@ func main() {
 	cmd.NewPortForward(root.Command, client)
 	cmd.NewCompletion(root.Command)
 
+	// Init config
+	root.Command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
+	root.Command.PersistentFlags().StringVar(&profile, "profile", "", "profile to use")
+	cobra.OnInitialize(initConfig)
+
 	if err := root.Command.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("config")
+		viper.AddConfigPath("$HOME/.gxctl")
+		viper.AddConfigPath(".") // optionally look for config in the working directory
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println(err)
+	}
+
+	if err := viper.Unmarshal(&conf); err != nil {
+		fmt.Println(err)
 	}
 }
