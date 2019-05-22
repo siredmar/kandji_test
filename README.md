@@ -36,13 +36,19 @@ $ gxctl get apps testapp testapp2
 
 ## Operations
 
+* **config**   `gxctl config [ACTION] [TYPE] [flags]`
+* **copy**   `gxctl copy [SOURCE] [DESTIONATION] [flags]`
 * **create**   `gxctl create [[-f | ----filename]=Filename]`
-* **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
-* **patch**   `gxctl patch [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
 * **delete**   `gxctl delete [TYPE] [NAME] [flags]`
+* **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
+* **label**   `gxctl label [TYPE] [NAME] [flags]`
+* **patch**   `gxctl patch [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
+* **port-forward**   `gxctl port-forward [NAME] [LOCALPORT] [TARGET] [flags]`
+* **ssh**   `gxctl ssh [NAME] [flags]`
+* **syslog**   `gxctl syslog [NAME] [flags]`
 
 
-## Resource types
+## General resource types
 * **applications**   Abbreviated alias `application`,`app`
 * **devices**   Abbreviated alias `device`
 * **deployments**   Abbreviated alias `deployment`,`deploy`
@@ -63,7 +69,51 @@ $ gxctl [command] [TYPE] [NAME] -o=<output_format>
 
 ## Examples: Common operations
 
-`gxctl get` - List one or more resources.
+`gxctl config` - All device config related commands
+```shell
+# Get a List of docker configurations
+$ gxctl config get docker
+# Get a List of docker configurations and include additional information (such as selectors).
+$ gxctl config get docker -o wide
+# Create a docker config for AWS targeting all devices with label demo=demo
+$ gxctl config create docker-aws https://123456789.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=AAABBBCCCDDDEEE --secret-access-key=dpohx+EgPWQK+Fadsads123adeqwuIwnM4atH --region=eu-central-1 --selector demo=demo
+# Delete a docker configuration
+$ gxctl config delete docker 35e3dede-2b45-4212-82fb-b92f7d391e05 
+```
+
+`gxctl copy` - Copies files to devices
+```shell
+# Copy a local file to a device
+$ gxctl copy ./testfile.tar.gz 57e82f8e-08f4-48f9-8e75-28552d09701f:/opt/incoming/testfile.tar.gz
+# Copy a file from the device to the local machine
+$ gxctl copy 57e82f8e-08f4-48f9-8e75-28552d09701f:/opt/incoming/testfile.tar.gz ./testfile.tar.gz
+# Copy a local file using uuid abbreviation
+$ gxctl copy ./testfile.tar.gz 57e:/opt/incoming/testfile.tar.gz
+```
+
+`gxctl create` - Create a new resource
+
+```shell
+# Create a new deployment
+$ gxctl create -f new_deployment.json
+# Create a new app
+$ gxctl create app testapp
+# Create a new nginx deployment for app testapp
+$ gxctl create deployment nginx:1.15.8 -a testapp -s gridx.de/channel=stable
+```
+
+`gxctl delete` - Delete a existing resource
+
+```shell
+# Delete an app
+$ gxctl delete app testapp
+# Delete an Deployment using the uuid abbreviation
+$ gxctl delete deploy c78
+# Delete two Deployments using both uuid abbreviation and full qualified name
+$ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05 
+```
+
+`gxctl get` - List one or more resources
 
 ```shell
 # Get a List of all devices 
@@ -86,18 +136,20 @@ $ gxctl get deploy
 $ gxctl get deploy c78 -o wide
 ```
 
-`gxctl create` - Create a new resource.
+`gxctl label` - Labels different resources
 
 ```shell
-# Create a new deployment
-$ gxctl create -f new_deployment.json
-# Create a new app
-$ gxctl create app testapp
-# Create a new nginx deployment for app testapp
-$ gxctl create deployment nginx:1.15.8 -a testapp -s gridx.de/channel=stable
+# Add a new label to a device
+$ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test=test
+# Add multiple new labels to a device using uuid abbreviation
+$ gxctl label device 57e test=test demo=demo
+# Remove a label "test" from a device
+$ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test-
+# Remove a label "test" from a device and a new one
+$ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test- demo=demo
 ```
 
-`gxctl patch` - Patch a existing resource.
+`gxctl patch` - Patch a existing resource
 
 ```shell
 # Patch a device using a patchfile
@@ -110,14 +162,36 @@ $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-
 $ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
 ```
 
-`gxctl delete` - Delete a existing resource.
+`gxctl port-forward` - Forward an port from a device to a local port
 
 ```shell
-# Delete an app
-$ gxctl delete app testapp
-# Delete an Deployment using the uuid abbreviation
-$ gxctl delete deploy c78
-# Delete two Deployments using both uuid abbreviation and full qualified name
-$ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05 
+# Forward port 8080 from the device on local port 4444
+$ gxctl port-forward 57e82f8e-08f4-48f9-8e75-28552d09701f --localport 4444 --target 127.0.0.1:8080
+# Forward port 8080 from a machine in the same network as the device (eg. router)  on local port 4444
+$ gxctl port-forward 57e82f8e-08f4-48f9-8e75-28552d09701f --localport 4444 --target 192.168.0.1:8080
 ```
 
+`gxctl ssh` - SSH to a devie
+
+```shell
+# SSH to device 
+$ gxctl ssh 57e82f8e-08f4-48f9-8e75-28552d09701f
+# SSH to device and execute an inital command
+$ gxctl ssh -c "tail -f /var/log/syslog" 57e82f8e-08f4-48f9-8e75-28552d09701f
+```
+
+`gxctl syslog` - Stream device syslog
+
+```shell
+# Stream the current device syslog
+$ gxctl syslog 57e82f8e-08f4-48f9-8e75-28552d09701f
+```
+
+## Examples: Special operations
+
+```shell
+# Get the public key of a device
+$ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-publickey
+# Get the docker config of a device
+$ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-dockerconfig
+```

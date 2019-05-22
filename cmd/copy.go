@@ -28,7 +28,7 @@ const (
 
 func NewCopy(parent *cobra.Command, client *client.APIClient) *Copy {
 	var copyCmd = &cobra.Command{
-		Use:                   "copy ID SOURCE DESTINATION [OPTIONS]",
+		Use:                   "copy SOURCE DESTINATION [OPTIONS]",
 		DisableFlagsInUseLine: true,
 		Short:                 "forwards files to devices",
 		Example:               "# gxctl copy /tmp/test.conf c72:/opt/test.conf",

@@ -19,7 +19,6 @@ type DeviceConsoleOutputWide struct {
 	MaintenanceWindow string `header:"Maintenance Window"`
 	MACAddress        string `header:"MAC address"`
 	LastHeartbeat     string `header:"Last heartbeat"`
-	PublicKey         string `header:"Pubkey"`
 	Labels            string `header:"Labels"`
 }
 
@@ -46,12 +45,6 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	}
 	if d.Status.LastHeartbeat != "" {
 		o.LastHeartbeat = d.Status.LastHeartbeat
-	}
-	if d.Spec.PublicKey != nil {
-		o.PublicKey = *d.Spec.PublicKey
-		if len(o.PublicKey) > 50 {
-			o.PublicKey = o.PublicKey[0:50] + "..."
-		}
 	}
 	if d.Metadata.Labels != nil {
 		var s string

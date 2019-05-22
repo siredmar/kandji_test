@@ -26,9 +26,14 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		Long:                  `Prints a list of all devices you have access to`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
+			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 
 			if getCmdShowDockerconfig && len(args) != 1 {
 				return errors.InvalidParameter("show-dockerconfig", "docker-configs can just be shown for a single device")
+			}
+
+			if getCmdShowPublickey && len(args) != 1 {
+				return errors.InvalidParameter("show-publickey", "publickeys can just be shown for a single device")
 			}
 
 			return nil
@@ -36,6 +41,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
+			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 
 			if len(args) > 0 {
 				//Get multiple devices
@@ -47,7 +53,14 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 				deviceIDs := devices.GetIds()
 
 				for _, a := range args {
-					if getCmdShowDockerconfig {
+					if getCmdShowPublickey {
+						// Just show publickey
+						device, err := getDeviceById(client, a, deviceIDs)
+						if err != nil {
+							return err
+						}
+						fmt.Println(*device.Spec.PublicKey)
+					} else if getCmdShowDockerconfig {
 						// Just show dockerconfig
 						configs, err := getDeviceDockerConfigs(client, a, deviceIDs)
 						if err != nil {
@@ -58,7 +71,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 							return err
 						}
 					} else {
-						// List devices
+						// Print device
 						device, err := getDeviceById(client, a, deviceIDs)
 						if err != nil {
 							return err
@@ -84,6 +97,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		},
 	}
 	getDevicesCmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
+	getDevicesCmd.Flags().BoolP("show-publickey", "", false, "print the public key for a device")
 	getDevicesCmd.SetHelpTemplate(template.HelpTemplate())
 	getDevicesCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDevicesCmd)

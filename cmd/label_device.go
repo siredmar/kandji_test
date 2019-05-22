@@ -45,7 +45,12 @@ func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevic
 			m := make(map[string]string)
 			for _, pair := range args[1:] {
 				z := strings.Split(pair, "=")
-				m[z[0]] = z[1]
+				if len(z) == 1 {
+					m[z[0]] = ""
+				}
+				if len(z) == 2 {
+					m[z[0]] = z[1]
+				}
 			}
 
 			d.Metadata.Labels = m
