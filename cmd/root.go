@@ -14,6 +14,9 @@ func NewRoot() *Root {
 		SilenceUsage: true,
 		Short:        "gxctl controls the gridX device services",
 		Long:         `More info will come hier TODO`,
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
 	}
 
 	return &Root{

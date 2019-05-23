@@ -1,10 +1,12 @@
-hash: c4ffaa4d89518717ec4218553c223e4b4a1b9adf8735a758155fe54d1b9fc458
-updated: 2019-05-14T16:02:13.486326+02:00
+hash: c1cbb915a339879e713aaf509a93dd4ef39511ffc69a233f534c02e8e45bb500
+updated: 2019-05-23T10:08:52.99027+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/dustin/go-humanize
   version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
+- name: github.com/fsnotify/fsnotify
+  version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/gogo/protobuf
@@ -26,13 +28,13 @@ imports:
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/gorilla/websocket
-  version: 80c2d40e9b91f2ef7a9c1a403aeec64d1b89a9a6
+  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grid-x/ds-api
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
   - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: e0dcda76748fadccb9e3cd22b6fed4d897595442
+  version: dbdeae6135e82970a63933b32ba59ff5ec890742
   subpackages:
   - management/2018-11-02/device
   - management/2018-11-27/application
@@ -43,26 +45,52 @@ imports:
   - management/2019-05-14/devicedockerconfigs
 - name: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
+- name: github.com/hashicorp/hcl
+  version: 99e2f22d1c94b272184d97dd9d252866409100ab
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/printer
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kataras/tablewriter
   version: e063d29b7c2363c8e21a25fdb4109f03beb50230
 - name: github.com/landoop/tableprinter
   version: 8bd8c2576d278c0352b9cecd384e609b51943f28
+- name: github.com/magiconair/properties
+  version: de8848e004dd33dc07a2947b3d76f618a7fc7ef1
 - name: github.com/mattn/go-runewidth
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
 - name: github.com/mitchellh/colorstring
   version: d06e56a500db4d08c33db0b79461e7c9beafca2d
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/pelletier/go-toml
+  version: 728039f679cbcd4f6a54e080d2219a4c4928c546
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
   - termios
 - name: github.com/schollz/progressbar
-  version: 8607ead5339fbde7efa7dafff8e2d4b5e3cd046b
+  version: 07ba2d7b211fa8d13e6da8f863ecf68be2b9ec94
+- name: github.com/spf13/afero
+  version: 588a75ec4f32903aa5e39a2619ba6a4631e28424
+  subpackages:
+  - mem
+- name: github.com/spf13/cast
+  version: 8c9545af88b134710ab1cd196795e7f2388358d7
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
+- name: github.com/spf13/jwalterweatherman
+  version: 94f6ae3ed3bceceafa716478c5fbf8d29ca601a1
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/spf13/viper
