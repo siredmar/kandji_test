@@ -43,8 +43,8 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	if d.Spec.MACAddress != nil {
 		o.MACAddress = *d.Spec.MACAddress
 	}
-	if d.Status.LastHeartbeat != "" {
-		o.LastHeartbeat = d.Status.LastHeartbeat
+	if d.Status.LastHeartbeat != nil {
+		o.LastHeartbeat = d.Status.LastHeartbeat.String()
 	}
 	if d.Metadata.Labels != nil {
 		var s string
