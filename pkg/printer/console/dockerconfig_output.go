@@ -1,8 +1,6 @@
 package printer
 
 import (
-	"fmt"
-
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
@@ -43,12 +41,7 @@ func (o DockerConfigConsoleOutputWide) Map(d api.DockerConfig) DockerConfigConso
 	}
 
 	if d.Spec.Selector.MatchByLabels != nil {
-		var s string
-		for key, value := range d.Spec.Selector.MatchByLabels {
-			s += fmt.Sprintf("%s:%s\n", key, value)
-		}
-
-		o.Selector = s[:len(s)-1]
+		o.Selector = SortedString(d.Spec.Selector.MatchByLabels)
 	}
 
 	return o

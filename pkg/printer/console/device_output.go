@@ -1,8 +1,6 @@
 package printer
 
 import (
-	"fmt"
-
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
@@ -47,12 +45,7 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 		o.LastHeartbeat = d.Status.LastHeartbeat.String()
 	}
 	if d.Metadata.Labels != nil {
-		var s string
-		for key, value := range d.Metadata.Labels {
-			s += fmt.Sprintf("%s:%s\n", key, value)
-		}
-
-		o.Labels = s[:len(s)-1]
+		o.Labels = SortedString(d.Metadata.Labels)
 	}
 	return o
 }
