@@ -3,8 +3,10 @@ package printer
 import (
 	"errors"
 	"fmt"
-	"github.com/landoop/tableprinter"
 	"io"
+	"sort"
+
+	"github.com/landoop/tableprinter"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 )
@@ -109,4 +111,19 @@ func (c *ConsolePrinter) PrintWide(v interface{}) error {
 
 	printer.Print(out)
 	return nil
+}
+
+func SortedString(m map[string]string) string {
+	var s string
+
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		s += fmt.Sprintf("%s:%s\n", key, m[key])
+	}
+
+	return s[:len(s)-1]
 }

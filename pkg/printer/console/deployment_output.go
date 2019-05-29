@@ -18,12 +18,7 @@ func (o DeploymentConsoleOutput) Map(d api.Deployment) DeploymentConsoleOutput {
 	o.App = d.Spec.App
 
 	if d.Spec.Selector.MatchByLabels != nil {
-		var s string
-		for key, value := range d.Spec.Selector.MatchByLabels {
-			s += fmt.Sprintf("%s:%s\n", key, value)
-		}
-
-		o.Selector = s[:len(s)-1]
+		o.Selector = SortedString(d.Spec.Selector.MatchByLabels)
 	}
 
 	if d.Spec.Template.Spec.Containers != nil {
