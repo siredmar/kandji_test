@@ -26,6 +26,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 		Example:               "# Get all pods \n  gxctl get pods\n\n  # Get information about an pod with abbreviation a1n \n  gxctl get pod a1n",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdShowAll, _ := cmd.Flags().GetBool("all")
 
 			getCmdDeviceID, err := cmd.Flags().GetString("device-id")
 			if err != nil {
@@ -39,7 +40,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 					return err
 				}
 
-				if err := printer.Print(pods, getCmdOutputType); err != nil {
+				if err := printer.Print(pods, getCmdOutputType, getCmdShowAll); err != nil {
 					return err
 				}
 			} else if len(args) > 0 {
@@ -57,7 +58,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 						return err
 					}
 
-					if err := printer.Print(pod, getCmdOutputType); err != nil {
+					if err := printer.Print(pod, getCmdOutputType, getCmdShowAll); err != nil {
 						return err
 					}
 				}
@@ -68,7 +69,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 					return err
 				}
 
-				if err := printer.Print(pods, getCmdOutputType); err != nil {
+				if err := printer.Print(pods, getCmdOutputType, getCmdShowAll); err != nil {
 					return err
 				}
 			}
@@ -80,6 +81,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 	getPodsCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getPodsCmd)
 	getPodsCmd.Flags().StringP("device-id", "d", "", "specify device id")
+	getPodsCmd.Flags().BoolP("all", "", false, "show also unstarted pods")
 
 	return &GetPods{
 		Command: getPodsCmd,

@@ -41,7 +41,7 @@ func NewConfigGetDocker(parent *cobra.Command, client *client.APIClient, printer
 						return err
 					}
 
-					if err := printer.Print(config, getCmdOutputType); err != nil {
+					if err := printer.Print(config, getCmdOutputType, false); err != nil {
 						return err
 					}
 				}
@@ -52,7 +52,7 @@ func NewConfigGetDocker(parent *cobra.Command, client *client.APIClient, printer
 					return err
 				}
 
-				if err := printer.Print(dockerConfigs, getCmdOutputType); err != nil {
+				if err := printer.Print(dockerConfigs, getCmdOutputType, false); err != nil {
 					return err
 				}
 			}

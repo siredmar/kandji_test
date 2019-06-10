@@ -42,6 +42,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
 			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
+			getCmdShowAll, _ := cmd.Flags().GetBool("all")
 
 			if len(args) > 0 {
 				//Get multiple devices
@@ -67,7 +68,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 							return err
 						}
 
-						if err := printer.Print(configs, getCmdOutputType); err != nil {
+						if err := printer.Print(configs, getCmdOutputType, getCmdShowAll); err != nil {
 							return err
 						}
 					} else {
@@ -77,7 +78,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 							return err
 						}
 
-						if err := printer.Print(device, getCmdOutputType); err != nil {
+						if err := printer.Print(device, getCmdOutputType, getCmdShowAll); err != nil {
 							return err
 						}
 					}
@@ -89,7 +90,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 					return err
 				}
 
-				if err := printer.Print(devices, getCmdOutputType); err != nil {
+				if err := printer.Print(devices, getCmdOutputType, getCmdShowAll); err != nil {
 					return err
 				}
 			}
@@ -98,6 +99,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 	}
 	getDevicesCmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
 	getDevicesCmd.Flags().BoolP("show-publickey", "", false, "print the public key for a device")
+	getDevicesCmd.Flags().BoolP("all", "", false, "show also inactive devices")
 	getDevicesCmd.SetHelpTemplate(template.HelpTemplate())
 	getDevicesCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDevicesCmd)

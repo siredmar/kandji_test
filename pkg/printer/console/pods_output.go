@@ -9,9 +9,12 @@ import (
 type PodsConsoleOutput []PodConsoleOutput
 type PodsConsoleOutputWide []PodConsoleOutputWide
 
-func (po PodsConsoleOutput) Map(p api.Pods) PodsConsoleOutput {
+func (po PodsConsoleOutput) Map(p api.Pods, showAll bool) PodsConsoleOutput {
 	var out PodsConsoleOutput
 	for _, e := range p.Pods {
+		if !showAll && e.Status.StartTime == nil {
+			continue
+		}
 		out = append(out, PodConsoleOutput{}.Map(e))
 	}
 
@@ -26,9 +29,12 @@ func (po PodsConsoleOutput) Sort() PodsConsoleOutput {
 	return po
 }
 
-func (po PodsConsoleOutputWide) Map(p api.Pods) PodsConsoleOutputWide {
+func (po PodsConsoleOutputWide) Map(p api.Pods, showAll bool) PodsConsoleOutputWide {
 	var out PodsConsoleOutputWide
 	for _, e := range p.Pods {
+		if !showAll && e.Status.StartTime == nil {
+			continue
+		}
 		out = append(out, PodConsoleOutputWide{}.Map(e))
 	}
 

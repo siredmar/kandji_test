@@ -120,6 +120,8 @@ $ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05
 $ gxctl get devices
 # Get a List of all devices and include additional information (such as labels).
 $ gxctl get devices -o wide
+# get a List of all devices including the ones which were not yet online
+$ gxctl get devices --all
 # Get information of a single device
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f
 # Get information of a single device in json format
@@ -128,6 +130,8 @@ $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f -o json
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f 8st62f8e-22gd-ab45-ll23-115980970ab
 # Get a List of all pods 
 $ gxctl get pods
+# get a List of all pods including the ones which were not yet started 
+$ gxctl get pods --all
 # Get a List of all pods on a certain device
 $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
 # Get a List of all deployments 
