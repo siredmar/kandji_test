@@ -9,18 +9,24 @@ import (
 type DevicesConsoleOutput []DeviceConsoleOutput
 type DevicesConsoleOutputWide []DeviceConsoleOutputWide
 
-func (do DevicesConsoleOutput) Map(d api.Devices) DevicesConsoleOutput {
+func (do DevicesConsoleOutput) Map(d api.Devices, showAll bool) DevicesConsoleOutput {
 	var out DevicesConsoleOutput
 	for _, e := range d.Devices {
+		if !showAll && e.Status.LastHeartbeat == nil {
+			continue
+		}
 		out = append(out, DeviceConsoleOutput{}.Map(e))
 	}
 
 	return out
 }
 
-func (do DevicesConsoleOutputWide) Map(d api.Devices) DevicesConsoleOutputWide {
+func (do DevicesConsoleOutputWide) Map(d api.Devices, showAll bool) DevicesConsoleOutputWide {
 	var out DevicesConsoleOutputWide
 	for _, e := range d.Devices {
+		if !showAll && e.Status.LastHeartbeat == nil {
+			continue
+		}
 		out = append(out, DeviceConsoleOutputWide{}.Map(e))
 	}
 

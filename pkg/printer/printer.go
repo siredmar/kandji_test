@@ -29,16 +29,16 @@ func NewPrinter() *Printer {
 	}
 }
 
-func (p *Printer) Print(d interface{}, outputFormat string) error {
+func (p *Printer) Print(d interface{}, outputFormat string, showAll bool) error {
 	switch outputFormat {
 	case JSON:
 		return p.JSON.Print(d)
 	case YAML:
 		return p.YAML.Print(d)
 	case Console:
-		return p.Console.Print(d)
+		return p.Console.Print(d, showAll)
 	case ConsoleWide:
-		return p.Console.PrintWide(d)
+		return p.Console.PrintWide(d, showAll)
 	default:
 		return p.JSON.Print(d)
 	}

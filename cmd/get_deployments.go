@@ -42,7 +42,7 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 						return err
 					}
 
-					if err := printer.Print(deployment, getCmdOutputType); err != nil {
+					if err := printer.Print(deployment, getCmdOutputType, false); err != nil {
 						return err
 					}
 				}
@@ -53,7 +53,7 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 					return err
 				}
 
-				if err := printer.Print(deployments, getCmdOutputType); err != nil {
+				if err := printer.Print(deployments, getCmdOutputType, false); err != nil {
 					return err
 				}
 			}

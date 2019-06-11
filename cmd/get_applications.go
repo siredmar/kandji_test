@@ -35,7 +35,7 @@ func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer
 						return err
 					}
 
-					if err := printer.Print(application, getCmdOutputType); err != nil {
+					if err := printer.Print(application, getCmdOutputType, false); err != nil {
 						return err
 					}
 				}
@@ -46,7 +46,7 @@ func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer
 					return err
 				}
 
-				if err := printer.Print(applications, getCmdOutputType); err != nil {
+				if err := printer.Print(applications, getCmdOutputType, false); err != nil {
 					return err
 				}
 			}

@@ -41,7 +41,7 @@ func NewGetMaintenance(parent *cobra.Command, client *client.APIClient, printer 
 						return err
 					}
 
-					if err := printer.Print(task, getCmdOutputType); err != nil {
+					if err := printer.Print(task, getCmdOutputType, false); err != nil {
 						return err
 					}
 				}
@@ -52,7 +52,7 @@ func NewGetMaintenance(parent *cobra.Command, client *client.APIClient, printer 
 					return err
 				}
 
-				if err := printer.Print(tasks, getCmdOutputType); err != nil {
+				if err := printer.Print(tasks, getCmdOutputType, false); err != nil {
 					return err
 				}
 			}
