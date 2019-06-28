@@ -24,7 +24,7 @@ func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
 	o.ID = d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
 	if d.Spec.MaintenanceWindow != nil {
-		o.MaintenanceWindow = *d.Spec.MaintenanceWindow
+		o.MaintenanceWindow = d.Spec.MaintenanceWindow.String()
 	}
 	if d.Spec.MACAddress != nil {
 		o.MACAddress = *d.Spec.MACAddress
@@ -36,7 +36,7 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	o.ID = d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
 	if d.Spec.MaintenanceWindow != nil {
-		o.MaintenanceWindow = *d.Spec.MaintenanceWindow
+		o.MaintenanceWindow = d.Spec.MaintenanceWindow.String()
 	}
 	if d.Spec.MACAddress != nil {
 		o.MACAddress = *d.Spec.MACAddress

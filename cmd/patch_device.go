@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
@@ -47,7 +48,11 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			d := api.PatchDevice{}
 
 			if patchDeviceCmdMaintenanceWindow != "" {
-				d.Spec.MaintenanceWindow = &patchDeviceCmdMaintenanceWindow
+				w, err := devicesApi.NewMaintenanceWindow(patchDeviceCmdMaintenanceWindow)
+				if err != nil {
+					return err
+				}
+				d.Spec.MaintenanceWindow = w
 			}
 			if patchDeviceCmdMacAddress != "" {
 				d.Spec.MACAddress = &patchDeviceCmdMacAddress
