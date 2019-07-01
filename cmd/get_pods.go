@@ -8,7 +8,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	"github.com/grid-x/gxctl/pkg/printer"
+	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -16,7 +16,7 @@ type GetPods struct {
 	Command *cobra.Command
 }
 
-func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetPods {
+func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *print.Printer) *GetPods {
 	var getPodsCmd = &cobra.Command{
 		Use:                   "pod [NAME] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -27,6 +27,11 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 			getCmdShowAll, _ := cmd.Flags().GetBool("all")
+
+			printerConfig := print.Printconfig{
+				OutputFormat: getCmdOutputType,
+				ShowAll:      getCmdShowAll,
+			}
 
 			getCmdDeviceID, err := cmd.Flags().GetString("device-id")
 			if err != nil {
@@ -40,7 +45,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 					return err
 				}
 
-				if err := printer.Print(pods, getCmdOutputType, getCmdShowAll); err != nil {
+				if err := printer.Print(pods, printerConfig); err != nil {
 					return err
 				}
 			} else if len(args) > 0 {
@@ -58,7 +63,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 						return err
 					}
 
-					if err := printer.Print(pod, getCmdOutputType, getCmdShowAll); err != nil {
+					if err := printer.Print(pod, printerConfig); err != nil {
 						return err
 					}
 				}
@@ -69,7 +74,7 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *printe
 					return err
 				}
 
-				if err := printer.Print(pods, getCmdOutputType, getCmdShowAll); err != nil {
+				if err := printer.Print(pods, printerConfig); err != nil {
 					return err
 				}
 			}

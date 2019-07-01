@@ -15,6 +15,11 @@ type ConsolePrinter struct {
 	Target io.Writer
 }
 
+type ConsolePrintconfig struct {
+	SortBy  string
+	ShowAll bool
+}
+
 func NewConsolePrinter(t io.Writer) *ConsolePrinter {
 	return &ConsolePrinter{
 		Target: t,
@@ -25,18 +30,18 @@ type printClient interface {
 	Print(v interface{})
 }
 
-func (c *ConsolePrinter) Print(v interface{}, showAll bool) error {
+func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintconfig) error {
 	var out interface{}
 
 	switch v := v.(type) {
 	case api.Device:
 		out = DeviceConsoleOutput{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutput{}.Map(v, showAll).Sort()
+		out = DevicesConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutput{}.Map(v, showAll).Sort()
+		out = PodsConsoleOutput{}.Map(v, config.ShowAll).Sort()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v)
 	case api.Deployments:
@@ -69,18 +74,18 @@ func (c *ConsolePrinter) Print(v interface{}, showAll bool) error {
 	return nil
 }
 
-func (c *ConsolePrinter) PrintWide(v interface{}, showAll bool) error {
+func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintconfig) error {
 	var out interface{}
 
 	switch v := v.(type) {
 	case api.Device:
 		out = DeviceConsoleOutputWide{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutputWide{}.Map(v, showAll).Sort()
+		out = DevicesConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutputWide{}.Map(v, showAll).Sort()
+		out = PodsConsoleOutputWide{}.Map(v, config.ShowAll).Sort()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v) //TODO make wide mapping
 	case api.Deployments:

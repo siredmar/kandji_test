@@ -8,7 +8,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	"github.com/grid-x/gxctl/pkg/printer"
+	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -16,7 +16,7 @@ type GetDevices struct {
 	Command *cobra.Command
 }
 
-func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetDevices {
+func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *print.Printer) *GetDevices {
 	var getDevicesCmd = &cobra.Command{
 		Use:                   "device [ID] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -40,9 +40,16 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdSortBy, _ := cmd.Flags().GetString("sort-by")
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
 			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 			getCmdShowAll, _ := cmd.Flags().GetBool("all")
+
+			printerConfig := print.Printconfig{
+				OutputFormat: getCmdOutputType,
+				SortBy:       getCmdSortBy,
+				ShowAll:      getCmdShowAll,
+			}
 
 			if len(args) > 0 {
 				//Get multiple devices
@@ -68,7 +75,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 							return err
 						}
 
-						if err := printer.Print(configs, getCmdOutputType, getCmdShowAll); err != nil {
+						if err := printer.Print(configs, printerConfig); err != nil {
 							return err
 						}
 					} else {
@@ -78,7 +85,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 							return err
 						}
 
-						if err := printer.Print(device, getCmdOutputType, getCmdShowAll); err != nil {
+						if err := printer.Print(device, printerConfig); err != nil {
 							return err
 						}
 					}
@@ -90,7 +97,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 					return err
 				}
 
-				if err := printer.Print(devices, getCmdOutputType, getCmdShowAll); err != nil {
+				if err := printer.Print(devices, printerConfig); err != nil {
 					return err
 				}
 			}

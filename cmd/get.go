@@ -21,6 +21,7 @@ func NewGet(parent *cobra.Command) *Get {
 	getCmd.SetHelpTemplate(template.HelpTemplate())
 	getCmd.SetUsageTemplate(template.UsageTemplate())
 	getCmd.PersistentFlags().StringP("output", "o", "", "print the result in a different format. Currently supported json/wide/yaml")
+	getCmd.PersistentFlags().StringP("sort-by", "s", "", "sort results by filed using a jsonpath expression")
 	parent.AddCommand(getCmd)
 
 	return &Get{
