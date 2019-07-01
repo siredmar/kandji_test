@@ -9,7 +9,7 @@ import (
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2018-12-04/maintenance"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
 	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-05-14/devicedockerconfigs"
-	devicesApi "github.com/grid-x/ds-api-types/management/2019-05-16/device"
+	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 )
 
 type FullObjectMeta struct {

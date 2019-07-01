@@ -173,7 +173,7 @@ func createSession(conf *SSHConfig) error {
 	additionalHeaders := make(map[string]string)
 	init := conf.InitCommand
 	if init == "" {
-		init = "/dbclient -y root@127.0.0.1"
+		init = "/dbclient -p 22222 -y root@127.0.0.1"
 	}
 	additionalHeaders["command"] = init
 

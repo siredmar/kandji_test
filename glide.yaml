@@ -15,7 +15,7 @@ import:
 - package: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
 - package: github.com/grid-x/ds-api-types
-  version: dbdeae6135e82970a63933b32ba59ff5ec890742
+  version: b7fa7339e93d71dfbddb186e2d9737aec58721e7
 # Needed to fix to a5d413f7728c81fb97d96a2b722368945f651e78
 # vendor/github.com/nats-io/nkeys/strkey.go:92:17: undefined: ed25519.SeedSize
 - package: golang.org/x/crypto
@@ -24,3 +24,6 @@ import:
 # vendor/github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1/register.go:21:19: undefined: scheme.Builder
 - package: sigs.k8s.io/controller-runtime 
   version: v0.1.1
+# broke API in v2.13.1, cause who cares about semantic versioning...
+- package: github.com/schollz/progressbar
+  version: v2.13.0
