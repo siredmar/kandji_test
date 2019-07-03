@@ -1,5 +1,5 @@
-hash: 91d5985454367974e06a5ffddea7a07366bf92f7b6320916e9e1b9dc496baf09
-updated: 2019-07-01T16:31:34.247198+02:00
+hash: e561539d24212b45afd1c6076ead9afc7224a7c50edd3d1b19fa6234feca4703
+updated: 2019-07-03T15:58:49.058707+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 5e25c22bd5d6de03265bbe5462dcd162f85046f6
@@ -35,7 +35,7 @@ imports:
   subpackages:
   - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: b7fa7339e93d71dfbddb186e2d9737aec58721e7
+  version: 186ec40b01ecad26967aaa1b6150a678b202285b
   subpackages:
   - management/2018-11-27/application
   - management/2018-11-28/deployments

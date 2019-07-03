@@ -52,7 +52,7 @@ func Test_metadataFiltered(t *testing.T) {
 				Name:      "e8cd400e-c5c7-4cb6-947b-50ae1ba951bc",
 				Namespace: "account-ff8a5861-824b-4246-9457-94f04d665d7b",
 				Annotations: map[string]string{
-					"gridx.ai/app": "nginx",
+					"core.gridx.ai/app": "nginx",
 					"kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"core.gridx.ai/v1beta1\"}",
 				},
 			},
@@ -60,7 +60,7 @@ func Test_metadataFiltered(t *testing.T) {
 			want: Metadata{
 				ID: "e8cd400e-c5c7-4cb6-947b-50ae1ba951bc",
 				Annotations: map[string]string{
-					"gridx.ai/app": "nginx",
+					"core.gridx.ai/app": "nginx",
 					"kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"core.gridx.ai/v1beta1\"}",
 				},
 			},
