@@ -8,7 +8,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	"github.com/grid-x/gxctl/pkg/printer"
+	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -16,7 +16,7 @@ type GetDeployments struct {
 	Command *cobra.Command
 }
 
-func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetDeployments {
+func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer *print.Printer) *GetDeployments {
 	var getDeploymentsCmd = &cobra.Command{
 		Use:                   "deployment [ID] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -26,6 +26,10 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 		Example:               "# Get all deployments \n  gxctl get deployments\n\n  # Get information about an deployment with abbreviation 3cc \n  gxctl get deployment 3cc",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+
+			printerConfig := print.Printconfig{
+				OutputFormat: getCmdOutputType,
+			}
 
 			if len(args) > 0 {
 				//Get multiple deployments
@@ -42,7 +46,7 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 						return err
 					}
 
-					if err := printer.Print(deployment, getCmdOutputType, false); err != nil {
+					if err := printer.Print(deployment, printerConfig); err != nil {
 						return err
 					}
 				}
@@ -53,7 +57,7 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 					return err
 				}
 
-				if err := printer.Print(deployments, getCmdOutputType, false); err != nil {
+				if err := printer.Print(deployments, printerConfig); err != nil {
 					return err
 				}
 			}

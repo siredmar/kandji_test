@@ -22,6 +22,7 @@ type DeviceConsoleOutputWide struct {
 	SuperviorVersion  string `header:"Supervisor"`
 	OSVersion         string `header:"OS"`
 	Labels            string `header:"Labels"`
+	Annotations       string `header:"Annotations"`
 }
 
 func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
@@ -56,6 +57,9 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	}
 	if d.Metadata.Labels != nil {
 		o.Labels = SortedString(d.Metadata.Labels)
+	}
+	if d.Metadata.Annotations != nil {
+		o.Annotations = SortedString(d.Metadata.Annotations)
 	}
 	if d.Status.Info != nil {
 		if d.Status.Info.SupervisorVersion != nil {

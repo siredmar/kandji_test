@@ -8,7 +8,8 @@ import (
 
 // CreateRequest represents the request type
 type CreateRequest struct {
-	Spec DeviceSpec `json:"spec"`
+	Metadata *types.CreateMetadata `json:"metadata,omitempty"`
+	Spec     DeviceSpec            `json:"spec"`
 }
 
 // CreateResponse represents the response type
@@ -28,8 +29,8 @@ type GetResponse struct {
 
 // UpdateRequest represents the request type
 type UpdateRequest struct {
-	Metadata types.UpdateMetadata `json:"metadata"`
-	Spec     UpdateSpec           `json:"spec,omitempty"`
+	Metadata *types.UpdateMetadata `json:"metadata,omitempty"`
+	Spec     UpdateSpec            `json:"spec,omitempty"`
 }
 
 // UpdateResponse represents the response type

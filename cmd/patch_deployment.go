@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
 	"github.com/spf13/cobra"
@@ -57,11 +56,9 @@ func NewPatchDeployment(parent *cobra.Command, client *client.APIClient) *PatchD
 			}
 
 			if patchDeploymentCmdSelector != "" {
-				matchByLabels := make(map[string]string)
-				labels := strings.Split(patchDeploymentCmdSelector, " ")
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					matchByLabels[z[0]] = z[1]
+				matchByLabels, err := api.ParseMetadataMap(patchDeploymentCmdSelector)
+				if err != nil {
+					return err
 				}
 
 				deployment.Spec.Selector = deploymentsApi.Selector{

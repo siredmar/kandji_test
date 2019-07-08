@@ -1,8 +1,8 @@
-hash: 91d5985454367974e06a5ffddea7a07366bf92f7b6320916e9e1b9dc496baf09
-updated: 2019-06-28T11:44:28.41051806+02:00
+hash: e561539d24212b45afd1c6076ead9afc7224a7c50edd3d1b19fa6234feca4703
+updated: 2019-07-03T15:58:49.058707+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
-  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
+  version: 5e25c22bd5d6de03265bbe5462dcd162f85046f6
 - name: github.com/dustin/go-humanize
   version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
 - name: github.com/fsnotify/fsnotify
@@ -17,7 +17,7 @@ imports:
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/google/go-cmp
-  version: 6f77996f0c42f7b84e5a2b252227263f93432e9b
+  version: 1b316004397f1f336546ca058ddb5b95c41a8772
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -29,13 +29,13 @@ imports:
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/gorilla/websocket
-  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
+  version: ae1634f6a98965ded3b8789c626cb4e0bd78c3de
 - name: github.com/grid-x/ds-api
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
   - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: b7fa7339e93d71dfbddb186e2d9737aec58721e7
+  version: 186ec40b01ecad26967aaa1b6150a678b202285b
   subpackages:
   - management/2018-11-27/application
   - management/2018-11-28/deployments
@@ -76,6 +76,10 @@ imports:
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/PaesslerAG/gval
+  version: 0ce847fc5e6163ee05ae770a441ba497fc77dcaa
+- name: github.com/PaesslerAG/jsonpath
+  version: c18d0f043db32b5d4295e14c6518fa9160e45d15
 - name: github.com/pelletier/go-toml
   version: dba45d427ff48cfb9bcf633db3a8e43b7364e261
 - name: github.com/pkg/term
@@ -115,7 +119,7 @@ imports:
   - lex/httplex
   - websocket
 - name: golang.org/x/sys
-  version: 66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399
+  version: 04f50cda93cbb67f2afa353c52f342100e80e625
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -128,7 +132,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 - name: k8s.io/apimachinery
   version: 103fd098999dc9c0c88536f5c9ad2e5da39373ae
   subpackages:

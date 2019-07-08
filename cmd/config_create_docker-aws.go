@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
@@ -50,11 +49,11 @@ func NewConfigCreateDockerAWS(parent *cobra.Command, client *client.APIClient) *
 			}
 
 			matchByLabels := make(map[string]string)
+			var err error
 			if configCreateDockerAWSCmdSelector != "" {
-				labels := strings.Split(configCreateDockerAWSCmdSelector, " ")
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					matchByLabels[z[0]] = z[1]
+				matchByLabels, err = api.ParseMetadataMap(configCreateDockerAWSCmdSelector)
+				if err != nil {
+					return err
 				}
 			}
 

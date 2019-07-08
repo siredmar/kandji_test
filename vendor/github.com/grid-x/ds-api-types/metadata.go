@@ -15,7 +15,14 @@ type Metadata struct {
 
 // UpdateMetadata contains metadata which can be updated
 type UpdateMetadata struct {
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// CreateMetadata contains metadata which can assigned while creation
+type CreateMetadata struct {
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // ConvertFromK8sMetadata covernts k8s metadata to internal metadata
@@ -41,7 +48,7 @@ func filterAnnotations(annotations map[string]string) map[string]string {
 	}
 
 	for k := range annotations {
-		if !strings.HasPrefix(k, "gridx.ai") {
+		if !strings.Contains(k, "gridx.ai") {
 			delete(annotations, k)
 		}
 	}

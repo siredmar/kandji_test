@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
-	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
+	types "github.com/grid-x/ds-api-types"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
@@ -33,8 +32,9 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			patchDeviceCmdMaintenanceWindow, _ := cmd.Flags().GetString("maintenance-window")
 			patchDeviceCmdMacAddress, _ := cmd.Flags().GetString("mac-address")
 			patchDeviceCmdLabels, _ := cmd.Flags().GetString("labels")
+			patchDeviceCmdAnnotations, _ := cmd.Flags().GetString("annotations")
 
-			if patchDeviceCmdMaintenanceWindow == "" && patchDeviceCmdMacAddress == "" && patchDeviceCmdLabels == "" {
+			if patchDeviceCmdMaintenanceWindow == "" && patchDeviceCmdMacAddress == "" && patchDeviceCmdLabels == "" && patchDeviceCmdAnnotations == "" {
 				return errors.NothingToDo("gxctl patch device -h")
 			}
 
@@ -48,7 +48,7 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			d := api.PatchDevice{}
 
 			if patchDeviceCmdMaintenanceWindow != "" {
-				w, err := devicesApi.NewMaintenanceWindow(patchDeviceCmdMaintenanceWindow)
+				w, err := types.NewMaintenanceWindow(patchDeviceCmdMaintenanceWindow)
 				if err != nil {
 					return err
 				}
@@ -59,14 +59,27 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			}
 
 			if patchDeviceCmdLabels != "" {
-				labels := strings.Split(patchDeviceCmdLabels, " ")
-				m := make(map[string]string)
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					m[z[0]] = z[1]
+				m, err := api.ParseMetadataMap(patchDeviceCmdLabels)
+				if err != nil {
+					return err
 				}
 
+				if d.Metadata == nil {
+					d.Metadata = &types.UpdateMetadata{}
+				}
 				d.Metadata.Labels = m
+			}
+
+			if patchDeviceCmdAnnotations != "" {
+				a, err := api.ParseMetadataMap(patchDeviceCmdAnnotations)
+				if err != nil {
+					return err
+				}
+
+				if d.Metadata == nil {
+					d.Metadata = &types.UpdateMetadata{}
+				}
+				d.Metadata.Annotations = a
 			}
 			message, err := patchResource(client, d, args[0], deviceIDs)
 			if err != nil {
@@ -78,9 +91,10 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 		},
 	}
 
-	patchDeviceCmd.Flags().StringP("maintenance-window", "m", "", "Maintenance window for the device")
-	patchDeviceCmd.Flags().StringP("mac-address", "a", "", "Mac address for the device")
+	patchDeviceCmd.Flags().StringP("maintenance-window", "w", "", "Maintenance window for the device")
+	patchDeviceCmd.Flags().StringP("mac-address", "m", "", "Mac address for the device")
 	patchDeviceCmd.Flags().StringP("labels", "l", "", "A space seperated list of labels eg. gridx.de/channel=stable gridx.de/area=west-1")
+	patchDeviceCmd.Flags().StringP("annotations", "a", "", "A space seperated list of annotations eg. gridx.ai/custimer=123 gridx.ai/style=red")
 
 	patchDeviceCmd.SetHelpTemplate(template.HelpTemplate())
 	patchDeviceCmd.SetUsageTemplate(template.UsageTemplate())

@@ -54,11 +54,11 @@ func NewCreateMaintenance(parent *cobra.Command, client *client.APIClient) *Crea
 			}
 
 			matchByLabels := make(map[string]string)
+			var err error
 			if createMaintenanceCmdSelector != "" {
-				labels := strings.Split(createMaintenanceCmdSelector, " ")
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					matchByLabels[z[0]] = z[1]
+				matchByLabels, err = api.ParseMetadataMap(createMaintenanceCmdSelector)
+				if err != nil {
+					return err
 				}
 			}
 

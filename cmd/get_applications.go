@@ -8,7 +8,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
-	"github.com/grid-x/gxctl/pkg/printer"
+	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -16,7 +16,7 @@ type GetApplications struct {
 	Command *cobra.Command
 }
 
-func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer *printer.Printer) *GetApplications {
+func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer *print.Printer) *GetApplications {
 	var getApplicationsCmd = &cobra.Command{
 		Use:                   "application [NAME] [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -27,6 +27,10 @@ func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 
+			printerConfig := print.Printconfig{
+				OutputFormat: getCmdOutputType,
+			}
+
 			if len(args) > 0 {
 				//Get multiple application
 				for _, a := range args {
@@ -35,7 +39,7 @@ func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer
 						return err
 					}
 
-					if err := printer.Print(application, getCmdOutputType, false); err != nil {
+					if err := printer.Print(application, printerConfig); err != nil {
 						return err
 					}
 				}
@@ -46,7 +50,7 @@ func NewGetApplications(parent *cobra.Command, client *client.APIClient, printer
 					return err
 				}
 
-				if err := printer.Print(applications, getCmdOutputType, false); err != nil {
+				if err := printer.Print(applications, printerConfig); err != nil {
 					return err
 				}
 			}
