@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	types "github.com/grid-x/ds-api-types"
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	errors "github.com/grid-x/gxctl/pkg/error"
@@ -42,15 +43,13 @@ func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevic
 
 			d := api.PatchDevice{}
 
-			m := make(map[string]string)
-			for _, pair := range args[1:] {
-				z := strings.Split(pair, "=")
-				if len(z) == 1 {
-					m[z[0]] = ""
-				}
-				if len(z) == 2 {
-					m[z[0]] = z[1]
-				}
+			m, err := api.ParseMetadataMap(strings.Join(args[1:], " "))
+			if err != nil {
+				return err
+			}
+
+			if d.Metadata == nil {
+				d.Metadata = &types.UpdateMetadata{}
 			}
 
 			d.Metadata.Labels = m

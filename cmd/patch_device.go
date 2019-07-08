@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	types "github.com/grid-x/ds-api-types"
 	"github.com/spf13/cobra"
@@ -60,11 +59,9 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			}
 
 			if patchDeviceCmdLabels != "" {
-				labels := strings.Split(patchDeviceCmdLabels, " ")
-				m := make(map[string]string)
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					m[z[0]] = z[1]
+				m, err := api.ParseMetadataMap(patchDeviceCmdLabels)
+				if err != nil {
+					return err
 				}
 
 				if d.Metadata == nil {
@@ -74,11 +71,9 @@ func NewPatchDevice(parent *cobra.Command, client *client.APIClient) *PatchDevic
 			}
 
 			if patchDeviceCmdAnnotations != "" {
-				annotations := strings.Split(patchDeviceCmdAnnotations, " ")
-				a := make(map[string]string)
-				for _, pair := range annotations {
-					z := strings.Split(pair, "=")
-					a[z[0]] = z[1]
+				a, err := api.ParseMetadataMap(patchDeviceCmdAnnotations)
+				if err != nil {
+					return err
 				}
 
 				if d.Metadata == nil {

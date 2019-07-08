@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
 	podsApi "github.com/grid-x/ds-api-types/management/2018-11-28/pod"
@@ -50,11 +49,11 @@ func NewCreateDeployment(parent *cobra.Command, client *client.APIClient) *Creat
 			}
 
 			matchByLabels := make(map[string]string)
+			var err error
 			if createDeploymentCmdSelector != "" {
-				labels := strings.Split(createDeploymentCmdSelector, " ")
-				for _, pair := range labels {
-					z := strings.Split(pair, "=")
-					matchByLabels[z[0]] = z[1]
+				matchByLabels, err = api.ParseMetadataMap(createDeploymentCmdSelector)
+				if err != nil {
+					return err
 				}
 			}
 
