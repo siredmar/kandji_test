@@ -129,7 +129,7 @@ func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForwar
 				DeviceID:       deviceID,
 				WaitText:       "Connecting to the device...",
 				ReadyText:      "Serving on local port " + portForwardCmdLocalPort,
-				InitCommand:    fmt.Sprintf("/dbclient -y -L LOCALPORT:%s root@127.0.0.1", portForwardCmdTarget),
+				InitCommand:    fmt.Sprintf("/dbclient -p 22222 -y -L LOCALPORT:%s root@127.0.0.1", portForwardCmdTarget),
 				InputChannel:   socketInputChannel,
 				OutputChannel:  socketOutputChannel,
 				SessionChannel: sessionChannel,

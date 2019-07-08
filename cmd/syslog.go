@@ -81,7 +81,7 @@ func NewSyslog(parent *cobra.Command, client *client.APIClient) *Syslog {
 				Client:         client,
 				DeviceID:       deviceID,
 				WaitText:       "Connecting to the device...",
-				InitCommand:    "/dbclient -y root@127.0.0.1 'journalctl -f'",
+				InitCommand:    "/dbclient -p 22222 -y root@127.0.0.1 'journalctl -f'",
 				InputChannel:   input,
 				OutputChannel:  output,
 				SessionChannel: session,
