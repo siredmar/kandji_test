@@ -31,7 +31,7 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
 	var r []api.Device
 	for _, e := range do.raw.Devices {
-		if !showAll && e.Status.LastHeartbeat == nil {
+		if !showAll && e.Status.FirstSeen == nil {
 			continue
 		}
 		r = append(r, e)
@@ -44,7 +44,7 @@ func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
 func (do DevicesConsoleOutputWide) Filter(showAll bool) DevicesConsoleOutputWide {
 	var r []api.Device
 	for _, e := range do.raw.Devices {
-		if !showAll && e.Status.LastHeartbeat == nil {
+		if !showAll && e.Status.FirstSeen == nil {
 			continue
 		}
 		r = append(r, e)
