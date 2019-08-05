@@ -77,6 +77,10 @@ func (do DevicesConsoleOutput) Sort(sortBy string) DevicesConsoleOutput {
 	rawJson, _ := json.Marshal(do.raw)
 	json.Unmarshal(rawJson, &s)
 
+	if len(do.raw.Devices) < 2 {
+		return do
+	}
+
 	var found bool
 	sort.Slice(do.raw.Devices, func(i, j int) bool {
 		di, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", do.raw.Devices[i].Metadata.ID, sortBy), s)

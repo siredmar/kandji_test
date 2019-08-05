@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	baseURL = "api.ds.gridx.ai"
-	//baseURL = "127.0.0.1:8080"
+	baseURL        = "api.ds.gridx.ai"
+	baseURLStaging = "api.staging.ds.gridx.ai"
 )
 
 type AuthConfig struct {
@@ -32,6 +32,7 @@ type AuthConfig struct {
 
 type APIClient struct {
 	Http    *http.Client
+	Staging *bool
 	Auth    *AuthConfig
 	Profile *string
 }
@@ -40,10 +41,11 @@ type Error struct {
 	Message string `json:"error"`
 }
 
-func NewAPIClient(auth *AuthConfig, profile *string) *APIClient {
+func NewAPIClient(staging *bool, auth *AuthConfig, profile *string) *APIClient {
 	return &APIClient{
 		Http:    &http.Client{Timeout: 10 * time.Second},
 		Auth:    auth,
+		Staging: staging,
 		Profile: profile,
 	}
 }
@@ -55,6 +57,11 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 		return nil, err
 	}
 
+	base := baseURL
+	if *apiclient.Staging {
+		base = baseURLStaging
+	}
+
 	h := http.Header{}
 	h.Set("Origin", fmt.Sprintf("https://%s/%s", baseURL, endpoint))
 	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -63,7 +70,7 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 		h.Set(k, v)
 	}
 
-	url := fmt.Sprintf("wss://%s/%s", baseURL, endpoint)
+	url := fmt.Sprintf("wss://%s/%s", base, endpoint)
 
 	conn, resp, err := websocket.DefaultDialer.Dial(url, h)
 	if err != nil {
@@ -113,7 +120,12 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://%s/%s", baseURL, endpoint)
+	base := baseURL
+	if *apiclient.Staging {
+		base = baseURLStaging
+	}
+
+	url := fmt.Sprintf("https://%s/%s", base, endpoint)
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
