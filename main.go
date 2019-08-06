@@ -29,13 +29,14 @@ import (
 var (
 	cfgFile string
 	profile string
+	staging bool
 	conf    client.AuthConfig
 )
 
 func main() {
 	root := cmd.NewRoot()
 
-	client := client.NewAPIClient(&conf, &profile)
+	client := client.NewAPIClient(&staging, &conf, &profile)
 	printer := printer.NewPrinter()
 
 	// Get
@@ -83,6 +84,7 @@ func main() {
 	// Init config
 	root.Command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	root.Command.PersistentFlags().StringVar(&profile, "profile", "", "profile to use")
+	root.Command.PersistentFlags().BoolVar(&staging, "staging", false, "should point to staging api")
 	cobra.OnInitialize(initConfig)
 
 	if err := root.Command.Execute(); err != nil {
