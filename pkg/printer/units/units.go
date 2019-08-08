@@ -1,3 +1,16 @@
+/*
+Copyright 2018 The Kubernetes Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package printer
 
 import (
@@ -5,29 +18,48 @@ import (
 	"time"
 )
 
-// HumanDuration returns a human-readable approximation of a duration
-// (eg. "About a minute", "4 hours ago", etc.).
+// HumanDuration returns a succint representation of the provided duration
+// with limited precision for consumption by humans. It provides ~2-3 significant
+// figures of duration.
 func HumanDuration(d time.Duration) string {
-	if seconds := int(d.Seconds()); seconds < 1 {
-		return "Less than a second"
-	} else if seconds == 1 {
-		return "1 second"
-	} else if seconds < 60 {
-		return fmt.Sprintf("%d seconds", seconds)
-	} else if minutes := int(d.Minutes()); minutes == 1 {
-		return "About a minute"
-	} else if minutes < 60 {
-		return fmt.Sprintf("%d minutes", minutes)
-	} else if hours := int(d.Hours() + 0.5); hours == 1 {
-		return "About an hour"
-	} else if hours < 48 {
-		return fmt.Sprintf("%d hours", hours)
-	} else if hours < 24*7*2 {
-		return fmt.Sprintf("%d days", hours/24)
-	} else if hours < 24*30*2 {
-		return fmt.Sprintf("%d weeks", hours/24/7)
-	} else if hours < 24*365*2 {
-		return fmt.Sprintf("%d months", hours/24/30)
+	// Allow deviation no more than 2 seconds(excluded) to tolerate machine time
+	// inconsistence, it can be considered as almost now.
+	if seconds := int(d.Seconds()); seconds < -1 {
+		return fmt.Sprintf("<invalid>")
+	} else if seconds < 0 {
+		return fmt.Sprintf("0s")
+	} else if seconds < 60*2 {
+		return fmt.Sprintf("%ds", seconds)
 	}
-	return fmt.Sprintf("%d years", int(d.Hours())/24/365)
+	minutes := int(d / time.Minute)
+	if minutes < 10 {
+		s := int(d/time.Second) % 60
+		if s == 0 {
+			return fmt.Sprintf("%dm", minutes)
+		}
+		return fmt.Sprintf("%dm%ds", minutes, s)
+	} else if minutes < 60*3 {
+		return fmt.Sprintf("%dm", minutes)
+	}
+	hours := int(d / time.Hour)
+	if hours < 8 {
+		m := int(d/time.Minute) % 60
+		if m == 0 {
+			return fmt.Sprintf("%dh", hours)
+		}
+		return fmt.Sprintf("%dh%dm", hours, m)
+	} else if hours < 48 {
+		return fmt.Sprintf("%dh", hours)
+	} else if hours < 24*8 {
+		h := hours % 24
+		if h == 0 {
+			return fmt.Sprintf("%dd", hours/24)
+		}
+		return fmt.Sprintf("%dd%dh", hours/24, h)
+	} else if hours < 24*365*2 {
+		return fmt.Sprintf("%dd", hours/24)
+	} else if hours < 24*365*8 {
+		return fmt.Sprintf("%dy%dd", hours/24/365, (hours/24)%365)
+	}
+	return fmt.Sprintf("%dy", int(hours/24/365))
 }
