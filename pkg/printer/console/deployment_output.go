@@ -9,7 +9,7 @@ import (
 type DeploymentConsoleOutput struct {
 	ID       string `header:"ID"`
 	App      string `header:"Application"`
-	Selector string `header:"Sector"`
+	Selector string `header:"Selector"`
 	Images   string `header:"Images"`
 }
 
