@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -31,8 +32,13 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
 	var r []api.Device
 	for _, e := range do.raw.Devices {
-		if !showAll && e.Status.FirstSeen == nil {
-			continue
+		// Filter out offline devices if !showAll
+		if !showAll {
+			if e.Status.LastHeartbeat == nil {
+				continue
+			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
+				continue
+			}
 		}
 		r = append(r, e)
 	}
@@ -44,8 +50,13 @@ func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
 func (do DevicesConsoleOutputWide) Filter(showAll bool) DevicesConsoleOutputWide {
 	var r []api.Device
 	for _, e := range do.raw.Devices {
-		if !showAll && e.Status.FirstSeen == nil {
-			continue
+		// Filter out offline devices if !showAll
+		if !showAll {
+			if e.Status.LastHeartbeat == nil {
+				continue
+			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
+				continue
+			}
 		}
 		r = append(r, e)
 	}
