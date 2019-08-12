@@ -26,10 +26,15 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		Long:                  `Prints a list of all devices you have access to`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
+			getCmdShowPods, _ := cmd.Flags().GetBool("show-pods")
 			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 
 			if getCmdShowDockerconfig && len(args) != 1 {
 				return errors.InvalidParameter("show-dockerconfig", "docker-configs can just be shown for a single device")
+			}
+
+			if getCmdShowPods && len(args) != 1 {
+				return errors.InvalidParameter("show-pods", "pods can just be shown for a single device")
 			}
 
 			if getCmdShowPublickey && len(args) != 1 {
@@ -42,6 +47,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
 			getCmdSortBy, _ := cmd.Flags().GetString("sort-by")
 			getCmdShowDockerconfig, _ := cmd.Flags().GetBool("show-dockerconfig")
+			getCmdShowPods, _ := cmd.Flags().GetBool("show-pods")
 			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 			getCmdShowAll, _ := cmd.Flags().GetBool("all")
 
@@ -78,6 +84,16 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 						if err := printer.Print(configs, printerConfig); err != nil {
 							return err
 						}
+					} else if getCmdShowPods {
+						// Just show pods
+						pods, err := getDevicePods(client, a, deviceIDs)
+						if err != nil {
+							return err
+						}
+
+						if err := printer.Print(pods, printerConfig); err != nil {
+							return err
+						}
 					} else {
 						// Print device
 						device, err := getDeviceById(client, a, deviceIDs)
@@ -105,6 +121,7 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 		},
 	}
 	getDevicesCmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
+	getDevicesCmd.Flags().BoolP("show-pods", "", false, "print the docker config for a device")
 	getDevicesCmd.Flags().BoolP("show-publickey", "", false, "print the public key for a device")
 	getDevicesCmd.Flags().BoolP("all", "", false, "show also inactive devices")
 	getDevicesCmd.SetHelpTemplate(template.HelpTemplate())
@@ -172,4 +189,24 @@ func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []str
 	}
 
 	return configs, nil
+}
+
+func getDevicePods(client *client.APIClient, id string, deviceIds []string) (api.Pods, error) {
+	deviceID, err := api.LookupID(id, deviceIds)
+	if err != nil {
+		return api.Pods{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s/pods", api.DevicesEndpoint, deviceID)
+	response, err := client.GetRequest(endpoint)
+	if err != nil {
+		return api.Pods{}, err
+	}
+
+	pods, err := api.NewPods(response)
+	if err != nil {
+		return pods, err
+	}
+
+	return pods, nil
 }

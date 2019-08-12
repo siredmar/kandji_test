@@ -17,7 +17,9 @@ func (o DeploymentConsoleOutput) Map(d api.Deployment) DeploymentConsoleOutput {
 	o.ID = d.Metadata.ID
 	o.App = d.Spec.App
 
-	if d.Spec.Selector.MatchByLabels != nil {
+	if d.Spec.Selector.MatchByDeviceID != nil {
+		o.Selector = *d.Spec.Selector.MatchByDeviceID
+	} else if d.Spec.Selector.MatchByLabels != nil {
 		o.Selector = SortedString(d.Spec.Selector.MatchByLabels)
 	}
 

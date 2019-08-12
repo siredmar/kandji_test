@@ -19,7 +19,7 @@ func (do DeploymentsConsoleOutput) Map(d api.Deployments) DeploymentsConsoleOutp
 
 func (do DeploymentsConsoleOutput) Sort() DeploymentsConsoleOutput {
 	sort.Slice(do, func(i, j int) bool {
-		return do[j].ID > do[i].ID
+		return do[j].App > do[i].App
 	})
 
 	return do

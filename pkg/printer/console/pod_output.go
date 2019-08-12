@@ -11,6 +11,7 @@ type PodConsoleOutput struct {
 	ID       string `header:"ID"`
 	DeviceID string `header:"Device ID"`
 	Age      string `header:"Age"`
+	Image    string `header:"Images"`
 }
 
 type PodConsoleOutputWide struct {
@@ -24,6 +25,13 @@ type PodConsoleOutputWide struct {
 func (o PodConsoleOutput) Map(p api.Pod) PodConsoleOutput {
 	o.ID = p.Metadata.ID
 	o.DeviceID = p.Spec.DeviceID
+
+	var images string
+	for _, container := range p.Spec.Config.Containers {
+		images += fmt.Sprintf("%s \n", container.Image)
+	}
+	o.Image = images
+
 	if p.Status.StartTime != nil {
 		startTime := p.Status.StartTime
 
