@@ -24,8 +24,18 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 		Short:                 "get deployment",
 		Long:                  `Prints a list of all deployments you have access to`,
 		Example:               "# Get all deployments \n  gxctl get deployments\n\n  # Get information about an deployment with abbreviation 3cc \n  gxctl get deployment 3cc",
+		Args: func(cmd *cobra.Command, args []string) error {
+			getCmdShowDevices, _ := cmd.Flags().GetBool("show-devices")
+
+			if getCmdShowDevices && len(args) != 1 {
+				return errors.InvalidParameter("show-devices", "devices can just be shown for a single deployment")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdShowDevices, _ := cmd.Flags().GetBool("show-devices")
 
 			printerConfig := print.Printconfig{
 				OutputFormat: getCmdOutputType,
@@ -41,13 +51,25 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 				deploymentIDs := deployments.GetIds()
 
 				for _, a := range args {
-					deployment, err := getDeploymentById(client, a, deploymentIDs)
-					if err != nil {
-						return err
-					}
+					if getCmdShowDevices {
+						// Just show devices
+						devices, err := getDeploymentDevices(client, a, deploymentIDs)
+						if err != nil {
+							return err
+						}
 
-					if err := printer.Print(deployment, printerConfig); err != nil {
-						return err
+						if err := printer.Print(devices, printerConfig); err != nil {
+							return err
+						}
+					} else {
+						deployment, err := getDeploymentById(client, a, deploymentIDs)
+						if err != nil {
+							return err
+						}
+
+						if err := printer.Print(deployment, printerConfig); err != nil {
+							return err
+						}
 					}
 				}
 			} else {
@@ -65,6 +87,7 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 		},
 	}
 
+	getDeploymentsCmd.Flags().BoolP("show-devices", "", false, "print the devices for a deployment")
 	getDeploymentsCmd.SetHelpTemplate(template.HelpTemplate())
 	getDeploymentsCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(getDeploymentsCmd)
@@ -110,4 +133,24 @@ func getDeploymentById(client *client.APIClient, id string, deploymentsIds []str
 	}
 
 	return deployment, nil
+}
+
+func getDeploymentDevices(client *client.APIClient, id string, deploymentIds []string) (api.Devices, error) {
+	deploymentID, err := api.LookupID(id, deploymentIds)
+	if err != nil {
+		return api.Devices{}, err
+	}
+
+	endpoint := fmt.Sprintf("%s/%s/devices", api.DeploymentsEndpoint, deploymentID)
+	response, err := client.GetRequest(endpoint)
+	if err != nil {
+		return api.Devices{}, err
+	}
+
+	devices, err := api.NewDevices(response)
+	if err != nil {
+		return devices, err
+	}
+
+	return devices, nil
 }
