@@ -8,7 +8,6 @@ package viper
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -263,7 +262,7 @@ func (s *stringValue) Type() string {
 }
 
 func (s *stringValue) String() string {
-	return fmt.Sprintf("%s", *s)
+	return string(*s)
 }
 
 func TestBasics(t *testing.T) {
@@ -498,8 +497,7 @@ func TestAllKeys(t *testing.T) {
 	dob, _ := time.Parse(time.RFC3339, "1979-05-27T07:32:00Z")
 	all := map[string]interface{}{"owner": map[string]interface{}{"organization": "MongoDB", "bio": "MongoDB Chief Developer Advocate & Hacker at Large", "dob": dob}, "title": "TOML Example", "ppu": 0.55, "eyes": "brown", "clothing": map[string]interface{}{"trousers": "denim", "jacket": "leather", "pants": map[string]interface{}{"size": "large"}}, "id": "0001", "batters": map[string]interface{}{"batter": []interface{}{map[string]interface{}{"type": "Regular"}, map[string]interface{}{"type": "Chocolate"}, map[string]interface{}{"type": "Blueberry"}, map[string]interface{}{"type": "Devil's Food"}}}, "hacker": true, "beard": true, "hobbies": []interface{}{"skateboarding", "snowboarding", "go"}, "age": 35, "type": "donut", "newkey": "remote", "name": "Cake", "p_id": "0001", "p_ppu": "0.55", "p_name": "Cake", "p_batters": map[string]interface{}{"batter": map[string]interface{}{"type": "Regular"}}, "p_type": "donut", "foos": []map[string]interface{}{map[string]interface{}{"foo": []map[string]interface{}{map[string]interface{}{"key": 1}, map[string]interface{}{"key": 2}, map[string]interface{}{"key": 3}, map[string]interface{}{"key": 4}}}}, "title_dotenv": "DotEnv Example", "type_dotenv": "donut", "name_dotenv": "Cake"}
 
-	var allkeys sort.StringSlice
-	allkeys = AllKeys()
+	allkeys := sort.StringSlice(AllKeys())
 	allkeys.Sort()
 	ks.Sort()
 
@@ -952,6 +950,7 @@ func TestDirsSearch(t *testing.T) {
 	v.SetDefault(`key`, `default`)
 
 	entries, err := ioutil.ReadDir(root)
+	assert.Nil(t, err)
 	for _, e := range entries {
 		if e.IsDir() {
 			v.AddConfigPath(e.Name())
@@ -1262,6 +1261,9 @@ hello:
     universe:
     - mw
     - ad
+    ints:
+    - 1
+    - 2
 fu: bar
 `)
 
@@ -1328,6 +1330,10 @@ func TestMergeConfig(t *testing.T) {
 		t.Fatalf("len(universe) != 2, = %d", len(universe))
 	}
 
+	if ints := v.GetIntSlice("hello.ints"); len(ints) != 2 {
+		t.Fatalf("len(ints) != 2, = %d", len(ints))
+	}
+
 	if fu := v.GetString("fu"); fu != "bar" {
 		t.Fatalf("fu != \"bar\", = %s", fu)
 	}
@@ -1366,6 +1372,10 @@ func TestMergeConfigNoMerge(t *testing.T) {
 
 	if universe := v.GetStringSlice("hello.universe"); len(universe) != 2 {
 		t.Fatalf("len(universe) != 2, = %d", len(universe))
+	}
+
+	if ints := v.GetIntSlice("hello.ints"); len(ints) != 2 {
+		t.Fatalf("len(ints) != 2, = %d", len(ints))
 	}
 
 	if fu := v.GetString("fu"); fu != "bar" {
@@ -1763,7 +1773,7 @@ func BenchmarkGet(b *testing.B) {
 	}
 }
 
-// This is the "perfect result" for the above.
+// BenchmarkGetBoolFromMap is the "perfect result" for the above.
 func BenchmarkGetBoolFromMap(b *testing.B) {
 	m := make(map[string]bool)
 	key := "BenchmarkGetBool"

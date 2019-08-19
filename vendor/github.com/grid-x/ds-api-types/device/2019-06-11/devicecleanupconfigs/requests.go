@@ -5,7 +5,12 @@ type GetResponse struct {
 	*DeviceCleanupConfig
 }
 
-// ListResponse represents the response type
-type ListResponse struct {
-	DeviceCleanupConfig []*DeviceCleanupConfig `json:"deviceCleanupConfigs"`
+// UpdateRequest represents the request type
+type UpdateRequest struct {
+	Status *DeviceCleanupConfigStatus `json:"status,omitempty"`
+}
+
+// UpdateResponse represents the response type
+type UpdateResponse struct {
+	*DeviceCleanupConfig
 }

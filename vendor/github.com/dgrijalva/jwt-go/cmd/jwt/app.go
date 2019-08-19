@@ -278,5 +278,5 @@ func isEs() bool {
 }
 
 func isRs() bool {
-	return strings.HasPrefix(*flagAlg, "RS") || strings.HasPrefix(*flagAlg, "PS")
+	return strings.HasPrefix(*flagAlg, "RS")
 }
