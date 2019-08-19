@@ -518,7 +518,7 @@ func comparerTests() []test {
 		y:     map[*pb.Stringer]*pb.Stringer(nil),
 		wantDiff: `
   map[*testprotos.Stringer]*testprotos.Stringer(
-- 	{s"hello": s"world"},
+- 	{⟪0xdeadf00f⟫: s"world"},
 + 	nil,
   )
 `,

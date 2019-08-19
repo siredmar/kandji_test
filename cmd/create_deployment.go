@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
-	podsApi "github.com/grid-x/ds-api-types/management/2018-11-28/pod"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-08-17/deployments"
+	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"

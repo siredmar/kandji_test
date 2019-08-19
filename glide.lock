@@ -1,8 +1,8 @@
-hash: e561539d24212b45afd1c6076ead9afc7224a7c50edd3d1b19fa6234feca4703
-updated: 2019-07-03T15:58:49.058707+02:00
+hash: 4a330745c071c8e9da0bb3feedeeb1054b054a8d2b7a691e48acc7c54eb1f229
+updated: 2019-08-19T09:17:36.295092763+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
-  version: 5e25c22bd5d6de03265bbe5462dcd162f85046f6
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/dustin/go-humanize
   version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
 - name: github.com/fsnotify/fsnotify
@@ -17,7 +17,7 @@ imports:
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/google/go-cmp
-  version: 1b316004397f1f336546ca058ddb5b95c41a8772
+  version: 6f77996f0c42f7b84e5a2b252227263f93432e9b
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -29,13 +29,13 @@ imports:
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/gorilla/websocket
-  version: ae1634f6a98965ded3b8789c626cb4e0bd78c3de
+  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grid-x/ds-api
   version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
   subpackages:
   - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: 186ec40b01ecad26967aaa1b6150a678b202285b
+  version: 58e96f1ddbee018dd6cb825d148e849c12f0e28e
   subpackages:
   - management/2018-11-27/application
   - management/2018-11-28/deployments
@@ -46,6 +46,8 @@ imports:
   - management/2019-05-29/devicecleanupconfigs
   - management/2019-06-09/devicedockerconfigs
   - management/2019-06-13/device
+  - management/2019-08-17/deployments
+  - management/2019-08-17/pod
 - name: github.com/grid-x/ds-k8s
   version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
 - name: github.com/hashicorp/hcl
@@ -77,11 +79,11 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/PaesslerAG/gval
-  version: 0ce847fc5e6163ee05ae770a441ba497fc77dcaa
+  version: 6fceb06ca1629ade2cb3ec5669d8d629adb5d324
 - name: github.com/PaesslerAG/jsonpath
   version: c18d0f043db32b5d4295e14c6518fa9160e45d15
 - name: github.com/pelletier/go-toml
-  version: dba45d427ff48cfb9bcf633db3a8e43b7364e261
+  version: 68063a447e06b51f7acc88b9ac65a9730beab3fc
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
@@ -101,9 +103,9 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/spf13/viper
-  version: 3349bd9cc2887f06cc4efdc88894e7c3c0e6d872
+  version: e697d557b7f549ddf91098cef2ad6e92176dbcdf
 - name: github.com/subosito/gotenv
-  version: 69b5b6104433beb2cb9c3ce00bdadf3c7c2d3f34
+  version: 422ef8095f112cfaf9f40c368e0b9ae8c0714cfb
 - name: github.com/tj/go-spin
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: golang.org/x/crypto
@@ -119,7 +121,7 @@ imports:
   - lex/httplex
   - websocket
 - name: golang.org/x/sys
-  version: 04f50cda93cbb67f2afa353c52f342100e80e625
+  version: 66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -132,7 +134,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: k8s.io/apimachinery
   version: 103fd098999dc9c0c88536f5c9ad2e5da39373ae
   subpackages:
