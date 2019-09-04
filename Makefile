@@ -1,5 +1,5 @@
 GO_BUILD := CGO_ENABLED=0 go build -ldflags="-w -s"
-GO_TOOLS := gridx/golang-tools:1.11
+GO_TOOLS := gridx/golang-dev:1.13.latest-linux-amd64
 GO_PROJECT := github.com/grid-x/gxctl
 DOCKER_RUN := docker run -it --rm -v $$PWD:/go/src/${GO_PROJECT} -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
