@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"sync"
 	"time"
@@ -286,33 +287,11 @@ func (w *WebsocketWriter) WriteMessage(messageType int, data []byte) error {
 	return w.Socket.WriteMessage(messageType, data)
 }
 
-func getChar(t *term.Term) ([]byte, error) {
-	bytes := make([]byte, 3)
-
-	var n int
-	n, err := t.Read(bytes)
+func getChar(r io.Reader) ([]byte, error) {
+	bytes := make([]byte, 4096)
+	n, err := r.Read(bytes)
 	if err != nil {
 		return nil, err
 	}
-
-	if n == 3 && bytes[0] == 27 && bytes[1] == 91 {
-		// Three-character control sequence, beginning with "ESC-[".
-		if bytes[2] == 65 {
-			// Up
-			bytes = []byte{27, 91, 65}
-		} else if bytes[2] == 66 {
-			// Down
-			bytes = []byte{27, 91, 66}
-		} else if bytes[2] == 67 {
-			// Right
-			bytes = []byte{27, 91, 67}
-		} else if bytes[2] == 68 {
-			// Left
-			bytes = []byte{27, 91, 68}
-		}
-
-		return bytes, nil
-	}
-
-	return bytes[:1], nil
+	return bytes[:n], nil
 }
