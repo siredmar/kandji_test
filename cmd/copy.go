@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -239,13 +240,16 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 		}
 	}()
 
-	tmpFileName := uuid.New().String()
+	tmpFolder := uuid.New().String()
+	fileName := filepath.Base(srcFile.Name())
+
+	targetPath := tmpFolder + "/" + fileName
 
 	go func() {
 		sessionID := string(<-sessionChannel)
 
 		// Issue inital create file message
-		msg := ssh.NewCreateFileMessage(sessionID, tmpFileName, false)
+		msg := ssh.NewCreateFileMessage(sessionID, targetPath, false)
 		m, err := json.Marshal(msg)
 		if err != nil {
 			fmt.Println("Unknown error: ", err)
@@ -272,7 +276,7 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 			n, err := srcFile.Read(buf)
 			if err != nil {
 				// EOF reached
-				msg := ssh.NewWriteToFileMessage(sessionID, tmpFileName, nil, true)
+				msg := ssh.NewWriteToFileMessage(sessionID, targetPath, nil, true)
 				m, err := json.Marshal(msg)
 				if err != nil {
 					fmt.Println("Unknown error: ", err)
@@ -287,7 +291,7 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 					progress = float32(written) / float32(size) * 100
 					bar.Set64(int64(progress))
 				}
-				msg := ssh.NewWriteToFileMessage(sessionID, tmpFileName, buf[0:n], false)
+				msg := ssh.NewWriteToFileMessage(sessionID, targetPath, buf[0:n], false)
 				m, err := json.Marshal(msg)
 				if err != nil {
 					fmt.Println("Unknown error: ", err)
@@ -320,7 +324,7 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 		Client:         client,
 		DeviceID:       deviceID,
 		WaitText:       "Connecting to the device...",
-		InitCommand:    fmt.Sprintf("/scp -P 22222 -S /dbclient /%s root@127.0.0.1:%s", tmpFileName, dest),
+		InitCommand:    fmt.Sprintf("/scp -P 22222 -S /dbclient /%s root@127.0.0.1:%s", targetPath, dest),
 		InputChannel:   socketInputChannel,
 		OutputChannel:  socketOutputChannel,
 		SessionChannel: sessionChannel,
