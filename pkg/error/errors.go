@@ -40,6 +40,5 @@ func NothingToDo(hint string) error {
 }
 
 func ServerError(msg string) error {
-	s := fmt.Sprintf("Unexpected server error: %s", msg)
-	return errors.New(s)
+	return errors.New(msg)
 }
