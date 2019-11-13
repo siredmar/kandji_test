@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/websocket"
 
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -38,7 +37,9 @@ type APIClient struct {
 }
 
 type Error struct {
-	Message string `json:"error"`
+	Error struct {
+		Message string `json:"message"`
+	} `json:"Error"`
 }
 
 func NewAPIClient(staging *bool, auth *AuthConfig, profile *string) *APIClient {
@@ -148,14 +149,12 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 
 	respError := Error{}
 	err = json.Unmarshal(bodyBytes, &respError)
-
 	if err != nil {
-		s := fmt.Sprintf("Unexpected to unmarshal '%s'", string(bodyBytes))
-		return nil, errors.ServerError(s)
+		return nil, err
 	}
 
-	if cmp.Diff(Error{}, respError) != "" {
-		return nil, errors.ServerError(respError.Message)
+	if respError.Error.Message != "" {
+		return nil, errors.ServerError(respError.Error.Message)
 	}
 
 	return bodyBytes, nil
