@@ -29,7 +29,7 @@ func (mo MaintenancesConsoleOutputWide) Map(m api.MaintenanceTasks) Maintenances
 
 func (mo MaintenancesConsoleOutput) Sort() MaintenancesConsoleOutput {
 	sort.Slice(mo, func(i, j int) bool {
-		return mo[j].ID > mo[i].ID
+		return mo[j].DeviceID > mo[i].DeviceID
 	})
 
 	return mo
@@ -37,7 +37,7 @@ func (mo MaintenancesConsoleOutput) Sort() MaintenancesConsoleOutput {
 
 func (mo MaintenancesConsoleOutputWide) Sort() MaintenancesConsoleOutputWide {
 	sort.Slice(mo, func(i, j int) bool {
-		return mo[j].ID > mo[i].ID
+		return mo[j].DeviceID > mo[i].DeviceID
 	})
 
 	return mo
