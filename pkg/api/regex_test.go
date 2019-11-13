@@ -283,17 +283,22 @@ func TestGetDockerImageName(t *testing.T) {
 	testcases := []regexpImageName{
 		{
 			input:   "gridx/test",
-			result:  "gridx-test-latest",
+			result:  "gridx-test",
 			wantErr: false,
 		},
 		{
 			input:   "gridx/test:123456",
-			result:  "gridx-test-123456",
+			result:  "gridx-test",
 			wantErr: false,
 		},
 		{
 			input:   "gridx/test/test2:123456",
-			result:  "gridx-test-test2-123456",
+			result:  "gridx-test-test2",
+			wantErr: false,
+		},
+		{
+			input:   "gridx/ds-janitor:master.9-c99bfd7c40a3206c5a1dc9f0979406549bef8873-linux-arm32v7",
+			result:  "gridx-ds-janitor",
 			wantErr: false,
 		},
 	}
