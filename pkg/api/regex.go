@@ -192,5 +192,5 @@ func GetDockerImageName(input string) (string, error) {
 
 	matches_name[0] = strings.Replace(matches_name[0], "/", "-", -1)
 
-	return fmt.Sprintf("%s-%s", matches_name[0], matches[2]), nil
+	return fmt.Sprintf("%s", matches_name[0]), nil
 }
