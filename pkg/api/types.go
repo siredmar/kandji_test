@@ -4,12 +4,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
-	maintenanceApi "github.com/grid-x/ds-api-types/management/2018-12-04/maintenance"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
 	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-05-14/devicedockerconfigs"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-08-17/deployments"
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
+	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
 )
 
 type FullObjectMeta struct {
@@ -51,7 +51,7 @@ type Applications struct {
 
 type CreateApplication applicationsApi.CreateRequest
 
-type MaintenanceTask maintenanceApi.Task
+type MaintenanceTask maintenanceApi.MaintenanceTask
 
 type MaintenanceTasks struct {
 	MaintenanceTasks []MaintenanceTask `json:"maintenanceTasks"`

@@ -1,29 +1,31 @@
 package printer
 
 import (
-	"fmt"
 	"strconv"
+	"time"
 
 	api "github.com/grid-x/gxctl/pkg/api"
+	units "github.com/grid-x/gxctl/pkg/printer/units"
 )
 
 type MaintenanceConsoleOutput struct {
-	ID         string `header:"ID"`
+	DeviceID   string `header:"DeviceID"`
 	Successful string `header:"Successful"`
 	Failed     string `header:"Failed"`
 	Running    string `header:"Running"`
 }
 
 type MaintenanceConsoleOutputWide struct {
-	ID         string `header:"ID"`
+	DeviceID   string `header:"ID"`
+	StartedAt  string `header:"StartedAt"`
+	FinishedAt string `header:"FinishedAt"`
 	Successful string `header:"Successful"`
 	Failed     string `header:"Failed"`
 	Running    string `header:"Running"`
-	Selector   string `header:"Selector"`
 }
 
 func (o MaintenanceConsoleOutput) Map(m api.MaintenanceTask) MaintenanceConsoleOutput {
-	o.ID = m.Metadata.ID
+	o.DeviceID = m.Spec.DeviceID
 	o.Successful = strconv.Itoa(m.Status.Successful)
 	o.Failed = strconv.Itoa(m.Status.Failed)
 	o.Running = strconv.Itoa(m.Status.Running)
@@ -32,18 +34,17 @@ func (o MaintenanceConsoleOutput) Map(m api.MaintenanceTask) MaintenanceConsoleO
 }
 
 func (o MaintenanceConsoleOutputWide) Map(m api.MaintenanceTask) MaintenanceConsoleOutputWide {
-	o.ID = m.Metadata.ID
+	o.DeviceID = m.Spec.DeviceID
 	o.Successful = strconv.Itoa(m.Status.Successful)
 	o.Failed = strconv.Itoa(m.Status.Failed)
 	o.Running = strconv.Itoa(m.Status.Running)
 
-	if m.Spec.Selector.MatchByLabels != nil {
-		var s string
-		for key, value := range m.Spec.Selector.MatchByLabels {
-			s += fmt.Sprintf("%s:%s\n", key, value)
-		}
+	if m.Status.StartedAt != nil {
+		o.StartedAt = units.HumanDuration(time.Now().Sub(m.Status.StartedAt.Time)) + " ago"
+	}
 
-		o.Selector = s[:len(s)-1]
+	if m.Status.FinishedAt != nil {
+		o.FinishedAt = units.HumanDuration(time.Now().Sub(m.Status.FinishedAt.Time)) + " ago"
 	}
 
 	return o

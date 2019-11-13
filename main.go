@@ -80,6 +80,7 @@ func main() {
 	cmd.NewSyslog(root.Command, client)
 	cmd.NewPortForward(root.Command, client)
 	cmd.NewCompletion(root.Command)
+	cmd.NewRestart(root.Command, client)
 
 	// Init config
 	root.Command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
