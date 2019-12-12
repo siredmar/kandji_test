@@ -311,7 +311,7 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 		DeviceID:       deviceID,
 		WaitText:       "Connecting to the device...",
 		ReadyText:      "Starting file transfer...",
-		InitCommand:    "",
+		InitCommand:    "/dbclient -p 22222 -y root@127.0.0.1",
 		InputChannel:   socketInputChannel,
 		OutputChannel:  socketOutputChannel,
 		SessionChannel: sessionChannel,

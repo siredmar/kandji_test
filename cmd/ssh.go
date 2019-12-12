@@ -49,8 +49,6 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initCommand, _ := cmd.Flags().GetString("command")
-
 			info, err := os.Stdin.Stat()
 			if err != nil {
 				return fmt.Errorf("Unknown error")
@@ -111,6 +109,11 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 				}
 			}()
 
+			initCommand := "/dbclient -p 22222 -y root@127.0.0.1"
+			flagCommand, _ := cmd.Flags().GetString("command")
+			if flagCommand != "" {
+				initCommand += " " + flagCommand
+			}
 			conf := &SSHConfig{
 				Client:         client,
 				DeviceID:       deviceID,
@@ -172,11 +175,7 @@ func createSession(conf *SSHConfig) error {
 	endpoint := fmt.Sprintf("%s/%s/ssh", api.DevicesEndpoint, conf.DeviceID)
 
 	additionalHeaders := make(map[string]string)
-	init := conf.InitCommand
-	if init == "" {
-		init = "/dbclient -p 22222 -y root@127.0.0.1"
-	}
-	additionalHeaders["command"] = init
+	additionalHeaders["command"] = conf.InitCommand
 
 	conn, err := conf.Client.GetWebsocketConnection(endpoint, additionalHeaders)
 	if err != nil {
