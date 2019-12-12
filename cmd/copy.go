@@ -158,6 +158,9 @@ func deviceToClient(source, dest, deviceID string, client *client.APIClient) err
 
 	go func() {
 		// Create file
+		if stat, err := os.Stat(dest); err == nil && stat.IsDir() {
+			dest = filepath.Join(dest, filepath.Base(source))
+		}
 		file, err := os.Create(dest)
 		if err != nil {
 			fmt.Println("Error while getting create file message", err)
