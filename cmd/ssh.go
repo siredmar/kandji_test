@@ -161,12 +161,12 @@ func createSession(conf *SSHConfig) error {
 		for {
 			select {
 			case <-connectedChannel:
-				fmt.Print("\r\n")
-				fmt.Print("Connection established!\r\n")
-				fmt.Print(conf.ReadyText + "\r\n")
+				fmt.Fprint(os.Stderr, "\r\n")
+				fmt.Fprint(os.Stderr, "Connection established!\r\n")
+				fmt.Fprint(os.Stderr, conf.ReadyText+"\r\n")
 				return
 			default:
-				fmt.Printf("\r\033[36m%s\033[m %s", conf.WaitText, s.Next())
+				fmt.Fprintf(os.Stderr, "\r\033[36m%s\033[m %s", conf.WaitText, s.Next())
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
