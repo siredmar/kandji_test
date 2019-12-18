@@ -4,3 +4,5 @@ steps:
   label: ":llama: Build"
   agents:
   - "queue=default"
+  artifact_paths:
+  - "gxctl"
