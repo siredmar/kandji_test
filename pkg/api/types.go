@@ -4,12 +4,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
-	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
 	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-05-14/devicedockerconfigs"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-08-17/deployments"
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
+	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 )
 
 type FullObjectMeta struct {
@@ -25,7 +26,7 @@ type Devices struct {
 	Devices []Device `json:"devices"`
 }
 
-type PatchDevice devicesApi.UpdateRequest
+type UpdateDevice devicesApi.UpdateRequest
 
 type Pod podsApi.Pod
 
@@ -37,7 +38,7 @@ type Deployment deploymentsApi.Deployment
 
 type CreateDeployment deploymentsApi.CreateRequest
 
-type PatchDeployment deploymentsApi.UpdateRequest
+type UpdateDeployment deploymentsApi.UpdateRequest
 
 type Deployments struct {
 	Deployments []Deployment `json:"deployments"`
@@ -67,6 +68,18 @@ type DockerConfigs struct {
 
 type CreateDockerConfig dockerConfigApi.CreateRequest
 
+type UpdateDockerConfig dockerConfigApi.UpdateRequest
+
+type CleanupConfig cleanupConfigApi.CleanupConfig
+
+type CleanupConfigs struct {
+	CleanupConfigs []CleanupConfig `json:"cleanupConfigs"`
+}
+
+type CreateCleanupConfig cleanupConfigApi.CreateRequest
+
+type UpdateCleanupConfig cleanupConfigApi.UpdateRequest
+
 type DeviceDockerConfig deviceDockerConfigApi.DeviceDockerConfig
 
 type DeviceDockerConfigs struct {
@@ -95,14 +108,14 @@ func (d *Devices) GetIds() []string {
 	return out
 }
 
-func (d *PatchDevice) IsEmpty() bool {
-	if cmp.Diff(PatchDevice{}, *d) == "" {
+func (d *UpdateDevice) IsEmpty() bool {
+	if cmp.Diff(UpdateDevice{}, *d) == "" {
 		return true
 	}
 	return false
 }
 
-func (d *PatchDevice) IsValid() bool {
+func (d *UpdateDevice) IsValid() bool {
 	if d.Spec.MACAddress == nil && d.Spec.MaintenanceWindow == nil {
 		return false
 	}
@@ -161,8 +174,8 @@ func (d *CreateDeployment) IsEmpty() bool {
 	return false
 }
 
-func (d *PatchDeployment) IsEmpty() bool {
-	if cmp.Diff(PatchDeployment{}, *d) == "" {
+func (d *UpdateDeployment) IsEmpty() bool {
+	if cmp.Diff(UpdateDeployment{}, *d) == "" {
 		return true
 	}
 	return false
@@ -172,7 +185,7 @@ func (a *CreateDeployment) IsValid() bool {
 	if a.Spec.App == "" {
 		return false
 	}
-	if a.Spec.Selector.MatchByLabels == nil {
+	if a.Spec.Selector.MatchByLabels == nil && a.Spec.Selector.MatchByDeviceID == nil {
 		return false
 	}
 	if a.Spec.Template.Spec.Containers == nil {
@@ -182,11 +195,11 @@ func (a *CreateDeployment) IsValid() bool {
 	return true
 }
 
-func (a *PatchDeployment) IsValid() bool {
+func (a *UpdateDeployment) IsValid() bool {
 	if a.Spec.App == "" {
 		return false
 	}
-	if a.Spec.Selector.MatchByLabels == nil {
+	if a.Spec.Selector.MatchByLabels == nil && a.Spec.Selector.MatchByDeviceID == nil {
 		return false
 	}
 	if a.Spec.Template.Spec.Containers == nil {
@@ -266,6 +279,30 @@ func (d *DockerConfigs) GetIds() []string {
 	return out
 }
 
+func (d *CreateDockerConfig) IsEmpty() bool {
+	if cmp.Diff(CreateDockerConfig{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (a *CreateDockerConfig) IsValid() bool {
+	// Todo
+	return true
+}
+
+func (d *UpdateDockerConfig) IsEmpty() bool {
+	if cmp.Diff(UpdateDockerConfig{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (a *UpdateDockerConfig) IsValid() bool {
+	// Todo
+	return true
+}
+
 func (d *DeviceDockerConfig) IsEmpty() bool {
 	if cmp.Diff(DeviceDockerConfig{}, *d) == "" {
 		return true
@@ -286,4 +323,50 @@ func (d *DeviceDockerConfigs) GetIds() []string {
 		out = append(out, con.Metadata.ID)
 	}
 	return out
+}
+
+func (c *CleanupConfig) IsEmpty() bool {
+	if cmp.Diff(CleanupConfigs{}, *c) == "" {
+		return true
+	}
+	return false
+}
+
+func (c *CleanupConfigs) IsEmpty() bool {
+	if len(c.CleanupConfigs) == 0 {
+		return true
+	}
+	return false
+}
+
+func (c *CleanupConfigs) GetIds() []string {
+	out := make([]string, len(c.CleanupConfigs))
+	for _, con := range c.CleanupConfigs {
+		out = append(out, con.Metadata.ID)
+	}
+	return out
+}
+
+func (d *CreateCleanupConfig) IsEmpty() bool {
+	if cmp.Diff(CreateCleanupConfig{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (a *CreateCleanupConfig) IsValid() bool {
+	// Todo
+	return true
+}
+
+func (d *UpdateCleanupConfig) IsEmpty() bool {
+	if cmp.Diff(UpdateCleanupConfig{}, *d) == "" {
+		return true
+	}
+	return false
+}
+
+func (a *UpdateCleanupConfig) IsValid() bool {
+	// Todo
+	return true
 }

@@ -1,0 +1,35 @@
+---
+metadata:
+  id: 09e9f281-8374-47c9-9bdb-50b072018b4b
+spec:
+  app: wordpress
+  selector:
+    matchByDeviceID: 4b962533-cf61-4964-b505-1596e9ece3c0
+  template:
+    spec:
+      containers:
+      - name: mariadb
+        image: yobasystems/alpine-mariadb:10.3.17-arm32v7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: somewordpress
+        - name: MYSQL_DATABASE
+          value: wordpress
+        - name: MYSQL_USER
+          value: wordpress
+        - name: MYSQL_PASSWORD
+          value: wordpress
+      - name: wordpress
+        image: wordpress:latest
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: mariadb:3306
+        - name: WORDPRESS_DB_USER
+          value: wordpress
+        - name: WORDPRESS_DB_PASSWORD
+          value: wordpress
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        ports:
+        - hostPort: 82
+          containerPort: 80

@@ -1,0 +1,216 @@
+package cmd
+
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+
+	"github.com/ghodss/yaml"
+	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	"github.com/spf13/cobra"
+
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
+	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/template"
+)
+
+type Diff struct {
+	Command *cobra.Command
+}
+
+const (
+	KNOWN_AFTER_APPLY = "(Known after apply)"
+)
+
+func NewDiff(parent *cobra.Command, client *client.APIClient) *Diff {
+	var diffCmd = &cobra.Command{
+		Use:                   "diff [OPTIONS]",
+		Short:                 "diff resources",
+		DisableFlagsInUseLine: true,
+		Long:                  `TODO`,
+		Example:               "# Diff a resource from file \n  gxctl diff -f deployment.json",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			diffCmdFilename, _ := cmd.Flags().GetString("filename")
+			diffCmdDiffer, _ := cmd.Flags().GetString("command")
+
+			if diffCmdFilename == "" {
+				cmd.Usage()
+				return nil
+			}
+
+			contents, err := api.GetFilesContentsToProcess(diffCmdFilename)
+			if err != nil {
+				return err
+			}
+
+			for n, c := range contents {
+				if err := diff(n, c, diffCmdDiffer, client); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	}
+
+	diffCmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to create the resource")
+	diffCmd.Flags().StringP("command", "c", "diff", "External diff programm")
+
+	diffCmd.SetHelpTemplate(template.HelpTemplate())
+	diffCmd.SetUsageTemplate(template.UsageTemplate())
+
+	parent.AddCommand(diffCmd)
+
+	return &Diff{
+		Command: diffCmd,
+	}
+}
+
+func diff(filename string, content []byte, differ string, client *client.APIClient) error {
+	res, resID, err := checkResourceFile(content)
+	if err != nil {
+		return err
+	}
+
+	var f1, f2 string
+	if resID == KNOWN_AFTER_APPLY {
+		// Looks like a new resource... Diff against empty file
+		err, f1, f2 = writeDiffFiles(nil, res)
+		defer os.Remove(f1)
+		defer os.Remove(f2)
+		if err != nil {
+			return err
+		}
+	} else {
+		// There is a resID - Check if res already exists
+		var current interface{}
+		switch v := res.(type) {
+		case api.Device:
+			device, err := getDeviceById(client, v.Metadata.ID, nil)
+			device.Status = deviceApi.DeviceStatus{}
+			if err == nil {
+				current = device
+			}
+		case api.Deployment:
+			deploy, err := getDeploymentById(client, v.Metadata.ID, nil)
+			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
+			if err == nil {
+				current = deploy
+			}
+		default:
+			return fmt.Errorf("Unsupported type")
+		}
+
+		err, f1, f2 = writeDiffFiles(current, res)
+		defer os.Remove(f1)
+		defer os.Remove(f2)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Diff it
+	output, err := exec.Command(differ, f1, f2).Output()
+	if err != nil {
+		switch err.(type) {
+		case *exec.ExitError:
+			// this is just an exit code error, no worries
+		default: //couldnt run diff
+			return err
+		}
+	}
+
+	fmt.Println(fmt.Sprintf("Diffing file %s", filename))
+	fmt.Println(string(output))
+	return nil
+}
+
+func checkResourceFile(bytes []byte) (interface{}, string, error) {
+	resID, err := resolveIdentifierFromFile(bytes)
+	if err != nil {
+		resID = KNOWN_AFTER_APPLY
+	}
+
+	deploymentUpdate, err := api.NewDeployment(bytes)
+	if err != nil {
+		return nil, "", err
+	}
+	if !deploymentUpdate.IsEmpty() {
+		deploymentUpdate.Metadata.ID = resID
+		return deploymentUpdate, resID, nil
+	}
+
+	deviceUpdate, err := api.NewDevice(bytes)
+	if err != nil {
+		return nil, "", err
+	}
+	if !deviceUpdate.IsEmpty() {
+		deviceUpdate.Metadata.ID = resID
+		return deviceUpdate, resID, nil
+	}
+
+	dockerConfigUpdate, err := api.NewDockerConfig(bytes)
+	if err != nil {
+		return nil, "", err
+	}
+	if !dockerConfigUpdate.IsEmpty() {
+		dockerConfigUpdate.Metadata.ID = resID
+		return dockerConfigUpdate, resID, nil
+	}
+
+	cleanupConfigUpdate, err := api.NewCleanupConfig(bytes)
+	if err != nil {
+		return nil, "", err
+	}
+	if !cleanupConfigUpdate.IsEmpty() {
+		cleanupConfigUpdate.Metadata.ID = resID
+		return cleanupConfigUpdate, resID, nil
+	}
+
+	//Nothing found
+	return nil, "", errors.InvalidFileFormat()
+}
+
+func writeDiffFiles(i1, i2 interface{}) (error, string, string) {
+	rev1, err := ioutil.TempFile("/tmp", "rev2")
+	if err != nil {
+		return err, "", ""
+	}
+
+	rev2, err := ioutil.TempFile("/tmp", "rev2")
+	if err != nil {
+		return err, "", ""
+	}
+
+	if i1 != nil {
+
+		b1, err := yaml.Marshal(i1)
+		if err != nil {
+			return err, "", ""
+		}
+		if _, err := rev1.Write(b1); err != nil {
+			return err, "", ""
+		}
+		if err := rev1.Close(); err != nil {
+			return err, "", ""
+		}
+	}
+
+	if i2 != nil {
+		b2, err := yaml.Marshal(i2)
+		if err != nil {
+			return err, "", ""
+		}
+		if _, err := rev2.Write(b2); err != nil {
+			return err, "", ""
+		}
+		if err := rev2.Close(); err != nil {
+			return err, "", ""
+		}
+	}
+
+	return nil, rev1.Name(), rev2.Name()
+}

@@ -41,7 +41,7 @@ func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevic
 			}
 			deviceIDs := devices.GetIds()
 
-			d := api.PatchDevice{}
+			d := api.UpdateDevice{}
 
 			m, err := api.ParseMetadataMap(strings.Join(args[1:], " "))
 			if err != nil {
@@ -54,7 +54,7 @@ func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevic
 
 			d.Metadata.Labels = m
 
-			message, err := patchResource(client, d, args[0], deviceIDs)
+			message, err := updateResource(client, d, args[0], deviceIDs)
 			if err != nil {
 				return err
 			}

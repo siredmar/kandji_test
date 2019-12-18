@@ -9,7 +9,7 @@ Use the following syntax to run gxctl commands from your terminal window:
 
 where `command`, `TYPE`, `NAME`, and `flags` are:
 
-* **command**   Specifies the operation that you want to perform on one or more resources, for example `create`, `get`, `patch`
+* **command**   Specifies the operation that you want to perform on one or more resources, for example `create`, `get`, `update`
 * **TYPE**   Specifies the resource type. Resource types are case-insensitive and you can specify the singular, plural, or abbreviated forms. For example, the following commands produce the same output:
 
 ```shell
@@ -42,7 +42,7 @@ $ gxctl get apps testapp testapp2
 * **delete**   `gxctl delete [TYPE] [NAME] [flags]`
 * **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
 * **label**   `gxctl label [TYPE] [NAME] [flags]`
-* **patch**   `gxctl patch [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
+* **update**   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
 * **port-forward**   `gxctl port-forward [NAME] [LOCALPORT] [TARGET] [flags]`
 * **ssh**   `gxctl ssh [NAME] [flags]`
 * **syslog**   `gxctl syslog [NAME] [flags]`
@@ -153,17 +153,17 @@ $ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test-
 $ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test- demo=demo
 ```
 
-`gxctl patch` - Patch a existing resource
+`gxctl update` - Updates a existing resource
 
 ```shell
-# Patch a device using a patchfile
-$ gxctl patch -f patch_device.json
-# Patch labels of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -s "gridx.de/channel=stable gridx.de=area:west"
-# Patch mac address of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-77-88-99"
-# Patch maintenance window of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
+# Update a device using a updatefile
+$ gxctl update -f update_device.json
+# Update labels of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -s "gridx.de/channel=stable gridx.de=area:west"
+# Update mac address of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-77-88-99"
+# Update maintenance window of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
 ```
 
 `gxctl port-forward` - Forward an port from a device to a local port

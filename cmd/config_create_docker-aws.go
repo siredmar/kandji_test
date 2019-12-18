@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2018-11-28/deployments"
-	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-04-01/dockerconfigs"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
