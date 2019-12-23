@@ -65,6 +65,9 @@ func main() {
 	cmd.NewCreateApplication(create.Command, client)
 	cmd.NewCreateDeployment(create.Command, client)
 
+	// Apply
+	cmd.NewApply(root.Command, client)
+
 	// Config
 	config := cmd.NewConfig(root.Command)
 	configGet := cmd.NewConfigGet(config.Command)
