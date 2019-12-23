@@ -97,7 +97,7 @@ func getDockerConfigById(client *client.APIClient, id string, dockerConfigIDs []
 		return api.DockerConfig{}, err
 	}
 
-	endpoint := fmt.Sprintf("%s/%s", api.DevicesEndpoint, configID)
+	endpoint := fmt.Sprintf("%s/%s", api.DockerConfigsEndpoint, configID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.DockerConfig{}, err

@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -32,33 +30,22 @@ func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 				return nil
 			}
 
-			jsonFile, err := os.Open(createCmdFilename)
-			if err != nil {
-				return err
-			}
-			defer jsonFile.Close()
-
-			bytes, err := ioutil.ReadAll(jsonFile)
+			contents, err := api.GetFilesContentsToProcess(createCmdFilename)
 			if err != nil {
 				return err
 			}
 
-			res, err := checkCreateResourceFile(bytes)
-			if err != nil {
-				return err
+			for _, c := range contents {
+				if err := create(c, client); err != nil {
+					return err
+				}
 			}
 
-			message, err := createResource(client, res)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(message)
 			return nil
 		},
 	}
 
-	createCmd.Flags().StringP("filename", "f", "", "Filename to file to use to create the resource")
+	createCmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to create the resource")
 
 	createCmd.SetHelpTemplate(template.HelpTemplate())
 	createCmd.SetUsageTemplate(template.UsageTemplate())
@@ -70,30 +57,36 @@ func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 	}
 }
 
-func checkCreateResourceFile(bytes []byte) (interface{}, error) {
-	deploymentCreate, err := api.NewCreateDeployment(bytes)
+func create(content []byte, client *client.APIClient) error {
+	res, _, err := checkResourceFile(content)
 	if err != nil {
-		return nil, err
-	}
-	if !deploymentCreate.IsEmpty() && deploymentCreate.IsValid() {
-		return deploymentCreate, nil
+		return err
 	}
 
-	applicationCreate, err := api.NewCreateApplication(bytes)
+	message, err := createResource(client, res)
 	if err != nil {
-		return nil, err
-	}
-	if !applicationCreate.IsEmpty() && applicationCreate.IsValid() {
-		return applicationCreate, nil
+		return err
 	}
 
-	//Nothing found
-	return nil, errors.InvalidFileFormat()
+	fmt.Println(message)
+	return nil
 }
 
 func createResource(client *client.APIClient, v interface{}) (string, error) {
 	switch v := v.(type) {
-	case api.CreateDeployment:
+	case api.Device:
+		response, err := client.PostRequest(api.DevicesEndpoint, v)
+		if err != nil {
+			return "", err
+		}
+
+		device, err := api.NewDevice(response)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("Device %s created successfully", device.Metadata.ID), nil
+	case api.Deployment:
 		response, err := client.PostRequest(api.DeploymentsEndpoint, v)
 		if err != nil {
 			return "", err
@@ -105,7 +98,7 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Deployment %s created successfully", deployment.Metadata.ID), nil
-	case api.CreateApplication:
+	case api.Application:
 		response, err := client.PostRequest(api.ApplicationsEndpoint, v)
 		if err != nil {
 			return "", err
@@ -117,7 +110,7 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Application %s created successfully", application.Name), nil
-	case api.CreateMaintenanceTask:
+	case api.MaintenanceTask:
 		response, err := client.PostRequest(api.MaintenanceEndpoint, v)
 		if err != nil {
 			return "", err
@@ -129,7 +122,7 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Maintenance task %s created successfully", task.Metadata.ID), nil
-	case api.CreateDockerConfig:
+	case api.DockerConfig:
 		response, err := client.PostRequest(api.DockerConfigsEndpoint, v)
 		if err != nil {
 			return "", err
@@ -141,6 +134,18 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		}
 
 		return fmt.Sprintf("Docker config %s created successfully", config.Metadata.ID), nil
+	case api.CleanupConfig:
+		response, err := client.PostRequest(api.CleanupConfigsEndpoint, v)
+		if err != nil {
+			return "", err
+		}
+
+		config, err := api.NewCleanupConfig(response)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("Cleanup config %s created successfully", config.Metadata.ID), nil
 	default:
 		s := fmt.Sprintf("Creating resource of type %s.", v)
 		return "", errors.NotImplementedError(s)

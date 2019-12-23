@@ -9,7 +9,7 @@ Use the following syntax to run gxctl commands from your terminal window:
 
 where `command`, `TYPE`, `NAME`, and `flags` are:
 
-* **command**   Specifies the operation that you want to perform on one or more resources, for example `create`, `get`, `patch`
+* **command**   Specifies the operation that you want to perform on one or more resources, for example `create`, `get`, `update`
 * **TYPE**   Specifies the resource type. Resource types are case-insensitive and you can specify the singular, plural, or abbreviated forms. For example, the following commands produce the same output:
 
 ```shell
@@ -42,7 +42,7 @@ $ gxctl get apps testapp testapp2
 * **delete**   `gxctl delete [TYPE] [NAME] [flags]`
 * **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
 * **label**   `gxctl label [TYPE] [NAME] [flags]`
-* **patch**   `gxctl patch [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
+* **update**   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
 * **port-forward**   `gxctl port-forward [NAME] [LOCALPORT] [TARGET] [flags]`
 * **ssh**   `gxctl ssh [NAME] [flags]`
 * **syslog**   `gxctl syslog [NAME] [flags]`
@@ -73,8 +73,12 @@ $ gxctl [command] [TYPE] [NAME] -o=<output_format>
 ```shell
 # Get a List of docker configurations
 $ gxctl config get docker
+# Get a List of cleanup configurations
+$ gxctl config get cleanup
 # Get a List of docker configurations and include additional information (such as selectors).
 $ gxctl config get docker -o wide
+# Get a List of cleanup configurations and include additional information (such as selectors).
+$ gxctl config get cleanup -o wide
 # Create a docker config for AWS targeting all devices with label demo=demo
 $ gxctl config create docker-aws https://123456789.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=AAABBBCCCDDDEEE --secret-access-key=dpohx+EgPWQK+Fadsads123adeqwuIwnM4atH --region=eu-central-1 --selector demo=demo
 # Delete a docker configuration
@@ -153,17 +157,24 @@ $ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test-
 $ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test- demo=demo
 ```
 
-`gxctl patch` - Patch a existing resource
+`gxctl update` - Updates a existing resource
 
 ```shell
-# Patch a device using a patchfile
-$ gxctl patch -f patch_device.json
-# Patch labels of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -s "gridx.de/channel=stable gridx.de=area:west"
-# Patch mac address of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-77-88-99"
-# Patch maintenance window of a device
-$ gxctl patch device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
+# Update a device using a updatefile
+$ gxctl update -f update_device.json
+# Update labels of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -s "gridx.de/channel=stable gridx.de=area:west"
+# Update mac address of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -a "11-22-33-44-55-66-77-88-99"
+# Update maintenance window of a device
+$ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:00"
+```
+
+`gxctl apply` - Creates or Updates resources
+
+```shell
+# Creates a resource if not existing, otherwise updates.
+$ gxctl apply -f deployment.json
 ```
 
 `gxctl port-forward` - Forward an port from a device to a local port
@@ -189,6 +200,27 @@ $ gxctl ssh -c "tail -f /var/log/syslog" 57e82f8e-08f4-48f9-8e75-28552d09701f
 ```shell
 # Stream the current device syslog
 $ gxctl syslog 57e82f8e-08f4-48f9-8e75-28552d09701f
+```
+
+`gxctl restart` - Restarts a device
+
+```shell
+# Restart the device
+$ gxctl restart 57e82f8e-08f4-48f9-8e75-28552d09701f
+```
+
+`gxctl validate` - Validates a resource file
+
+```shell
+# Validates if required fields are set and that there are no unsupported fields
+$ gxctl validate -f deployment.json
+```
+
+`gxctl diff` - Diff a resource file
+
+```shell
+# Shows the diff between the live system and the provided resource file
+$ gxctl diff -f deployment.json
 ```
 
 ## Examples: Special operations

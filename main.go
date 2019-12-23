@@ -55,15 +55,18 @@ func main() {
 	cmd.NewDeleteDeployment(delete.Command, client)
 	cmd.NewDeleteApplication(delete.Command, client)
 
-	// Patch
-	patch := cmd.NewPatch(root.Command, client)
-	cmd.NewPatchDevice(patch.Command, client)
-	cmd.NewPatchDeployment(patch.Command, client)
+	// Update
+	update := cmd.NewUpdate(root.Command, client)
+	cmd.NewUpdateDevice(update.Command, client)
+	cmd.NewUpdateDeployment(update.Command, client)
 
 	// Create
 	create := cmd.NewCreate(root.Command, client)
 	cmd.NewCreateApplication(create.Command, client)
 	cmd.NewCreateDeployment(create.Command, client)
+
+	// Apply
+	cmd.NewApply(root.Command, client)
 
 	// Config
 	config := cmd.NewConfig(root.Command)
@@ -71,6 +74,7 @@ func main() {
 	configCreate := cmd.NewConfigCreate(config.Command)
 	configDelete := cmd.NewConfigDelete(config.Command)
 	cmd.NewConfigGetDocker(configGet.Command, client, printer)
+	cmd.NewConfigGetCleanup(configGet.Command, client, printer)
 	cmd.NewConfigCreateDockerAWS(configCreate.Command, client)
 	cmd.NewConfigDeleteDocker(configDelete.Command, client)
 
@@ -81,6 +85,8 @@ func main() {
 	cmd.NewPortForward(root.Command, client)
 	cmd.NewCompletion(root.Command)
 	cmd.NewRestart(root.Command, client)
+	cmd.NewValidate(root.Command, client)
+	cmd.NewDiff(root.Command, client)
 
 	// Init config
 	root.Command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
