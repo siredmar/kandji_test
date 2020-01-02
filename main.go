@@ -87,6 +87,7 @@ func main() {
 	cmd.NewRestart(root.Command, client)
 	cmd.NewValidate(root.Command, client)
 	cmd.NewDiff(root.Command, client)
+	cmd.NewVersion(root.Command)
 
 	// Init config
 	root.Command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
