@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -43,23 +44,23 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 	ret := make(map[string][]byte)
 	switch mode := info.Mode(); {
 	case mode.IsDir():
-		// do directory stuff
-		files, err := ioutil.ReadDir(loc)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, f := range files {
-			path := loc + "/" + f.Name()
-			b, err := readFile(path)
+		err := filepath.Walk(loc, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return nil, err
+				return err
+			}
+			if info.IsDir() {
+				return nil
 			}
 
+			b, err := readFile(path)
+			if err != nil {
+				return err
+			}
 			ret[path] = b
-		}
+			return nil
+		})
 
-		return ret, nil
+		return ret, err
 	case mode.IsRegular():
 		b, err := readFile(loc)
 		if err != nil {
