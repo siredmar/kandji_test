@@ -62,6 +62,7 @@ func validate(filename string, content []byte, client *client.APIClient) error {
 		return err
 	}
 
+	fmt.Println(fmt.Sprintf("Validating file %s", filename))
 	fmt.Println("Valid Resource")
 	return nil
 }
