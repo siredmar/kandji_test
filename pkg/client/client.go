@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ghodss/yaml"
 	"github.com/gorilla/websocket"
+	"github.com/spf13/viper"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	errors "github.com/grid-x/gxctl/pkg/error"
@@ -24,7 +26,8 @@ type AuthConfig struct {
 		Name    string `yaml:"name"`
 		Default bool   `yaml:"default,omitempty"`
 		Auth    struct {
-			Token string `yaml:"token"`
+			Auth0Tenant string `yaml:"auth0Tenant"`
+			Token       string `yaml:"token"`
 		} `yaml:"auth"`
 	} `yaml:"profiles"`
 }
@@ -147,6 +150,10 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
+	if r.StatusCode == http.StatusUnauthorized {
+		return nil, fmt.Errorf("Invalid access token")
+	}
+
 	respError := Error{}
 	err = json.Unmarshal(bodyBytes, &respError)
 	if err != nil {
@@ -163,29 +170,90 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
 	var token string
 
-	if len(apiclient.Auth.Profiles) == 0 {
-		return token, fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
+	p, err := resolveProfile(apiclient)
+	if err != nil {
+		return "", err
 	}
 
 	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Default {
-			token = profile.Auth.Token
-		}
-	}
-
-	if token == "" && *apiclient.Profile == "" {
-		return token, fmt.Errorf("No default profile configured. Use --profile")
-	}
-
-	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Name == *apiclient.Profile {
+		if profile.Name == p {
 			token = profile.Auth.Token
 		}
 	}
 
 	if token == "" {
-		return token, fmt.Errorf("Profil %s not found", *apiclient.Profile)
+		return token, fmt.Errorf("Token for profile %s not configured", p)
 	}
 
 	return token, nil
+}
+
+func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
+	p, err := resolveProfile(apiclient)
+	if err != nil {
+		return err
+	}
+
+	for i, profile := range apiclient.Auth.Profiles {
+		if profile.Name == p {
+			apiclient.Auth.Profiles[i].Auth.Token = token
+		}
+	}
+
+	c, err := yaml.Marshal(apiclient.Auth)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(viper.ConfigFileUsed(), c, 0644)
+}
+
+func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
+	var tenant string
+
+	p, err := resolveProfile(apiclient)
+	if err != nil {
+		return "", err
+	}
+
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Name == p {
+			tenant = profile.Auth.Auth0Tenant
+		}
+	}
+
+	if tenant == "" {
+		return tenant, fmt.Errorf("Auth0 tenant for profile %s not configured", p)
+	}
+
+	return tenant, nil
+}
+
+func resolveProfile(apiclient *APIClient) (string, error) {
+	if len(apiclient.Auth.Profiles) == 0 {
+		return "", fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
+	}
+
+	var defaultProfile string
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Default {
+			defaultProfile = profile.Name
+		}
+	}
+
+	if *apiclient.Profile == "" {
+		if defaultProfile == "" {
+			return "", fmt.Errorf("No default profile configured. Use --profile or configure a default profile")
+		} else {
+			return defaultProfile, nil
+		}
+	}
+
+	for _, p := range apiclient.Auth.Profiles {
+		if p.Name == *apiclient.Profile {
+			return *apiclient.Profile, nil
+		}
+	}
+
+	return "", fmt.Errorf("Profil %s not found", *apiclient.Profile)
 }
