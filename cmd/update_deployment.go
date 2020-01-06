@@ -75,14 +75,12 @@ func NewUpdateDeployment(parent *cobra.Command, client *client.APIClient) *Updat
 				deployment.Spec.Template.Spec.Containers[0].Name = name
 				deployment.Spec.Template.Spec.Containers[0].Image = updateDeploymentCmdImage
 			}
+
 			if updateDeploymentCmdApp != "" {
 				deployment.Spec.App = updateDeploymentCmdApp
 			}
 
-			d := api.UpdateDeployment{}
-			d.Spec = &deployment.Spec
-
-			message, err := updateResource(client, d, deployment.Metadata.ID, nil)
+			message, err := updateResource(client, deployment, deployment.Metadata.ID, nil)
 			if err != nil {
 				return err
 			}

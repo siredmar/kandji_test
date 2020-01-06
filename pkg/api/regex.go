@@ -177,8 +177,6 @@ func GetDockerImageName(input string) (string, error) {
 
 	matches_name := NameRegexp.FindStringSubmatch(matches[1])
 
-	fmt.Println(matches_name)
-
 	if matches_name == nil {
 		return "", errors.New("Bad format")
 	}

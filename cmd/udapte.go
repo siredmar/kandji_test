@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	types "github.com/grid-x/ds-api-types"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
@@ -61,7 +62,7 @@ func NewUpdate(parent *cobra.Command, client *client.APIClient) *Update {
 }
 
 func update(content []byte, client *client.APIClient) error {
-	res, resId, err := checkResourceFile(content)
+	res, resId, err := checkResourceFile(content, false)
 	if err != nil {
 		return err
 	}
@@ -94,8 +95,9 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		inSpec.MaintenanceWindow = v.Spec.MaintenanceWindow
 		in.Spec = inSpec
 
-		in.Metadata.Labels = v.Metadata.Labels
+		in.Metadata = &types.UpdateMetadata{}
 		in.Metadata.Annotations = v.Metadata.Annotations
+		in.Metadata.Annotations = v.Metadata.Labels
 
 		response, err := client.PatchRequest(api.DevicesEndpoint, v, resId)
 		if err != nil {
@@ -112,6 +114,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in := deploymentsApi.UpdateRequest{}
 		in.Spec = &v.Spec
 
+		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 		in.Metadata.Annotations = v.Metadata.Annotations
 
