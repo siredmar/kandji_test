@@ -45,7 +45,10 @@ func NewUpdateDevice(parent *cobra.Command, client *client.APIClient) *UpdateDev
 			}
 			deviceIDs := devices.GetIds()
 
-			d := api.UpdateDevice{}
+			d, err := getDeviceById(client, args[0], deviceIDs)
+			if err != nil {
+				return err
+			}
 
 			if updateDeviceCmdMaintenanceWindow != "" {
 				w, err := types.NewMaintenanceWindow(updateDeviceCmdMaintenanceWindow)
@@ -64,9 +67,6 @@ func NewUpdateDevice(parent *cobra.Command, client *client.APIClient) *UpdateDev
 					return err
 				}
 
-				if d.Metadata == nil {
-					d.Metadata = &types.UpdateMetadata{}
-				}
 				d.Metadata.Labels = m
 			}
 
@@ -76,12 +76,10 @@ func NewUpdateDevice(parent *cobra.Command, client *client.APIClient) *UpdateDev
 					return err
 				}
 
-				if d.Metadata == nil {
-					d.Metadata = &types.UpdateMetadata{}
-				}
 				d.Metadata.Annotations = a
 			}
-			message, err := updateResource(client, d, args[0], deviceIDs)
+
+			message, err := updateResource(client, d, d.Metadata.ID, nil)
 			if err != nil {
 				return err
 			}

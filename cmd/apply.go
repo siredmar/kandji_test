@@ -58,7 +58,7 @@ func NewApply(parent *cobra.Command, client *client.APIClient) *Apply {
 }
 
 func apply(content []byte, client *client.APIClient) error {
-	res, resId, err := checkResourceFile(content)
+	res, resId, err := checkResourceFile(content, false)
 	if err != nil {
 		return err
 	}

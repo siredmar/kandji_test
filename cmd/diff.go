@@ -70,7 +70,7 @@ func NewDiff(parent *cobra.Command, client *client.APIClient) *Diff {
 }
 
 func diff(filename string, content []byte, differ string, client *client.APIClient) error {
-	res, resID, err := checkResourceFile(content)
+	res, resID, err := checkResourceFile(content, true)
 	if err != nil {
 		return err
 	}
@@ -128,44 +128,32 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 	return nil
 }
 
-func checkResourceFile(bytes []byte) (interface{}, string, error) {
+func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error) {
 	resID, err := resolveIdentifierFromFile(bytes)
-	if err != nil {
+	if err != nil && readOnly {
 		resID = KNOWN_AFTER_APPLY
 	}
 
 	deploymentUpdate, err := api.NewDeployment(bytes)
-	if err != nil {
-		return nil, "", err
-	}
-	if !deploymentUpdate.IsEmpty() {
+	if err == nil {
 		deploymentUpdate.Metadata.ID = resID
 		return deploymentUpdate, resID, nil
 	}
 
 	deviceUpdate, err := api.NewDevice(bytes)
-	if err != nil {
-		return nil, "", err
-	}
-	if !deviceUpdate.IsEmpty() {
+	if err == nil {
 		deviceUpdate.Metadata.ID = resID
 		return deviceUpdate, resID, nil
 	}
 
 	dockerConfigUpdate, err := api.NewDockerConfig(bytes)
-	if err != nil {
-		return nil, "", err
-	}
-	if !dockerConfigUpdate.IsEmpty() {
+	if err == nil {
 		dockerConfigUpdate.Metadata.ID = resID
 		return dockerConfigUpdate, resID, nil
 	}
 
 	cleanupConfigUpdate, err := api.NewCleanupConfig(bytes)
-	if err != nil {
-		return nil, "", err
-	}
-	if !cleanupConfigUpdate.IsEmpty() {
+	if err == nil {
 		cleanupConfigUpdate.Metadata.ID = resID
 		return cleanupConfigUpdate, resID, nil
 	}

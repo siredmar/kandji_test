@@ -58,7 +58,7 @@ func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 }
 
 func create(content []byte, client *client.APIClient) error {
-	res, _, err := checkResourceFile(content)
+	res, _, err := checkResourceFile(content, false)
 	if err != nil {
 		return err
 	}

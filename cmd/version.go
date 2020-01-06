@@ -39,7 +39,7 @@ func NewVersion(parent *cobra.Command) *Version {
 		Long:                  `TODO`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			v := clientVersion{
-				Version:    "0.1.0",
+				Version:    "0.1.1",
 				APIVersion: api.APIVersion,
 				GoVersion:  runtime.Version(),
 				OS:         runtime.GOOS,
