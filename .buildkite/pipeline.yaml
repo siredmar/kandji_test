@@ -1,8 +1,25 @@
 steps:
 - command:
   - "make ci_build"
-  label: ":llama: Build"
+  label: ":golang: Build"
   agents:
   - "queue=default"
   artifact_paths:
-  - "gxctl"
+  - "bin/*"
+- wait
+- command:
+  - "buildkite-agent artifact download bin/* . --step \":golang: Build\""
+  - "make docker"
+  label: ":docker: Build docker image"
+  agents:
+  - "queue=default"
+  branches: "!master"
+- command:
+  - "buildkite-agent artifact download bin/* . --step \":golang: Build\""
+  - "make docker"
+  - ".buildkite/steps/aws_ecr_auth.sh"
+  - "make docker_push"
+  label: ":docker: Push docker image"
+  agents:
+  - "queue=default"
+  branches: "master"
