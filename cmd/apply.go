@@ -71,6 +71,11 @@ func apply(content []byte, client *client.APIClient) error {
 	// Update or Create
 	found := false
 	switch v := res.(type) {
+	case api.Application:
+		_, err := getApplicationById(client, v.Metadata.ID)
+		if err == nil {
+			found = true
+		}
 	case api.Device:
 		_, err := getDeviceById(client, v.Metadata.ID, nil)
 		if err == nil {
@@ -92,7 +97,7 @@ func apply(content []byte, client *client.APIClient) error {
 			found = true
 		}
 	default:
-		s := fmt.Sprintf("Updating resource of type %s.", v)
+		s := fmt.Sprintf("Applying resource of type %s.", v)
 		return errors.NotImplementedError(s)
 	}
 

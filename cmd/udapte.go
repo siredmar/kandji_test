@@ -87,6 +87,8 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 	}
 
 	switch v := v.(type) {
+	case api.Application:
+		return fmt.Sprintf("WARNING: Skipped application %s from update as applications cannot be updated", v.Metadata.ID), nil
 	case api.Device:
 		in := devicesApi.UpdateRequest{}
 		inSpec := devicesApi.UpdateSpec{}

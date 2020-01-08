@@ -88,6 +88,11 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 		// There is a resID - Check if res already exists
 		var current interface{}
 		switch v := res.(type) {
+		case api.Application:
+			app, err := getApplicationById(client, v.Metadata.ID)
+			if err == nil {
+				current = app
+			}
 		case api.Device:
 			device, err := getDeviceById(client, v.Metadata.ID, nil)
 			device.Status = deviceApi.DeviceStatus{}
@@ -99,6 +104,16 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
 			if err == nil {
 				current = deploy
+			}
+		case api.DockerConfig:
+			dc, err := getDockerConfigById(client, v.Metadata.ID, nil)
+			if err == nil {
+				current = dc
+			}
+		case api.CleanupConfig:
+			cc, err := getCleanupConfigById(client, v.Metadata.ID, nil)
+			if err == nil {
+				current = cc
 			}
 		default:
 			return fmt.Errorf("Unsupported type")
@@ -134,28 +149,33 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 		resID = KNOWN_AFTER_APPLY
 	}
 
-	deploymentUpdate, err := api.NewDeployment(bytes)
+	application, err := api.NewApplication(bytes)
 	if err == nil {
-		deploymentUpdate.Metadata.ID = resID
-		return deploymentUpdate, resID, nil
+		return application, resID, nil
 	}
 
-	deviceUpdate, err := api.NewDevice(bytes)
+	deployment, err := api.NewDeployment(bytes)
 	if err == nil {
-		deviceUpdate.Metadata.ID = resID
-		return deviceUpdate, resID, nil
+		deployment.Metadata.ID = resID
+		return deployment, resID, nil
 	}
 
-	dockerConfigUpdate, err := api.NewDockerConfig(bytes)
+	device, err := api.NewDevice(bytes)
 	if err == nil {
-		dockerConfigUpdate.Metadata.ID = resID
-		return dockerConfigUpdate, resID, nil
+		device.Metadata.ID = resID
+		return device, resID, nil
 	}
 
-	cleanupConfigUpdate, err := api.NewCleanupConfig(bytes)
+	dockerConfig, err := api.NewDockerConfig(bytes)
 	if err == nil {
-		cleanupConfigUpdate.Metadata.ID = resID
-		return cleanupConfigUpdate, resID, nil
+		dockerConfig.Metadata.ID = resID
+		return dockerConfig, resID, nil
+	}
+
+	cleanupConfig, err := api.NewCleanupConfig(bytes)
+	if err == nil {
+		cleanupConfig.Metadata.ID = resID
+		return cleanupConfig, resID, nil
 	}
 
 	//Nothing found
