@@ -4,28 +4,37 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	"github.com/toqueteos/webbrowser"
 
+	"github.com/grid-x/gxctl/pkg/auth"
 	"github.com/grid-x/gxctl/pkg/client"
-	gxtemplate "github.com/grid-x/gxctl/pkg/template"
+	"github.com/grid-x/gxctl/pkg/template"
 )
 
 type Login struct {
 	Command *cobra.Command
 }
 
+const localAddress = "localhost:4445"
+
 func NewLogin(parent *cobra.Command, client *client.APIClient) *Login {
 	var loginCmd = &cobra.Command{
 		Use:                   "login [OPTIONS]",
 		DisableFlagsInUseLine: true,
-		Short:                 "lelele login token",
+		Short:                 "Retrieves a login token to authenticate with the api",
 		Long:                  `TODO`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			l, err := net.Listen("tcp", localAddress)
+			if err != nil {
+				return err
+			}
+			l.Close()
+
 			// https://auth0.com/docs/api-auth/tutorials/nonce
 			nonce := getRandomString()
 
@@ -33,37 +42,52 @@ func NewLogin(parent *cobra.Command, client *client.APIClient) *Login {
 			if err != nil {
 				return err
 			}
-			loginLocation := fmt.Sprintf("https://%s.eu.auth0.com/authorize?nonce=%s&scope=openid%%20email&response_type=id_token&client_id=KCKGmjmTAR1R1c2Wa86JDG5M2dOZswLt&redirect_uri=http://localhost:4445/", tenant, nonce)
-			webbrowser.Open(loginLocation)
+			clientID, err := client.GetAuth0ClientIDFromAuthConfig()
+			if err != nil {
+				return err
+			}
 
-			fmt.Println("Setting up home route on :4445")
+			loginLocation := fmt.Sprintf("https://%s/authorize?nonce=%s&scope=openid%%20email&response_type=id_token&client_id=%s&redirect_uri=http://%s/", tenant, nonce, clientID, localAddress)
+
+			go func() {
+				open, _ := cmd.Flags().GetBool("auto")
+				if open {
+					time.Sleep(time.Second * 1)
+					webbrowser.Open(loginLocation)
+				}
+			}()
+
+			fmt.Printf("Setting up home route on %s\n", localAddress)
 			fmt.Println("Press ctrl + c on Linux / Windows or cmd + c on OSX to end the process.")
 			fmt.Printf("If your browser does not open automatically, navigate to:\n\n\t%s\n\n", loginLocation)
 
-			r := mux.NewRouter()
-			server := &http.Server{Addr: fmt.Sprintf(":%d", 4445), Handler: r}
+			r := http.NewServeMux()
+			server := &http.Server{Addr: localAddress, Handler: r}
 			var shutdown = func() {
+				time.Sleep(time.Second * 1)
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 				defer cancel()
 				_ = server.Shutdown(ctx)
 			}
 
 			var token string
-			r.Path("/callback").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.HandleFunc("/callback", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Query().Get("error") != "" {
 					http.Error(w, "error happened in callback: "+r.URL.Query().Get("error")+" "+r.URL.Query().Get("error_description")+" "+r.URL.Query().Get("error_debug"), http.StatusInternalServerError)
 					return
 				}
 				token = r.URL.Query().Get("id_token")
 
-				// TODO Make a goodlooking exitpage and close the tab via JS after a few secs.
-				w.Write([]byte("Authenticated! You can now close the Tab."))
+				// TODO Make a goodlooking exitpage
+				fmt.Fprint(w, auth.Finish)
 				go shutdown()
 				return
 			}))
 
-			// Serve HTML page to populate id_token from client -> server by redirecting to /callback and attaching the token as query parameter
-			r.PathPrefix("/").Handler(http.FileServer(http.Dir("./pkg/auth")))
+			r.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprint(w, auth.Redirect)
+				return
+			}))
 
 			server.ListenAndServe()
 
@@ -79,8 +103,9 @@ func NewLogin(parent *cobra.Command, client *client.APIClient) *Login {
 		},
 	}
 
-	loginCmd.SetHelpTemplate(gxtemplate.HelpTemplate())
-	loginCmd.SetUsageTemplate(gxtemplate.UsageTemplate())
+	loginCmd.Flags().BoolP("auto", "a", true, "Do open the browser window automatically")
+	loginCmd.SetHelpTemplate(template.HelpTemplate())
+	loginCmd.SetUsageTemplate(template.UsageTemplate())
 	parent.AddCommand(loginCmd)
 
 	return &Login{
@@ -91,8 +116,7 @@ func NewLogin(parent *cobra.Command, client *client.APIClient) *Login {
 func getRandomString() string {
 	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._"
 
-	var seededRand *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
+	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	b := make([]byte, 32)
 	for i := range b {

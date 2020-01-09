@@ -26,8 +26,9 @@ type AuthConfig struct {
 		Name    string `yaml:"name"`
 		Default bool   `yaml:"default,omitempty"`
 		Auth    struct {
-			Auth0Tenant string `yaml:"auth0Tenant"`
-			Token       string `yaml:"token"`
+			Auth0Tenant   string `yaml:"auth0Tenant"`
+			Auth0ClientID string `yaml:"auth0ClientID"`
+			Token         string `yaml:"token"`
 		} `yaml:"auth"`
 	} `yaml:"profiles"`
 }
@@ -151,7 +152,7 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 	}
 
 	if r.StatusCode == http.StatusUnauthorized {
-		return nil, fmt.Errorf("Invalid access token")
+		return nil, fmt.Errorf("Invalid access token: %s", string(bodyBytes))
 	}
 
 	respError := Error{}
@@ -170,7 +171,7 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
 	var token string
 
-	p, err := resolveProfile(apiclient)
+	p, err := apiclient.resolveProfile()
 	if err != nil {
 		return "", err
 	}
@@ -189,7 +190,7 @@ func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
 }
 
 func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
-	p, err := resolveProfile(apiclient)
+	p, err := apiclient.resolveProfile()
 	if err != nil {
 		return err
 	}
@@ -211,7 +212,7 @@ func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
 func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
 	var tenant string
 
-	p, err := resolveProfile(apiclient)
+	p, err := apiclient.resolveProfile()
 	if err != nil {
 		return "", err
 	}
@@ -229,7 +230,28 @@ func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
 	return tenant, nil
 }
 
-func resolveProfile(apiclient *APIClient) (string, error) {
+func (apiclient *APIClient) GetAuth0ClientIDFromAuthConfig() (string, error) {
+	var clientID string
+
+	p, err := apiclient.resolveProfile()
+	if err != nil {
+		return "", err
+	}
+
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Name == p {
+			clientID = profile.Auth.Auth0ClientID
+		}
+	}
+
+	if clientID == "" {
+		return clientID, fmt.Errorf("Auth0 clientID for profile %s not configured", p)
+	}
+
+	return clientID, nil
+}
+
+func (apiclient *APIClient) resolveProfile() (string, error) {
 	if len(apiclient.Auth.Profiles) == 0 {
 		return "", fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
 	}
@@ -255,5 +277,5 @@ func resolveProfile(apiclient *APIClient) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("Profil %s not found", *apiclient.Profile)
+	return "", fmt.Errorf("Profile %s not found", *apiclient.Profile)
 }

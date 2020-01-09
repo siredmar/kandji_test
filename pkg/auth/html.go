@@ -1,3 +1,6 @@
+package auth
+
+const Redirect = `
 <!doctype html>
 <html>
 <script>
@@ -18,5 +21,15 @@
     console.error('This page expected an id_token in the location hash.');
   }
 </script>
-
 </html>
+`
+
+const Finish = `
+<!doctype html>
+<html>
+<body>
+  <img style="width:200px" src="https://gridx.ai/wp-content/uploads/2019/06/gridX_newlogo_petrol_spaced.png" alt="logo /">
+  <h3 style="margin-left: 40px; font-family: Arial, Helvetica, sans-serif">All done!<br /> You can now close this tab.</h3>
+</body>
+</html>
+`
