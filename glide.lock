@@ -1,5 +1,5 @@
 hash: b779ac0b16411cd0a6ecf0871722ceb876d64e6942af44fecc34c8e0ee64d5ee
-updated: 2020-01-07T11:15:27.291975+01:00
+updated: 2020-01-09T14:20:10.361227+01:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
@@ -28,8 +28,6 @@ imports:
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
-- name: github.com/gorilla/mux
-  version: 49c01487a141b49f8ffe06277f3dca3ee80a55fa
 - name: github.com/gorilla/websocket
   version: c3e18be99d19e6b3e8f1559eea2c161a665c4b6b
 - name: github.com/grid-x/ds-api
@@ -105,7 +103,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/spf13/viper
-  version: eabbc68a3ecd5cf8c11a2f84dbda5e7a38493b2f
+  version: 06ab5a4b62072ad7af49cf178f79d83aaf3e9d92
 - name: github.com/subosito/gotenv
   version: de67a6614a4de71ad5e380b6946e56ab957d58c5
 - name: github.com/tj/go-spin
@@ -125,7 +123,7 @@ imports:
   - lex/httplex
   - websocket
 - name: golang.org/x/sys
-  version: b016eb3dc98ea7f69ed55e8216b87187067ae621
+  version: 548cf772de5052aa878ccb47cdeb7d262b75c8ec
   subpackages:
   - unix
 - name: golang.org/x/text
