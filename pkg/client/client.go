@@ -68,7 +68,6 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 	}
 
 	h := http.Header{}
-	h.Set("Origin", fmt.Sprintf("https://%s/%s", baseURL, endpoint))
 	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	h.Set("Accept", api.APIVersion)
 	for k, v := range additionalHeaders {
