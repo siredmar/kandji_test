@@ -54,6 +54,7 @@ func main() {
 	delete := cmd.NewDelete(root.Command)
 	cmd.NewDeleteDeployment(delete.Command, client)
 	cmd.NewDeleteApplication(delete.Command, client)
+	cmd.NewDeleteDevice(delete.Command, client)
 
 	// Update
 	update := cmd.NewUpdate(root.Command, client)
