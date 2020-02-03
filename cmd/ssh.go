@@ -114,6 +114,7 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 			if flagCommand != "" {
 				initCommand += " " + flagCommand
 			}
+			silent, _ := cmd.Flags().GetBool("silent")
 			conf := &SSHConfig{
 				Client:         client,
 				DeviceID:       deviceID,
@@ -122,7 +123,7 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 				InputChannel:   input,
 				OutputChannel:  output,
 				SessionChannel: session,
-				Silent:         false,
+				Silent:         silent,
 			}
 
 			if err := createSession(conf); err != nil {
@@ -138,6 +139,7 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 	sshCmd.SetHelpTemplate(template.HelpTemplate())
 	sshCmd.SetUsageTemplate(template.UsageTemplate())
 	sshCmd.Flags().StringP("command", "c", "", "specify a command to issue")
+	sshCmd.Flags().BoolP("silent", "s", false, "don't print any output during connection setup")
 	parent.AddCommand(sshCmd)
 
 	return &SSH{
