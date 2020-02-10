@@ -107,7 +107,10 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 	}
 
 	if podList.IsEmpty() {
-		return podList, errors.E("no pods found")
+		return podList, errors.E(
+			errors.NotExists,
+			"no pods found",
+		)
 	}
 
 	return podList, nil
