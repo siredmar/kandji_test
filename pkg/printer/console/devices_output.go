@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
+
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
@@ -30,37 +31,15 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 }
 
 func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
-	var r []api.Device
-	for _, e := range do.raw.Devices {
-		// Filter out offline devices if !showAll
-		if !showAll {
-			if e.Status.LastHeartbeat == nil {
-				continue
-			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
-				continue
-			}
-		}
-		r = append(r, e)
-	}
-	do.raw.Devices = r
+	out := filterDevices(do.raw.Devices, showAll)
+	do.raw.Devices = out
 
 	return do
 }
 
 func (do DevicesConsoleOutputWide) Filter(showAll bool) DevicesConsoleOutputWide {
-	var r []api.Device
-	for _, e := range do.raw.Devices {
-		// Filter out offline devices if !showAll
-		if !showAll {
-			if e.Status.LastHeartbeat == nil {
-				continue
-			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
-				continue
-			}
-		}
-		r = append(r, e)
-	}
-	do.raw.Devices = r
+	out := filterDevices(do.raw.Devices, showAll)
+	do.raw.Devices = out
 
 	return do
 }
@@ -84,18 +63,55 @@ func (do DevicesConsoleOutputWide) Map() []DeviceConsoleOutputWide {
 }
 
 func (do DevicesConsoleOutput) Sort(sortBy string) DevicesConsoleOutput {
+	out := sortDevices(do.raw, sortBy)
+	do.raw.Devices = out
+
+	return do
+}
+
+func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide {
+	out := sortDevices(do.raw, sortBy)
+	do.raw.Devices = out
+
+	return do
+}
+
+func filterDevices(in []api.Device, showAll bool) []api.Device {
+	var r []api.Device
+	for _, e := range in {
+		// Filter out devices which are not picked up yet if !showAll
+		if !showAll {
+			if e.Status.LastHeartbeat == nil {
+				continue
+			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
+				continue
+			}
+		}
+		r = append(r, e)
+	}
+
+	return r
+}
+
+func sortDevices(in api.Devices, sortBy string) []api.Device {
 	s := interface{}(nil)
-	rawJson, _ := json.Marshal(do.raw)
+	rawJson, _ := json.Marshal(in)
 	json.Unmarshal(rawJson, &s)
 
-	if len(do.raw.Devices) < 2 {
-		return do
+	if len(in.Devices) < 2 {
+		return in.Devices
+	}
+
+	sortValues := make(map[string]interface{})
+
+	for _, d := range in.Devices {
+		sortValues[d.Metadata.ID], _ = jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", d.Metadata.ID, sortBy), s)
 	}
 
 	var found bool
-	sort.Slice(do.raw.Devices, func(i, j int) bool {
-		di, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", do.raw.Devices[i].Metadata.ID, sortBy), s)
-		dj, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", do.raw.Devices[j].Metadata.ID, sortBy), s)
+	sort.Slice(in.Devices, func(i, j int) bool {
+		di := sortValues[in.Devices[i].Metadata.ID]
+		dj := sortValues[in.Devices[j].Metadata.ID]
 
 		if fmt.Sprintf("%v", di) != "[]" {
 			found = true
@@ -108,20 +124,5 @@ func (do DevicesConsoleOutput) Sort(sortBy string) DevicesConsoleOutput {
 		fmt.Println(s)
 	}
 
-	return do
-}
-
-func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide {
-	s := interface{}(nil)
-	rawJson, _ := json.Marshal(do.raw)
-	json.Unmarshal(rawJson, &s)
-
-	sort.Slice(do.raw.Devices, func(i, j int) bool {
-		di, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", do.raw.Devices[i].Metadata.ID, sortBy), s)
-		dj, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", do.raw.Devices[j].Metadata.ID, sortBy), s)
-
-		return fmt.Sprintf("%v", di) < fmt.Sprintf("%v", dj)
-	})
-
-	return do
+	return in.Devices
 }

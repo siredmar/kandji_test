@@ -9,7 +9,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -26,7 +26,11 @@ func NewConfigCreateDockerAWS(parent *cobra.Command, client *client.APIClient) *
 		Example:               "# Create a docker config \n  gxctl config create docker-aws https://485611583707.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=FOO --secret-access-key=BAR --region=eu-central-1 --selector gridx.de/channel=stable",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("REGISTRY", "gxctl config create docker-aws -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument REGISTRY not found",
+					[]string{"run 'gxctl config create docker-aws --help' for usage"},
+				)
 			}
 
 			return nil
@@ -39,13 +43,25 @@ func NewConfigCreateDockerAWS(parent *cobra.Command, client *client.APIClient) *
 			configCreateDockerAWSCmdSelector, _ := cmd.Flags().GetString("selector")
 
 			if configCreateDockerAWSCmdAccessKey == "" {
-				return errors.MissingParameter("ACCESS_KEY", "gxctl config create docker-aws -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ACCESS_KEY not found",
+					[]string{"run 'gxctl config create docker-aws --help' for usage"},
+				)
 			}
 			if configCreateDockerAWSCmdSecretAccessKey == "" {
-				return errors.MissingParameter("SECRET_ACCESS_KEY", "gxctl config create docker-aws -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument SECRET_ACCESS_KEY not found",
+					[]string{"run 'gxctl config create docker-aws --help' for usage"},
+				)
 			}
 			if configCreateDockerAWSCmdRegion == "" {
-				return errors.MissingParameter("REGION", "gxctl config create docker-aws -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument REGION not found",
+					[]string{"run 'gxctl config create docker-aws --help' for usage"},
+				)
 			}
 
 			matchByLabels := make(map[string]string)

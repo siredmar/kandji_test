@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -26,10 +26,12 @@ func NewGetPods(parent *cobra.Command, client *client.APIClient, printer *print.
 		Example:               "# Get all pods \n  gxctl get pods\n\n  # Get information about an pod with abbreviation a1n \n  gxctl get pod a1n",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdSortBy, _ := cmd.Flags().GetString("sort-by")
 			getCmdShowAll, _ := cmd.Flags().GetBool("all")
 
 			printerConfig := print.Printconfig{
 				OutputFormat: getCmdOutputType,
+				SortBy:       getCmdSortBy,
 				ShowAll:      getCmdShowAll,
 			}
 
@@ -105,7 +107,10 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 	}
 
 	if podList.IsEmpty() {
-		return podList, errors.ListNotFoundError("pods")
+		return podList, errors.E(
+			errors.NotExists,
+			"no pods found",
+		)
 	}
 
 	return podList, nil
@@ -132,7 +137,10 @@ func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, 
 }
 
 func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
-	return api.Pods{}, errors.NotImplementedError("Getting Pods by Device-ID")
+	return api.Pods{}, errors.E(
+		errors.NotImplemented,
+		"Getting Pods by Device-ID is not yet implemented",
+	)
 	/*
 		endpoint := fmt.Sprintf("%s/%s/pods"", api.PodsEndpoint, id)
 		response, err := apiClient.Request(endpoint)

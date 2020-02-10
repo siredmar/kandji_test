@@ -57,12 +57,13 @@ func NewValidate(parent *cobra.Command, client *client.APIClient) *Validate {
 }
 
 func validate(filename string, content []byte, client *client.APIClient) error {
+	fmt.Printf("Validating file %s\n", filename)
+
 	_, _, err := checkResourceFile(content, true)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("Validating file %s", filename))
 	fmt.Println("Valid Resource")
 	return nil
 }

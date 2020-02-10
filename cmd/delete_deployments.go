@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -25,7 +25,11 @@ func NewDeleteDeployment(parent *cobra.Command, client *client.APIClient) *Delet
 		Example:          "# Delete a deployment \n  gxctl delete deployment 337df243-2cc9-46f4-bfeb-3c978ece4252",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.MissingParameter("ID", "gxctl delete deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl delete deployment --help' for usage"},
+				)
 			}
 			return nil
 		},

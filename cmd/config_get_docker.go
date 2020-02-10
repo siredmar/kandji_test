@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -85,7 +85,10 @@ func getDockerConfigs(client *client.APIClient) (api.DockerConfigs, error) {
 	}
 
 	if dockerConfigList.IsEmpty() {
-		return dockerConfigList, errors.ListNotFoundError("dockerConfigs")
+		return dockerConfigList, errors.E(
+			errors.NotExists,
+			"no dockerConfigs found",
+		)
 	}
 
 	return dockerConfigList, nil

@@ -14,7 +14,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -31,7 +31,11 @@ func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForwar
 		Long:                  `TODO`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("ID", "gxctl port-forward -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl port-forward --help' for usage"},
+				)
 			}
 			return nil
 		},
@@ -40,10 +44,18 @@ func NewPortForward(parent *cobra.Command, client *client.APIClient) *PortForwar
 			portForwardCmdTarget, _ := cmd.Flags().GetString("target")
 
 			if portForwardCmdLocalPort == "" {
-				return errors.MissingParameter("localport", "gxctl port-forward -h")
+				return errors.E(
+					errors.Invalid,
+					"required parameter '--localport' not found",
+					[]string{"run 'gxctl port-forward --help' for usage"},
+				)
 			}
 			if portForwardCmdTarget == "" {
-				return errors.MissingParameter("target", "gxctl port-forward -h")
+				return errors.E(
+					errors.Invalid,
+					"required parameter '--target' not found",
+					[]string{"run 'gxctl port-forward --help' for usage"},
+				)
 			}
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary

@@ -9,7 +9,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -27,11 +27,19 @@ func NewCreateDeployment(parent *cobra.Command, client *client.APIClient) *Creat
 		Example:               "# Create an nginx deployment for app test \n  gxctl create deployment nginx:1.15.8 -a test -s gridx.de/channel=stable",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("IMAGE", "gxctl create deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument IMAGE not found",
+					[]string{"run 'gxctl create deployment --help' for usage"},
+				)
 			}
 
 			if !api.IsDockerImageValid(args[0]) {
-				return errors.InvalidParameter("IMAGE", "gxctl create deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument IMAGE is invalid",
+					[]string{"run 'gxctl create deployment --help' for usage"},
+				)
 			}
 
 			return nil
@@ -42,10 +50,18 @@ func NewCreateDeployment(parent *cobra.Command, client *client.APIClient) *Creat
 			createDeploymentCmdSelector, _ := cmd.Flags().GetString("selector")
 
 			if createDeploymentCmdApp == "" {
-				return errors.MissingParameter("APP", "gxctl create deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument APP not found",
+					[]string{"run 'gxctl create deployment --help' for usage"},
+				)
 			}
 			if createDeploymentCmdSelector == "" {
-				return errors.MissingParameter("SELECTOR", "gxctl create deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument SELECTOR not found",
+					[]string{"run 'gxctl create deployment --help' for usage"},
+				)
 			}
 
 			matchByLabels := make(map[string]string)

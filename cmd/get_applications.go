@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -79,7 +79,10 @@ func getApplications(client *client.APIClient) (api.Applications, error) {
 	}
 
 	if applicationList.IsEmpty() {
-		return applicationList, errors.ListNotFoundError("applications")
+		return applicationList, errors.E(
+			errors.NotExists,
+			"no applications found",
+		)
 	}
 
 	return applicationList, nil
@@ -95,11 +98,6 @@ func getApplicationById(client *client.APIClient, id string) (api.Application, e
 	application, err := api.NewApplication(response)
 	if err != nil {
 		return application, err
-	}
-
-	if application.IsEmpty() {
-		msg := fmt.Sprintf("application \"%s\"", id)
-		return application, errors.GetNotFoundError(msg)
 	}
 
 	return application, nil

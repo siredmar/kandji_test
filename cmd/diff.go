@@ -8,12 +8,14 @@ import (
 
 	"github.com/ghodss/yaml"
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
+	cleanupconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	dockerconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -70,6 +72,8 @@ func NewDiff(parent *cobra.Command, client *client.APIClient) *Diff {
 }
 
 func diff(filename string, content []byte, differ string, client *client.APIClient) error {
+	fmt.Printf("Diffing file %s\n", filename)
+
 	res, resID, err := checkResourceFile(content, true)
 	if err != nil {
 		return err
@@ -87,36 +91,48 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 	} else {
 		// There is a resID - Check if res already exists
 		var current interface{}
+		var err error
+
 		switch v := res.(type) {
 		case api.Application:
-			app, err := getApplicationById(client, v.Metadata.ID)
-			if err == nil {
-				current = app
-			}
+			current, err = getApplicationById(client, v.Metadata.ID)
 		case api.Device:
-			device, err := getDeviceById(client, v.Metadata.ID, nil)
+			var device api.Device
+			device, err = getDeviceById(client, v.Metadata.ID, nil)
 			device.Status = deviceApi.DeviceStatus{}
-			if err == nil {
-				current = device
-			}
+			current = device
 		case api.Deployment:
-			deploy, err := getDeploymentById(client, v.Metadata.ID, nil)
+			var deploy api.Deployment
+			deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
 			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
-			if err == nil {
-				current = deploy
-			}
+			current = deploy
 		case api.DockerConfig:
-			dc, err := getDockerConfigById(client, v.Metadata.ID, nil)
-			if err == nil {
-				current = dc
-			}
+			var dc api.DockerConfig
+			dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
+			dc.Status = dockerconfigApi.DockerConfigStatus{}
+			current = dc
 		case api.CleanupConfig:
-			cc, err := getCleanupConfigById(client, v.Metadata.ID, nil)
-			if err == nil {
-				current = cc
-			}
+			var cc api.CleanupConfig
+			cc, err = getCleanupConfigById(client, v.Metadata.ID, nil)
+			cc.Status = cleanupconfigApi.CleanupConfigStatus{}
+			current = cc
 		default:
-			return fmt.Errorf("Unsupported type")
+			return errors.E(
+				errors.NotImplemented,
+				"Unsupported type",
+			)
+		}
+
+		// Check if api returned something else then 404
+		if err != nil {
+			e, ok := err.(*errors.Error)
+			if !ok {
+				return errors.E(errors.Other, err)
+			}
+
+			if e.Kind != errors.NotExists {
+				return e
+			}
 		}
 
 		err, f1, f2 = writeDiffFiles(current, res)
@@ -138,7 +154,6 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 		}
 	}
 
-	fmt.Println(fmt.Sprintf("Diffing file %s", filename))
 	fmt.Println(string(output))
 	return nil
 }
@@ -179,7 +194,7 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 	}
 
 	//Nothing found
-	return nil, "", errors.InvalidFileFormat()
+	return nil, "", errors.E(errors.Invalid, "Unsupported type")
 }
 
 func writeDiffFiles(i1, i2 interface{}) (error, string, string) {

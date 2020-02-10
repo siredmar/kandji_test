@@ -8,7 +8,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -25,11 +25,19 @@ func NewUpdateDeployment(parent *cobra.Command, client *client.APIClient) *Updat
 		Long:                  `Updates a deployment`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("ID", "gxctl update deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl update deployment --help' for usage"},
+				)
 			}
 
 			if !api.IsDockerImageValid(args[0]) {
-				return errors.InvalidParameter("IMAGE", "gxctl create deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument IMAGE not valdi",
+					[]string{"run 'gxctl update deployment --help' for usage"},
+				)
 			}
 
 			return nil
@@ -40,7 +48,11 @@ func NewUpdateDeployment(parent *cobra.Command, client *client.APIClient) *Updat
 			updateDeploymentCmdSelector, _ := cmd.Flags().GetString("selector")
 
 			if updateDeploymentCmdImage == "" && updateDeploymentCmdApp == "" && updateDeploymentCmdSelector == "" {
-				return errors.NothingToDo("gxctl update deployment -h")
+				return errors.E(
+					errors.Invalid,
+					"Nothing to update",
+					[]string{"run 'gxctl update deployment --help' for usage"},
+				)
 			}
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary

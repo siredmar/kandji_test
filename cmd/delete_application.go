@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -25,7 +25,11 @@ func NewDeleteApplication(parent *cobra.Command, client *client.APIClient) *Dele
 		Example:               "# Delete an application with name test \n  gxctl delete application test",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.MissingParameter("NAME", "gxctl create application -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument NAME not found",
+					[]string{"run 'gxctl delete application --help' for usage"},
+				)
 			}
 			return nil
 		},

@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -97,8 +95,10 @@ func apply(content []byte, client *client.APIClient) error {
 			found = true
 		}
 	default:
-		s := fmt.Sprintf("Applying resource of type %s.", v)
-		return errors.NotImplementedError(s)
+		return errors.E(
+			errors.NotImplemented,
+			"Unsupported type",
+		)
 	}
 
 	if !found {

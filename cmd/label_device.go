@@ -8,7 +8,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -25,10 +25,18 @@ func NewLabelDevice(parent *cobra.Command, client *client.APIClient) *LabelDevic
 		Long:                  `Todo`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				return errors.MissingParameter("ID", "gxctl create application -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl label device --help' for usage"},
+				)
 			}
 			if len(args) == 1 {
-				return errors.MissingParameter("LABEL", "gxctl create application -h")
+				return errors.E(
+					errors.Invalid,
+					"required arguments KEY=VAL not found",
+					[]string{"run 'gxctl label device --help' for usage"},
+				)
 			}
 			return nil
 		},

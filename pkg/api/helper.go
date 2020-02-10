@@ -1,12 +1,13 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 func LookupID(prefix string, ids []string) (string, error) {
@@ -21,7 +22,7 @@ func LookupID(prefix string, ids []string) (string, error) {
 		if strings.HasPrefix(i, prefix) {
 			if out != "" {
 				s := fmt.Sprintf("Found more then one result for abbreviation %s", prefix)
-				return out, errors.New(s)
+				return out, errors.E(errors.Invalid, s)
 			}
 			out = i
 		}
@@ -29,7 +30,7 @@ func LookupID(prefix string, ids []string) (string, error) {
 
 	if out == "" {
 		s := fmt.Sprintf("Found no result for abbreviation %s", prefix)
-		return out, errors.New(s)
+		return out, errors.E(errors.NotExists, s)
 	}
 
 	return out, nil

@@ -41,11 +41,11 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintconfig) error {
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutput{}.Map(v, config.ShowAll).Sort()
+		out = PodsConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutput{}.Map(v).Sort()
+		out = DeploymentsConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v)
 	case api.Applications:
@@ -85,11 +85,11 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintconfig) err
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutputWide{}.Map(v, config.ShowAll).Sort()
+		out = PodsConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Deployment:
-		out = DeploymentConsoleOutput{}.Map(v) //TODO make wide mapping
+		out = DeploymentConsoleOutputWide{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+		out = DeploymentsConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v) //TODO make wide mapping
 	case api.Applications:

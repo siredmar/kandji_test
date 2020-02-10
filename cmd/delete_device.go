@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -25,7 +25,11 @@ func NewDeleteDevice(parent *cobra.Command, client *client.APIClient) *DeleteApp
 		Example:               "# Delete devices with abbreviation a42\n  gxctl delete device a42",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.MissingParameter("NAME", "gxctl delete device -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl delete device --help' for usage"},
+				)
 			}
 			return nil
 		},

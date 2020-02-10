@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -28,17 +28,23 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 			getCmdShowDevices, _ := cmd.Flags().GetBool("show-devices")
 
 			if getCmdShowDevices && len(args) != 1 {
-				return errors.InvalidParameter("show-devices", "devices can just be shown for a single deployment")
+				return errors.E(
+					errors.Invalid,
+					"devices can just be shown for a single deployment",
+					[]string{"run 'gxctl get deployment --help' for usage"},
+				)
 			}
 
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			getCmdOutputType, _ := cmd.Flags().GetString("output")
+			getCmdSortBy, _ := cmd.Flags().GetString("sort-by")
 			getCmdShowDevices, _ := cmd.Flags().GetBool("show-devices")
 
 			printerConfig := print.Printconfig{
 				OutputFormat: getCmdOutputType,
+				SortBy:       getCmdSortBy,
 			}
 
 			if len(args) > 0 {
@@ -73,13 +79,29 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 					}
 				}
 			} else {
-				//List all deployments
 				deployments, err := getDeployments(client)
 				if err != nil {
 					return err
 				}
 
-				if err := printer.Print(deployments, printerConfig); err != nil {
+				var label []api.Deployment
+				var id []api.Deployment
+
+				for _, d := range deployments.Deployments {
+					if d.Spec.Selector.MatchByDeviceID != nil {
+						id = append(id, d)
+						continue
+					}
+					label = append(label, d)
+				}
+
+				fmt.Print("Deployments by ID\n\n")
+				if err := printer.Print(api.Deployments{Deployments: id}, printerConfig); err != nil {
+					return err
+				}
+
+				fmt.Print("Deployments by Label\n\n")
+				if err := printer.Print(api.Deployments{Deployments: label}, printerConfig); err != nil {
 					return err
 				}
 			}
@@ -109,7 +131,10 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 	}
 
 	if deploymentList.IsEmpty() {
-		return deploymentList, errors.ListNotFoundError("deployments")
+		return deploymentList, errors.E(
+			errors.NotExists,
+			"no deployments found",
+		)
 	}
 
 	return deploymentList, nil
