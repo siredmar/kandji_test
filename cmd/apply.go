@@ -95,7 +95,10 @@ func apply(content []byte, client *client.APIClient) error {
 			found = true
 		}
 	default:
-		return errors.E(errors.Invalid, "Unsupported type")
+		return errors.E(
+			errors.NotImplemented,
+			"Unsupported type",
+		)
 	}
 
 	if !found {

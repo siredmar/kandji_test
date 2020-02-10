@@ -168,8 +168,10 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 
 		return fmt.Sprintf("CleanupConfig %s updated successfully", config.Metadata.ID), nil
 	default:
-		s := fmt.Sprintf("Updating resource of type %s.", v)
-		return "", errors.E(s)
+		return "", errors.E(
+			errors.NotImplemented,
+			"Unsupported type",
+		)
 	}
 }
 

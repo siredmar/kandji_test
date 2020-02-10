@@ -99,10 +99,16 @@ func sortPods(in api.Pods, sortBy string) []api.Pod {
 		return in.Pods
 	}
 
+	sortValues := make(map[string]interface{})
+
+	for _, d := range in.Pods {
+		sortValues[d.Metadata.ID], _ = jsonpath.Get(fmt.Sprintf("$..pods[?(@.metadata.id==\"%s\")].%s", d.Metadata.ID, sortBy), s)
+	}
+
 	var found bool
 	sort.Slice(in.Pods, func(i, j int) bool {
-		di, _ := jsonpath.Get(fmt.Sprintf("$..pods[?(@.metadata.id==\"%s\")].%s", in.Pods[i].Metadata.ID, sortBy), s)
-		dj, _ := jsonpath.Get(fmt.Sprintf("$..pods[?(@.metadata.id==\"%s\")].%s", in.Pods[j].Metadata.ID, sortBy), s)
+		di := sortValues[in.Pods[i].Metadata.ID]
+		dj := sortValues[in.Pods[j].Metadata.ID]
 
 		if fmt.Sprintf("%v", di) != "[]" {
 			found = true

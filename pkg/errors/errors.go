@@ -35,14 +35,15 @@ type Kind uint8
 // their values.
 // New items muss be added only to the end.
 const (
-	Other      Kind = iota // Unclassified error
-	Permission             // Permission denied
-	Invalid                // Invalid action
-	Validation             // Validation failed
-	Exist                  // Resource already exists
-	NotExists              // Resource does not exist
-	Service                // External service is not reachable
-	Internal               // Internal error
+	Other          Kind = iota // Unclassified error
+	Permission                 // Permission denied
+	Invalid                    // Invalid action
+	Validation                 // Validation failed
+	Exist                      // Resource already exists
+	NotExists                  // Resource does not exist
+	Service                    // External service is not reachable
+	NotImplemented             // Not yet implemented
+	Internal                   // Internal error
 )
 
 // String returns the string representation of the error kind.
@@ -62,6 +63,8 @@ func (k Kind) String() string {
 		return "resource does not exist"
 	case Service:
 		return "service unavailable"
+	case NotImplemented:
+		return "not implemented"
 	case Internal:
 		return "internal error"
 	}

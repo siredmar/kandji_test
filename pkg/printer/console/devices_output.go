@@ -102,10 +102,16 @@ func sortDevices(in api.Devices, sortBy string) []api.Device {
 		return in.Devices
 	}
 
+	sortValues := make(map[string]interface{})
+
+	for _, d := range in.Devices {
+		sortValues[d.Metadata.ID], _ = jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", d.Metadata.ID, sortBy), s)
+	}
+
 	var found bool
 	sort.Slice(in.Devices, func(i, j int) bool {
-		di, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", in.Devices[i].Metadata.ID, sortBy), s)
-		dj, _ := jsonpath.Get(fmt.Sprintf("$..devices[?(@.metadata.id==\"%s\")].%s", in.Devices[j].Metadata.ID, sortBy), s)
+		di := sortValues[in.Devices[i].Metadata.ID]
+		dj := sortValues[in.Devices[j].Metadata.ID]
 
 		if fmt.Sprintf("%v", di) != "[]" {
 			found = true

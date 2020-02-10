@@ -147,7 +147,9 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 
 		return fmt.Sprintf("Cleanup config %s created successfully", config.Metadata.ID), nil
 	default:
-		s := fmt.Sprintf("Creating resource of type %s.", v)
-		return "", errors.E(s)
+		return "", errors.E(
+			errors.NotImplemented,
+			"Unsupported type",
+		)
 	}
 }

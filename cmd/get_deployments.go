@@ -28,7 +28,11 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 			getCmdShowDevices, _ := cmd.Flags().GetBool("show-devices")
 
 			if getCmdShowDevices && len(args) != 1 {
-				return errors.E("show-devices", "devices can just be shown for a single deployment")
+				return errors.E(
+					errors.Invalid,
+					"devices can just be shown for a single deployment",
+					[]string{"run 'gxctl get deployment --help' for usage"},
+				)
 			}
 
 			return nil

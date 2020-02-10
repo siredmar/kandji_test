@@ -8,7 +8,9 @@ import (
 
 	"github.com/ghodss/yaml"
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
+	cleanupconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	dockerconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	"github.com/spf13/cobra"
 
 	"github.com/grid-x/gxctl/pkg/api"
@@ -70,7 +72,7 @@ func NewDiff(parent *cobra.Command, client *client.APIClient) *Diff {
 }
 
 func diff(filename string, content []byte, differ string, client *client.APIClient) error {
-	fmt.Println(fmt.Sprintf("Diffing file %s", filename))
+	fmt.Printf("Diffing file %s\n", filename)
 
 	res, resID, err := checkResourceFile(content, true)
 	if err != nil {
@@ -93,40 +95,30 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 
 		switch v := res.(type) {
 		case api.Application:
-			var app api.Application
-			app, err = getApplicationById(client, v.Metadata.ID)
-			if err == nil {
-				current = app
-			}
+			current, err = getApplicationById(client, v.Metadata.ID)
 		case api.Device:
 			var device api.Device
 			device, err = getDeviceById(client, v.Metadata.ID, nil)
 			device.Status = deviceApi.DeviceStatus{}
-			if err == nil {
-				current = device
-			}
+			current = device
 		case api.Deployment:
 			var deploy api.Deployment
 			deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
 			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
-			if err == nil {
-				current = deploy
-			}
+			current = deploy
 		case api.DockerConfig:
 			var dc api.DockerConfig
 			dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
-			if err == nil {
-				current = dc
-			}
+			dc.Status = dockerconfigApi.DockerConfigStatus{}
+			current = dc
 		case api.CleanupConfig:
 			var cc api.CleanupConfig
 			cc, err = getCleanupConfigById(client, v.Metadata.ID, nil)
-			if err == nil {
-				current = cc
-			}
+			cc.Status = cleanupconfigApi.CleanupConfigStatus{}
+			current = cc
 		default:
 			return errors.E(
-				errors.Invalid,
+				errors.NotImplemented,
 				"Unsupported type",
 			)
 		}

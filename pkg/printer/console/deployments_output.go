@@ -78,10 +78,16 @@ func sortDeployments(in api.Deployments, sortBy string) []api.Deployment {
 		return in.Deployments
 	}
 
+	sortValues := make(map[string]interface{})
+
+	for _, d := range in.Deployments {
+		sortValues[d.Metadata.ID], _ = jsonpath.Get(fmt.Sprintf("$..deployments[?(@.metadata.id==\"%s\")].%s", d.Metadata.ID, sortBy), s)
+	}
+
 	var found bool
 	sort.Slice(in.Deployments, func(i, j int) bool {
-		di, _ := jsonpath.Get(fmt.Sprintf("$..deployments[?(@.metadata.id==\"%s\")].%s", in.Deployments[i].Metadata.ID, sortBy), s)
-		dj, _ := jsonpath.Get(fmt.Sprintf("$..deployments[?(@.metadata.id==\"%s\")].%s", in.Deployments[j].Metadata.ID, sortBy), s)
+		di := sortValues[in.Deployments[i].Metadata.ID]
+		dj := sortValues[in.Deployments[j].Metadata.ID]
 
 		if fmt.Sprintf("%v", di) != "[]" {
 			found = true

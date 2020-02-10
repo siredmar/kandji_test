@@ -138,7 +138,7 @@ func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, 
 
 func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
 	return api.Pods{}, errors.E(
-		errors.Service,
+		errors.NotImplemented,
 		"Getting Pods by Device-ID is not yet implemented",
 	)
 	/*
