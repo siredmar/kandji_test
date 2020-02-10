@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -148,6 +148,6 @@ func createResource(client *client.APIClient, v interface{}) (string, error) {
 		return fmt.Sprintf("Cleanup config %s created successfully", config.Metadata.ID), nil
 	default:
 		s := fmt.Sprintf("Creating resource of type %s.", v)
-		return "", errors.NotImplementedError(s)
+		return "", errors.E(s)
 	}
 }

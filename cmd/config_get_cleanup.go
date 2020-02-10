@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -85,7 +85,10 @@ func getCleanupConfigs(client *client.APIClient) (api.CleanupConfigs, error) {
 	}
 
 	if cleanupConfigList.IsEmpty() {
-		return cleanupConfigList, errors.ListNotFoundError("cleanupConfigs")
+		return cleanupConfigList, errors.E(
+			errors.NotExists,
+			"no cleanupConfigs found",
+		)
 	}
 
 	return cleanupConfigList, nil

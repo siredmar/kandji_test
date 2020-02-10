@@ -14,7 +14,7 @@ import (
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	template "github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -36,7 +36,11 @@ func NewCopy(parent *cobra.Command, client *client.APIClient) *Copy {
 		Long:                  `TODO`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				return errors.MissingParameter("ID", "gxctl copy -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl copy --help' for usage"},
+				)
 			}
 			return nil
 		},
@@ -45,10 +49,18 @@ func NewCopy(parent *cobra.Command, client *client.APIClient) *Copy {
 			copyCmdDestination := args[1]
 
 			if strings.Contains(copyCmdSource, ":") && strings.Contains(copyCmdDestination, ":") {
-				return errors.ServerError("You cannot specify the device in both source and destination parameters")
+				return errors.E(
+					errors.Invalid,
+					"You cannot specify the device in both source and destination parameters",
+					[]string{"run 'gxctl copy --help' for usage"},
+				)
 			}
 			if !strings.Contains(copyCmdSource, ":") && !strings.Contains(copyCmdDestination, ":") {
-				return errors.ServerError("Missing device id")
+				return errors.E(
+					errors.Invalid,
+					"Missing device id",
+					[]string{"run 'gxctl copy --help' for usage"},
+				)
 			}
 
 			var id, source, dest string

@@ -11,7 +11,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -27,7 +27,11 @@ func NewSyslog(parent *cobra.Command, client *client.APIClient) *Syslog {
 		Long:                  `TODO`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("ID", "gxctl syslog -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not found",
+					[]string{"run 'gxctl syslog --help' for usage"},
+				)
 			}
 			return nil
 		},

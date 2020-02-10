@@ -8,7 +8,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -24,7 +24,11 @@ func NewUpdateDevice(parent *cobra.Command, client *client.APIClient) *UpdateDev
 		Long:                  `Updates a device`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("ID", "gxctl update device -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument ID not valdi",
+					[]string{"run 'gxctl update device --help' for usage"},
+				)
 			}
 			return nil
 		},
@@ -35,7 +39,11 @@ func NewUpdateDevice(parent *cobra.Command, client *client.APIClient) *UpdateDev
 			updateDeviceCmdAnnotations, _ := cmd.Flags().GetString("annotations")
 
 			if updateDeviceCmdMaintenanceWindow == "" && updateDeviceCmdMacAddress == "" && updateDeviceCmdLabels == "" && updateDeviceCmdAnnotations == "" {
-				return errors.NothingToDo("gxctl update device -h")
+				return errors.E(
+					errors.Invalid,
+					"Nothing to update",
+					[]string{"run 'gxctl update device --help' for usage"},
+				)
 			}
 
 			//Lookup all existing devices to validate ids and autocomplete them if necessary

@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 
 	api "github.com/grid-x/gxctl/pkg/api"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 const (
@@ -121,7 +121,7 @@ func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, e
 func internalRequest(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {
 	token, err := apiclient.getTokenFromAuthConfig()
 	if err != nil {
-		return nil, err
+		return nil, errors.E(errors.Invalid, "Token not found", err)
 	}
 
 	base := baseURL
@@ -150,18 +150,36 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
-	if r.StatusCode == http.StatusUnauthorized {
-		return nil, fmt.Errorf("Invalid access token: %s", string(bodyBytes))
-	}
-
 	respError := Error{}
 	err = json.Unmarshal(bodyBytes, &respError)
 	if err != nil {
 		return nil, err
 	}
 
-	if respError.Error.Message != "" {
-		return nil, errors.ServerError(respError.Error.Message)
+	errorMsg := respError.Error.Message
+	if errorMsg == "" {
+		errorMsg = string(bodyBytes)
+	}
+
+	if r.StatusCode == http.StatusUnauthorized {
+		return nil, errors.E(
+			errors.Permission,
+			"Invalid access token",
+			errorMsg,
+		)
+	}
+	if r.StatusCode == http.StatusNotFound {
+		return nil, errors.E(
+			errors.NotExists,
+			errorMsg,
+		)
+	}
+
+	if r.StatusCode >= 400 {
+		return nil, errors.E(
+			errors.Internal,
+			errorMsg,
+		)
 	}
 
 	return bodyBytes, nil

@@ -231,3 +231,16 @@ $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-publickey
 # Get the docker config of a device
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-dockerconfig
 ```
+
+## Examples: Sorted output
+
+You can sort the output of the get command using JSONPath expressions.
+
+```shell
+# Get a list of all pods sorted by their starttime
+$ gxctl get pods -s .status.startTime
+# Get a list of all devices sorted by their serialnumber in wide output
+$ gxctl get devices -s .spec.serialnumber -o wide
+# Get a list of all deployments sorted by their app
+$ gxctl get deploy -s .spec.app
+```

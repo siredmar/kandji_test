@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -24,7 +24,11 @@ func NewCreateApplication(parent *cobra.Command, client *client.APIClient) *Crea
 		Example:               "# Create an application with name test \n  gxctl create application test",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.MissingParameter("NAME", "gxctl create application -h")
+				return errors.E(
+					errors.Invalid,
+					"required argument NAME not found",
+					[]string{"run 'gxctl create application --help' for usage"},
+				)
 			}
 			return nil
 		},

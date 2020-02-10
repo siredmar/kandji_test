@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -30,15 +30,27 @@ func NewGetDevices(parent *cobra.Command, client *client.APIClient, printer *pri
 			getCmdShowPublickey, _ := cmd.Flags().GetBool("show-publickey")
 
 			if getCmdShowDockerconfig && len(args) != 1 {
-				return errors.InvalidParameter("show-dockerconfig", "docker-configs can just be shown for a single device")
+				return errors.E(
+					errors.Invalid,
+					"docker-configs can just be shown for a single device",
+					[]string{"run 'gxctl get device --help' for usage"},
+				)
 			}
 
 			if getCmdShowPods && len(args) != 1 {
-				return errors.InvalidParameter("show-pods", "pods can just be shown for a single device")
+				return errors.E(
+					errors.Invalid,
+					"pods can just be shown for a single device",
+					[]string{"run 'gxctl get device --help' for usage"},
+				)
 			}
 
 			if getCmdShowPublickey && len(args) != 1 {
-				return errors.InvalidParameter("show-publickey", "publickeys can just be shown for a single device")
+				return errors.E(
+					errors.Invalid,
+					"publickeys can just be shown for a single device",
+					[]string{"run 'gxctl get device --help' for usage"},
+				)
 			}
 
 			return nil
@@ -145,7 +157,10 @@ func getDevices(client *client.APIClient) (api.Devices, error) {
 	}
 
 	if deviceList.IsEmpty() {
-		return deviceList, errors.ListNotFoundError("devices")
+		return deviceList, errors.E(
+			errors.NotExists,
+			"no devices found",
+		)
 	}
 
 	return deviceList, nil

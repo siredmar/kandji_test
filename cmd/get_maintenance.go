@@ -7,7 +7,7 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	errors "github.com/grid-x/gxctl/pkg/error"
+	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/template"
 )
@@ -85,7 +85,10 @@ func getMaintenanceTasks(client *client.APIClient) (api.MaintenanceTasks, error)
 	}
 
 	if taskList.IsEmpty() {
-		return taskList, errors.ListNotFoundError("maintenance tasks")
+		return taskList, errors.E(
+			errors.NotExists,
+			"no maintenance tasks found",
+		)
 	}
 
 	return taskList, nil
