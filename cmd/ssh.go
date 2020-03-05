@@ -32,6 +32,7 @@ type SSHConfig struct {
 	InitCommand    string
 	InputChannel   chan []byte
 	OutputChannel  chan []byte
+	OutputWG       *sync.WaitGroup
 	SessionChannel chan []byte
 	Silent         bool
 }
@@ -74,6 +75,8 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 				return err
 			}
 
+			var outputWG sync.WaitGroup
+
 			input := make(chan []byte)
 			defer close(input)
 			output := make(chan []byte)
@@ -90,6 +93,7 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 					b := <-output
 
 					os.Stdout.Write(b)
+					outputWG.Done()
 				}
 			}()
 
@@ -126,6 +130,7 @@ func NewSSH(parent *cobra.Command, client *client.APIClient) *SSH {
 				InitCommand:    initCommand,
 				InputChannel:   input,
 				OutputChannel:  output,
+				OutputWG:       &outputWG,
 				SessionChannel: session,
 				Silent:         silent,
 			}
@@ -224,13 +229,18 @@ func createSession(conf *SSHConfig) error {
 
 			switch messageType.Type {
 			case ssh.ProcessOutputMessageType:
-
 				var output ssh.ProcessOutputMessage
 				if err := json.Unmarshal(message, &output); err != nil {
 					fmt.Println("Not able to unmarshall process output. Closing connection...")
 				}
+				if conf.OutputWG != nil {
+					conf.OutputWG.Add(1)
+				}
 				conf.OutputChannel <- output.Data
 			case ssh.WriteToFileMessageType:
+				if conf.OutputWG != nil {
+					conf.OutputWG.Add(1)
+				}
 				conf.OutputChannel <- message
 			case ssh.ProcessCreatedMessageType:
 				connectedChannel <- 0
@@ -265,6 +275,12 @@ func createSession(conf *SSHConfig) error {
 	}()
 
 	<-exitChannel
+
+	// Wait for all output being written
+	if conf.OutputWG != nil {
+		conf.OutputWG.Wait()
+	}
+
 	return nil
 }
 
