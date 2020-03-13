@@ -133,6 +133,9 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 			if e.Kind != errors.NotExists {
 				return e
 			}
+
+			// It's 404, set current to nil for diff
+			current = nil
 		}
 
 		err, f1, f2 = writeDiffFiles(current, res)
