@@ -150,10 +150,22 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
+	if r.StatusCode == http.StatusUnauthorized {
+		return nil, errors.E(
+			errors.Permission,
+			"Invalid access token",
+			"Invalid access token",
+		)
+	}
+
 	respError := Error{}
 	err = json.Unmarshal(bodyBytes, &respError)
 	if err != nil {
-		return nil, err
+		// Not even JSON returned... Might be some Oathkeeper or NGINX response
+		return nil, errors.E(
+			errors.Internal,
+			"Unknown server error",
+		)
 	}
 
 	errorMsg := respError.Error.Message
@@ -161,13 +173,6 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		errorMsg = string(bodyBytes)
 	}
 
-	if r.StatusCode == http.StatusUnauthorized {
-		return nil, errors.E(
-			errors.Permission,
-			"Invalid access token",
-			errorMsg,
-		)
-	}
 	if r.StatusCode == http.StatusNotFound {
 		return nil, errors.E(
 			errors.NotExists,
