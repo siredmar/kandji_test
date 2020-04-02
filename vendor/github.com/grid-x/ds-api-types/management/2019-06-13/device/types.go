@@ -34,8 +34,9 @@ type DeviceSpec struct {
 
 // UpdateSpec represents the update spec type
 type UpdateSpec struct {
-	MACAddress        *string            `json:"macAddress,omitempty"`
+	MACAddress        *string                  `json:"macAddress,omitempty"`
 	MaintenanceWindow *types.MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	MenderDeviceID    *string                  `json:"menderDeviceID,omitempty"`
 }
 
 // DeviceStatus represents the status of a device
