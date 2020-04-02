@@ -101,6 +101,7 @@ where a configuration file is expected.
 
 ```go
 viper.SetConfigName("config") // name of config file (without extension)
+viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
 viper.AddConfigPath("/etc/appname/")   // path to look for the config file in
 viper.AddConfigPath("$HOME/.appname")  // call multiple times to add many search paths
 viper.AddConfigPath(".")               // optionally look for config in the working directory
@@ -124,7 +125,7 @@ if err := viper.ReadInConfig(); err != nil {
 // Config file found and successfully parsed
 ```
 
-*NOTE:* You can also have a file without an extension and specify the format programmaticaly. For those configuration files that lie in the home of the user without any extension like `.bashrc`
+*NOTE [since 1.6]:* You can also have a file without an extension and specify the format programmaticaly. For those configuration files that lie in the home of the user without any extension like `.bashrc`
 
 ### Writing Config Files
 
@@ -399,7 +400,7 @@ in a Key/Value store such as etcd or Consul.  These values take precedence over
 default values, but are overridden by configuration values retrieved from disk,
 flags, or environment variables.
 
-Viper uses [crypt](https://github.com/xordataexchange/crypt) to retrieve
+Viper uses [crypt](https://github.com/bketelsen/crypt) to retrieve
 configuration from the K/V store, which means that you can store your
 configuration values encrypted and have them automatically decrypted if you have
 the correct gpg keyring.  Encryption is optional.
@@ -411,7 +412,7 @@ independently of it.
 K/V store. `crypt` defaults to etcd on http://127.0.0.1:4001.
 
 ```bash
-$ go get github.com/xordataexchange/crypt/bin/crypt
+$ go get github.com/bketelsen/crypt/bin/crypt
 $ crypt set -plaintext /config/hugo.json /Users/hugo/settings/config.json
 ```
 
@@ -452,6 +453,16 @@ err := viper.ReadRemoteConfig()
 fmt.Println(viper.Get("port")) // 8080
 fmt.Println(viper.Get("hostname")) // myhostname.com
 ```
+
+#### Firestore
+
+```go
+viper.AddRemoteProvider("firestore", "google-cloud-project-id", "collection/document")
+viper.SetConfigType("json") // Config's format: "json", "toml", "yaml", "yml"
+err := viper.ReadRemoteConfig()
+```
+
+Of course, you're allowed to use `SecureRemoteProvider` also
 
 ### Remote Key/Value Store Example - Encrypted
 

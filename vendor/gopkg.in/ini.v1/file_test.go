@@ -64,6 +64,116 @@ func TestFile_NewSection(t *testing.T) {
 	})
 }
 
+func TestFile_NonUniqueSection(t *testing.T) {
+	Convey("Read and write non-unique sections", t, func() {
+		f, err := ini.LoadSources(ini.LoadOptions{
+			AllowNonUniqueSections: true,
+		}, []byte(`[Interface]
+Address = 192.168.2.1
+PrivateKey = <server's privatekey>
+ListenPort = 51820
+
+[Peer]
+PublicKey = <client's publickey>
+AllowedIPs = 192.168.2.2/32
+
+[Peer]
+PublicKey = <client2's publickey>
+AllowedIPs = 192.168.2.3/32`))
+		So(err, ShouldBeNil)
+		So(f, ShouldNotBeNil)
+
+		sec, err := f.NewSection("Peer")
+		So(err, ShouldBeNil)
+		So(f, ShouldNotBeNil)
+
+		sec.NewKey("PublicKey", "<client3's publickey>")
+		sec.NewKey("AllowedIPs", "192.168.2.4/32")
+
+		var buf bytes.Buffer
+		_, err = f.WriteTo(&buf)
+		So(err, ShouldBeNil)
+		str := buf.String()
+		So(str, ShouldEqual, `[Interface]
+Address    = 192.168.2.1
+PrivateKey = <server's privatekey>
+ListenPort = 51820
+
+[Peer]
+PublicKey  = <client's publickey>
+AllowedIPs = 192.168.2.2/32
+
+[Peer]
+PublicKey  = <client2's publickey>
+AllowedIPs = 192.168.2.3/32
+
+[Peer]
+PublicKey  = <client3's publickey>
+AllowedIPs = 192.168.2.4/32
+
+`)
+	})
+
+	Convey("Delete non-unique section", t, func() {
+		f, err := ini.LoadSources(ini.LoadOptions{
+			AllowNonUniqueSections: true,
+		}, []byte(`[Interface]
+Address    = 192.168.2.1
+PrivateKey = <server's privatekey>
+ListenPort = 51820
+
+[Peer]
+PublicKey  = <client's publickey>
+AllowedIPs = 192.168.2.2/32
+
+[Peer]
+PublicKey  = <client2's publickey>
+AllowedIPs = 192.168.2.3/32
+
+[Peer]
+PublicKey  = <client3's publickey>
+AllowedIPs = 192.168.2.4/32
+
+`))
+		So(err, ShouldBeNil)
+		So(f, ShouldNotBeNil)
+
+		err = f.DeleteSectionWithIndex("Peer", 1)
+		So(err, ShouldBeNil)
+
+		var buf bytes.Buffer
+		_, err = f.WriteTo(&buf)
+		So(err, ShouldBeNil)
+		str := buf.String()
+		So(str, ShouldEqual, `[Interface]
+Address    = 192.168.2.1
+PrivateKey = <server's privatekey>
+ListenPort = 51820
+
+[Peer]
+PublicKey  = <client's publickey>
+AllowedIPs = 192.168.2.2/32
+
+[Peer]
+PublicKey  = <client3's publickey>
+AllowedIPs = 192.168.2.4/32
+
+`)
+	})
+
+	Convey("Delete all sections", t, func() {
+		f := ini.Empty(ini.LoadOptions{
+			AllowNonUniqueSections: true,
+		})
+		So(f, ShouldNotBeNil)
+
+		f.NewSections("Interface", "Peer", "Peer")
+		So(f.SectionStrings(), ShouldResemble, []string{ini.DefaultSection, "Interface", "Peer", "Peer"})
+		f.DeleteSection("Peer")
+		So(f.SectionStrings(), ShouldResemble, []string{ini.DefaultSection, "Interface"})
+	})
+}
+
 func TestFile_NewRawSection(t *testing.T) {
 	Convey("Create a new raw section", t, func() {
 		f := ini.Empty()
@@ -303,6 +413,43 @@ func TestFile_SaveTo(t *testing.T) {
 
 		So(f.SaveTo("testdata/conf_out.ini"), ShouldBeNil)
 		So(f.SaveToIndent("testdata/conf_out.ini", "\t"), ShouldBeNil)
+	})
+}
+
+func TestFile_WriteToWithOutputDelimiter(t *testing.T) {
+	Convey("Write content to somewhere using a custom output delimiter", t, func() {
+		f, err := ini.LoadSources(ini.LoadOptions{
+			KeyValueDelimiterOnWrite: "->",
+		}, []byte(`[Others]
+Cities = HangZhou|Boston
+Visits = 1993-10-07T20:17:05Z, 1993-10-07T20:17:05Z
+Years = 1993,1994
+Numbers = 10010,10086
+Ages = 18,19
+Populations = 12345678,98765432
+Coordinates = 192.168,10.11
+Flags       = true,false
+Note = Hello world!`))
+		So(err, ShouldBeNil)
+		So(f, ShouldNotBeNil)
+
+		var actual bytes.Buffer
+		var expected = []byte(`[Others]
+Cities      -> HangZhou|Boston
+Visits      -> 1993-10-07T20:17:05Z, 1993-10-07T20:17:05Z
+Years       -> 1993,1994
+Numbers     -> 10010,10086
+Ages        -> 18,19
+Populations -> 12345678,98765432
+Coordinates -> 192.168,10.11
+Flags       -> true,false
+Note        -> Hello world!
+
+`)
+		_, err = f.WriteTo(&actual)
+		So(err, ShouldBeNil)
+
+		So(bytes.Equal(expected, actual.Bytes()), ShouldBeTrue)
 	})
 }
 

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
+
 	"gopkg.in/ini.v1"
 )
 
@@ -75,7 +76,24 @@ type testStruct struct {
 	DurationPtrNil *time.Duration
 }
 
-const _CONF_DATA_STRUCT = `
+type testInterface struct {
+	Address    string
+	ListenPort int
+	PrivateKey string
+}
+
+type testPeer struct {
+	PublicKey    string
+	PresharedKey string
+	AllowedIPs   []string `delim:","`
+}
+
+type testNonUniqueSectionsStruct struct {
+	Interface testInterface
+	Peer      []testPeer `ini:",,,nonunique"`
+}
+
+const confDataStruct = `
 NAME = Unknwon
 Age = 21
 Male = true
@@ -125,6 +143,23 @@ Here = there
 When = then
 `
 
+const confNonUniqueSectionDataStruct = `[Interface]
+Address    = 10.2.0.1/24
+ListenPort = 34777
+PrivateKey = privServerKey
+
+[Peer]
+PublicKey    = pubClientKey
+PresharedKey = psKey
+AllowedIPs   = 10.2.0.2/32,fd00:2::2/128
+
+[Peer]
+PublicKey    = pubClientKey2
+PresharedKey = psKey2
+AllowedIPs   = 10.2.0.3/32,fd00:2::3/128
+
+`
+
 type unsupport struct {
 	Byte byte
 }
@@ -157,7 +192,7 @@ type fooBar struct {
 	Here, When string
 }
 
-const _INVALID_DATA_CONF_STRUCT = `
+const invalidDataConfStruct = `
 Name = 
 Age = age
 Male = 123
@@ -170,7 +205,7 @@ func Test_MapToStruct(t *testing.T) {
 	Convey("Map to struct", t, func() {
 		Convey("Map file to struct", func() {
 			ts := new(testStruct)
-			So(ini.MapTo(ts, []byte(_CONF_DATA_STRUCT)), ShouldBeNil)
+			So(ini.MapTo(ts, []byte(confDataStruct)), ShouldBeNil)
 
 			So(ts.Name, ShouldEqual, "Unknwon")
 			So(ts.Age, ShouldEqual, 21)
@@ -185,8 +220,8 @@ func Test_MapToStruct(t *testing.T) {
 			dur, err := time.ParseDuration("2h45m")
 			So(err, ShouldBeNil)
 			So(ts.Time.Seconds(), ShouldEqual, dur.Seconds())
-			
-			So(ts.OldVersionTime * time.Second, ShouldEqual, 30 * time.Second)
+
+			So(ts.OldVersionTime*time.Second, ShouldEqual, 30*time.Second)
 
 			So(strings.Join(ts.Others.Cities, ","), ShouldEqual, "HangZhou,Boston")
 			So(ts.Others.Visits[0].String(), ShouldEqual, t.String())
@@ -230,7 +265,7 @@ func Test_MapToStruct(t *testing.T) {
 
 		Convey("Map section to struct", func() {
 			foobar := new(fooBar)
-			f, err := ini.Load([]byte(_CONF_DATA_STRUCT))
+			f, err := ini.Load([]byte(confDataStruct))
 			So(err, ShouldBeNil)
 
 			So(f.Section("foo.bar").MapTo(foobar), ShouldBeNil)
@@ -239,7 +274,7 @@ func Test_MapToStruct(t *testing.T) {
 		})
 
 		Convey("Map to non-pointer struct", func() {
-			f, err := ini.Load([]byte(_CONF_DATA_STRUCT))
+			f, err := ini.Load([]byte(confDataStruct))
 			So(err, ShouldBeNil)
 			So(f, ShouldNotBeNil)
 
@@ -247,7 +282,7 @@ func Test_MapToStruct(t *testing.T) {
 		})
 
 		Convey("Map to unsupported type", func() {
-			f, err := ini.Load([]byte(_CONF_DATA_STRUCT))
+			f, err := ini.Load([]byte(confDataStruct))
 			So(err, ShouldBeNil)
 			So(f, ShouldNotBeNil)
 
@@ -264,13 +299,13 @@ func Test_MapToStruct(t *testing.T) {
 
 		Convey("Map to omitempty field", func() {
 			ts := new(testStruct)
-			So(ini.MapTo(ts, []byte(_CONF_DATA_STRUCT)), ShouldBeNil)
+			So(ini.MapTo(ts, []byte(confDataStruct)), ShouldBeNil)
 
 			So(ts.Omitted, ShouldEqual, true)
 		})
 
 		Convey("Map with shadows", func() {
-			f, err := ini.LoadSources(ini.LoadOptions{AllowShadows: true}, []byte(_CONF_DATA_STRUCT))
+			f, err := ini.LoadSources(ini.LoadOptions{AllowShadows: true}, []byte(confDataStruct))
 			So(err, ShouldBeNil)
 			ts := new(testStruct)
 			So(f.MapTo(ts), ShouldBeNil)
@@ -284,7 +319,7 @@ func Test_MapToStruct(t *testing.T) {
 		})
 
 		Convey("Map to wrong types and gain default values", func() {
-			f, err := ini.Load([]byte(_INVALID_DATA_CONF_STRUCT))
+			f, err := ini.Load([]byte(invalidDataConfStruct))
 			So(err, ShouldBeNil)
 
 			t, err := time.Parse(time.RFC3339, "1993-10-07T20:17:05Z")
@@ -327,6 +362,59 @@ names=alice, bruce`))
 
 		So(f.Section("").StrictMapTo(s), ShouldBeNil)
 		So(fmt.Sprint(s.Names), ShouldEqual, "[alice bruce]")
+	})
+}
+
+func Test_MapToStructNonUniqueSections(t *testing.T) {
+	Convey("Map to struct non unique", t, func() {
+		Convey("Map file to struct non unique", func() {
+			f, err := ini.LoadSources(ini.LoadOptions{AllowNonUniqueSections: true}, []byte(confNonUniqueSectionDataStruct))
+			So(err, ShouldBeNil)
+			ts := new(testNonUniqueSectionsStruct)
+
+			So(f.MapTo(ts), ShouldBeNil)
+
+			So(ts.Interface.Address, ShouldEqual, "10.2.0.1/24")
+			So(ts.Interface.ListenPort, ShouldEqual, 34777)
+			So(ts.Interface.PrivateKey, ShouldEqual, "privServerKey")
+
+			So(ts.Peer[0].PublicKey, ShouldEqual, "pubClientKey")
+			So(ts.Peer[0].PresharedKey, ShouldEqual, "psKey")
+			So(ts.Peer[0].AllowedIPs[0], ShouldEqual, "10.2.0.2/32")
+			So(ts.Peer[0].AllowedIPs[1], ShouldEqual, "fd00:2::2/128")
+
+			So(ts.Peer[1].PublicKey, ShouldEqual, "pubClientKey2")
+			So(ts.Peer[1].PresharedKey, ShouldEqual, "psKey2")
+			So(ts.Peer[1].AllowedIPs[0], ShouldEqual, "10.2.0.3/32")
+			So(ts.Peer[1].AllowedIPs[1], ShouldEqual, "fd00:2::3/128")
+		})
+
+		Convey("Map non unique section to struct", func() {
+			newPeer := new(testPeer)
+			newPeerSlice := make([]testPeer, 0)
+
+			f, err := ini.LoadSources(ini.LoadOptions{AllowNonUniqueSections: true}, []byte(confNonUniqueSectionDataStruct))
+			So(err, ShouldBeNil)
+
+			// try only first one
+			So(f.Section("Peer").MapTo(newPeer), ShouldBeNil)
+			So(newPeer.PublicKey, ShouldEqual, "pubClientKey")
+			So(newPeer.PresharedKey, ShouldEqual, "psKey")
+			So(newPeer.AllowedIPs[0], ShouldEqual, "10.2.0.2/32")
+			So(newPeer.AllowedIPs[1], ShouldEqual, "fd00:2::2/128")
+
+			// try all
+			So(f.Section("Peer").MapTo(&newPeerSlice), ShouldBeNil)
+			So(newPeerSlice[0].PublicKey, ShouldEqual, "pubClientKey")
+			So(newPeerSlice[0].PresharedKey, ShouldEqual, "psKey")
+			So(newPeerSlice[0].AllowedIPs[0], ShouldEqual, "10.2.0.2/32")
+			So(newPeerSlice[0].AllowedIPs[1], ShouldEqual, "fd00:2::2/128")
+
+			So(newPeerSlice[1].PublicKey, ShouldEqual, "pubClientKey2")
+			So(newPeerSlice[1].PresharedKey, ShouldEqual, "psKey2")
+			So(newPeerSlice[1].AllowedIPs[0], ShouldEqual, "10.2.0.3/32")
+			So(newPeerSlice[1].AllowedIPs[1], ShouldEqual, "fd00:2::3/128")
+		})
 	})
 }
 
@@ -427,6 +515,101 @@ omitempty  = 9
 	})
 }
 
+func Test_ReflectFromStructNonUniqueSections(t *testing.T) {
+	Convey("Reflect from struct with non unique sections", t, func() {
+		nonUnique := &testNonUniqueSectionsStruct{
+			Interface: testInterface{
+				Address:    "10.2.0.1/24",
+				ListenPort: 34777,
+				PrivateKey: "privServerKey",
+			},
+			Peer: []testPeer{
+				{
+					PublicKey:    "pubClientKey",
+					PresharedKey: "psKey",
+					AllowedIPs:   []string{"10.2.0.2/32,fd00:2::2/128"},
+				},
+				{
+					PublicKey:    "pubClientKey2",
+					PresharedKey: "psKey2",
+					AllowedIPs:   []string{"10.2.0.3/32,fd00:2::3/128"},
+				},
+			},
+		}
+
+		cfg := ini.Empty(ini.LoadOptions{
+			AllowNonUniqueSections: true,
+		})
+
+		So(ini.ReflectFrom(cfg, nonUnique), ShouldBeNil)
+
+		var buf bytes.Buffer
+		_, err := cfg.WriteTo(&buf)
+		So(err, ShouldBeNil)
+		So(buf.String(), ShouldEqual, confNonUniqueSectionDataStruct)
+
+		// note: using ReflectFrom from should overwrite the existing sections
+		err = cfg.Section("Peer").ReflectFrom([]*testPeer{
+			{
+				PublicKey:    "pubClientKey3",
+				PresharedKey: "psKey3",
+				AllowedIPs:   []string{"10.2.0.4/32,fd00:2::4/128"},
+			},
+			{
+				PublicKey:    "pubClientKey4",
+				PresharedKey: "psKey4",
+				AllowedIPs:   []string{"10.2.0.5/32,fd00:2::5/128"},
+			},
+		})
+
+		So(err, ShouldBeNil)
+
+		buf = bytes.Buffer{}
+		_, err = cfg.WriteTo(&buf)
+		So(err, ShouldBeNil)
+		So(buf.String(), ShouldEqual, `[Interface]
+Address    = 10.2.0.1/24
+ListenPort = 34777
+PrivateKey = privServerKey
+
+[Peer]
+PublicKey    = pubClientKey3
+PresharedKey = psKey3
+AllowedIPs   = 10.2.0.4/32,fd00:2::4/128
+
+[Peer]
+PublicKey    = pubClientKey4
+PresharedKey = psKey4
+AllowedIPs   = 10.2.0.5/32,fd00:2::5/128
+
+`)
+
+		// note: using ReflectFrom from should overwrite the existing sections
+		err = cfg.Section("Peer").ReflectFrom(&testPeer{
+			PublicKey:    "pubClientKey5",
+			PresharedKey: "psKey5",
+			AllowedIPs:   []string{"10.2.0.6/32,fd00:2::6/128"},
+		})
+
+		So(err, ShouldBeNil)
+
+		buf = bytes.Buffer{}
+		_, err = cfg.WriteTo(&buf)
+		So(err, ShouldBeNil)
+		So(buf.String(), ShouldEqual, `[Interface]
+Address    = 10.2.0.1/24
+ListenPort = 34777
+PrivateKey = privServerKey
+
+[Peer]
+PublicKey    = pubClientKey5
+PresharedKey = psKey5
+AllowedIPs   = 10.2.0.6/32,fd00:2::6/128
+
+`)
+	})
+}
+
 // Inspired by https://github.com/go-ini/ini/issues/196
 func TestMapToAndReflectFromStructWithShadows(t *testing.T) {
 	Convey("Map to struct and then reflect with shadows should generate original config content", t, func() {
@@ -473,7 +656,7 @@ func Test_NameGetter(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(cfg, ShouldNotBeNil)
 
-		cfg.NameMapper = ini.AllCapsUnderscore
+		cfg.NameMapper = ini.SnackCase
 		tg := new(testMapper)
 		So(cfg.MapTo(tg), ShouldBeNil)
 		So(tg.PackageName, ShouldEqual, "ini")
@@ -492,5 +675,58 @@ func Test_Duration(t *testing.T) {
 		dur, err := time.ParseDuration("16m49s")
 		So(err, ShouldBeNil)
 		So(ds.Duration.Seconds(), ShouldEqual, dur.Seconds())
+	})
+}
+
+type Employer struct {
+	Name  string
+	Title string
+}
+
+type Employers []*Employer
+
+func (es Employers) ReflectINIStruct(f *ini.File) error {
+	for _, e := range es {
+		f.Section(e.Name).Key("Title").SetValue(e.Title)
+	}
+	return nil
+}
+
+// Inspired by https://github.com/go-ini/ini/issues/199
+func Test_StructReflector(t *testing.T) {
+	Convey("Reflect with StructReflector interface", t, func() {
+		p := &struct {
+			FirstName string
+			Employer  Employers
+		}{
+			FirstName: "Andrew",
+			Employer: []*Employer{
+				{
+					Name:  `Employer "VMware"`,
+					Title: "Staff II Engineer",
+				},
+				{
+					Name:  `Employer "EMC"`,
+					Title: "Consultant Engineer",
+				},
+			},
+		}
+
+		f := ini.Empty()
+		So(f.ReflectFrom(p), ShouldBeNil)
+
+		var buf bytes.Buffer
+		_, err := f.WriteTo(&buf)
+		So(err, ShouldBeNil)
+
+		So(buf.String(), ShouldEqual, `FirstName = Andrew
+
+[Employer "VMware"]
+Title = Staff II Engineer
+
+[Employer "EMC"]
+Title = Consultant Engineer
+
+`)
 	})
 }

@@ -3,7 +3,7 @@ package v20181203
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/grid-x/ds-api-types"
+	types "github.com/grid-x/ds-api-types"
 )
 
 // DevicePodSpec defines the desired state of DevicePod
@@ -298,38 +298,31 @@ type ExecAction struct {
 	Command []string `json:"command,omitempty"`
 }
 
-// Handler defines a specific action that should be taken
-type Handler struct {
-	// One and only one of the following should be specified.
-	// Exec specifies the action to take.
+// HealthCheck describes docker healthchecks
+type HealthCheck struct {
+	// HealthMonitoringEnabled describes whether or not a failing healthcheck
+	// should be handled.
 	// +optional
-	Exec *ExecAction `json:"exec,omitempty"`
-	// HTTPGet specifies the http request to perform.
+	HealthMonitoringEnabled bool `json:"healthMonitoringEnabled,omitempty"`
 	// +optional
-	HTTPGet *HTTPGetAction `json:"httpGet,omitempty"`
+	Config *HealthConfig `json:"config,omitempty"`
 }
 
-// Probe describes a health check to be performed against a container to
-// determine whether it is alive or ready
-type Probe struct {
-	// The action taken to determine the health of a container
-	Handler Handler `json:"handler"`
-	// Length of time before health checking is activated.  In seconds.
+// HealthConfig describes the config of a docker healthcheck
+type HealthConfig struct {
+	// Exec is the test to perform to check that the container is healthy.
 	// +optional
-	InitialDelaySeconds int32 `json:"initialDelaySeconds,omitempty"`
-	// Length of time before health checking times out.  In seconds.
+	Exec *ExecAction `json:"exec,omitempty"`
 	// +optional
-	TimeoutSeconds int32 `json:"timeoutSeconds,omitempty"`
-	// How often (in seconds) to perform the probe.
+	IntervalSeconds int32 `json:"intervalSeconds,omitempty"` // Interval is the time to wait between checks.
 	// +optional
-	PeriodSeconds int32 `json:"periodSeconds,omitempty"`
-	// Minimum consecutive successes for the probe to be considered successful after having failed.
-	// Must be 1 for liveness.
+	TimeoutSeconds int32 `json:"timeoutSeconds,omitempty"` // TimeoutSeconds is the time to wait before considering the check to have hung.
 	// +optional
-	SuccessThreshold int32 `json:"successThreshold,omitempty"`
-	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
+	StartPeriodSeconds int32 `json:"periodSeconds,omitempty"` // The start period for the container to initialize before the retries starts to count down.
+	// Retries is the number of consecutive failures needed to consider a container as unhealthy.
+	// Zero means inherit.
 	// +optional
-	FailureThreshold int32 `json:"failureThreshold,omitempty"`
+	Retries int `json:"retries,omitempty"`
 }
 
 // ContainerPort represents a network port in a single container
@@ -385,15 +378,9 @@ type Container struct {
 	WorkingDir string `json:"workingDir,omitempty"`
 	// +optional
 	Ports []ContainerPort `json:"ports,omitempty"`
-
-	// LivelinessProbe is the probe to be  used to check if a container is
-	// still living
+	// HealthCheck is the probe to be used to check if a container is still living
 	// +optional
-	LivelinessProbe *Probe `json:"livelinessProbe,omitempty"`
-	// ReadinessProbe is the probe to be used to check if a container is
-	// ready
-	// +optional
-	ReadinessProbe *Probe `json:"readinessProbe,omitempty"`
+	HealthCheck *HealthCheck `json:"healthCheck,omitempty"`
 }
 
 // Pod definition as exported by this API version
