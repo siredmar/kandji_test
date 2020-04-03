@@ -2,7 +2,7 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILDTIME := $(shell date)
 VERSION := $(shell cat VERSION)
 GO_BUILD := CGO_ENABLED=0 go build -o bin/gxctl -ldflags=\"-w -s -X github.com/grid-x/gxctl/cmd.gitCommit=$(GIT_COMMIT) -X 'github.com/grid-x/gxctl/cmd.buildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/cmd.version=$(VERSION)'\"
-GO_TOOLS := gridx/golang-dev:1.13.latest-linux-amd64
+GO_TOOLS := gridx/golang-dev:1.14.latest-linux-amd64
 GO_PROJECT := github.com/grid-x/gxctl
 DOCKER_RUN := docker run -it --rm -v $$PWD:/go/src/${GO_PROJECT} -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
