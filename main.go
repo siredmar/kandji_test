@@ -50,6 +50,9 @@ func main() {
 	label := cmd.NewLabel(root.Command)
 	cmd.NewLabelDevice(label.Command, client)
 
+	// Lint
+	cmd.NewLint(root.Command)
+
 	// Delete
 	delete := cmd.NewDelete(root.Command)
 	cmd.NewDeleteDeployment(delete.Command, client)
