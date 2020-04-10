@@ -5,6 +5,7 @@ import (
 
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/internal/lint/rule"
+	"github.com/grid-x/gxctl/pkg/api"
 )
 
 // Lint the given resource
@@ -13,6 +14,8 @@ func Lint(resource interface{}) ([]result.Result, error) {
 	var results []result.Result
 
 	switch resource.(type) {
+	case api.Deployment:
+		rules = append(rules, &rule.DeploymentSelectorSingleMatching{})
 	}
 
 	if len(rules) == 0 {
