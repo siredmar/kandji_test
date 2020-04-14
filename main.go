@@ -51,7 +51,7 @@ func main() {
 	cmd.NewLabelDevice(label.Command, client)
 
 	// Lint
-	cmd.NewLint(root.Command)
+	cmd.NewLint(root.Command, client)
 
 	// Delete
 	delete := cmd.NewDelete(root.Command)

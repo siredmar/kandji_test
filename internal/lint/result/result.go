@@ -17,8 +17,8 @@ type rule interface {
 
 func (r Result) String() string {
 	if r.Pass {
-		return fmt.Sprintf("%v: PASS", r.Rule.ID())
+		return fmt.Sprintf("PASS: %v", r.Rule.ID())
 	}
 
-	return fmt.Sprintf("%v: FAIL - %v", r.Rule.ID(), r.Rule.Desc())
+	return fmt.Sprintf("FAIL: %v - %v", r.Rule.ID(), r.Rule.Desc())
 }

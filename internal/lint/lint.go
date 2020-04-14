@@ -6,16 +6,19 @@ import (
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/internal/lint/rule"
 	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 )
 
 // Lint the given resource
-func Lint(resource interface{}) ([]result.Result, error) {
+func Lint(client *client.APIClient, resource interface{}) ([]result.Result, error) {
 	var rules []rule.Rule
 	var results []result.Result
 
 	switch resource.(type) {
 	case api.Deployment:
-		rules = append(rules, &rule.DeploymentSelectorSingleMatching{})
+		rules = append(rules,
+			rule.NewDeploymentSelectorUniqueMatchByDeviceID(client),
+		)
 	}
 
 	if len(rules) == 0 {

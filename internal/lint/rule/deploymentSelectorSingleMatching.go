@@ -3,19 +3,29 @@ package rule
 import (
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 // DeploymentSelectorSingleMatching passes iff there is
 // at most one of MatchByDeviceID or MatchByLabel selector.
-type DeploymentSelectorSingleMatching struct{}
+type DeploymentSelectorSingleMatching struct {
+	client *client.APIClient
+}
+
+// NewDeploymentSelectorSingleMatching returns a new DeploymentSelectorSingleMatching rule
+func NewDeploymentSelectorSingleMatching(client *client.APIClient) *DeploymentSelectorSingleMatching {
+	return &DeploymentSelectorSingleMatching{
+		client: client,
+	}
+}
 
 // ID returns the ID of this rule
 func (r *DeploymentSelectorSingleMatching) ID() string {
 	return "DeploymentSelectorSingleMatching"
 }
 
-// Desc returns the decsription of this rule
+// Desc returns the description of this rule
 func (r *DeploymentSelectorSingleMatching) Desc() string {
 	return "A deployment must have at most one of MatchByDeviceID or MatchByLabel selectors"
 }

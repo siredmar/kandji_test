@@ -8,6 +8,7 @@ import (
 	"github.com/grid-x/gxctl/internal/lint"
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -17,7 +18,7 @@ type Lint struct {
 
 var fileName string
 
-func NewLint(parent *cobra.Command) *Lint {
+func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	var lintCmd = &cobra.Command{
 		Use:                   "lint [OPTIONS]",
 		DisableFlagsInUseLine: true,
@@ -39,7 +40,7 @@ func NewLint(parent *cobra.Command) *Lint {
 
 			results := []result.Result{}
 			for _, c := range contents {
-				res, err := execLint(c)
+				res, err := execLint(client, c)
 				if err != nil {
 					return err
 				}
@@ -65,11 +66,11 @@ func NewLint(parent *cobra.Command) *Lint {
 	}
 }
 
-func execLint(content []byte) ([]result.Result, error) {
+func execLint(client *client.APIClient, content []byte) ([]result.Result, error) {
 	res, _, err := checkResourceFile(content, true)
 	if err != nil {
 		return nil, err
 	}
 
-	return lint.Lint(res)
+	return lint.Lint(client, res)
 }
