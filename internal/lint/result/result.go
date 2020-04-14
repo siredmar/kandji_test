@@ -8,6 +8,8 @@ import (
 type Result struct {
 	Rule rule
 	Pass bool
+	Have interface{}
+	Want interface{}
 }
 
 type rule interface {
@@ -20,5 +22,13 @@ func (r Result) String() string {
 		return fmt.Sprintf("PASS: %v", r.Rule.ID())
 	}
 
-	return fmt.Sprintf("FAIL: %v - %v", r.Rule.ID(), r.Rule.Desc())
+	prefix := fmt.Sprintf("FAIL: %v - %v", r.Rule.ID(), r.Rule.Desc())
+
+	if r.Want != nil && r.Have != nil {
+		return fmt.Sprintf("%v. Want: %v, have %v", prefix, r.Want, r.Have)
+	}
+	if r.Have != nil {
+		return fmt.Sprintf("%v. Have: %v", prefix, r.Have)
+	}
+	return prefix
 }

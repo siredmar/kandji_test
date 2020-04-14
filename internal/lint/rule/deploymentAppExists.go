@@ -39,7 +39,10 @@ func (r *DeploymentAppExists) Exec(resource interface{}) (*result.Result, error)
 		)
 	}
 
-	result := &result.Result{}
+	app := res.Spec.App
+	result := &result.Result{
+		Have: app,
+	}
 	apps, err := getApplications(r.client)
 	if err != nil {
 		return nil, errors.E(
@@ -47,13 +50,15 @@ func (r *DeploymentAppExists) Exec(resource interface{}) (*result.Result, error)
 			"Can't get applications",
 		)
 	}
-	app := res.Spec.App
+	var names []string
 	for _, a := range apps.Applications {
+		names = append(names, a.Name)
 		if a.Name == app {
 			result.Pass = true
 			break
 		}
 	}
+	result.Want = names
 
 	return result, nil
 }
