@@ -18,6 +18,7 @@ func Lint(client *client.APIClient, resource interface{}) ([]result.Result, erro
 	case api.Deployment:
 		rules = append(rules,
 			rule.NewDeploymentSelectorUniqueMatchByDeviceID(client),
+			rule.NewDeploymentAppExists(client),
 		)
 	}
 
