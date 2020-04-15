@@ -1,24 +1,15 @@
 package rule
 
 import (
+	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
-	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 // DeploymentSelectorSingleMatching passes iff there is
 // at most one of MatchByDeviceID or MatchByLabel selector.
-type DeploymentSelectorSingleMatching struct {
-	client *client.APIClient
-}
-
-// NewDeploymentSelectorSingleMatching returns a new DeploymentSelectorSingleMatching rule
-func NewDeploymentSelectorSingleMatching(client *client.APIClient) *DeploymentSelectorSingleMatching {
-	return &DeploymentSelectorSingleMatching{
-		client: client,
-	}
-}
+type DeploymentSelectorSingleMatching struct{}
 
 // ID returns the ID of this rule
 func (r *DeploymentSelectorSingleMatching) ID() string {
@@ -31,7 +22,7 @@ func (r *DeploymentSelectorSingleMatching) Desc() string {
 }
 
 // Exec checks compliance of the given resource with the rule
-func (r *DeploymentSelectorSingleMatching) Exec(resource interface{}) (*result.Result, error) {
+func (r *DeploymentSelectorSingleMatching) Exec(ctx *context.Context, resource interface{}) (*result.Result, error) {
 	res, ok := resource.(api.Deployment)
 	if !ok {
 		return nil, errors.E(
