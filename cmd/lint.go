@@ -21,7 +21,7 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	var lintCmd = &cobra.Command{
 		Use:                   "lint [OPTIONS]",
 		DisableFlagsInUseLine: true,
-		Short:                 "Lint resources",
+		Short:                 "Lint resources by evaluating local files and remote state",
 		Long:                  `TODO`,
 		Example:               "# Lint resource file \n  gxctl lint -f deployment.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -53,7 +53,7 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 
 			results := []result.Result{}
 			for fileName, c := range fsContents {
-				result, err := execLint(ctx, client, fileName, c)
+				result, err := execLint(ctx, fileName, c)
 				if err != nil {
 					return err
 				}
@@ -79,11 +79,11 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	}
 }
 
-func execLint(ctx *context.Context, client *client.APIClient, fileName string, content []byte) ([]result.Result, error) {
+func execLint(ctx *context.Context, fileName string, content []byte) ([]result.Result, error) {
 	res, _, err := checkResourceFile(content, true)
 	if err != nil {
 		return nil, err
 	}
 
-	return lint.Lint(ctx, client, fileName, res)
+	return lint.Lint(ctx, fileName, res)
 }
