@@ -17,8 +17,6 @@ type Lint struct {
 	Command *cobra.Command
 }
 
-var fileName string
-
 func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	var lintCmd = &cobra.Command{
 		Use:                   "lint [OPTIONS]",
@@ -40,7 +38,6 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 			}
 
 			var resources []interface{}
-
 			for _, x := range fsContents {
 				res, _, err := checkResourceFile(x, true)
 				if err != nil {
@@ -55,8 +52,8 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 			}
 
 			results := []result.Result{}
-			for _, c := range fsContents {
-				result, err := execLint(ctx, client, c)
+			for fileName, c := range fsContents {
+				result, err := execLint(ctx, client, fileName, c)
 				if err != nil {
 					return err
 				}
@@ -82,11 +79,11 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	}
 }
 
-func execLint(ctx *context.Context, client *client.APIClient, content []byte) ([]result.Result, error) {
+func execLint(ctx *context.Context, client *client.APIClient, fileName string, content []byte) ([]result.Result, error) {
 	res, _, err := checkResourceFile(content, true)
 	if err != nil {
 		return nil, err
 	}
 
-	return lint.Lint(ctx, client, res)
+	return lint.Lint(ctx, client, fileName, res)
 }

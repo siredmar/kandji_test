@@ -11,7 +11,7 @@ import (
 )
 
 // Lint the given resource
-func Lint(ctx *context.Context, client *client.APIClient, resource interface{}) ([]result.Result, error) {
+func Lint(ctx *context.Context, client *client.APIClient, fileName string, resource interface{}) ([]result.Result, error) {
 	var rules []rule.Rule
 	var results []result.Result
 
@@ -35,6 +35,7 @@ func Lint(ctx *context.Context, client *client.APIClient, resource interface{}) 
 			fmt.Printf("error while applying rule %v: %v\n", rule.ID(), err)
 			return nil, err
 		}
+		result.SourceID = fileName
 		result.Rule = rule
 		results = append(results, *result)
 	}

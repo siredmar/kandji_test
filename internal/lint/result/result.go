@@ -6,10 +6,11 @@ import (
 
 // Result contains the result of running a rule against a resource
 type Result struct {
-	Rule rule
-	Pass bool
-	Have interface{}
-	Want interface{}
+	SourceID string
+	Rule     rule
+	Pass     bool
+	Have     interface{}
+	Want     interface{}
 }
 
 type rule interface {
@@ -19,10 +20,10 @@ type rule interface {
 
 func (r Result) String() string {
 	if r.Pass {
-		return fmt.Sprintf("PASS: %v", r.Rule.ID())
+		return fmt.Sprintf("PASS %v: %v", r.SourceID, r.Rule.ID())
 	}
 
-	prefix := fmt.Sprintf("FAIL: %v - %v", r.Rule.ID(), r.Rule.Desc())
+	prefix := fmt.Sprintf("FAIL %v: %v - %v", r.SourceID, r.Rule.ID(), r.Rule.Desc())
 
 	if r.Want != nil && r.Have != nil {
 		return fmt.Sprintf("%v. Want: %v, have %v", prefix, r.Want, r.Have)
