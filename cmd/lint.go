@@ -10,6 +10,7 @@ import (
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/template"
 )
 
@@ -21,7 +22,7 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	var lintCmd = &cobra.Command{
 		Use:                   "lint [OPTIONS]",
 		DisableFlagsInUseLine: true,
-		Short:                 "Lint resources by evaluating local files and remote state",
+		Short:                 "Lint resources by evaluating both desired (local files) and current (remote) state",
 		Long:                  `TODO`,
 		Example:               "# Lint resource file \n  gxctl lint -f deployment.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -36,13 +37,16 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 			if err != nil {
 				return err
 			}
+			toLint := make(map[string]interface{})
 
 			var resources []interface{}
-			for _, x := range fsContents {
-				res, _, err := checkResourceFile(x, true)
+			for fileName, x := range fsContents {
+				res, _, err := checkResourceFile(x, false) // true will return (Known after apply) for unset IDs
 				if err != nil {
-					return err
+					fmt.Printf("SKIP %v: %v\n", fileName, err)
+					continue
 				}
+				toLint[fileName] = res
 				resources = append(resources, res)
 			}
 
@@ -52,16 +56,33 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 			}
 
 			results := []result.Result{}
-			for fileName, c := range fsContents {
-				result, err := execLint(ctx, fileName, c)
-				if err != nil {
-					return err
-				}
+			for fileName, resource := range toLint {
+				result, _ := lint.Lint(ctx, fileName, resource)
 				results = append(results, result...)
 			}
 
+			var total, pass, skip int
+			for _, result := range results {
+				if result.Skip {
+					skip++
+					continue
+				}
+				total++
+				if result.Pass {
+					pass++
+				}
+			}
+
+			fmt.Printf("%v / %v passed (%v skipped)\n", pass, total, skip)
 			for _, result := range results {
 				fmt.Println(result)
+			}
+
+			if pass != total {
+				return errors.E(
+					errors.Validation,
+					"Some linting rules did not pass",
+				)
 			}
 
 			return nil
@@ -77,13 +98,4 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 	return &Lint{
 		Command: lintCmd,
 	}
-}
-
-func execLint(ctx *context.Context, fileName string, content []byte) ([]result.Result, error) {
-	res, _, err := checkResourceFile(content, true)
-	if err != nil {
-		return nil, err
-	}
-
-	return lint.Lint(ctx, fileName, res)
 }
