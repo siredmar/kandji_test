@@ -1,8 +1,10 @@
 package context
 
 import (
-	"github.com/grid-x/gxctl/internal/lint/state"
+	"fmt"
+	"strings"
 
+	"github.com/grid-x/gxctl/internal/lint/state"
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -15,7 +17,7 @@ type Context struct {
 }
 
 // New creates a new Context
-func New(client *client.APIClient, resources []interface{}) (*Context, error) {
+func New(client *client.APIClient) (*Context, error) {
 	a, err := fetchApplications(client)
 	if err != nil {
 		return nil, err
@@ -31,6 +33,13 @@ func New(client *client.APIClient, resources []interface{}) (*Context, error) {
 		Deployments:  d.Deployments,
 	}
 
+	return &Context{
+		Current: current,
+	}, nil
+}
+
+// SetDesired sets the desired resources
+func (c *Context) SetDesired(resources []interface{}) {
 	var apps []api.Application
 	var deps []api.Deployment
 
@@ -43,15 +52,35 @@ func New(client *client.APIClient, resources []interface{}) (*Context, error) {
 		}
 	}
 
-	desired := state.State{
+	c.Desired = state.State{
 		Applications: apps,
 		Deployments:  deps,
 	}
+}
 
-	return &Context{
-		Current: current,
-		Desired: desired,
-	}, nil
+func (c *Context) String() string {
+	var str strings.Builder
+
+	str.WriteString("Applications:\n")
+	str.WriteString("  Current:\n")
+	for _, x := range c.Current.Applications {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Name))
+	}
+	str.WriteString("  Desired:\n")
+	for _, x := range c.Desired.Applications {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Name))
+	}
+	str.WriteString("Deployments:\n")
+	str.WriteString("  Current:\n")
+	for _, x := range c.Current.Deployments {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
+	}
+	str.WriteString("  Desired:\n")
+	for _, x := range c.Desired.Deployments {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
+	}
+
+	return str.String()
 }
 
 // Applications returns all applications

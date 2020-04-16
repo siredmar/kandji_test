@@ -33,31 +33,50 @@ func NewLint(parent *cobra.Command, client *client.APIClient) *Lint {
 				return nil
 			}
 
+			// read raw file contents into fileName -> bytes map
 			fsContents, err := api.GetFilesContentsToProcess(lintCmdFilename)
 			if err != nil {
 				return err
 			}
-			toLint := make(map[string]interface{})
 
-			var resources []interface{}
+			// parse file contents into fileName -> resource map
+			fsResources := make(map[string]interface{})
+			var fsNames []string
 			for fileName, x := range fsContents {
 				res, _, err := checkResourceFile(x, false) // true will return (Known after apply) for unset IDs
 				if err != nil {
 					fmt.Printf("SKIP %v: %v\n", fileName, err)
 					continue
 				}
-				toLint[fileName] = res
-				resources = append(resources, res)
+				fsNames = append(fsNames, fileName)
+				fsResources[fileName] = res
 			}
 
-			ctx, err := context.New(client, resources)
+			// init context with current state
+			ctx, err := context.New(client)
 			if err != nil {
 				return err
 			}
 
+			// build permutations:
+			// for each file, we need a context which includes every other file but not itself
+			jobs := make(map[string][]string)
+			for i, x := range fsNames {
+				tmp := make([]string, len(fsNames))
+				copy(tmp, fsNames)
+				jobs[x] = append(tmp[:i], tmp[i+1:]...)
+			}
+
 			results := []result.Result{}
-			for fileName, resource := range toLint {
-				result, _ := lint.Lint(ctx, fileName, resource)
+			for fileName, context := range jobs {
+				desired := []interface{}{}
+
+				for _, ctxRes := range context {
+					desired = append(desired, fsResources[ctxRes])
+				}
+				ctx.SetDesired(desired)
+
+				result, _ := lint.Lint(ctx, fileName, fsResources[fileName])
 				results = append(results, result...)
 			}
 
