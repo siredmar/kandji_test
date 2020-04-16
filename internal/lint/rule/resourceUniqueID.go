@@ -31,12 +31,13 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 	switch res := resource.(type) {
 
 	case api.Application:
-		if res.Name == "" {
+		ID := res.Name
+		if ID == "" {
 			result.Skip = true
 			result.Have = "Name not set"
 			return result, nil
 		}
-		applications := ctx.Applications()
+		applications := append(ctx.Applications(), res)
 		for _, a := range applications {
 			ID := a.Name
 			if _, exists := ids[ID]; ID != "" && exists {
@@ -50,12 +51,13 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 		}
 
 	case api.Deployment:
-		if res.Metadata.ID == "" {
+		ID := res.Metadata.ID
+		if ID == "" {
 			result.Skip = true
 			result.Have = "Metadata.ID not set"
 			return result, nil
 		}
-		deployments := ctx.Deployments()
+		deployments := append(ctx.Deployments(), res)
 		for _, d := range deployments {
 			ID := d.Metadata.ID
 			if _, exists := ids[ID]; ID != "" && exists {
