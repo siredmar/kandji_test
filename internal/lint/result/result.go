@@ -9,6 +9,7 @@ type Result struct {
 	SourceID string
 	Rule     rule
 	Pass     bool
+	Skip     bool
 	Have     interface{}
 	Want     interface{}
 }
@@ -19,6 +20,13 @@ type rule interface {
 }
 
 func (r Result) String() string {
+	if r.Skip {
+		if r.Have != nil {
+			return fmt.Sprintf("SKIP %v: %v - %v", r.SourceID, r.Rule.ID(), r.Have)
+		}
+		return fmt.Sprintf("SKIP %v: %v", r.SourceID, r.Rule.ID())
+	}
+
 	if r.Pass {
 		return fmt.Sprintf("PASS %v: %v", r.SourceID, r.Rule.ID())
 	}
