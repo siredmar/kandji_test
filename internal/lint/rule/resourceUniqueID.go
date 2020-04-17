@@ -28,8 +28,8 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 	}
 
 	ids := make(map[string]bool)
-	switch res := resource.(type) {
 
+	switch res := resource.(type) {
 	case api.Application:
 		ID := res.Name
 		if ID == "" {
@@ -37,18 +37,16 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Name not set"
 			return result, nil
 		}
-		applications := append(ctx.Applications(), res)
+		applications := append(ctx.Applications())
 		for _, a := range applications {
-			ID := a.Name
-			if _, exists := ids[ID]; ID != "" && exists {
-				result.Pass = false
-				result.Have = ID
-				return result, nil
-			}
-			if ID != "" {
-				ids[ID] = true
-			}
+			ids[a.Name] = true
 		}
+		if _, exists := ids[ID]; exists {
+			result.Pass = false
+			result.Have = ID
+			return result, nil
+		}
+		break
 
 	case api.Deployment:
 		ID := res.Metadata.ID
@@ -57,18 +55,16 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Metadata.ID not set"
 			return result, nil
 		}
-		deployments := append(ctx.Deployments(), res)
+		deployments := append(ctx.Deployments())
 		for _, d := range deployments {
-			ID := d.Metadata.ID
-			if _, exists := ids[ID]; ID != "" && exists {
-				result.Pass = false
-				result.Have = ID
-				return result, nil
-			}
-			if ID != "" {
-				ids[ID] = true
-			}
+			ids[d.Metadata.ID] = true
 		}
+		if _, exists := ids[ID]; exists {
+			result.Pass = false
+			result.Have = ID
+			return result, nil
+		}
+		break
 
 	default:
 		return nil, errors.E(
