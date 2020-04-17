@@ -43,9 +43,9 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) Exec(ctx *context.Context, res
 	}
 
 	for _, d := range deployments {
-		if dID := d.Spec.Selector.MatchByDeviceID; dID != nil && dID == ID {
+		if dID := d.Spec.Selector.MatchByDeviceID; dID != nil && *dID == *ID {
 			result.Pass = false
-			result.Have = dID
+			result.Have = *dID
 			break
 		}
 	}
