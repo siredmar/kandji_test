@@ -21,10 +21,11 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 		)
 	case api.Deployment:
 		rules = append(rules,
-			&rule.ResourceUniqueID{},
-			&rule.DeploymentSelectorUniqueMatchByDeviceID{},
-			&rule.DeploymentSelectorSingleMatching{},
 			&rule.DeploymentAppExists{},
+			rule.NewDeploymentMountAllowed([]string{"/proc"}),
+			&rule.DeploymentSelectorSingleMatching{},
+			&rule.DeploymentSelectorUniqueMatchByDeviceID{},
+			&rule.ResourceUniqueID{},
 		)
 	}
 
