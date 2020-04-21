@@ -16,4 +16,5 @@ var (
 		Desired: nilState,
 	}
 	foo = "foo"
+	goo = "goo"
 )

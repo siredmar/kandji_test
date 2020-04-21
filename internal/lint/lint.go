@@ -25,6 +25,7 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 			rule.NewDeploymentMountAllowed([]string{"/proc"}),
 			&rule.DeploymentSelectorSingleMatching{},
 			&rule.DeploymentSelectorUniqueMatchByDeviceID{},
+			&rule.DeploymentSelectorDeviceExists{},
 			&rule.ResourceUniqueID{},
 		)
 	}
