@@ -23,14 +23,20 @@ func New(client *client.APIClient) (*Context, error) {
 		return nil, err
 	}
 
-	d, err := fetchDeployments(client)
+	deps, err := fetchDeployments(client)
+	if err != nil {
+		return nil, err
+	}
+
+	devs, err := fetchDevices(client)
 	if err != nil {
 		return nil, err
 	}
 
 	current := state.State{
 		Applications: a.Applications,
-		Deployments:  d.Deployments,
+		Deployments:  deps.Deployments,
+		Devices:      devs.Devices,
 	}
 
 	return &Context{
@@ -99,6 +105,11 @@ func (c *Context) Deployments() []api.Deployment {
 	return deps
 }
 
+// Devices returns all devices
+func (c *Context) Devices() []api.Device {
+	return c.Current.Devices
+}
+
 func fetchApplications(client *client.APIClient) (api.Applications, error) {
 	response, err := client.GetRequest(api.ApplicationsEndpoint)
 	if err != nil {
@@ -139,4 +150,25 @@ func fetchDeployments(client *client.APIClient) (api.Deployments, error) {
 	}
 
 	return deploymentList, nil
+}
+
+func fetchDevices(client *client.APIClient) (api.Devices, error) {
+	response, err := client.GetRequest(api.DevicesEndpoint)
+	if err != nil {
+		return api.Devices{}, err
+	}
+
+	deviceList, err := api.NewDevices(response)
+	if err != nil {
+		return deviceList, err
+	}
+
+	if deviceList.IsEmpty() {
+		return deviceList, errors.E(
+			errors.NotExists,
+			"no devices found",
+		)
+	}
+
+	return deviceList, nil
 }

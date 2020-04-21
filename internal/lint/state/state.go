@@ -8,4 +8,5 @@ import (
 type State struct {
 	Applications []api.Application
 	Deployments  []api.Deployment
+	Devices      []api.Device
 }
