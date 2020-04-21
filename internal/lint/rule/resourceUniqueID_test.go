@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	types "github.com/grid-x/ds-api-types"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
 
 	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/internal/lint/state"
@@ -105,13 +106,16 @@ func TestResourceUniqueID(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "deployment exists currently",
+			desc: "deployment exists currently with the same spec",
 			ctx: &context.Context{
 				Current: state.State{
 					Deployments: []api.Deployment{
 						{
 							Metadata: types.Metadata{
 								ID: "foo",
+							},
+							Spec: deploymentsApi.DeviceDeploymentSpec{
+								App: "foobar",
 							},
 						},
 					},
@@ -122,13 +126,45 @@ func TestResourceUniqueID(t *testing.T) {
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
+				Spec: deploymentsApi.DeviceDeploymentSpec{
+					App: "foobar",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "deployment exists currently with a different spec",
+			ctx: &context.Context{
+				Current: state.State{
+					Deployments: []api.Deployment{
+						{
+							Metadata: types.Metadata{
+								ID: "foo",
+							},
+							Spec: deploymentsApi.DeviceDeploymentSpec{
+								App: "foobar",
+							},
+						},
+					},
+				},
+				Desired: nilState,
+			},
+			res: api.Deployment{
+				Metadata: types.Metadata{
+					ID: "foo",
+				},
+				Spec: deploymentsApi.DeviceDeploymentSpec{
+					App: "goobaz",
+				},
 			},
 			wantPass:  false,
 			wantSkip:  false,
 			wantError: false,
 		},
 		{
-			desc: "deployment will exist",
+			desc: "deployment will exist with the same spec",
 			ctx: &context.Context{
 				Current: nilState,
 				Desired: state.State{
@@ -137,6 +173,9 @@ func TestResourceUniqueID(t *testing.T) {
 							Metadata: types.Metadata{
 								ID: "foo",
 							},
+							Spec: deploymentsApi.DeviceDeploymentSpec{
+								App: "foobar",
+							},
 						},
 					},
 				},
@@ -144,6 +183,38 @@ func TestResourceUniqueID(t *testing.T) {
 			res: api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
+				},
+				Spec: deploymentsApi.DeviceDeploymentSpec{
+					App: "foobar",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "deployment will exist with a different spec",
+			ctx: &context.Context{
+				Current: nilState,
+				Desired: state.State{
+					Deployments: []api.Deployment{
+						{
+							Metadata: types.Metadata{
+								ID: "foo",
+							},
+							Spec: deploymentsApi.DeviceDeploymentSpec{
+								App: "foobar",
+							},
+						},
+					},
+				},
+			},
+			res: api.Deployment{
+				Metadata: types.Metadata{
+					ID: "foo",
+				},
+				Spec: deploymentsApi.DeviceDeploymentSpec{
+					App: "goobaz",
 				},
 			},
 			wantPass:  false,
