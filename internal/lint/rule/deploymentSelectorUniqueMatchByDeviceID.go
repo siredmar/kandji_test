@@ -1,6 +1,8 @@
 package rule
 
 import (
+	"fmt"
+
 	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
@@ -38,15 +40,18 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) Exec(ctx *context.Context, res
 	}
 
 	ID := res.Spec.Selector.MatchByDeviceID
+	app := res.Spec.App
 	if ID == nil {
 		return result, nil
 	}
 
 	for _, d := range deployments {
 		if dID := d.Spec.Selector.MatchByDeviceID; dID != nil && *dID == *ID {
-			result.Pass = false
-			result.Have = *dID
-			break
+			if dApp := d.Spec.App; dApp == app {
+				result.Pass = false
+				result.Have = fmt.Sprintf("deployment %s with app %s", *dID, dApp)
+				break
+			}
 		}
 	}
 

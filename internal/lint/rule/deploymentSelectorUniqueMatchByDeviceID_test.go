@@ -24,25 +24,12 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 	}{
 		{
 			desc: "does not exist",
-			ctx:  nilCtx,
-			res: api.Deployment{
-				Spec: deployments.DeviceDeploymentSpec{
-					Selector: deployments.Selector{
-						MatchByDeviceID: &foo,
-					},
-				},
-			},
-			wantPass:  true,
-			wantSkip:  false,
-			wantError: false,
-		},
-		{
-			desc: "does exist",
 			ctx: &context.Context{
 				Current: state.State{
 					Deployments: []api.Deployment{
 						{
 							Spec: deployments.DeviceDeploymentSpec{
+								App: "fooApp",
 								Selector: deployments.Selector{
 									MatchByDeviceID: &foo,
 								},
@@ -55,6 +42,78 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
+						MatchByDeviceID: &goo,
+					},
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "no deployments",
+			ctx:  nilCtx,
+			res: api.Deployment{
+				Spec: deployments.DeviceDeploymentSpec{
+					Selector: deployments.Selector{
+						MatchByDeviceID: &foo,
+					},
+				},
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
+			desc: "does exist with a different app",
+			ctx: &context.Context{
+				Current: state.State{
+					Deployments: []api.Deployment{
+						{
+							Spec: deployments.DeviceDeploymentSpec{
+								App: "fooApp",
+								Selector: deployments.Selector{
+									MatchByDeviceID: &foo,
+								},
+							},
+						},
+					},
+				},
+				Desired: nilState,
+			},
+			res: api.Deployment{
+				Spec: deployments.DeviceDeploymentSpec{
+					App: "gooApp",
+					Selector: deployments.Selector{
+						MatchByDeviceID: &foo,
+					},
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "does exist with the same app",
+			ctx: &context.Context{
+				Current: state.State{
+					Deployments: []api.Deployment{
+						{
+							Spec: deployments.DeviceDeploymentSpec{
+								App: "fooApp",
+								Selector: deployments.Selector{
+									MatchByDeviceID: &foo,
+								},
+							},
+						},
+					},
+				},
+				Desired: nilState,
+			},
+			res: api.Deployment{
+				Spec: deployments.DeviceDeploymentSpec{
+					App: "fooApp",
+					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
 					},
 				},
@@ -64,13 +123,14 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "will exist",
+			desc: "will exist with a different app",
 			ctx: &context.Context{
 				Current: nilState,
 				Desired: state.State{
 					Deployments: []api.Deployment{
 						{
 							Spec: deployments.DeviceDeploymentSpec{
+								App: "fooApp",
 								Selector: deployments.Selector{
 									MatchByDeviceID: &foo,
 								},
@@ -81,6 +141,36 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 			},
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
+					App: "gooApp",
+					Selector: deployments.Selector{
+						MatchByDeviceID: &foo,
+					},
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "will exist with the same app",
+			ctx: &context.Context{
+				Current: nilState,
+				Desired: state.State{
+					Deployments: []api.Deployment{
+						{
+							Spec: deployments.DeviceDeploymentSpec{
+								App: "fooApp",
+								Selector: deployments.Selector{
+									MatchByDeviceID: &foo,
+								},
+							},
+						},
+					},
+				},
+			},
+			res: api.Deployment{
+				Spec: deployments.DeviceDeploymentSpec{
+					App: "fooApp",
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
 					},
