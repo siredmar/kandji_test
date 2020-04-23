@@ -13,6 +13,8 @@ GXCTL_BASE_URL := 485611583707.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl
 GXCTL_IMAGE_URL := ${GXCTL_BASE_URL}:${IMAGE_TAG}
 GXCTL_IMAGE_URL_VERSIONED := ${GXCTL_BASE_URL}:${VERSION}
 
+.PHONY: test
+
 lint:
 	golint -set_exit_status $(shell go list ./...)
 
@@ -27,6 +29,9 @@ ci_lint:
 
 ci_build:
 	${DOCKER_RUN} ${GO_TOOLS} bash -c "${GO_BUILD}"
+
+ci_test:
+	${GO_RUN} "make test"
 
 docker:
 	docker build -t gxctl -f Dockerfile .
