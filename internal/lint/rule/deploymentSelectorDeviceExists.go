@@ -46,7 +46,7 @@ func (r *DeploymentSelectorDeviceExists) Exec(ctx *context.Context, resource int
 	devices := ctx.Devices()
 
 	if len(devices) == 0 {
-		result.Skip = true
+		result.Pass = false
 		result.Have = "no devices"
 		return result, nil
 	}

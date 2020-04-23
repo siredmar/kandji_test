@@ -30,8 +30,8 @@ func TestDeploymentAppExists(t *testing.T) {
 					App: "foo",
 				},
 			},
-			wantPass:  true,
-			wantSkip:  true,
+			wantPass:  false,
+			wantSkip:  false,
 			wantError: false,
 		},
 		{

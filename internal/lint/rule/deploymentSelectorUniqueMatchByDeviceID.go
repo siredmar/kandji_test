@@ -53,7 +53,7 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) Exec(ctx *context.Context, res
 	}
 
 	for _, d := range deployments {
-		if dID := d.Spec.Selector.MatchByDeviceID; dID != nil && *dID == *ID {
+		if dID := d.Spec.Selector.MatchByDeviceID; res.Metadata.ID != d.Metadata.ID && dID != nil && *dID == *ID {
 			if dApp := d.Spec.App; dApp == app {
 				result.Pass = false
 				result.Have = fmt.Sprintf("deployment %s with app %s", *dID, dApp)

@@ -35,8 +35,7 @@ func (r *DeploymentAppExists) Exec(ctx *context.Context, resource interface{}) (
 
 	if len(apps) == 0 {
 		return &result.Result{
-			Pass: true,
-			Skip: true,
+			Pass: false,
 			Have: "no applications",
 		}, nil
 	}
