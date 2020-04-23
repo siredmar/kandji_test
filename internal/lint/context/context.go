@@ -7,7 +7,6 @@ import (
 	"github.com/grid-x/gxctl/internal/lint/state"
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 // Context contains both pending and current state
@@ -121,13 +120,6 @@ func fetchApplications(client *client.APIClient) (api.Applications, error) {
 		return applicationList, err
 	}
 
-	if applicationList.IsEmpty() {
-		return applicationList, errors.E(
-			errors.NotExists,
-			"no applications found",
-		)
-	}
-
 	return applicationList, nil
 }
 
@@ -142,13 +134,6 @@ func fetchDeployments(client *client.APIClient) (api.Deployments, error) {
 		return deploymentList, err
 	}
 
-	if deploymentList.IsEmpty() {
-		return deploymentList, errors.E(
-			errors.NotExists,
-			"no deployments found",
-		)
-	}
-
 	return deploymentList, nil
 }
 
@@ -161,13 +146,6 @@ func fetchDevices(client *client.APIClient) (api.Devices, error) {
 	deviceList, err := api.NewDevices(response)
 	if err != nil {
 		return deviceList, err
-	}
-
-	if deviceList.IsEmpty() {
-		return deviceList, errors.E(
-			errors.NotExists,
-			"no devices found",
-		)
 	}
 
 	return deviceList, nil

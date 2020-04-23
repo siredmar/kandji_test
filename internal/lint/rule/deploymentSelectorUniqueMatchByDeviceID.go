@@ -33,15 +33,22 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) Exec(ctx *context.Context, res
 		)
 	}
 
-	deployments := ctx.Deployments()
-
 	result := &result.Result{
 		Pass: true,
+	}
+
+	deployments := ctx.Deployments()
+	if len(deployments) == 0 {
+		result.Skip = true
+		result.Have = "no deployments"
+		return result, nil
 	}
 
 	ID := res.Spec.Selector.MatchByDeviceID
 	app := res.Spec.App
 	if ID == nil {
+		result.Skip = true
+		result.Have = "no matchByDeviceID"
 		return result, nil
 	}
 

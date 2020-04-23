@@ -24,10 +24,29 @@ func TestResourceUniqueID(t *testing.T) {
 		wantError bool
 	}{
 		{
-			desc: "app does not exist",
+			desc: "no applications",
 			ctx:  nilCtx,
 			res: api.Application{
 				Name: "foo",
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
+			desc: "app does not exist",
+			ctx: &context.Context{
+				Current: state.State{
+					Applications: []api.Application{
+						{
+							Name: "foo",
+						},
+					},
+				},
+				Desired: nilState,
+			},
+			res: api.Application{
+				Name: "goo",
 			},
 			wantPass:  true,
 			wantSkip:  false,
@@ -82,11 +101,37 @@ func TestResourceUniqueID(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "deployment does not exist",
+			desc: "no deployments",
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
+			desc: "deployment does not exist",
+			ctx: &context.Context{
+				Current: state.State{
+					Deployments: []api.Deployment{
+						{
+							Metadata: types.Metadata{
+								ID: "foo",
+							},
+							Spec: deploymentsApi.DeviceDeploymentSpec{
+								App: "foobar",
+							},
+						},
+					},
+				},
+				Desired: nilState,
+			},
+			res: api.Deployment{
+				Metadata: types.Metadata{
+					ID: "goo",
 				},
 			},
 			wantPass:  true,

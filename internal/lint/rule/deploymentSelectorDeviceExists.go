@@ -43,7 +43,15 @@ func (r *DeploymentSelectorDeviceExists) Exec(ctx *context.Context, resource int
 	}
 
 	foundDevice := false
-	for _, dev := range ctx.Devices() {
+	devices := ctx.Devices()
+
+	if len(devices) == 0 {
+		result.Skip = true
+		result.Have = "no devices"
+		return result, nil
+	}
+
+	for _, dev := range devices {
 		if dev.Metadata.ID == *selector {
 			foundDevice = true
 			break

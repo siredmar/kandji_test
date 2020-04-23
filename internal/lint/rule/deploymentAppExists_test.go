@@ -23,6 +23,18 @@ func TestDeploymentAppExists(t *testing.T) {
 		wantError bool
 	}{
 		{
+			desc: "no applications",
+			ctx:  nilCtx,
+			res: api.Deployment{
+				Spec: deployments.DeviceDeploymentSpec{
+					App: "foo",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
 			desc: "exists currently",
 			ctx: &context.Context{
 				Current: state.State{
@@ -87,10 +99,19 @@ func TestDeploymentAppExists(t *testing.T) {
 		},
 		{
 			desc: "does not exist and will not exist",
-			ctx:  nilCtx,
+			ctx: &context.Context{
+				Current: state.State{
+					Applications: []api.Application{
+						{
+							Name: "foo",
+						},
+					},
+				},
+				Desired: nilState,
+			},
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
-					App: "foo",
+					App: "goo",
 				},
 			},
 			wantPass:  false,

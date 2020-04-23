@@ -31,16 +31,23 @@ func (r *DeploymentAppExists) Exec(ctx *context.Context, resource interface{}) (
 	}
 
 	app := res.Spec.App
-	result := &result.Result{
-		Have: app,
-	}
 	apps := ctx.Applications()
 
+	if len(apps) == 0 {
+		return &result.Result{
+			Pass: true,
+			Skip: true,
+			Have: "no applications",
+		}, nil
+	}
+
+	result := &result.Result{}
 	var names []string
 	for _, a := range apps {
 		names = append(names, a.Name)
 		if a.Name == app {
 			result.Pass = true
+			result.Have = app
 			break
 		}
 	}
