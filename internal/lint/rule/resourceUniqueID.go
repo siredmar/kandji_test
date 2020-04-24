@@ -39,7 +39,12 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Name not set"
 			return result, nil
 		}
-		applications := append(ctx.Applications())
+		applications := ctx.Applications()
+		if len(applications) == 0 {
+			result.Skip = true
+			result.Have = "no applications"
+			return result, nil
+		}
 		for _, a := range applications {
 			resources[a.Name] = res
 		}
@@ -57,7 +62,12 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Metadata.ID not set"
 			return result, nil
 		}
-		deployments := append(ctx.Deployments())
+		deployments := ctx.Deployments()
+		if len(deployments) == 0 {
+			result.Skip = true
+			result.Have = "no deployments"
+			return result, nil
+		}
 		for _, d := range deployments {
 			resources[d.Metadata.ID] = d
 		}

@@ -36,6 +36,7 @@ func (r *DeploymentSelectorSingleMatching) Exec(ctx *context.Context, resource i
 	}
 	if s := res.Spec.Selector; s.MatchByDeviceID != nil && len(s.MatchByLabels) > 0 {
 		result.Pass = false
+		result.Have = "multiple selectors"
 	}
 
 	return result, nil
