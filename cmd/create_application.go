@@ -35,7 +35,7 @@ func NewCreateApplication(parent *cobra.Command, client *client.APIClient) *Crea
 		Long: `TODO`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			createApplicationCmdName := args[0]
-			d := api.CreateApplication{}
+			d := api.Application{}
 
 			if createApplicationCmdName != "" {
 				d.Name = createApplicationCmdName

@@ -180,6 +180,13 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		)
 	}
 
+	if r.StatusCode == http.StatusConflict {
+		return nil, errors.E(
+			errors.Exist,
+			errorMsg,
+		)
+	}
+
 	if r.StatusCode >= 400 {
 		return nil, errors.E(
 			errors.Internal,
