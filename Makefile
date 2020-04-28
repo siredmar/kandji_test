@@ -11,7 +11,7 @@ BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
 IMAGE_TAG := ${BRANCH}.${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT}
 GXCTL_BASE_URL := 485611583707.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl
 GXCTL_IMAGE_URL := ${GXCTL_BASE_URL}:${IMAGE_TAG}
-GXCTL_IMAGE_URL_VERSIONED := ${GXCTL_BASE_URL}:${VERSION}
+GXCTL_IMAGE_URL_RELEASE := ${GXCTL_BASE_URL}:${VERSION}
 
 .PHONY: test
 
@@ -38,6 +38,10 @@ docker:
 
 docker_push:
 	docker tag gxctl ${GXCTL_IMAGE_URL}-linux-amd64
-	docker tag gxctl ${GXCTL_IMAGE_URL_VERSIONED}-linux-amd64
 	docker push ${GXCTL_IMAGE_URL}-linux-amd64
-	docker push ${GXCTL_IMAGE_URL_VERSIONED}-linux-amd64
+
+docker_push_release:
+	docker tag gxctl ${GXCTL_IMAGE_URL}-linux-amd64
+	docker tag gxctl ${GXCTL_IMAGE_URL_RELEASE}-linux-amd64
+	docker push ${GXCTL_IMAGE_URL}-linux-amd64
+	docker push ${GXCTL_IMAGE_URL_RELEASE}-linux-amd64
