@@ -15,6 +15,8 @@ steps:
 - command:
   - "buildkite-agent artifact download bin/* . --step \":golang: Build\""
   - "make docker"
+  - ".buildkite/steps/aws_ecr_auth.sh"
+  - "make docker_push"
   label: ":docker: Build docker image"
   agents:
   - "queue=default"
@@ -23,7 +25,7 @@ steps:
   - "buildkite-agent artifact download bin/* . --step \":golang: Build\""
   - "make docker"
   - ".buildkite/steps/aws_ecr_auth.sh"
-  - ".buildkite/steps/push.sh && echo 'Nothing to do' || make docker_push"
+  - ".buildkite/steps/release.sh && echo make docker_push || make docker_push_release"
   label: ":docker: Push docker image"
   agents:
   - "queue=default"
