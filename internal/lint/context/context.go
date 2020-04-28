@@ -66,6 +66,11 @@ func (c *Context) SetDesired(resources []interface{}) {
 func (c *Context) String() string {
 	var str strings.Builder
 
+	str.WriteString("Devices:\n")
+	str.WriteString("  Current:\n")
+	for _, x := range c.Current.Devices {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
+	}
 	str.WriteString("Applications:\n")
 	str.WriteString("  Current:\n")
 	for _, x := range c.Current.Applications {

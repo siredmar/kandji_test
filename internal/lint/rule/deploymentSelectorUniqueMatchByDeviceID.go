@@ -9,8 +9,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/errors"
 )
 
-// DeploymentSelectorUniqueMatchByDeviceID passes iff there is
-// no existing deployment with the same matchByDeviceID selector
+// DeploymentSelectorUniqueMatchByDeviceID passes iff there is no other deployment using the same app with the same matchByDeviceID selector
 type DeploymentSelectorUniqueMatchByDeviceID struct{}
 
 // ID returns the ID of this rule
@@ -20,7 +19,7 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) ID() string {
 
 // Desc returns the description of this rule
 func (r *DeploymentSelectorUniqueMatchByDeviceID) Desc() string {
-	return "There must not be another deployment with the same matchByDeviceID selector"
+	return "There must not be another deployment using the same app with the same matchByDeviceID selector"
 }
 
 // Exec checks compliance of the given resource with the rule
@@ -56,7 +55,7 @@ func (r *DeploymentSelectorUniqueMatchByDeviceID) Exec(ctx *context.Context, res
 		if dID := d.Spec.Selector.MatchByDeviceID; res.Metadata.ID != d.Metadata.ID && dID != nil && *dID == *ID {
 			if dApp := d.Spec.App; dApp == app {
 				result.Pass = false
-				result.Have = fmt.Sprintf("deployment %s with app %s", *dID, dApp)
+				result.Have = fmt.Sprintf("deployment %s for device %s with app %s", d.Metadata.ID, *dID, dApp)
 				break
 			}
 		}
