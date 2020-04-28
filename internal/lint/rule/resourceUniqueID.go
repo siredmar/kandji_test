@@ -1,8 +1,6 @@
 package rule
 
 import (
-	"github.com/google/go-cmp/cmp"
-
 	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
@@ -10,7 +8,7 @@ import (
 )
 
 // ResourceUniqueID passes iff there is
-// no other resource of the same type with the same ID and a different spec
+// no other resource of the same type with the same ID
 type ResourceUniqueID struct{}
 
 // ID returns the ID of this rule
@@ -20,7 +18,7 @@ func (r *ResourceUniqueID) ID() string {
 
 // Desc returns the description of this rule
 func (r *ResourceUniqueID) Desc() string {
-	return "There must not be another resource of the same type with the same ID and a different spec"
+	return "There must not be another resource of the same type with the same ID"
 }
 
 // Exec checks compliance of the given resource with the rule
@@ -28,8 +26,6 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 	result := &result.Result{
 		Pass: true,
 	}
-
-	resources := make(map[string]interface{})
 
 	switch res := resource.(type) {
 	case api.Application:
@@ -39,19 +35,18 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Name not set"
 			return result, nil
 		}
-		applications := ctx.Applications()
+		applications := ctx.Desired.Applications
 		if len(applications) == 0 {
 			result.Skip = true
 			result.Have = "no applications"
 			return result, nil
 		}
 		for _, a := range applications {
-			resources[a.Name] = res
-		}
-		if _, exists := resources[ID]; exists {
-			result.Pass = false
-			result.Have = ID
-			return result, nil
+			if a.Name == ID {
+				result.Pass = false
+				result.Have = ID
+				break
+			}
 		}
 		break
 
@@ -62,24 +57,18 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 			result.Have = "Metadata.ID not set"
 			return result, nil
 		}
-		deployments := ctx.Deployments()
+		deployments := ctx.Desired.Deployments
 		if len(deployments) == 0 {
 			result.Skip = true
 			result.Have = "no deployments"
 			return result, nil
 		}
 		for _, d := range deployments {
-			resources[d.Metadata.ID] = d
-		}
-		_x, exists := resources[ID]
-		if !exists {
-			break
-		}
-		x := _x.(api.Deployment)
-		if !cmp.Equal(res.Spec, x.Spec) {
-			result.Pass = false
-			result.Have = ID
-			return result, nil
+			if d.Metadata.ID == ID {
+				result.Pass = false
+				result.Have = ID
+				break
+			}
 		}
 		break
 

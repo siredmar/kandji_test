@@ -49,7 +49,7 @@ func TestResourceUniqueID(t *testing.T) {
 				Name: "goo",
 			},
 			wantPass:  true,
-			wantSkip:  false,
+			wantSkip:  true,
 			wantError: false,
 		},
 		{
@@ -77,8 +77,8 @@ func TestResourceUniqueID(t *testing.T) {
 			res: api.Application{
 				Name: "foo",
 			},
-			wantPass:  false,
-			wantSkip:  false,
+			wantPass:  true,
+			wantSkip:  true,
 			wantError: false,
 		},
 		{
@@ -135,7 +135,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 			},
 			wantPass:  true,
-			wantSkip:  false,
+			wantSkip:  true,
 			wantError: false,
 		},
 		{
@@ -176,7 +176,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 			},
 			wantPass:  true,
-			wantSkip:  false,
+			wantSkip:  true,
 			wantError: false,
 		},
 		{
@@ -204,8 +204,8 @@ func TestResourceUniqueID(t *testing.T) {
 					App: "goobaz",
 				},
 			},
-			wantPass:  false,
-			wantSkip:  false,
+			wantPass:  true,
+			wantSkip:  true,
 			wantError: false,
 		},
 		{
@@ -233,7 +233,7 @@ func TestResourceUniqueID(t *testing.T) {
 					App: "foobar",
 				},
 			},
-			wantPass:  true,
+			wantPass:  false,
 			wantSkip:  false,
 			wantError: false,
 		},
