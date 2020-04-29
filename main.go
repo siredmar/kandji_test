@@ -67,7 +67,6 @@ func main() {
 	// Create
 	create := cmd.NewCreate(root.Command, client)
 	cmd.NewCreateApplication(create.Command, client)
-	cmd.NewCreateDeployment(create.Command, client)
 
 	// Apply
 	cmd.NewApply(root.Command, client)
@@ -75,11 +74,9 @@ func main() {
 	// Config
 	config := cmd.NewConfig(root.Command)
 	configGet := cmd.NewConfigGet(config.Command)
-	configCreate := cmd.NewConfigCreate(config.Command)
 	configDelete := cmd.NewConfigDelete(config.Command)
 	cmd.NewConfigGetDocker(configGet.Command, client, printer)
 	cmd.NewConfigGetCleanup(configGet.Command, client, printer)
-	cmd.NewConfigCreateDockerAWS(configCreate.Command, client)
 	cmd.NewConfigDeleteDocker(configDelete.Command, client)
 
 	// Others
