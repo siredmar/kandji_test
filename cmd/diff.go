@@ -157,7 +157,9 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 		}
 	}
 
-	fmt.Println(string(output))
+	if len(output) != 0 {
+		fmt.Println(string(output))
+	}
 	return nil
 }
 
