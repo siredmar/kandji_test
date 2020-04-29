@@ -11,9 +11,9 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 )
 
-func TestDeploymentMountAllowed(t *testing.T) {
+func TestDeploymentVolumesAllowed(t *testing.T) {
 	testcases := []struct {
-		rule      *DeploymentMountAllowed
+		rule      *DeploymentVolumesAllowed
 		desc      string
 		ctx       *context.Context
 		res       interface{}
@@ -22,20 +22,20 @@ func TestDeploymentMountAllowed(t *testing.T) {
 		wantError bool
 	}{
 		{
-			desc: "allowed mounts",
-			rule: NewDeploymentMountAllowed([]string{"goobaz"}),
+			desc: "volumes allowed",
+			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
-							Containers: []v20190817Pod.Container{
+							Volumes: []v20190817Pod.Volume{
 								{
-									VolumeMounts: []v20190817Pod.VolumeMount{
-										{
-											Name:      "foobar",
-											MountPath: "/etc/foobar",
+									Name: "foovolume",
+									VolumeSource: v20190817Pod.VolumeSource{
+										&v20190817Pod.HostPathVolumeSource{
+											Path: "/tmp/foobar",
 										},
 									},
 								},
@@ -49,36 +49,28 @@ func TestDeploymentMountAllowed(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "disallowed mounts",
-			rule: NewDeploymentMountAllowed([]string{"/etc/goobaz", "/dev/blub"}),
+			desc: "volumes not allowed",
+			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
-							Containers: []v20190817Pod.Container{
+							Volumes: []v20190817Pod.Volume{
 								{
-									VolumeMounts: []v20190817Pod.VolumeMount{
-										{
-											Name:      "blub",
-											MountPath: "/dev/blub",
-										},
-										{
-											Name:      "foobar",
-											MountPath: "/etc/foobar",
+									Name: "foovolume",
+									VolumeSource: v20190817Pod.VolumeSource{
+										&v20190817Pod.HostPathVolumeSource{
+											Path: "/tmp/foobar",
 										},
 									},
 								},
 								{
-									VolumeMounts: []v20190817Pod.VolumeMount{
-										{
-											Name:      "foobar",
-											MountPath: "/etc/foobar",
-										},
-										{
-											Name:      "goobaz",
-											MountPath: "/etc/goobaz",
+									Name: "goovolume",
+									VolumeSource: v20190817Pod.VolumeSource{
+										&v20190817Pod.HostPathVolumeSource{
+											Path: "/tmp/goobaz",
 										},
 									},
 								},
@@ -92,37 +84,15 @@ func TestDeploymentMountAllowed(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "no containers",
-			rule: NewDeploymentMountAllowed([]string{"goobaz"}),
-			ctx:  nilCtx,
-			res: api.Deployment{
-				Spec: deployments.DeviceDeploymentSpec{
-					App: "app-foo",
-					Template: deployments.PodTemplate{
-						Spec: v20190817Pod.PodConfig{
-							Containers: []v20190817Pod.Container{},
-						},
-					},
-				},
-			},
-			wantPass:  true,
-			wantSkip:  true,
-			wantError: false,
-		},
-		{
 			desc: "no volumes",
-			rule: NewDeploymentMountAllowed([]string{"/etc/goobaz"}),
+			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
-							Containers: []v20190817Pod.Container{
-								{
-									VolumeMounts: []v20190817Pod.VolumeMount{},
-								},
-							},
+							Volumes: []v20190817Pod.Volume{},
 						},
 					},
 				},
