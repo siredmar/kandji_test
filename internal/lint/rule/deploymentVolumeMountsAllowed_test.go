@@ -11,9 +11,9 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 )
 
-func TestDeploymentMountAllowed(t *testing.T) {
+func TestDeploymentVolumeMountsAllowed(t *testing.T) {
 	testcases := []struct {
-		rule      *DeploymentMountAllowed
+		rule      *DeploymentVolumeMountsAllowed
 		desc      string
 		ctx       *context.Context
 		res       interface{}
@@ -22,8 +22,8 @@ func TestDeploymentMountAllowed(t *testing.T) {
 		wantError bool
 	}{
 		{
-			desc: "allowed mounts",
-			rule: NewDeploymentMountAllowed([]string{"goobaz"}),
+			desc: "allowed volumeMounts",
+			rule: NewDeploymentVolumeMountsAllowed([]string{"goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
@@ -49,8 +49,8 @@ func TestDeploymentMountAllowed(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "disallowed mounts",
-			rule: NewDeploymentMountAllowed([]string{"/etc/goobaz", "/dev/blub"}),
+			desc: "disallowed volumeMounts",
+			rule: NewDeploymentVolumeMountsAllowed([]string{"/etc/goobaz", "/dev/blub"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
@@ -93,7 +93,7 @@ func TestDeploymentMountAllowed(t *testing.T) {
 		},
 		{
 			desc: "no containers",
-			rule: NewDeploymentMountAllowed([]string{"goobaz"}),
+			rule: NewDeploymentVolumeMountsAllowed([]string{"goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
@@ -110,8 +110,8 @@ func TestDeploymentMountAllowed(t *testing.T) {
 			wantError: false,
 		},
 		{
-			desc: "no volumes",
-			rule: NewDeploymentMountAllowed([]string{"/etc/goobaz"}),
+			desc: "no volumeMounts",
+			rule: NewDeploymentVolumeMountsAllowed([]string{"/etc/goobaz"}),
 			ctx:  nilCtx,
 			res: api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
