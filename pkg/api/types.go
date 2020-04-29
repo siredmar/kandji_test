@@ -4,7 +4,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
-	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-05-14/devicedockerconfigs"
+	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
