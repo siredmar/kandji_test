@@ -84,25 +84,29 @@ func NewGetDeployments(parent *cobra.Command, client *client.APIClient, printer 
 					return err
 				}
 
-				var label []api.Deployment
-				var id []api.Deployment
-
-				for _, d := range deployments.Deployments {
-					if d.Spec.Selector.MatchByDeviceID != nil {
-						id = append(id, d)
-						continue
+				if getCmdOutputType == "json" || getCmdOutputType == "yaml" {
+					if err := printer.Print(api.Deployments{Deployments: deployments.Deployments}, printerConfig); err != nil {
+						return err
 					}
-					label = append(label, d)
-				}
+				} else {
+					var label []api.Deployment
+					var id []api.Deployment
 
-				fmt.Print("Deployments by ID\n\n")
-				if err := printer.Print(api.Deployments{Deployments: id}, printerConfig); err != nil {
-					return err
-				}
-
-				fmt.Print("Deployments by Label\n\n")
-				if err := printer.Print(api.Deployments{Deployments: label}, printerConfig); err != nil {
-					return err
+					for _, d := range deployments.Deployments {
+						if d.Spec.Selector.MatchByDeviceID != nil {
+							id = append(id, d)
+							continue
+						}
+						label = append(label, d)
+					}
+					fmt.Print("Deployments by ID\n\n")
+					if err := printer.Print(api.Deployments{Deployments: id}, printerConfig); err != nil {
+						return err
+					}
+					fmt.Print("Deployments by Label\n\n")
+					if err := printer.Print(api.Deployments{Deployments: label}, printerConfig); err != nil {
+						return err
+					}
 				}
 			}
 			return nil
