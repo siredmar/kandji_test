@@ -40,8 +40,17 @@ func NewUpdate(parent *cobra.Command, client *client.APIClient) *Update {
 				return err
 			}
 
+			resources := make(map[string]interface{}, len(contents))
 			for _, c := range contents {
-				if err := update(c, client); err != nil {
+				res, resID, err := checkResourceFile(c, false)
+				if err != nil {
+					return err
+				}
+				resources[resID] = res
+			}
+
+			for resID, res := range resources {
+				if err := update(resID, res, client); err != nil {
 					return err
 				}
 			}
@@ -61,13 +70,8 @@ func NewUpdate(parent *cobra.Command, client *client.APIClient) *Update {
 	}
 }
 
-func update(content []byte, client *client.APIClient) error {
-	res, resId, err := checkResourceFile(content, false)
-	if err != nil {
-		return err
-	}
-
-	message, err := updateResource(client, res, resId, nil)
+func update(resID string, res interface{}, client *client.APIClient) error {
+	message, err := updateResource(client, res, resID, nil)
 	if err != nil {
 		return err
 	}
