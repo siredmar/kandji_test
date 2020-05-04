@@ -72,8 +72,6 @@ func NewDiff(parent *cobra.Command, client *client.APIClient) *Diff {
 }
 
 func diff(filename string, content []byte, differ string, client *client.APIClient) error {
-	fmt.Fprintf(os.Stderr, "Diffing file %s\n", filename)
-
 	res, resID, err := checkResourceFile(content, true)
 	if err != nil {
 		return err
@@ -158,6 +156,7 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 	}
 
 	if len(output) != 0 {
+		fmt.Printf("%s:\n", filename)
 		fmt.Println(string(output))
 	}
 	return nil
