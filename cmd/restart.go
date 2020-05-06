@@ -76,7 +76,7 @@ func restartDevice(client *client.APIClient, id string, ids []string) (string, e
 		},
 	}
 
-	message, err := createResource(client, d)
+	message, err := createResource(devID, d, client)
 	if err != nil {
 		return "", err
 	}

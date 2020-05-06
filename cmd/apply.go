@@ -126,7 +126,7 @@ func sortByKind(resources map[string]interface{}) []resAssoc {
 func apply(resID string, res interface{}, client *client.APIClient) error {
 	if resID == "" {
 		// Create
-		return create(res, client)
+		return create(resID, res, client)
 	}
 
 	// Update or Create
@@ -166,7 +166,7 @@ func apply(resID string, res interface{}, client *client.APIClient) error {
 
 	if !found {
 		// Create
-		return create(res, client)
+		return create(resID, res, client)
 	}
 
 	// Update
