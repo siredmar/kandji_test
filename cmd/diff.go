@@ -170,6 +170,7 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 
 	application, err := api.NewApplication(bytes)
 	if err == nil {
+		application.Name = resID
 		return application, resID, nil
 	}
 
@@ -195,6 +196,12 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 	if err == nil {
 		cleanupConfig.Metadata.ID = resID
 		return cleanupConfig, resID, nil
+	}
+
+	maintenanceTask, err := api.NewMaintenanceTask(bytes)
+	if err == nil {
+		maintenanceTask.Metadata.ID = resID
+		return maintenanceTask, resID, nil
 	}
 
 	//Nothing found

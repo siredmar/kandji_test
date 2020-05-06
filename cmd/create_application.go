@@ -41,7 +41,7 @@ func NewCreateApplication(parent *cobra.Command, client *client.APIClient) *Crea
 				d.Name = createApplicationCmdName
 			}
 
-			message, err := createResource(client, d)
+			message, err := createResource(createApplicationCmdName, d, client)
 			if err != nil {
 				return err
 			}

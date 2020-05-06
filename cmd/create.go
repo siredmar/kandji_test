@@ -35,8 +35,20 @@ func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 				return err
 			}
 
+			resources := make(map[string]interface{}, len(contents))
+
 			for _, c := range contents {
-				if err := create(c, client); err != nil {
+				res, resID, err := checkResourceFile(c, false)
+				if err != nil {
+					return err
+				}
+				resources[resID] = res
+			}
+
+			resourcesSorted := sortByKind(resources)
+
+			for _, r := range resourcesSorted {
+				if err := create(r.ID, r.Res, client); err != nil {
 					return err
 				}
 			}
@@ -57,13 +69,8 @@ func NewCreate(parent *cobra.Command, client *client.APIClient) *Create {
 	}
 }
 
-func create(content []byte, client *client.APIClient) error {
-	res, _, err := checkResourceFile(content, false)
-	if err != nil {
-		return err
-	}
-
-	message, err := createResource(client, res)
+func create(resID string, res interface{}, client *client.APIClient) error {
+	message, err := createResource(resID, res, client)
 	if err != nil {
 		return err
 	}
@@ -72,80 +79,68 @@ func create(content []byte, client *client.APIClient) error {
 	return nil
 }
 
-func createResource(client *client.APIClient, v interface{}) (string, error) {
-	switch v := v.(type) {
+func createResource(resID string, res interface{}, client *client.APIClient) (string, error) {
+	switch res := res.(type) {
 	case api.Device:
-		response, err := client.PostRequest(api.DevicesEndpoint, v)
+		response, err := client.PostRequest(api.DevicesEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		device, err := api.NewDevice(response)
-		if err != nil {
+		if _, err := api.NewDevice(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Device %s created successfully", resID), nil
 
-		return fmt.Sprintf("Device %s created successfully", device.Metadata.ID), nil
 	case api.Deployment:
-		response, err := client.PostRequest(api.DeploymentsEndpoint, v)
+		response, err := client.PostRequest(api.DeploymentsEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		deployment, err := api.NewDeployment(response)
-		if err != nil {
+		if _, err := api.NewDeployment(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Deployment %s created successfully", resID), nil
 
-		return fmt.Sprintf("Deployment %s created successfully", deployment.Metadata.ID), nil
 	case api.Application:
-		response, err := client.PostRequest(api.ApplicationsEndpoint, v)
+		response, err := client.PostRequest(api.ApplicationsEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		application, err := api.NewApplication(response)
-		if err != nil {
+		if _, err := api.NewApplication(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Application %s created successfully", resID), nil
 
-		return fmt.Sprintf("Application %s created successfully", application.Name), nil
 	case api.MaintenanceTask:
-		response, err := client.PostRequest(api.MaintenanceEndpoint, v)
+		response, err := client.PostRequest(api.MaintenanceEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		task, err := api.NewMaintenanceTask(response)
-		if err != nil {
+		if _, err := api.NewMaintenanceTask(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Maintenance task %s created successfully", resID), nil
 
-		return fmt.Sprintf("Maintenance task %s created successfully", task.Metadata.ID), nil
 	case api.DockerConfig:
-		response, err := client.PostRequest(api.DockerConfigsEndpoint, v)
+		response, err := client.PostRequest(api.DockerConfigsEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		config, err := api.NewDockerConfig(response)
-		if err != nil {
+		if _, err := api.NewDockerConfig(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Docker config %s created successfully", resID), nil
 
-		return fmt.Sprintf("Docker config %s created successfully", config.Metadata.ID), nil
 	case api.CleanupConfig:
-		response, err := client.PostRequest(api.CleanupConfigsEndpoint, v)
+		response, err := client.PostRequest(api.CleanupConfigsEndpoint, res)
 		if err != nil {
 			return "", err
 		}
-
-		config, err := api.NewCleanupConfig(response)
-		if err != nil {
+		if _, err := api.NewCleanupConfig(response); err != nil {
 			return "", err
 		}
+		return fmt.Sprintf("Cleanup config %s created successfully", resID), nil
 
-		return fmt.Sprintf("Cleanup config %s created successfully", config.Metadata.ID), nil
 	default:
 		return "", errors.E(
 			errors.NotImplemented,
