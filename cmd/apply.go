@@ -77,34 +77,31 @@ func NewApply(parent *cobra.Command, client *client.APIClient) *Apply {
 }
 
 type resAssoc struct {
-	ID  string
-	Res interface{}
+	ID    string
+	Res   interface{}
+	Order int
 }
 
 func sortByKind(resources map[string]interface{}) []resAssoc {
 	result := make([]resAssoc, len(resources))
 	i := 0
 	for resID, res := range resources {
+		kind := reflect.TypeOf(res).Name()
+		var order int
+		var exists bool
+		if order, exists = kindOrder[kind]; kind == "" || !exists {
+			order = -1
+		}
 		result[i] = resAssoc{
 			resID,
 			res,
+			order,
 		}
 		i++
 	}
 	sort.SliceStable(result, func(i, j int) bool {
-		k := reflect.TypeOf(result[i].Res).Name()
-		l := reflect.TypeOf(result[j].Res).Name()
-
-		var s, t int
-		var exists bool
-
-		if s, exists = kindOrder[k]; k == "" || !exists {
-			s = -1
-		}
-		exists = false
-		if t, exists = kindOrder[l]; l == "" || !exists {
-			t = -1
-		}
+		s := result[i].Order
+		t := result[j].Order
 
 		// resources with no kind go last
 		if s > -1 && t == -1 {

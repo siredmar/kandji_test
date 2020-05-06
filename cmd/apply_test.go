@@ -26,10 +26,12 @@ func TestSortByKind(t *testing.T) {
 				{
 					"foo",
 					api.Application{},
+					0,
 				},
 				{
 					"bar",
 					api.Deployment{},
+					1,
 				},
 			},
 		},
@@ -59,12 +61,14 @@ func TestSortByKind(t *testing.T) {
 					api.Application{
 						Name: "c",
 					},
+					0,
 				},
 				{
 					"d",
 					api.Application{
 						Name: "d",
 					},
+					0,
 				},
 				{
 					"a",
@@ -73,6 +77,7 @@ func TestSortByKind(t *testing.T) {
 							ID: "a",
 						},
 					},
+					1,
 				},
 				{
 					"b",
@@ -81,6 +86,7 @@ func TestSortByKind(t *testing.T) {
 							ID: "b",
 						},
 					},
+					1,
 				},
 			},
 		},
@@ -94,10 +100,12 @@ func TestSortByKind(t *testing.T) {
 				{
 					"b",
 					api.Deployment{},
+					1,
 				},
 				{
 					"a",
 					42,
+					-1,
 				},
 			},
 		},
