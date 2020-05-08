@@ -54,7 +54,7 @@ func main() {
 	cmd.NewLint(root.Command, client)
 
 	// Delete
-	delete := cmd.NewDelete(root.Command)
+	delete := cmd.NewDelete(root.Command, client)
 	cmd.NewDeleteDeployment(delete.Command, client)
 	cmd.NewDeleteApplication(delete.Command, client)
 	cmd.NewDeleteDevice(delete.Command, client)
