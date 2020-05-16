@@ -70,8 +70,9 @@ func (c *CMD) Init(s *service.Service) error {
 			outputType, _ := cmd.Flags().GetString("output")
 			showAll, _ := cmd.Flags().GetBool("all")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
+			showPublicIP, _ := cmd.Flags().GetBool("show-public-ip")
 
-			if err := action.GetDevice(s, outputType, sortBy, showDockerConfig, showPods, showPublicKey, showAll, args); err != nil {
+			if err := action.GetDevice(s, outputType, sortBy, showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
 				return err
 			}
 
@@ -86,6 +87,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().Bool("all", false, "show also inactive devices")
 	c.cmd.Flags().Bool("show-dockerconfig", false, "print the docker config for a device")
 	c.cmd.Flags().Bool("show-pods", false, "print the pods for a device")
+	c.cmd.Flags().Bool("show-public-ip", false, "print the public ip for a device")
 	c.cmd.Flags().Bool("show-publickey", false, "print the public key for a device")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")

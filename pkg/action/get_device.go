@@ -10,7 +10,17 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-func GetDevice(s *service.Service, outputType string, sortBy string, showDockerConfig bool, showPods bool, showPublicKey bool, showAll bool, ids []string) error {
+func GetDevice(
+	s *service.Service,
+	outputType string,
+	sortBy string,
+	showDockerConfig bool,
+	showPods bool,
+	showPublicIP bool,
+	showPublicKey bool,
+	showAll bool,
+	ids []string,
+) error {
 	printerConfig := print.Printconfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
@@ -27,7 +37,14 @@ func GetDevice(s *service.Service, outputType string, sortBy string, showDockerC
 		deviceIDs := devices.GetIds()
 
 		for _, a := range ids {
-			if showPublicKey {
+			if showPublicIP {
+				// Just show public IP
+				device, err := getDeviceById(s.Client, a, deviceIDs)
+				if err != nil {
+					return err
+				}
+				fmt.Println(*device.Status.Info.PublicIP)
+			} else if showPublicKey {
 				// Just show publickey
 				device, err := getDeviceById(s.Client, a, deviceIDs)
 				if err != nil {
