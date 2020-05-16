@@ -138,6 +138,8 @@ type DeviceSystemInfo struct {
 	MachineID *string `json:"machineID,omitempty"`
 	// NetworkInterfaces is the list of network interfaces of this device
 	NetworkInterfaces []NetworkInterface `json:"networkInterfaces,omitempty"`
+	// PublicIP is the public IP of this device
+	PublicIP *string `json:"publicIP,omitempty"`
 }
 
 // ContainerImage represents a container image with different names and its

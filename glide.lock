@@ -1,14 +1,16 @@
-hash: b99ef9b2813d2826b3ec839dc1b0cf940d2c2ec41dc757fa54eefc7f9e4f517a
-updated: 2020-04-02T15:16:08.716755264+02:00
+hash: de88e079389858575cb5c8dd8266bf046ed2c07ff79140b966c4e4dbaee3299d
+updated: 2020-05-16T13:43:04.985614+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
-  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
+  version: dc14462fd58732591c7fa58cc8496d6824316a82
 - name: github.com/dustin/go-humanize
   version: afde56e7acacd811f6c94228c2c61af2b0e93158
 - name: github.com/fsnotify/fsnotify
-  version: 45d7d09e39ef4ac08d493309fa031790c15bfe8a
+  version: 7f4cf4dd2b522a984eaca51d1ccee54101d3414a
 - name: github.com/ghodss/yaml
   version: 25d852aebe32c875e9c044af3eef9c7dc6bc777f
+- name: github.com/go-clix/cli
+  version: 0304317a107b08d0f8e04f7baa6a186f6832c405
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
@@ -17,7 +19,7 @@ imports:
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/google/go-cmp
-  version: 6f77996f0c42f7b84e5a2b252227263f93432e9b
+  version: 7e5cb83929c528b29e5a8ac1244eab0436f79bce
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -27,19 +29,14 @@ imports:
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/google/uuid
-  version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
+  version: bd451584982ecf4ca5b1e5938cf168e17e30d837
 - name: github.com/gorilla/websocket
   version: b65e62901fc1c0d968042419e74789f6af455eb9
-- name: github.com/grid-x/ds-api
-  version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
-  subpackages:
-  - pkg/ssh
 - name: github.com/grid-x/ds-api-types
-  version: 2eac780fbca8c730da7325e20b729226596568ae
+  version: 2061c653118be1a86a39e23fb6ea56793d30604f
   subpackages:
   - management/2018-11-27/application
   - management/2018-11-28/pod
-  - management/2019-05-14/devicedockerconfigs
   - management/2019-05-29/devicecleanupconfigs
   - management/2019-06-09/devicedockerconfigs
   - management/2019-06-13/device
@@ -48,10 +45,12 @@ imports:
   - management/2019-12-10/cleanupconfigs
   - management/2019-12-10/deployments
   - management/2019-12-10/dockerconfigs
-- name: github.com/grid-x/ds-k8s
-  version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
+- name: github.com/hashicorp/errwrap
+  version: 8a6fb523712970c966eefc6b39ed2c5e74880354
+- name: github.com/hashicorp/go-multierror
+  version: 2004d9dba6b07a5b8d133209244f376680f9d472
 - name: github.com/hashicorp/hcl
-  version: 914dc3f8dd7c463188c73fc47e9ced82a6e421ca
+  version: 569ae818ccb3cf7a7192e329771f8f940feecbba
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -62,8 +61,6 @@ imports:
   - json/parser
   - json/scanner
   - json/token
-- name: github.com/inconshreveable/mousetrap
-  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kataras/tablewriter
   version: e063d29b7c2363c8e21a25fdb4109f03beb50230
 - name: github.com/landoop/tableprinter
@@ -77,41 +74,42 @@ imports:
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/mitchellh/mapstructure
-  version: ba04b217da920f27cfc994a979894602990935ad
+  version: 14428cd8e72132155ec2f0f13c4eb93ffe620f7c
 - name: github.com/PaesslerAG/gval
   version: 6fceb06ca1629ade2cb3ec5669d8d629adb5d324
 - name: github.com/PaesslerAG/jsonpath
   version: c18d0f043db32b5d4295e14c6518fa9160e45d15
 - name: github.com/pelletier/go-toml
-  version: 3f7178ffd6cab79ef1fe4cefdd2579addf06452a
+  version: a60e466129af3efb3277a46ec01bab50f89a7f4e
 - name: github.com/pkg/term
   version: aa71e9d9e942418fbb97d80895dcea70efed297c
   subpackages:
   - termios
+- name: github.com/posener/complete
+  version: f6dd29e97e24f8cb51a8d4050781ce2b238776a4
+  subpackages:
+  - cmd
+  - cmd/install
 - name: github.com/schollz/progressbar
   version: 6aa2ca5bbf34895dfac0f83003ddb34c9eea4f41
 - name: github.com/spf13/afero
-  version: f1155579b0d925f4ccae2da50175acd36d03d632
+  version: c8608266dfb4546f38a16622d1b5aed0291033b9
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: 1ffadf551085444af981432dd0f6d1160c11ec64
-- name: github.com/spf13/cobra
-  version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/jwalterweatherman
   version: 94f6ae3ed3bceceafa716478c5fbf8d29ca601a1
 - name: github.com/spf13/pflag
-  version: 298182f68c66c05229eb03ac171abe6e309ee79a
+  version: 81378bbcd8a1005f72b1e8d7579e5dd7b2d612ab
 - name: github.com/spf13/viper
-  version: 97ee7adfef4882d78c0ef26e22a0c8a7a8bf6776
+  version: 13df72109047b6ae9c907bce81e327265d6d8a9c
 - name: github.com/subosito/gotenv
   version: de67a6614a4de71ad5e380b6946e56ab957d58c5
 - name: github.com/tj/go-spin
   version: 30574f5fadef1aa5c61d4c42e936785af9f03ada
 - name: github.com/toqueteos/webbrowser
   version: dc97d39f47581b388e37bd749f31f8a3b29e22f6
-- name: golang.org/x/crypto
-  version: a5d413f7728c81fb97d96a2b722368945f651e78
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
@@ -123,8 +121,9 @@ imports:
   - lex/httplex
   - websocket
 - name: golang.org/x/sys
-  version: 66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399
+  version: 1151b9dac4a98d49ef7f80f07ddd826ff51e0b36
   subpackages:
+  - internal/unsafeheader
   - unix
 - name: golang.org/x/text
   version: b19bf474d317b857955b12035d2c5acb57ce8b01
@@ -136,9 +135,9 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ini.v1
-  version: 39bc4ddcb8b9d0100f7a040816380ccda878b94a
+  version: ad8a10643d24d67f464955e42b23e0d42d60fcb4
 - name: gopkg.in/yaml.v2
-  version: 53403b58ad1b561927d19068c655246f2db79d48
+  version: 0b1645d91e851e735d3e23330303ce81f70adbe3
 - name: k8s.io/apimachinery
   version: 103fd098999dc9c0c88536f5c9ad2e5da39373ae
   subpackages:
@@ -163,6 +162,4 @@ imports:
   - pkg/util/wait
   - pkg/watch
   - third_party/forked/golang/reflect
-- name: sigs.k8s.io/controller-runtime
-  version: 67e28744a963c78a34108c3b52aadbc5e02f4384
 testImports: []
