@@ -4,10 +4,9 @@ import (
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/pkg/service"
-
 	"github.com/grid-x/gxctl/internal/cmd/config/delete"
 	"github.com/grid-x/gxctl/internal/cmd/config/get"
+	"github.com/grid-x/gxctl/pkg/service"
 )
 
 // CMD contains a command and all its sub commands
@@ -38,8 +37,8 @@ func (c *CMD) Init(s *service.Service) error {
 		Short: "configure devices",
 	}
 	c.children = []cmd.CMD{
-		get.New(),
 		delete.New(),
+		get.New(),
 	}
 
 	return nil

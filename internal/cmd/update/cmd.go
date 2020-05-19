@@ -3,6 +3,7 @@ package update
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/internal/cmd/update/deployment"
 	"github.com/grid-x/gxctl/internal/cmd/update/device"
@@ -44,6 +45,9 @@ func (c *CMD) Init(s *service.Service) error {
 			}
 
 			return action.Update(s, updateCmdFilename)
+		},
+		Predictors: args.Predictors{
+			"filename": args.PredictFile(),
 		},
 	}
 

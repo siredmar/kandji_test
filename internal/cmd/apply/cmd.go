@@ -3,6 +3,7 @@ package apply
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
@@ -42,6 +43,9 @@ func (c *CMD) Init(s *service.Service) error {
 			}
 
 			return action.Apply(s, applyCmdFilename)
+		},
+		Predictors: args.Predictors{
+			"filename": args.PredictFile(),
 		},
 	}
 

@@ -3,6 +3,7 @@ package delete
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/internal/cmd/delete/application"
 	"github.com/grid-x/gxctl/internal/cmd/delete/deployment"
@@ -47,6 +48,9 @@ func (c *CMD) Init(s *service.Service) error {
 			}
 
 			return action.Delete(s, deleteCmdFilename)
+		},
+		Predictors: args.Predictors{
+			"filename": args.PredictFile(),
 		},
 	}
 

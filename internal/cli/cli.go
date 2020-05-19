@@ -3,6 +3,7 @@ package cli
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -37,10 +38,11 @@ func Init(svc *service.Service, node cmd.CMD) error {
 		return err
 	}
 
+	c := node.Command()
+
 	// wrap Command.Run to init services - not pretty but we can't do it earlier
 	// i.e. in order to read the auth config we need to know the value of the
 	// --config flag, which is not set until a command is run
-	c := node.Command()
 	r := c.Run
 	if r != nil {
 		c.Run = func(cmd *clix.Command, args []string) error {
@@ -64,6 +66,13 @@ func Init(svc *service.Service, node cmd.CMD) error {
 	node.Command().Flags().BoolVar(&svc.Config.UseStaging, "staging", false, "use staging env")
 	node.Command().Flags().StringVar(&svc.Config.Profile, "profile", "", "profile to use")
 	node.Command().Flags().StringVar(&svc.Config.ConfigFile, "config", "", "config file")
+
+	p := &c.Predictors
+	if *p == nil {
+		*p = make(args.Predictors)
+	}
+	(*p)["config"] = args.PredictFile()
+	(*p)["profile"] = args.PredictNil()
 
 	return nil
 }

@@ -3,6 +3,7 @@ package deployment
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/api"
@@ -37,22 +38,11 @@ func (c *CMD) Init(s *service.Service) error {
 		Use:     "deployment ID",
 		Aliases: []string{"deployments", "deploy"},
 		Short:   "update deployment",
+		Args: args.Args{
+			validateArgs(),
+			args.PredictNil(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"required argument ID not found",
-					[]string{"run 'gxctl update deployment --help' for usage"},
-				)
-			}
-
-			if !api.IsDockerImageValid(args[0]) {
-				return errors.E(
-					errors.Invalid,
-					"required argument IMAGE not valdi",
-					[]string{"run 'gxctl update deployment --help' for usage"},
-				)
-			}
 
 			updateDeploymentCmdImage, _ := cmd.Flags().GetString("image")
 			updateDeploymentCmdApp, _ := cmd.Flags().GetString("app")
@@ -62,7 +52,7 @@ func (c *CMD) Init(s *service.Service) error {
 				return errors.E(
 					errors.Invalid,
 					"Nothing to update",
-					[]string{"run 'gxctl update deployment --help' for usage"},
+					nil,
 				)
 			}
 			return action.UpdateDeployment(
@@ -73,6 +63,11 @@ func (c *CMD) Init(s *service.Service) error {
 				updateDeploymentCmdSelector,
 			)
 		},
+		Predictors: args.Predictors{
+			"image":    args.PredictNil(),
+			"app":      args.PredictNil(),
+			"selector": args.PredictNil(),
+		},
 	}
 
 	c.cmd.Flags().StringP("image", "i", "", "Image for the deployment")
@@ -80,4 +75,25 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().StringP("selector", "s", "", "A space seperated list of labels eg. gridx.de/channel=stable gridx.de/area=west-1")
 
 	return nil
+}
+
+func validateArgs() clix.ValidateFunc {
+	return func(args []string) error {
+		if len(args) != 1 {
+			return errors.E(
+				errors.Invalid,
+				"required argument ID not found",
+				nil,
+			)
+		}
+
+		if !api.IsDockerImageValid(args[0]) {
+			return errors.E(
+				errors.Invalid,
+				"required argument IMAGE not valid",
+				nil,
+			)
+		}
+		return nil
+	}
 }

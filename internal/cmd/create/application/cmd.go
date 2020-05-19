@@ -3,9 +3,9 @@ package application
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
-	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -36,18 +36,12 @@ func (c *CMD) Init(s *service.Service) error {
 		Use:     "application NAME",
 		Short:   "Creates an application",
 		Aliases: []string{"applications", "app", "apps"},
+		Args: args.Args{
+			args.ValidateSingle("NAME"),
+			args.PredictNil(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"required argument NAME not found",
-					[]string{"run 'gxctl create application --help' for usage"},
-				)
-			}
-
-			createApplicationCmdName := args[0]
-
-			return action.CreateApplication(s, createApplicationCmdName)
+			return action.CreateApplication(s, args[0])
 		},
 	}
 

@@ -3,6 +3,7 @@ package deployment
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -51,6 +52,10 @@ func (c *CMD) Init(s *service.Service) error {
 			}
 
 			return action.GetDeployment(s, outputType, sortBy, showDevices, args)
+		},
+		Predictors: args.Predictors{
+			"output":  args.PredictOutputType(),
+			"sort-by": args.PredictNil(),
 		},
 	}
 

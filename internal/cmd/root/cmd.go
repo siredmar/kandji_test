@@ -13,7 +13,7 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/label"
 	"github.com/grid-x/gxctl/internal/cmd/lint"
 	"github.com/grid-x/gxctl/internal/cmd/login"
-	"github.com/grid-x/gxctl/internal/cmd/portForward"
+	"github.com/grid-x/gxctl/internal/cmd/portforward"
 	"github.com/grid-x/gxctl/internal/cmd/restart"
 	"github.com/grid-x/gxctl/internal/cmd/ssh"
 	"github.com/grid-x/gxctl/internal/cmd/syslog"
@@ -62,7 +62,7 @@ func (c *CMD) Init(s *service.Service) error {
 		label.New(),
 		lint.New(),
 		login.New(),
-		portForward.New(),
+		portforward.New(),
 		restart.New(),
 		ssh.New(),
 		syslog.New(),

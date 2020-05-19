@@ -1,8 +1,9 @@
-package portForward
+package portforward
 
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -35,15 +36,11 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
 		Use:   "forward",
 		Short: "forwards remote connections to local port",
+		Args: args.Args{
+			validateArgs(),
+			args.PredictNil(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"required argument ID not found",
-					[]string{"run 'gxctl port-forward --help' for usage"},
-				)
-			}
-
 			portForwardCmdLocalPort, _ := cmd.Flags().GetString("localport")
 			portForwardCmdTarget, _ := cmd.Flags().GetString("target")
 
@@ -64,10 +61,27 @@ func (c *CMD) Init(s *service.Service) error {
 
 			return action.PortForward(s, args[0], portForwardCmdLocalPort, portForwardCmdTarget)
 		},
+		Predictors: args.Predictors{
+			"localport": args.PredictNil(),
+			"target":    args.PredictNil(),
+		},
 	}
 
 	c.cmd.Flags().StringP("localport", "l", "", "Local port for the forwarded connection")
 	c.cmd.Flags().StringP("target", "t", "", "Target to forward traffic from")
 
 	return nil
+}
+
+func validateArgs() clix.ValidateFunc {
+	return func(args []string) error {
+		if len(args) != 1 {
+			return errors.E(
+				errors.Invalid,
+				"required argument ID not found",
+				[]string{"run 'gxctl port-forward --help' for usage"},
+			)
+		}
+		return nil
+	}
 }

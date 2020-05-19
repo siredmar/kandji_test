@@ -3,6 +3,7 @@ package device
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -46,7 +47,7 @@ func (c *CMD) Init(s *service.Service) error {
 				return errors.E(
 					errors.Invalid,
 					"docker-configs can just be shown for a single device",
-					[]string{"run 'gxctl get device --help' for usage"},
+					nil,
 				)
 			}
 
@@ -54,7 +55,7 @@ func (c *CMD) Init(s *service.Service) error {
 				return errors.E(
 					errors.Invalid,
 					"pods can just be shown for a single device",
-					[]string{"run 'gxctl get device --help' for usage"},
+					nil,
 				)
 			}
 
@@ -62,7 +63,7 @@ func (c *CMD) Init(s *service.Service) error {
 				return errors.E(
 					errors.Invalid,
 					"publickeys can just be shown for a single device",
-					[]string{"run 'gxctl get device --help' for usage"},
+					nil,
 				)
 			}
 
@@ -76,13 +77,17 @@ func (c *CMD) Init(s *service.Service) error {
 
 			return nil
 		},
+		Predictors: args.Predictors{
+			"sort-by": args.PredictNil(),
+			"output":  args.PredictOutputType(),
+		},
 	}
 
 	c.cmd.Flags().BoolP("all", "", false, "show also inactive devices")
 	c.cmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
 	c.cmd.Flags().BoolP("show-pods", "", false, "print the pods for a device")
 	c.cmd.Flags().BoolP("show-publickey", "", false, "print the public key for a device")
-	c.cmd.Flags().StringP("sort-by", "", "", "sort by")
+	c.cmd.Flags().String("sort-by", "", "sort by")
 	c.cmd.Flags().String("output", "wide", "output format of result")
 
 	return nil

@@ -3,9 +3,9 @@ package device
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
-	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -36,15 +36,11 @@ func (c *CMD) Init(s *service.Service) error {
 		Use:     "device ID",
 		Aliases: []string{"devices"},
 		Short:   "delete device",
+		Args: args.Args{
+			args.ValidateSingle("ID"),
+			args.PredictNil(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) < 1 {
-				return errors.E(
-					errors.Invalid,
-					"required argument ID not found",
-					[]string{"run 'gxctl delete device --help' for usage"},
-				)
-			}
-
 			return action.DeleteDevice(s, args)
 		},
 	}

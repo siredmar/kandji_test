@@ -3,6 +3,7 @@ package device
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -35,15 +36,11 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
 		Use:   "device ID",
 		Short: "update device",
+		Args: args.Args{
+			args.ValidateSingle("ID"),
+			args.PredictNil(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"required argument ID not valid",
-					[]string{"run 'gxctl update device --help' for usage"},
-				)
-			}
-
 			updateDeviceCmdMaintenanceWindow, _ := cmd.Flags().GetString("maintenance-window")
 			updateDeviceCmdMacAddress, _ := cmd.Flags().GetString("mac-address")
 			updateDeviceCmdLabels, _ := cmd.Flags().GetString("labels")
@@ -53,7 +50,7 @@ func (c *CMD) Init(s *service.Service) error {
 				return errors.E(
 					errors.Invalid,
 					"Nothing to update",
-					[]string{"run 'gxctl update device --help' for usage"},
+					nil,
 				)
 			}
 			return action.UpdateDevice(
@@ -64,6 +61,12 @@ func (c *CMD) Init(s *service.Service) error {
 				updateDeviceCmdLabels,
 				updateDeviceCmdAnnotations,
 			)
+		},
+		Predictors: args.Predictors{
+			"maintenance-window": args.PredictNil(),
+			"mac-address":        args.PredictNil(),
+			"labels":             args.PredictNil(),
+			"annotations":        args.PredictNil(),
 		},
 	}
 

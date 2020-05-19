@@ -5,6 +5,7 @@ import (
 
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/errors"
@@ -37,36 +38,47 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
 		Use:   "copy SOURCE DESTINATION",
 		Short: "forwards files to devices",
+		Args: args.Args{
+			validateArgs(),
+			args.PredictFile(),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
-			if len(args) != 2 {
-				return errors.E(
-					errors.Invalid,
-					"required argument ID not found",
-					[]string{"run 'gxctl copy --help' for usage"},
-				)
-			}
-
 			sourceID := args[0]
 			destID := args[1]
-
-			if strings.Contains(sourceID, ":") && strings.Contains(destID, ":") {
-				return errors.E(
-					errors.Invalid,
-					"You cannot specify the device in both source and destination parameters",
-					[]string{"run 'gxctl copy --help' for usage"},
-				)
-			}
-			if !strings.Contains(sourceID, ":") && !strings.Contains(destID, ":") {
-				return errors.E(
-					errors.Invalid,
-					"Missing device id",
-					[]string{"run 'gxctl copy --help' for usage"},
-				)
-			}
-
 			return action.Copy(s, sourceID, destID)
 		},
 	}
 
 	return nil
+}
+
+func validateArgs() clix.ValidateFunc {
+	return func(args []string) error {
+		if len(args) != 2 {
+			return errors.E(
+				errors.Invalid,
+				"required arguments source and dest not found",
+				nil,
+			)
+		}
+
+		sourceID := args[0]
+		destID := args[1]
+
+		if strings.Contains(sourceID, ":") && strings.Contains(destID, ":") {
+			return errors.E(
+				errors.Invalid,
+				"You cannot specify the device in both source and destination parameters",
+				nil,
+			)
+		}
+		if !strings.Contains(sourceID, ":") && !strings.Contains(destID, ":") {
+			return errors.E(
+				errors.Invalid,
+				"Missing device id",
+				nil,
+			)
+		}
+		return nil
+	}
 }

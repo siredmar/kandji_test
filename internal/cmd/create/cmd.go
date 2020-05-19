@@ -3,6 +3,7 @@ package create
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/internal/cmd/create/application"
 	"github.com/grid-x/gxctl/pkg/action"
@@ -44,6 +45,9 @@ func (c *CMD) Init(s *service.Service) error {
 			}
 
 			return action.Create(s, createCmdFilename)
+		},
+		Predictors: args.Predictors{
+			"filename": args.PredictFile(),
 		},
 	}
 
