@@ -1,6 +1,8 @@
 package update
 
 import (
+	"fmt"
+
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cli/args"
@@ -40,7 +42,7 @@ func (c *CMD) Init(s *service.Service) error {
 		Run: func(cmd *clix.Command, args []string) error {
 			updateCmdFilename, _ := cmd.Flags().GetString("filename")
 			if updateCmdFilename == "" {
-				cmd.Usage()
+				fmt.Println(cmd.Usage())
 				return nil
 			}
 

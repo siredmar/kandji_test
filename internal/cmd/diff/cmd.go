@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"fmt"
+
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cli/args"
@@ -40,7 +42,7 @@ func (c *CMD) Init(s *service.Service) error {
 			diffCmdDiffer, _ := cmd.Flags().GetString("command")
 
 			if diffCmdFilename == "" {
-				cmd.Usage()
+				fmt.Println(cmd.Usage())
 				return nil
 			}
 

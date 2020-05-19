@@ -1,6 +1,8 @@
 package lint
 
 import (
+	"fmt"
+
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cli/args"
@@ -39,7 +41,7 @@ func (c *CMD) Init(s *service.Service) error {
 			lintCmdFilename, _ := cmd.Flags().GetString("filename")
 
 			if lintCmdFilename == "" {
-				cmd.Usage()
+				fmt.Println(cmd.Usage())
 				return nil
 			}
 

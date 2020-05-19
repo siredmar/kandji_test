@@ -1,6 +1,8 @@
 package apply
 
 import (
+	"fmt"
+
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cli/args"
@@ -38,7 +40,7 @@ func (c *CMD) Init(s *service.Service) error {
 		Run: func(cmd *clix.Command, args []string) error {
 			applyCmdFilename, _ := cmd.Flags().GetString("filename")
 			if applyCmdFilename == "" {
-				cmd.Usage()
+				fmt.Println(cmd.Usage())
 				return nil
 			}
 
