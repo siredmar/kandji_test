@@ -54,7 +54,7 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().String("output", "wide", "output format of result")
+	c.cmd.Flags().StringP("output", "o", "wide", "output format of result")
 
 	return nil
 }

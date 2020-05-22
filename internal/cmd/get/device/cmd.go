@@ -83,12 +83,12 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().BoolP("all", "", false, "show also inactive devices")
-	c.cmd.Flags().BoolP("show-dockerconfig", "", false, "print the docker config for a device")
-	c.cmd.Flags().BoolP("show-pods", "", false, "print the pods for a device")
-	c.cmd.Flags().BoolP("show-publickey", "", false, "print the public key for a device")
-	c.cmd.Flags().String("sort-by", "", "sort by")
-	c.cmd.Flags().String("output", "wide", "output format of result")
+	c.cmd.Flags().Bool("all", false, "show also inactive devices")
+	c.cmd.Flags().Bool("show-dockerconfig", false, "print the docker config for a device")
+	c.cmd.Flags().Bool("show-pods", false, "print the pods for a device")
+	c.cmd.Flags().Bool("show-publickey", false, "print the public key for a device")
+	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
+	c.cmd.Flags().StringP("output", "o", "wide", "output format of result")
 
 	return nil
 }

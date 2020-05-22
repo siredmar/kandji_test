@@ -59,9 +59,9 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().String("output", "wide", "output format of result")
-	c.cmd.Flags().BoolP("show-devices", "", false, "print the devices for a deployment")
-	c.cmd.Flags().StringP("sort-by", "", "", "sort by")
+	c.cmd.Flags().StringP("output", "o", "wide", "output format of result")
+	c.cmd.Flags().Bool("show-devices", false, "print the devices for a deployment")
+	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
 
 	return nil
 }
