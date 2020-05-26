@@ -46,12 +46,12 @@ type Error struct {
 	} `json:"Error"`
 }
 
-func NewAPIClient(staging *bool, auth *AuthConfig, profile *string) *APIClient {
+func NewAPIClient(staging bool, auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
 		Http:    &http.Client{Timeout: 10 * time.Second},
 		Auth:    auth,
-		Staging: staging,
-		Profile: profile,
+		Staging: &staging,
+		Profile: &profile,
 	}
 }
 

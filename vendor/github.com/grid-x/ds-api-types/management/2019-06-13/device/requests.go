@@ -10,8 +10,8 @@ import (
 // CreateRequest represents the request type
 // Endpoint: POST /devices
 type CreateRequest struct {
-	Metadata *types.CreateMetadata `json:"metadata,omitempty"`
-	Spec     DeviceSpec            `json:"spec"`
+	Metadata types.Metadata `json:"metadata"`
+	Spec     DeviceSpec     `json:"spec"`
 }
 
 // CreateResponse represents the response type

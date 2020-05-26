@@ -19,12 +19,6 @@ type UpdateMetadata struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
-// CreateMetadata contains metadata which can assigned while creation
-type CreateMetadata struct {
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
 // ConvertFromK8sMetadata covernts k8s metadata to internal metadata
 func ConvertFromK8sMetadata(meta metav1.ObjectMeta, unfiltered bool) Metadata {
 	if unfiltered {

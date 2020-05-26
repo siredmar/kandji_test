@@ -159,6 +159,16 @@ func TestAnnotation(t *testing.T) {
 	}
 }
 
+func TestName(t *testing.T) {
+	flagSetName := "bob"
+	f := NewFlagSet(flagSetName, ContinueOnError)
+
+	givenName := f.Name()
+	if givenName != flagSetName {
+		t.Errorf("Unexpected result when retrieving a FlagSet's name: expected %s, but found %s", flagSetName, givenName)
+	}
+}
+
 func testParse(f *FlagSet, t *testing.T) {
 	if f.Parsed() {
 		t.Error("f.Parse() = true before Parse")
@@ -851,6 +861,17 @@ func TestSetOutput(t *testing.T) {
 	flags.Parse([]string{"--unknown"})
 	if out := buf.String(); !strings.Contains(out, "--unknown") {
 		t.Logf("expected output mentioning unknown; got %q", out)
+	}
+}
+
+func TestOutput(t *testing.T) {
+	var flags FlagSet
+	var buf bytes.Buffer
+	expect := "an example string"
+	flags.SetOutput(&buf)
+	fmt.Fprint(flags.Output(), expect)
+	if out := buf.String(); !strings.Contains(out, expect) {
+		t.Errorf("expected output %q; got %q", expect, out)
 	}
 }
 

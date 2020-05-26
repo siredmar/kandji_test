@@ -42,7 +42,7 @@ Afero is easy to use and easier to adopt.
 A few different ways you could use Afero:
 
 * Use the interfaces alone to define your own file system.
-* Wraper for the OS packages.
+* Wrapper for the OS packages.
 * Define different filesystems for different parts of your application.
 * Use Afero for mock filesystems while testing
 
@@ -380,7 +380,6 @@ The following is a short list of possible backends we hope someone will
 implement:
 
 * SSH
-* ZIP
 * TAR
 * S3
 

@@ -1,25 +1,29 @@
-FROM ubuntu:18.10
+FROM ubuntu:20.04
+
+# Disable interactive prompts on package installation
+ENV DEBIAN_FRONTEND noninteractive
 
 # Dependencies to get the git sources and go binaries
 RUN apt-get update && apt-get install -y  --no-install-recommends \
         ca-certificates \
         curl \
         git \
+        rsync \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Get the git sources. If not cached, this takes O(5 minutes).
 WORKDIR /git
 RUN git config --global advice.detachedHead false
-# Linux Kernel: Released 22 Oct 2018
-RUN git clone --branch v4.19 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
-# GNU C library: Released 01 Aug 2018 (we should try to get a secure way to clone this)
-RUN git clone --branch glibc-2.28 --depth 1 git://sourceware.org/git/glibc.git
+# Linux Kernel: Released 29 Mar 2020
+RUN git clone --branch v5.6 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
+# GNU C library: Released 01 Feb 2020 (we should try to get a secure way to clone this)
+RUN git clone --branch release/2.31/master --depth 1 git://sourceware.org/git/glibc.git
 
 # Get Go
-ENV GOLANG_VERSION 1.11
+ENV GOLANG_VERSION 1.14.2
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 b3fcf280ff86558e0559e185b601c9eade0fd24c900b4c63cd14d1d38613e499
+ENV GOLANG_DOWNLOAD_SHA256 6272d6e940ecb71ea5636ddb5fab3933e087c1356173c61f4a803895e947ebb3
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
@@ -30,7 +34,7 @@ ENV PATH /usr/local/go/bin:$PATH
 
 # Linux and Glibc build dependencies and emulator
 RUN apt-get update && apt-get install -y  --no-install-recommends \
-        bison gawk make python \
+        bison gawk make python3 \
         gcc gcc-multilib \
         gettext texinfo \
         qemu-user \

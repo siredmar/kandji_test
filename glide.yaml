@@ -2,28 +2,12 @@ package: github.com/grid-x/gxctl
 import:
 - package: github.com/dgrijalva/jwt-go
 - package: github.com/mitchellh/go-homedir
-- package: github.com/spf13/cobra
-  version: 0.0.3
-- package: github.com/spf13/pflag
-  version: 1.0.3
 - package: github.com/spf13/viper
 - package: github.com/google/go-cmp
 - package: github.com/ghodss/yaml
 - package: github.com/gorilla/websocket
-- package: github.com/grid-x/ds-api
-  version: 3a149d6545287ce5d13cd159508c858c0da9b7f6
-- package: github.com/grid-x/ds-k8s
-  version: 4b3a96647a8b983f71cd127c8d4e4cc349cff3a6
 - package: github.com/grid-x/ds-api-types
-  version: 2eac780fbca8c730da7325e20b729226596568ae
-# Needed to fix to a5d413f7728c81fb97d96a2b722368945f651e78
-# vendor/github.com/nats-io/nkeys/strkey.go:92:17: undefined: ed25519.SeedSize
-- package: golang.org/x/crypto
-  version: a5d413f7728c81fb97d96a2b722368945f651e78
-# Needed to fix to v0.1.1
-# vendor/github.com/grid-x/ds-k8s/pkg/apis/core/v1beta1/register.go:21:19: undefined: scheme.Builder
-- package: sigs.k8s.io/controller-runtime 
-  version: v0.1.1
+  version: 2061c653118be1a86a39e23fb6ea56793d30604f
 # broke API in v2.13.1, cause who cares about semantic versioning...
 - package: github.com/schollz/progressbar
   version: v2.13.0
