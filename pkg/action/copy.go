@@ -220,7 +220,6 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 		socketInputChannel <- m
 
 		var size, written int64
-		var progress float32
 
 		fi, err := srcFile.Stat()
 		if err != nil {
@@ -248,7 +247,6 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 			if n > 0 {
 				if size != 0 {
 					written += int64(n)
-					progress = float32(written) / float32(size) * 100
 				}
 				msg := api.NewWriteToFileMessage(sessionID, targetPath, buf[0:n], false)
 				m, err := json.Marshal(msg)
