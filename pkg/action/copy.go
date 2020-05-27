@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/schollz/progressbar"
 
 	api "github.com/grid-x/gxctl/pkg/api"
 	client "github.com/grid-x/gxctl/pkg/client"
@@ -222,14 +221,12 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 
 		var size, written int64
 		var progress float32
-		var bar *progressbar.ProgressBar
 
 		fi, err := srcFile.Stat()
 		if err != nil {
 			size = 0
 			fmt.Println("Could not determine file size to display progress")
 		} else {
-			bar = progressbar.New(100)
 			size = fi.Size()
 		}
 
@@ -252,7 +249,6 @@ func clientToDevice(source, dest, deviceID string, client *client.APIClient) err
 				if size != 0 {
 					written += int64(n)
 					progress = float32(written) / float32(size) * 100
-					bar.Set64(int64(progress))
 				}
 				msg := api.NewWriteToFileMessage(sessionID, targetPath, buf[0:n], false)
 				m, err := json.Marshal(msg)
