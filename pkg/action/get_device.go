@@ -43,7 +43,9 @@ func GetDevice(
 				if err != nil {
 					return err
 				}
-				fmt.Println(*device.Status.Info.PublicIP)
+				if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
+					fmt.Println(*device.Status.Info.PublicIP)
+				}
 			} else if showPublicKey {
 				// Just show publickey
 				device, err := getDeviceById(s.Client, a, deviceIDs)
