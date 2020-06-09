@@ -25,6 +25,7 @@ type AuthConfig struct {
 	Profiles []struct {
 		Name    string `yaml:"name"`
 		Default bool   `yaml:"default,omitempty"`
+		Staging bool   `yaml:"staging,omitempty"`
 		Auth    struct {
 			Auth0Tenant   string `yaml:"auth0Tenant"`
 			Auth0ClientID string `yaml:"auth0ClientID"`
@@ -35,7 +36,6 @@ type AuthConfig struct {
 
 type APIClient struct {
 	Http    *http.Client
-	Staging *bool
 	Auth    *AuthConfig
 	Profile *string
 }
@@ -46,11 +46,10 @@ type Error struct {
 	} `json:"Error"`
 }
 
-func NewAPIClient(staging bool, auth *AuthConfig, profile string) *APIClient {
+func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
 		Http:    &http.Client{Timeout: 10 * time.Second},
 		Auth:    auth,
-		Staging: &staging,
 		Profile: &profile,
 	}
 }
@@ -63,7 +62,9 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 	}
 
 	base := baseURL
-	if *apiclient.Staging {
+	if isStaging, err := apiclient.isStaging(); err != nil {
+		return nil, err
+	} else if *isStaging {
 		base = baseURLStaging
 	}
 
@@ -125,7 +126,9 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 	}
 
 	base := baseURL
-	if *apiclient.Staging {
+	if isStaging, err := apiclient.isStaging(); err != nil {
+		return nil, err
+	} else if *isStaging {
 		base = baseURLStaging
 	}
 
@@ -195,6 +198,23 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 	}
 
 	return bodyBytes, nil
+}
+
+func (apiclient *APIClient) isStaging() (*bool, error) {
+	var isStaging bool
+
+	p, err := apiclient.resolveProfile()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Name == p {
+			isStaging = profile.Staging
+		}
+	}
+
+	return &isStaging, nil
 }
 
 func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
