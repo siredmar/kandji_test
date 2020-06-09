@@ -63,7 +63,6 @@ func Init(svc *service.Service, node cmd.CMD) error {
 	}
 
 	// as clix has no global/persistent flags, we need to set them for each command
-	node.Command().Flags().BoolVar(&svc.Config.UseStaging, "staging", false, "use staging env")
 	node.Command().Flags().StringVar(&svc.Config.Profile, "profile", "", "profile to use")
 	node.Command().Flags().StringVar(&svc.Config.ConfigFile, "config", "", "config file")
 

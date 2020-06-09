@@ -27,7 +27,7 @@ func (s *Service) Init() error {
 		return err
 	}
 
-	s.Client = client.NewAPIClient(s.Config.UseStaging, &s.Config.Auth, s.Config.Profile)
+	s.Client = client.NewAPIClient(&s.Config.Auth, s.Config.Profile)
 
 	return nil
 }
