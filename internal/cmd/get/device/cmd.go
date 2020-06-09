@@ -88,7 +88,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().Bool("show-pods", false, "print the pods for a device")
 	c.cmd.Flags().Bool("show-publickey", false, "print the public key for a device")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
-	c.cmd.Flags().StringP("output", "o", "wide", "output format of result")
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }
