@@ -59,7 +59,7 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().StringP("output", "o", "wide", "output format of result")
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 	c.cmd.Flags().Bool("show-devices", false, "print the devices for a deployment")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
 
