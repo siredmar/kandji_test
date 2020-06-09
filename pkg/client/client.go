@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 
+	"github.com/grid-x/gxctl/internal/version"
 	api "github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/errors"
 )
@@ -138,6 +139,7 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 		return nil, err
 	}
 
+	req.Header.Add("User-Agent", version.UserAgent())
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", api.APIVersion)
