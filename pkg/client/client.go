@@ -166,7 +166,13 @@ func internalRequest(apiclient *APIClient, method string, body []byte, endpoint 
 	respError := Error{}
 	err = json.Unmarshal(bodyBytes, &respError)
 	if err != nil {
-		// Not even JSON returned... Might be some Oathkeeper or NGINX response
+		// non-JSON (text) response
+		if r.StatusCode == http.StatusNotFound {
+			return nil, errors.E(
+				errors.Internal,
+				fmt.Sprintf("API endpoint not found. Most likely, the version of gxctl you are using (%s) is outdated. Please update to the latest version", version.Version),
+			)
+		}
 		return nil, errors.E(
 			errors.Internal,
 			"Unknown server error",
