@@ -11,6 +11,14 @@ import (
 	api "github.com/grid-x/gxctl/pkg/api"
 )
 
+const Unknown = "unknown"
+
+var (
+	GitCommit = Unknown // git commit SHA
+	Version   = Unknown // gxctl Version
+	BuildTime = Unknown // build datetime
+)
+
 type clientVersion struct {
 	Version    string
 	APIVersion string
@@ -20,12 +28,6 @@ type clientVersion struct {
 	OS         string
 	Arch       string
 }
-
-var (
-	GitCommit string // git commit SHA
-	Version   string // gxctl Version
-	BuildTime string // build datetime
-)
 
 // VersionDetails prints detailed version info
 func VersionDetails() error {
