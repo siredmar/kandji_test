@@ -1,12 +1,17 @@
 package cli
 
 import (
+	"fmt"
+
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
+	"github.com/grid-x/gxctl/internal/version"
 	"github.com/grid-x/gxctl/pkg/service"
 )
+
+const WarningColor = "\033[1;33m%s\033[0m"
 
 // CLI is the entry point to all commands
 type CLI struct {
@@ -29,6 +34,9 @@ func New(svc *service.Service, root cmd.CMD) (*CLI, error) {
 
 // Exec the CLI according to root command
 func (c *CLI) Exec() error {
+	if version.IsRogueBuild() {
+		fmt.Printf(WarningColor, "Warning: using rogue build. Please download an official release or build from source using 'make build'.\n")
+	}
 	return c.root.Execute()
 }
 
