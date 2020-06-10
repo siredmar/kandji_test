@@ -55,7 +55,7 @@ func getMaintenanceTasks(client *client.APIClient) (api.MaintenanceTasks, error)
 		return api.MaintenanceTasks{}, err
 	}
 
-	taskList, err := api.NewMaintenanceTasks(response)
+	taskList, err := api.NewMaintenanceTasks(response, false)
 	if err != nil {
 		return taskList, err
 	}
@@ -82,7 +82,7 @@ func getMaintenanceTaskById(client *client.APIClient, id string, taskIds []strin
 		return api.MaintenanceTask{}, err
 	}
 
-	task, err := api.NewMaintenanceTask(response)
+	task, err := api.NewMaintenanceTask(response, false)
 	if err != nil {
 		return task, err
 	}

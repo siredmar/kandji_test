@@ -16,7 +16,6 @@ func NewFullObjectMeta(j []byte) (FullObjectMeta, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	// allow unknown fields
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -24,7 +23,7 @@ func NewFullObjectMeta(j []byte) (FullObjectMeta, error) {
 	return d, nil
 }
 
-func NewDevice(j []byte) (Device, error) {
+func NewDevice(j []byte, strict bool) (Device, error) {
 	d := Device{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -33,7 +32,9 @@ func NewDevice(j []byte) (Device, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -41,7 +42,7 @@ func NewDevice(j []byte) (Device, error) {
 	return d, nil
 }
 
-func NewDevices(j []byte) (Devices, error) {
+func NewDevices(j []byte, strict bool) (Devices, error) {
 	d := Devices{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -50,7 +51,9 @@ func NewDevices(j []byte) (Devices, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -58,7 +61,7 @@ func NewDevices(j []byte) (Devices, error) {
 	return d, nil
 }
 
-func NewUpdateDevice(j []byte) (UpdateDevice, error) {
+func NewUpdateDevice(j []byte, strict bool) (UpdateDevice, error) {
 	d := UpdateDevice{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -67,7 +70,9 @@ func NewUpdateDevice(j []byte) (UpdateDevice, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -75,7 +80,7 @@ func NewUpdateDevice(j []byte) (UpdateDevice, error) {
 	return d, nil
 }
 
-func NewPod(j []byte) (Pod, error) {
+func NewPod(j []byte, strict bool) (Pod, error) {
 	p := Pod{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -84,7 +89,9 @@ func NewPod(j []byte) (Pod, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&p); err != nil {
 		return p, err
 	}
@@ -92,7 +99,7 @@ func NewPod(j []byte) (Pod, error) {
 	return p, nil
 }
 
-func NewPods(j []byte) (Pods, error) {
+func NewPods(j []byte, strict bool) (Pods, error) {
 	p := Pods{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -101,7 +108,9 @@ func NewPods(j []byte) (Pods, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&p); err != nil {
 		return p, err
 	}
@@ -109,7 +118,7 @@ func NewPods(j []byte) (Pods, error) {
 	return p, nil
 }
 
-func NewDeployment(j []byte) (Deployment, error) {
+func NewDeployment(j []byte, strict bool) (Deployment, error) {
 	d := Deployment{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -118,7 +127,9 @@ func NewDeployment(j []byte) (Deployment, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -126,7 +137,7 @@ func NewDeployment(j []byte) (Deployment, error) {
 	return d, nil
 }
 
-func NewDeployments(j []byte) (Deployments, error) {
+func NewDeployments(j []byte, strict bool) (Deployments, error) {
 	d := Deployments{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -135,7 +146,9 @@ func NewDeployments(j []byte) (Deployments, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -143,7 +156,7 @@ func NewDeployments(j []byte) (Deployments, error) {
 	return d, nil
 }
 
-func NewCreateDeployment(j []byte) (CreateDeployment, error) {
+func NewCreateDeployment(j []byte, strict bool) (CreateDeployment, error) {
 	d := CreateDeployment{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -152,7 +165,9 @@ func NewCreateDeployment(j []byte) (CreateDeployment, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -160,7 +175,7 @@ func NewCreateDeployment(j []byte) (CreateDeployment, error) {
 	return d, nil
 }
 
-func NewUpdateDeployment(j []byte) (UpdateDeployment, error) {
+func NewUpdateDeployment(j []byte, strict bool) (UpdateDeployment, error) {
 	d := UpdateDeployment{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -169,7 +184,9 @@ func NewUpdateDeployment(j []byte) (UpdateDeployment, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -177,7 +194,7 @@ func NewUpdateDeployment(j []byte) (UpdateDeployment, error) {
 	return d, nil
 }
 
-func NewApplication(j []byte) (Application, error) {
+func NewApplication(j []byte, strict bool) (Application, error) {
 	a := Application{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -186,7 +203,9 @@ func NewApplication(j []byte) (Application, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&a); err != nil {
 		return a, err
 	}
@@ -194,7 +213,7 @@ func NewApplication(j []byte) (Application, error) {
 	return a, nil
 }
 
-func NewApplications(j []byte) (Applications, error) {
+func NewApplications(j []byte, strict bool) (Applications, error) {
 	a := Applications{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -203,7 +222,9 @@ func NewApplications(j []byte) (Applications, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&a); err != nil {
 		return a, err
 	}
@@ -211,7 +232,7 @@ func NewApplications(j []byte) (Applications, error) {
 	return a, nil
 }
 
-func NewCreateApplication(j []byte) (CreateApplication, error) {
+func NewCreateApplication(j []byte, strict bool) (CreateApplication, error) {
 	a := CreateApplication{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -228,7 +249,7 @@ func NewCreateApplication(j []byte) (CreateApplication, error) {
 	return a, nil
 }
 
-func NewMaintenanceTask(j []byte) (MaintenanceTask, error) {
+func NewMaintenanceTask(j []byte, strict bool) (MaintenanceTask, error) {
 	m := MaintenanceTask{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -237,7 +258,9 @@ func NewMaintenanceTask(j []byte) (MaintenanceTask, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&m); err != nil {
 		return m, err
 	}
@@ -245,7 +268,7 @@ func NewMaintenanceTask(j []byte) (MaintenanceTask, error) {
 	return m, nil
 }
 
-func NewMaintenanceTasks(j []byte) (MaintenanceTasks, error) {
+func NewMaintenanceTasks(j []byte, strict bool) (MaintenanceTasks, error) {
 	m := MaintenanceTasks{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -254,7 +277,9 @@ func NewMaintenanceTasks(j []byte) (MaintenanceTasks, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&m); err != nil {
 		return m, err
 	}
@@ -262,7 +287,7 @@ func NewMaintenanceTasks(j []byte) (MaintenanceTasks, error) {
 	return m, nil
 }
 
-func NewCreateMaintenanceTask(j []byte) (CreateMaintenanceTask, error) {
+func NewCreateMaintenanceTask(j []byte, strict bool) (CreateMaintenanceTask, error) {
 	m := CreateMaintenanceTask{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -271,7 +296,9 @@ func NewCreateMaintenanceTask(j []byte) (CreateMaintenanceTask, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&m); err != nil {
 		return m, err
 	}
@@ -279,7 +306,7 @@ func NewCreateMaintenanceTask(j []byte) (CreateMaintenanceTask, error) {
 	return m, nil
 }
 
-func NewDockerConfig(j []byte) (DockerConfig, error) {
+func NewDockerConfig(j []byte, strict bool) (DockerConfig, error) {
 	d := DockerConfig{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -288,7 +315,9 @@ func NewDockerConfig(j []byte) (DockerConfig, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -296,7 +325,7 @@ func NewDockerConfig(j []byte) (DockerConfig, error) {
 	return d, nil
 }
 
-func NewCreateDockerConfig(j []byte) (CreateDockerConfig, error) {
+func NewCreateDockerConfig(j []byte, strict bool) (CreateDockerConfig, error) {
 	d := CreateDockerConfig{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -305,7 +334,9 @@ func NewCreateDockerConfig(j []byte) (CreateDockerConfig, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -313,7 +344,7 @@ func NewCreateDockerConfig(j []byte) (CreateDockerConfig, error) {
 	return d, nil
 }
 
-func NewDockerConfigs(j []byte) (DockerConfigs, error) {
+func NewDockerConfigs(j []byte, strict bool) (DockerConfigs, error) {
 	d := DockerConfigs{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -322,7 +353,9 @@ func NewDockerConfigs(j []byte) (DockerConfigs, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -330,7 +363,7 @@ func NewDockerConfigs(j []byte) (DockerConfigs, error) {
 	return d, nil
 }
 
-func NewDeviceDockerConfig(j []byte) (DeviceDockerConfig, error) {
+func NewDeviceDockerConfig(j []byte, strict bool) (DeviceDockerConfig, error) {
 	d := DeviceDockerConfig{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -339,7 +372,9 @@ func NewDeviceDockerConfig(j []byte) (DeviceDockerConfig, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -347,7 +382,7 @@ func NewDeviceDockerConfig(j []byte) (DeviceDockerConfig, error) {
 	return d, nil
 }
 
-func NewDeviceDockerConfigs(j []byte) (DeviceDockerConfigs, error) {
+func NewDeviceDockerConfigs(j []byte, strict bool) (DeviceDockerConfigs, error) {
 	d := DeviceDockerConfigs{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -356,7 +391,9 @@ func NewDeviceDockerConfigs(j []byte) (DeviceDockerConfigs, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -364,7 +401,7 @@ func NewDeviceDockerConfigs(j []byte) (DeviceDockerConfigs, error) {
 	return d, nil
 }
 
-func NewCleanupConfig(j []byte) (CleanupConfig, error) {
+func NewCleanupConfig(j []byte, strict bool) (CleanupConfig, error) {
 	c := CleanupConfig{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -373,7 +410,9 @@ func NewCleanupConfig(j []byte) (CleanupConfig, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&c); err != nil {
 		return c, err
 	}
@@ -381,7 +420,7 @@ func NewCleanupConfig(j []byte) (CleanupConfig, error) {
 	return c, nil
 }
 
-func NewCreateCleanupConfig(j []byte) (CreateCleanupConfig, error) {
+func NewCreateCleanupConfig(j []byte, strict bool) (CreateCleanupConfig, error) {
 	d := CreateCleanupConfig{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -390,7 +429,9 @@ func NewCreateCleanupConfig(j []byte) (CreateCleanupConfig, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&d); err != nil {
 		return d, err
 	}
@@ -398,7 +439,7 @@ func NewCreateCleanupConfig(j []byte) (CreateCleanupConfig, error) {
 	return d, nil
 }
 
-func NewCleanupConfigs(j []byte) (CleanupConfigs, error) {
+func NewCleanupConfigs(j []byte, strict bool) (CleanupConfigs, error) {
 	c := CleanupConfigs{}
 
 	b, err := yaml.YAMLToJSON(j)
@@ -407,7 +448,9 @@ func NewCleanupConfigs(j []byte) (CleanupConfigs, error) {
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&c); err != nil {
 		return c, err
 	}
@@ -415,14 +458,16 @@ func NewCleanupConfigs(j []byte) (CleanupConfigs, error) {
 	return c, nil
 }
 
-func decode(j []byte, i interface{}) (interface{}, error) {
+func decode(j []byte, i interface{}, strict bool) (interface{}, error) {
 	b, err := yaml.YAMLToJSON(j)
 	if err == nil {
 		j = b
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(j))
-	dec.DisallowUnknownFields() // Force errors
+	if strict {
+		dec.DisallowUnknownFields()
+	}
 	if err := dec.Decode(&i); err != nil {
 		return i, err
 	}

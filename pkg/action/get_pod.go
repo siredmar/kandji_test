@@ -66,7 +66,7 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 		return api.Pods{}, err
 	}
 
-	podList, err := api.NewPods(response)
+	podList, err := api.NewPods(response, false)
 	if err != nil {
 		return podList, err
 	}
@@ -93,7 +93,7 @@ func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, 
 		return api.Pod{}, err
 	}
 
-	pod, err := api.NewPod(response)
+	pod, err := api.NewPod(response, false)
 	if err != nil {
 		return pod, err
 	}

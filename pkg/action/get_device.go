@@ -88,7 +88,7 @@ func getDevices(client *client.APIClient) (api.Devices, error) {
 		return api.Devices{}, err
 	}
 
-	deviceList, err := api.NewDevices(response)
+	deviceList, err := api.NewDevices(response, false)
 	if err != nil {
 		return deviceList, err
 	}
@@ -115,7 +115,7 @@ func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api
 		return api.Device{}, err
 	}
 
-	device, err := api.NewDevice(response)
+	device, err := api.NewDevice(response, false)
 	if err != nil {
 		return device, err
 	}
@@ -135,7 +135,7 @@ func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []str
 		return api.DeviceDockerConfigs{}, err
 	}
 
-	configs, err := api.NewDeviceDockerConfigs(response)
+	configs, err := api.NewDeviceDockerConfigs(response, false)
 	if err != nil {
 		return configs, err
 	}
@@ -155,7 +155,7 @@ func getDevicePods(client *client.APIClient, id string, deviceIds []string) (api
 		return api.Pods{}, err
 	}
 
-	pods, err := api.NewPods(response)
+	pods, err := api.NewPods(response, false)
 	if err != nil {
 		return pods, err
 	}

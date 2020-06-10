@@ -47,7 +47,7 @@ func getApplications(client *client.APIClient) (api.Applications, error) {
 		return api.Applications{}, err
 	}
 
-	applicationList, err := api.NewApplications(response)
+	applicationList, err := api.NewApplications(response, false)
 	if err != nil {
 		return applicationList, err
 	}
@@ -69,7 +69,7 @@ func getApplicationById(client *client.APIClient, id string) (api.Application, e
 		return api.Application{}, err
 	}
 
-	application, err := api.NewApplication(response)
+	application, err := api.NewApplication(response, false)
 	if err != nil {
 		return application, err
 	}

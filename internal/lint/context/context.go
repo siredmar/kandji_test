@@ -120,7 +120,7 @@ func fetchApplications(client *client.APIClient) (api.Applications, error) {
 		return api.Applications{}, err
 	}
 
-	applicationList, err := api.NewApplications(response)
+	applicationList, err := api.NewApplications(response, false)
 	if err != nil {
 		return applicationList, err
 	}
@@ -134,7 +134,7 @@ func fetchDeployments(client *client.APIClient) (api.Deployments, error) {
 		return api.Deployments{}, err
 	}
 
-	deploymentList, err := api.NewDeployments(response)
+	deploymentList, err := api.NewDeployments(response, false)
 	if err != nil {
 		return deploymentList, err
 	}
@@ -148,7 +148,7 @@ func fetchDevices(client *client.APIClient) (api.Devices, error) {
 		return api.Devices{}, err
 	}
 
-	deviceList, err := api.NewDevices(response)
+	deviceList, err := api.NewDevices(response, false)
 	if err != nil {
 		return deviceList, err
 	}
