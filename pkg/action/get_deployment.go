@@ -89,7 +89,7 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 		return api.Deployments{}, err
 	}
 
-	deploymentList, err := api.NewDeployments(response)
+	deploymentList, err := api.NewDeployments(response, false)
 	if err != nil {
 		return deploymentList, err
 	}
@@ -116,7 +116,7 @@ func getDeploymentById(client *client.APIClient, id string, deploymentsIds []str
 		return api.Deployment{}, err
 	}
 
-	deployment, err := api.NewDeployment(response)
+	deployment, err := api.NewDeployment(response, false)
 	if err != nil {
 		return deployment, err
 	}
@@ -136,7 +136,7 @@ func getDeploymentDevices(client *client.APIClient, id string, deploymentIds []s
 		return api.Devices{}, err
 	}
 
-	devices, err := api.NewDevices(response)
+	devices, err := api.NewDevices(response, false)
 	if err != nil {
 		return devices, err
 	}

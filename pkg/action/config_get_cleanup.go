@@ -54,7 +54,7 @@ func getCleanupConfigs(client *client.APIClient) (api.CleanupConfigs, error) {
 		return api.CleanupConfigs{}, err
 	}
 
-	cleanupConfigList, err := api.NewCleanupConfigs(response)
+	cleanupConfigList, err := api.NewCleanupConfigs(response, false)
 	if err != nil {
 		return cleanupConfigList, err
 	}
@@ -81,7 +81,7 @@ func getCleanupConfigById(client *client.APIClient, id string, cleanupConfigIDs 
 		return api.CleanupConfig{}, err
 	}
 
-	config, err := api.NewCleanupConfig(response)
+	config, err := api.NewCleanupConfig(response, false)
 	if err != nil {
 		return config, err
 	}

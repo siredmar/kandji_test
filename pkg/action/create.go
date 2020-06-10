@@ -53,7 +53,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewDevice(response); err != nil {
+		if _, err := api.NewDevice(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Device %s created successfully", resID), nil
@@ -63,7 +63,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewDeployment(response); err != nil {
+		if _, err := api.NewDeployment(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Deployment %s created successfully", resID), nil
@@ -73,7 +73,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewApplication(response); err != nil {
+		if _, err := api.NewApplication(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Application %s created successfully", resID), nil
@@ -83,7 +83,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewMaintenanceTask(response); err != nil {
+		if _, err := api.NewMaintenanceTask(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Maintenance task %s created successfully", resID), nil
@@ -93,7 +93,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewDockerConfig(response); err != nil {
+		if _, err := api.NewDockerConfig(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Docker config %s created successfully", resID), nil
@@ -103,7 +103,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		if err != nil {
 			return "", err
 		}
-		if _, err := api.NewCleanupConfig(response); err != nil {
+		if _, err := api.NewCleanupConfig(response, false); err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("Cleanup config %s created successfully", resID), nil

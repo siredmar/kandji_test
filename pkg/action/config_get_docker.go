@@ -54,7 +54,7 @@ func getDockerConfigs(client *client.APIClient) (api.DockerConfigs, error) {
 		return api.DockerConfigs{}, err
 	}
 
-	dockerConfigList, err := api.NewDockerConfigs(response)
+	dockerConfigList, err := api.NewDockerConfigs(response, false)
 	if err != nil {
 		return dockerConfigList, err
 	}
@@ -81,7 +81,7 @@ func getDockerConfigById(client *client.APIClient, id string, dockerConfigIDs []
 		return api.DockerConfig{}, err
 	}
 
-	config, err := api.NewDockerConfig(response)
+	config, err := api.NewDockerConfig(response, false)
 	if err != nil {
 		return config, err
 	}

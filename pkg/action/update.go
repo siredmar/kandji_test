@@ -79,7 +79,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 			return "", err
 		}
 
-		device, err := api.NewDevice(response)
+		device, err := api.NewDevice(response, false)
 		if err != nil {
 			return "", err
 		}
@@ -98,7 +98,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 			return "", err
 		}
 
-		deployment, err := api.NewDeployment(response)
+		deployment, err := api.NewDeployment(response, false)
 		if err != nil {
 			return "", err
 		}
@@ -116,7 +116,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 			return "", err
 		}
 
-		config, err := api.NewDockerConfig(response)
+		config, err := api.NewDockerConfig(response, false)
 		if err != nil {
 			return "", err
 		}
@@ -134,7 +134,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 			return "", err
 		}
 
-		config, err := api.NewCleanupConfig(response)
+		config, err := api.NewCleanupConfig(response, false)
 		if err != nil {
 			return "", err
 		}

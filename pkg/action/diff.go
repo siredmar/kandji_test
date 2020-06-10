@@ -134,37 +134,37 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 		resID = KNOWN_AFTER_APPLY
 	}
 
-	application, err := api.NewApplication(bytes)
+	application, err := api.NewApplication(bytes, true)
 	if err == nil {
 		application.Name = resID
 		return application, resID, nil
 	}
 
-	deployment, err := api.NewDeployment(bytes)
+	deployment, err := api.NewDeployment(bytes, true)
 	if err == nil {
 		deployment.Metadata.ID = resID
 		return deployment, resID, nil
 	}
 
-	device, err := api.NewDevice(bytes)
+	device, err := api.NewDevice(bytes, true)
 	if err == nil {
 		device.Metadata.ID = resID
 		return device, resID, nil
 	}
 
-	dockerConfig, err := api.NewDockerConfig(bytes)
+	dockerConfig, err := api.NewDockerConfig(bytes, true)
 	if err == nil {
 		dockerConfig.Metadata.ID = resID
 		return dockerConfig, resID, nil
 	}
 
-	cleanupConfig, err := api.NewCleanupConfig(bytes)
+	cleanupConfig, err := api.NewCleanupConfig(bytes, true)
 	if err == nil {
 		cleanupConfig.Metadata.ID = resID
 		return cleanupConfig, resID, nil
 	}
 
-	maintenanceTask, err := api.NewMaintenanceTask(bytes)
+	maintenanceTask, err := api.NewMaintenanceTask(bytes, true)
 	if err == nil {
 		maintenanceTask.Metadata.ID = resID
 		return maintenanceTask, resID, nil
