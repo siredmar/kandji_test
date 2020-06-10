@@ -54,6 +54,11 @@ func UserAgent() string {
 	return fmt.Sprintf("gxctl/%s (%.7s; %s/%s; %s)", Version, GitCommit, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }
 
+// IsRogueBuild returns true iff this build has probably not been build using make build
+func IsRogueBuild() bool {
+	return (GitCommit == Unknown || Version == Unknown || BuildTime == Unknown)
+}
+
 func newVersionTemplate() (*template.Template, error) {
 	versionTemplate := `gridX:
 	Version:	{{.Version}}
