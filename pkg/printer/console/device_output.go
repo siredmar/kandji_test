@@ -24,6 +24,7 @@ type DeviceConsoleOutputWide struct {
 	OSVersion        string `header:"OS"`
 	Labels           string `header:"Labels"`
 	Annotations      string `header:"Annotations"`
+	PublicIP         string `header:"Public IPv4"`
 }
 
 func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
@@ -76,6 +77,9 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 		}
 		if d.Status.Info.OSVersion != nil {
 			o.OSVersion = *d.Status.Info.OSVersion
+		}
+		if d.Status.Info.PublicIP != nil {
+			o.PublicIP = *d.Status.Info.PublicIP
 		}
 	}
 	return o

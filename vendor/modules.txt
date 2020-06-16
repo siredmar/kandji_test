@@ -1,0 +1,174 @@
+# github.com/PaesslerAG/gval v1.0.2-0.20190803062529-6fceb06ca162
+## explicit
+github.com/PaesslerAG/gval
+# github.com/PaesslerAG/jsonpath v0.1.1
+## explicit
+github.com/PaesslerAG/jsonpath
+# github.com/dustin/go-humanize v1.0.1-0.20200219035652-afde56e7acac
+## explicit
+github.com/dustin/go-humanize
+# github.com/fsnotify/fsnotify v1.4.10-0.20200417215612-7f4cf4dd2b52
+## explicit
+github.com/fsnotify/fsnotify
+# github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+## explicit
+github.com/ghodss/yaml
+# github.com/go-clix/cli v0.1.3-0.20200520201655-dbd6eb1d350c
+## explicit
+github.com/go-clix/cli
+# github.com/gogo/protobuf v1.3.1
+github.com/gogo/protobuf/proto
+github.com/gogo/protobuf/sortkeys
+# github.com/google/go-cmp v0.4.2-0.20200526202920-4a83f5627756
+## explicit
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/flags
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
+# github.com/google/gofuzz v1.1.0
+github.com/google/gofuzz
+# github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f
+## explicit
+github.com/google/uuid
+# github.com/gorilla/websocket v1.4.2
+## explicit
+github.com/gorilla/websocket
+# github.com/grid-x/ds-api-types v0.0.0-20200527192356-8ffc530c21db
+## explicit
+github.com/grid-x/ds-api-types
+github.com/grid-x/ds-api-types/management/2018-11-27/application
+github.com/grid-x/ds-api-types/management/2018-11-28/pod
+github.com/grid-x/ds-api-types/management/2019-05-29/devicecleanupconfigs
+github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs
+github.com/grid-x/ds-api-types/management/2019-06-13/device
+github.com/grid-x/ds-api-types/management/2019-08-17/pod
+github.com/grid-x/ds-api-types/management/2019-11-04/maintenance
+github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs
+github.com/grid-x/ds-api-types/management/2019-12-10/deployments
+github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs
+# github.com/hashicorp/errwrap v1.0.0
+github.com/hashicorp/errwrap
+# github.com/hashicorp/go-multierror v1.1.0
+## explicit
+github.com/hashicorp/go-multierror
+# github.com/hashicorp/hcl v1.0.1-0.20200422214639-569ae818ccb3
+## explicit
+github.com/hashicorp/hcl
+github.com/hashicorp/hcl/hcl/ast
+github.com/hashicorp/hcl/hcl/parser
+github.com/hashicorp/hcl/hcl/printer
+github.com/hashicorp/hcl/hcl/scanner
+github.com/hashicorp/hcl/hcl/strconv
+github.com/hashicorp/hcl/hcl/token
+github.com/hashicorp/hcl/json/parser
+github.com/hashicorp/hcl/json/scanner
+github.com/hashicorp/hcl/json/token
+# github.com/json-iterator/go v1.1.9
+## explicit
+github.com/json-iterator/go
+# github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23
+## explicit
+github.com/kataras/tablewriter
+# github.com/landoop/tableprinter v0.0.0-20200104100433-ae9249991eb1
+## explicit
+github.com/landoop/tableprinter
+# github.com/magiconair/properties v1.8.2-0.20191019074931-a586bb8b7dea
+## explicit
+github.com/magiconair/properties
+# github.com/mattn/go-runewidth v0.0.9
+## explicit
+github.com/mattn/go-runewidth
+# github.com/mitchellh/mapstructure v1.3.1
+## explicit
+github.com/mitchellh/mapstructure
+# github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v1.0.1
+github.com/modern-go/reflect2
+# github.com/pelletier/go-toml v1.8.0
+## explicit
+github.com/pelletier/go-toml
+# github.com/pkg/term v0.0.0-20200520122047-c3ffed290a03
+## explicit
+github.com/pkg/term
+github.com/pkg/term/termios
+# github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
+## explicit
+github.com/posener/complete
+github.com/posener/complete/cmd
+github.com/posener/complete/cmd/install
+# github.com/spf13/afero v1.2.3-0.20200520213233-a7dc6ae3c554
+## explicit
+github.com/spf13/afero
+github.com/spf13/afero/mem
+# github.com/spf13/cast v1.3.1
+## explicit
+github.com/spf13/cast
+# github.com/spf13/jwalterweatherman v1.1.0
+## explicit
+github.com/spf13/jwalterweatherman
+# github.com/spf13/pflag v1.0.6-0.20200504143853-81378bbcd8a1
+## explicit
+github.com/spf13/pflag
+# github.com/spf13/viper v1.7.0
+## explicit
+github.com/spf13/viper
+# github.com/subosito/gotenv v1.2.1-0.20190917103637-de67a6614a4d
+## explicit
+github.com/subosito/gotenv
+# github.com/tj/go-spin v1.1.0
+## explicit
+github.com/tj/go-spin
+# github.com/toqueteos/webbrowser v1.2.1-0.20190725205412-dc97d39f4758
+## explicit
+github.com/toqueteos/webbrowser
+# golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+## explicit
+golang.org/x/net/http/httpguts
+golang.org/x/net/http2
+golang.org/x/net/http2/hpack
+golang.org/x/net/idna
+# golang.org/x/sys v0.0.0-20200523222454-059865788121
+## explicit
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+# golang.org/x/text v0.3.2
+golang.org/x/text/secure/bidirule
+golang.org/x/text/transform
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm
+# gopkg.in/inf.v0 v0.9.1
+gopkg.in/inf.v0
+# gopkg.in/ini.v1 v1.56.0
+## explicit
+gopkg.in/ini.v1
+# gopkg.in/yaml.v2 v2.3.0
+gopkg.in/yaml.v2
+# k8s.io/apimachinery v0.18.3
+## explicit
+k8s.io/apimachinery/pkg/api/resource
+k8s.io/apimachinery/pkg/apis/meta/v1
+k8s.io/apimachinery/pkg/conversion
+k8s.io/apimachinery/pkg/conversion/queryparams
+k8s.io/apimachinery/pkg/fields
+k8s.io/apimachinery/pkg/labels
+k8s.io/apimachinery/pkg/runtime
+k8s.io/apimachinery/pkg/runtime/schema
+k8s.io/apimachinery/pkg/selection
+k8s.io/apimachinery/pkg/types
+k8s.io/apimachinery/pkg/util/errors
+k8s.io/apimachinery/pkg/util/intstr
+k8s.io/apimachinery/pkg/util/json
+k8s.io/apimachinery/pkg/util/naming
+k8s.io/apimachinery/pkg/util/net
+k8s.io/apimachinery/pkg/util/runtime
+k8s.io/apimachinery/pkg/util/sets
+k8s.io/apimachinery/pkg/util/validation
+k8s.io/apimachinery/pkg/util/validation/field
+k8s.io/apimachinery/pkg/watch
+k8s.io/apimachinery/third_party/forked/golang/reflect
+# k8s.io/klog v1.0.0
+k8s.io/klog
+# sigs.k8s.io/structured-merge-diff/v3 v3.0.0
+sigs.k8s.io/structured-merge-diff/v3/value
