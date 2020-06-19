@@ -1,0 +1,50 @@
+Profiles:
+- Auth:
+    Auth0ClientID: 0yLqBjHS16bvbKQABidMYIMZMIxhZ0g4
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: os-tests
+- Auth:
+    Auth0ClientID: hzOXwM0npvgI6xmIJzN8IGCfhCublPDd
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: provisioning
+- Auth:
+    Auth0ClientID: zuCMg0DjWrp29J8eCXrgNW11EPGxrFMB
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: true
+  Name: gridx
+- Auth:
+    Auth0ClientID: 4ckrdbfCmC7hdC6d02wdzVsax5PMjcDW
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: gridx-staging
+  Staging: true
+- Auth:
+    Auth0ClientID: oDHQIf0MUAzcWWMFbRO5hlZPcS9jRlVT
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: viessmann
+- Auth:
+    Auth0ClientID: 95A1kFy4CppCnOWIt2gZCCBZdV4H0er0
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: innogy
+- Auth:
+    Auth0ClientID: j7f670v9sY6jRzjtBos7BrumaFrWToXf
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: eon
+- Auth:
+    Auth0ClientID: UkgefDVzWAywYXV7Mv7AFO2hZ7NVtMNh
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: electris
