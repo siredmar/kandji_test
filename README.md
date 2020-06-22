@@ -1,6 +1,41 @@
 # gxctl
 gxctl is a command line interface for running commands against the gridX device services clusters. This overview covers gxctl syntax, describes the command operations, and provides common examples.
 
+## Installing / Setup
+
+You should use the provided Makefile to build gxctl:
+
+```
+$ make build
+$ cp bin/gxctl ${GOPATH//://bin:}/bin
+```
+
+Then, copy the provided base config file in to ~/.gxctl/config.yaml. This file mainly lists the settings for
+authenticating gxctl for usage with the different subaccounts of Device Services. For each account, only the tenant
+settings are set up. Before you can actually issue commands, you have to use `gxctl login` to retrieve a token by
+authenticating with your gridx / Google account:
+
+```
+$ mkdir -p ~/.gxctl
+$ cp config.yaml ~/.gxctl/config
+$ gxctl login # will open a browser window where you can sign in using your gridx.de email
+```
+
+The generated token is only valid for a limited amount of time (currently 4 weeks); if you see errors regarding authentication
+after that time, you may have to simply refresh the token by running `gxctl login` again.
+
+## Profiles / Accounts
+
+The managed devices are split into different server-side accounts; to differentiate between them when using gxctl commands, you
+can pass the `--profile` argument. You will have to issue a `gxctl login` command separately for each profile that you want to use:
+
+```
+$ gxctl --profile viessmann login
+$ gxctl --profile viessmann get device
+```
+
+See the default config file for the list of accounts / profiles.
+
 ## Syntax
 
 Use the following syntax to run gxctl commands from your terminal window:
