@@ -17,7 +17,7 @@ authenticating with your gridx / Google account:
 
 ```
 $ mkdir -p ~/.gxctl
-$ cp config.yaml ~/.gxctl/config
+$ cp config.yaml ~/.gxctl/config.yaml
 $ gxctl login # will open a browser window where you can sign in using your gridx.de email
 ```
 
