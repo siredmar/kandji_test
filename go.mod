@@ -34,6 +34,7 @@ require (
 	github.com/toqueteos/webbrowser v1.2.1-0.20190725205412-dc97d39f4758
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
+	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 	gopkg.in/ini.v1 v1.56.0 // indirect
 	k8s.io/apimachinery v0.18.3 // indirect
 )

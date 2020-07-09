@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
+	"golang.org/x/time/rate"
 
 	"github.com/grid-x/gxctl/internal/version"
 	api "github.com/grid-x/gxctl/pkg/api"
@@ -37,6 +39,7 @@ type AuthConfig struct {
 
 type APIClient struct {
 	Http    *http.Client
+	limiter *rate.Limiter
 	Auth    *AuthConfig
 	Profile *string
 }
@@ -50,6 +53,7 @@ type Error struct {
 func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
 		Http:    &http.Client{Timeout: 10 * time.Second},
+		limiter: rate.NewLimiter(rate.Every(100*time.Millisecond), 1),
 		Auth:    auth,
 		Profile: &profile,
 	}
@@ -92,7 +96,7 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 
 //GetRequest to call via GET
 func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
-	return internalRequest(apiclient, http.MethodGet, nil, endpoint)
+	return apiclient.internalRequest(http.MethodGet, nil, endpoint)
 }
 
 //PostRequest to call via POST
@@ -101,7 +105,7 @@ func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte,
 	if err != nil {
 		return nil, err
 	}
-	return internalRequest(apiclient, http.MethodPost, body, endpoint)
+	return apiclient.internalRequest(http.MethodPost, body, endpoint)
 }
 
 //PatchRequest to call via PATCH
@@ -111,16 +115,26 @@ func (apiclient *APIClient) PatchRequest(endpoint string, v interface{}, id stri
 	if err != nil {
 		return nil, err
 	}
-	return internalRequest(apiclient, http.MethodPatch, body, url)
+	return apiclient.internalRequest(http.MethodPatch, body, url)
 }
 
 //DeleteRequest to call via DELETE
 func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", endpoint, id)
-	return internalRequest(apiclient, http.MethodDelete, nil, url)
+	return apiclient.internalRequest(http.MethodDelete, nil, url)
 }
 
-func internalRequest(apiclient *APIClient, method string, body []byte, endpoint string) ([]byte, error) {
+func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	if err := apiclient.limiter.Wait(ctx); err != nil {
+		cancel()
+		return nil, errors.E(
+			errors.Internal,
+			"Exceed timeout while haning in rate-limit",
+		)
+	}
+	cancel()
+
 	token, err := apiclient.getTokenFromAuthConfig()
 	if err != nil {
 		return nil, errors.E(errors.Invalid, "Token not found", err)
