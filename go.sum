@@ -113,6 +113,8 @@ github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0U
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/grid-x/ds-api-types v0.0.0-20200527192356-8ffc530c21db h1:X9+1TAmxUrHfXRTnOaADGIIFfL8CUKnmtz84muMREGU=
 github.com/grid-x/ds-api-types v0.0.0-20200527192356-8ffc530c21db/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
+github.com/grid-x/ds-api-types v0.0.0-20200829103259-d847af2a942f h1:QDkUymTv2boh0BGq+kd8+s33ixN4JqFjDz3a5ljH1uo=
+github.com/grid-x/ds-api-types v0.0.0-20200829103259-d847af2a942f/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgfV/d3M/q6VIi02HzZEHgUlZvzk=
 github.com/grpc-ecosystem/grpc-gateway v1.9.0/go.mod h1:vNeuVxBJEsws4ogUvrchl83t/GYV9WGTSLVdBhOQFDY=

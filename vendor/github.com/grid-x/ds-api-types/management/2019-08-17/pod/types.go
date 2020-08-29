@@ -36,6 +36,10 @@ type PodConfig struct {
 	// NOTE: This is currently not supported
 	// +optional
 	Priority *int32 `json:"priority,omitempty"`
+	// Lockfile that can be used by the contained application to prevent updates in critical sections. If this file is
+	// present, old pods should not be killed and new pods should not be started.
+	// +optional
+	UpdateLockfilePath *string `json:"updateLockfilePath,omitempty"`
 }
 
 // DevicePodStatus defines the observed state of DevicePod

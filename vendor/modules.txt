@@ -34,7 +34,7 @@ github.com/google/uuid
 # github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket
-# github.com/grid-x/ds-api-types v0.0.0-20200527192356-8ffc530c21db
+# github.com/grid-x/ds-api-types v0.0.0-20200829103259-d847af2a942f
 ## explicit
 github.com/grid-x/ds-api-types
 github.com/grid-x/ds-api-types/management/2018-11-27/application
@@ -47,6 +47,7 @@ github.com/grid-x/ds-api-types/management/2019-11-04/maintenance
 github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs
 github.com/grid-x/ds-api-types/management/2019-12-10/deployments
 github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs
+github.com/grid-x/ds-api-types/management/2020-08-29/deployments
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v1.1.0
