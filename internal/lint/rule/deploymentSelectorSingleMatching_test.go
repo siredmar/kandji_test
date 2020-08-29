@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	deployments "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	deployments "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
 	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/pkg/api"
