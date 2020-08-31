@@ -1,7 +1,7 @@
 package api
 
 const (
-	APIVersion             = "application/vnd.gridx.ai.2019-12-10"
+	APIVersion             = "application/vnd.gridx.ai.2020-08-29"
 	DevicesEndpoint        = "api/management/devices"
 	PodsEndpoint           = "api/management/pods"
 	DeploymentsEndpoint    = "api/management/deployments"

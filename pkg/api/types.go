@@ -9,8 +9,8 @@ import (
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
 	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 )
 
 type FullObjectMeta struct {

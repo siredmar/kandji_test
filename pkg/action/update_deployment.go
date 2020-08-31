@@ -3,7 +3,7 @@ package action
 import (
 	"fmt"
 
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/service"

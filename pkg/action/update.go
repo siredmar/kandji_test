@@ -6,8 +6,8 @@ import (
 	types "github.com/grid-x/ds-api-types"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"

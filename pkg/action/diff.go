@@ -9,8 +9,8 @@ import (
 	"github.com/ghodss/yaml"
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	cleanupconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2019-12-10/deployments"
 	dockerconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
+	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
