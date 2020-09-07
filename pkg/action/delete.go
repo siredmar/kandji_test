@@ -50,7 +50,7 @@ func deleteResource(resID string, res interface{}, client *client.APIClient) err
 		break
 
 	case api.Deployment:
-		if _, err := client.DeleteRequest(api.DockerConfigsEndpoint, resID); err != nil {
+		if _, err := client.DeleteRequest(api.DeploymentsEndpoint, resID); err != nil {
 			return err
 		}
 		break
