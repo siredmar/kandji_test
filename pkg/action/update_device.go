@@ -18,7 +18,7 @@ func UpdateDevice(s *service.Service,
 	updateDeviceCmdAnnotations string,
 ) error {
 	//Lookup all existing devices to validate ids and autocomplete them if necessary
-	devices, err := getDevices(s.Client)
+	devices, err, _ := getDevices(s.Client)
 	if err != nil {
 		return err
 	}

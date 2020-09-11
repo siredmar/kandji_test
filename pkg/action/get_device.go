@@ -30,7 +30,7 @@ func GetDevice(
 	if len(ids) > 0 {
 		//Get multiple devices
 		//Lookup all existing devices to validate ids and autocomplete them if necessary
-		devices, err := getDevices(s.Client)
+		devices, err, _ := getDevices(s.Client)
 		if err != nil {
 			return err
 		}
@@ -87,9 +87,17 @@ func GetDevice(
 		}
 	} else {
 		//List all devices
-		devices, err := getDevices(s.Client)
+		devices, err, errs := getDevices(s.Client)
 		if err != nil {
 			return err
+		}
+
+		if (printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide) {
+			for _, err := range errs {
+				if err.err != nil {
+					fmt.Printf("%v: %v\n", err.profile, err.err)
+				}
+			}
 		}
 
 		if err := s.Printer.Print(devices, printerConfig); err != nil {
@@ -101,25 +109,43 @@ func GetDevice(
 
 }
 
-func getDevices(client *client.APIClient) (api.Devices, error) {
-	response, err := client.GetRequest(api.DevicesEndpoint)
+type getDevicesErrors struct {
+	profile string
+	err     error
+}
+
+func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesErrors) {
+	devices := api.Devices{}
+
+	responses, err := client.GetMultiRequest(api.DevicesEndpoint)
 	if err != nil {
-		return api.Devices{}, err
+		return devices, err, nil
 	}
 
-	deviceList, err := api.NewDevices(response, false)
-	if err != nil {
-		return deviceList, err
+	errs := make([]getDevicesErrors, len(responses))
+
+	for i, response := range responses {
+		errs[i].profile = response.Profile
+		deviceList, err := api.NewDevices(response.Body, false)
+		if err != nil {
+			errs[i].err = err
+			continue
+		}
+
+		if deviceList.IsEmpty() {
+			errs[i].err = errors.E(
+				errors.NotExists,
+				"no devices found",
+			)
+		} else {
+			for _, d := range deviceList.Devices {
+				devices.Devices = append(devices.Devices, d)
+			}
+		}
 	}
 
-	if deviceList.IsEmpty() {
-		return deviceList, errors.E(
-			errors.NotExists,
-			"no devices found",
-		)
-	}
+	return devices, nil, errs
 
-	return deviceList, nil
 }
 
 func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api.Device, error) {
