@@ -50,6 +50,12 @@ type Error struct {
 	} `json:"Error"`
 }
 
+type RequestResult struct {
+	Profile string
+	Body []byte
+	Err  error
+}
+
 func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
 		Http:    &http.Client{Timeout: 10 * time.Second},
@@ -61,13 +67,27 @@ func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 
 //GetWebsocketConnection returns a websocket connection
 func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHeaders map[string]string) (*websocket.Conn, error) {
-	token, err := apiclient.getTokenFromAuthConfig()
+	p, err := apiclient.resolveProfileNames()
+	if err != nil {
+		return nil, errors.E(
+			errors.Internal,
+			"resolve profile",
+		)
+	}
+	if len(p) > 1 {
+		return nil, errors.E(
+			errors.Internal,
+			"more than 1 profile",
+		)
+	}
+
+	token, err := apiclient.getTokenFromAuthConfig(p[0])
 	if err != nil {
 		return nil, err
 	}
 
 	base := baseURL
-	if isStaging, err := apiclient.isStaging(); err != nil {
+	if isStaging, err := apiclient.isStaging(p[0]); err != nil {
 		return nil, err
 	} else if *isStaging {
 		base = baseURLStaging
@@ -96,7 +116,20 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 
 //GetRequest to call via GET
 func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
-	return apiclient.internalRequest(http.MethodGet, nil, endpoint)
+	result, err := apiclient.internalRequest(http.MethodGet, nil, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	return result[0].Body, result[0].Err
+}
+
+//GetMultiRequest to call via GET
+func (apiclient *APIClient) GetMultiRequest(endpoint string) ([]RequestResult, error) {
+	result, err := apiclient.internalRequest(http.MethodGet, nil, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
 
 //PostRequest to call via POST
@@ -105,7 +138,11 @@ func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte,
 	if err != nil {
 		return nil, err
 	}
-	return apiclient.internalRequest(http.MethodPost, body, endpoint)
+	result, err := apiclient.internalRequest(http.MethodPost, body, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	return result[0].Body, result[0].Err
 }
 
 //PatchRequest to call via PATCH
@@ -115,16 +152,24 @@ func (apiclient *APIClient) PatchRequest(endpoint string, v interface{}, id stri
 	if err != nil {
 		return nil, err
 	}
-	return apiclient.internalRequest(http.MethodPatch, body, url)
+	result, err := apiclient.internalRequest(http.MethodPatch, body, url)
+	if err != nil {
+		return nil, err
+	}
+	return result[0].Body, result[0].Err
 }
 
 //DeleteRequest to call via DELETE
 func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", endpoint, id)
-	return apiclient.internalRequest(http.MethodDelete, nil, url)
+	result, err := apiclient.internalRequest(http.MethodDelete, nil, url)
+	if err != nil {
+		return nil, err
+	}
+	return result[0].Body, result[0].Err
 }
 
-func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint string) ([]byte, error) {
+func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint string) ([]RequestResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	if err := apiclient.limiter.Wait(ctx); err != nil {
 		cancel()
@@ -135,103 +180,128 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 	}
 	cancel()
 
-	token, err := apiclient.getTokenFromAuthConfig()
+	profileNames, err := apiclient.resolveProfileNames()
 	if err != nil {
-		return nil, errors.E(errors.Invalid, "Token not found", err)
+		return nil, errors.E(errors.Invalid, "resolve profile", err)
 	}
 
-	base := baseURL
-	if isStaging, err := apiclient.isStaging(); err != nil {
-		return nil, err
-	} else if *isStaging {
-		base = baseURLStaging
+	if len(profileNames) > 1 && method != http.MethodGet {
+		return nil, errors.E(errors.Invalid, "more than 1 match on non-GET method")
 	}
 
-	url := fmt.Sprintf("https://%s/%s", base, endpoint)
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
+	results := make([]RequestResult, len(profileNames))
 
-	req.Header.Add("User-Agent", version.UserAgent())
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", api.APIVersion)
-
-	r, err := apiclient.Http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Body.Close()
-
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if r.StatusCode == http.StatusUnauthorized {
-		return nil, errors.E(
-			errors.Permission,
-			"Invalid access token",
-			"Invalid access token",
-		)
-	}
-
-	respError := Error{}
-	err = json.Unmarshal(bodyBytes, &respError)
-	if err != nil {
-		// non-JSON (text) response
-		if r.StatusCode == http.StatusNotFound {
-			return nil, errors.E(
-				errors.Internal,
-				fmt.Sprintf("API endpoint not found. Most likely, the version of gxctl you are using (%s) is outdated. Please update to the latest version", version.Version),
-			)
+	for i, p := range profileNames {
+		results[i] = RequestResult{
+			Profile: p,
 		}
-		return nil, errors.E(
-			errors.Internal,
-			"Unknown server error",
-		)
-	}
+		result := &results[i]
 
-	errorMsg := respError.Error.Message
-	if errorMsg == "" {
-		errorMsg = string(bodyBytes)
-	}
+		token, err := apiclient.getTokenFromAuthConfig(p)
+		if err != nil {
+			result.Err = errors.E(errors.Invalid, "Token not found", err)
+			continue
+		}
 
-	if r.StatusCode == http.StatusNotFound {
-		return nil, errors.E(
-			errors.NotExists,
-			errorMsg,
-		)
-	}
+		base := baseURL
+		if isStaging, err := apiclient.isStaging(p); err != nil {
+			result.Err = errors.E(errors.Invalid, "Token not found", err)
+			continue
+		} else if *isStaging {
+			base = baseURLStaging
+		}
 
-	if r.StatusCode == http.StatusConflict {
-		return nil, errors.E(
-			errors.Exist,
-			errorMsg,
-		)
-	}
+		url := fmt.Sprintf("https://%s/%s", base, endpoint)
+		req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+		if err != nil {
+			result.Err = err
+			continue
+		}
 
-	if r.StatusCode >= 400 {
-		return nil, errors.E(
-			errors.Internal,
-			errorMsg,
-		)
-	}
+		req.Header.Add("User-Agent", version.UserAgent())
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		req.Header.Add("Content-Type", "application/json")
+		req.Header.Add("Accept", api.APIVersion)
 
-	return bodyBytes, nil
+		r, err := apiclient.Http.Do(req)
+		if err != nil {
+			result.Err = err
+			continue
+		}
+		defer r.Body.Close()
+
+		bodyBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			result.Err = err
+			continue
+		}
+
+		if r.StatusCode == http.StatusUnauthorized {
+			result.Err = errors.E(
+				errors.Permission,
+				"Invalid access token",
+				"Invalid access token",
+			)
+			continue
+		}
+
+		respError := Error{}
+		err = json.Unmarshal(bodyBytes, &respError)
+		if err != nil {
+			// non-JSON (text) response
+			if r.StatusCode == http.StatusNotFound {
+				result.Err = errors.E(
+					errors.Internal,
+					fmt.Sprintf("API endpoint not found. Most likely, the version of gxctl you are using (%s) is outdated. Please update to the latest version", version.Version),
+				)
+				continue
+			}
+			result.Err = errors.E(
+				errors.Internal,
+				"Unknown server error",
+			)
+			continue
+		}
+
+		errorMsg := respError.Error.Message
+		if errorMsg == "" {
+			errorMsg = string(bodyBytes)
+		}
+
+		if r.StatusCode == http.StatusNotFound {
+			result.Err = errors.E(
+				errors.NotExists,
+				errorMsg,
+			)
+			continue
+		}
+
+		if r.StatusCode == http.StatusConflict {
+			result.Err = errors.E(
+				errors.Exist,
+				errorMsg,
+			)
+			continue
+		}
+
+		if r.StatusCode >= 400 {
+			result.Err = errors.E(
+				errors.Internal,
+				errorMsg,
+			)
+			continue
+		}
+		result.Body = bodyBytes
+
+	}
+	return results, nil
 }
 
-func (apiclient *APIClient) isStaging() (*bool, error) {
+func (apiclient *APIClient) isStaging(profileName string) (*bool, error) {
 	var isStaging bool
 
-	p, err := apiclient.resolveProfile()
-	if err != nil {
-		return nil, err
-	}
-
 	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Name == p {
+		if profile.Name == profileName {
 			isStaging = profile.Staging
 		}
 	}
@@ -239,35 +309,33 @@ func (apiclient *APIClient) isStaging() (*bool, error) {
 	return &isStaging, nil
 }
 
-func (apiclient *APIClient) getTokenFromAuthConfig() (string, error) {
+func (apiclient *APIClient) getTokenFromAuthConfig(profileName string) (string, error) {
 	var token string
 
-	p, err := apiclient.resolveProfile()
-	if err != nil {
-		return "", err
-	}
-
 	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Name == p {
+		if profile.Name == profileName {
 			token = profile.Auth.Token
 		}
 	}
 
 	if token == "" {
-		return token, fmt.Errorf("Token for profile %s not configured", p)
+		return token, fmt.Errorf("Token for profile %s not configured", profileName)
 	}
 
 	return token, nil
 }
 
 func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
-	p, err := apiclient.resolveProfile()
+	p, err := apiclient.resolveProfileNames()
 	if err != nil {
 		return err
 	}
+	if len(p) > 1 {
+		return errors.E(errors.Invalid, "more than 1 match")
+	}
 
 	for i, profile := range apiclient.Auth.Profiles {
-		if profile.Name == p {
+		if profile.Name == p[0] {
 			apiclient.Auth.Profiles[i].Auth.Token = token
 		}
 	}
@@ -283,13 +351,16 @@ func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
 func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
 	var tenant string
 
-	p, err := apiclient.resolveProfile()
+	p, err := apiclient.resolveProfileNames()
 	if err != nil {
 		return "", err
 	}
+	if len(p) > 1 {
+		return "", errors.E(errors.Invalid, "more than 1 match")
+	}
 
 	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Name == p {
+		if profile.Name == p[0] {
 			tenant = profile.Auth.Auth0Tenant
 		}
 	}
@@ -304,13 +375,16 @@ func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
 func (apiclient *APIClient) GetAuth0ClientIDFromAuthConfig() (string, error) {
 	var clientID string
 
-	p, err := apiclient.resolveProfile()
+	p, err := apiclient.resolveProfileNames()
 	if err != nil {
 		return "", err
 	}
+	if len(p) > 1 {
+		return "", errors.E(errors.Invalid, "more than 1 match")
+	}
 
 	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Name == p {
+		if profile.Name == p[0] {
 			clientID = profile.Auth.Auth0ClientID
 		}
 	}
@@ -322,9 +396,17 @@ func (apiclient *APIClient) GetAuth0ClientIDFromAuthConfig() (string, error) {
 	return clientID, nil
 }
 
-func (apiclient *APIClient) resolveProfile() (string, error) {
+func (apiclient *APIClient) resolveProfileNames() ([]string, error) {
 	if len(apiclient.Auth.Profiles) == 0 {
-		return "", fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
+		return nil, fmt.Errorf("No profiles found. Please add a profile to $HOME/.gxctl/config.yaml")
+	}
+
+	if *apiclient.Profile == "*" {
+		var profileIDs []string
+		for _, p := range apiclient.Auth.Profiles {
+			profileIDs = append(profileIDs, p.Name)
+		}
+		return profileIDs, nil
 	}
 
 	var defaultProfile string
@@ -336,17 +418,17 @@ func (apiclient *APIClient) resolveProfile() (string, error) {
 
 	if *apiclient.Profile == "" {
 		if defaultProfile == "" {
-			return "", fmt.Errorf("No default profile configured. Use --profile or configure a default profile")
+			return nil, fmt.Errorf("No default profile configured. Use --profile or configure a default profile")
 		} else {
-			return defaultProfile, nil
+			return []string{defaultProfile}, nil
 		}
 	}
 
 	for _, p := range apiclient.Auth.Profiles {
 		if p.Name == *apiclient.Profile {
-			return *apiclient.Profile, nil
+			return []string{*apiclient.Profile}, nil
 		}
 	}
 
-	return "", fmt.Errorf("Profile %s not found", *apiclient.Profile)
+	return nil, fmt.Errorf("Profile %s not found", *apiclient.Profile)
 }

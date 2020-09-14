@@ -9,7 +9,7 @@ import (
 )
 
 func LabelDevice(s *service.Service, ids []string) error {
-	devices, err := getDevices(s.Client)
+	devices, err, _ := getDevices(s.Client)
 	if err != nil {
 		return err
 	}
