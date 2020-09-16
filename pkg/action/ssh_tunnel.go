@@ -80,9 +80,6 @@ func SSHTunnel(s *service.Service, sn string) error {
 			return err
 		}
 	}
-
-	return nil
-
 }
 
 // NewSession requests a new session
