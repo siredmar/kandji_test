@@ -81,13 +81,13 @@ func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHe
 		)
 	}
 
-	token, err := apiclient.getTokenFromAuthConfig(p[0])
+	token, err := apiclient.GetTokenFromAuthConfig(p[0])
 	if err != nil {
 		return nil, err
 	}
 
 	base := baseURL
-	if isStaging, err := apiclient.isStaging(p[0]); err != nil {
+	if isStaging, err := apiclient.IsStaging(p[0]); err != nil {
 		return nil, err
 	} else if *isStaging {
 		base = baseURLStaging
@@ -197,14 +197,14 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 		}
 		result := &results[i]
 
-		token, err := apiclient.getTokenFromAuthConfig(p)
+		token, err := apiclient.GetTokenFromAuthConfig(p)
 		if err != nil {
 			result.Err = errors.E(errors.Invalid, "Token not found", err)
 			continue
 		}
 
 		base := baseURL
-		if isStaging, err := apiclient.isStaging(p); err != nil {
+		if isStaging, err := apiclient.IsStaging(p); err != nil {
 			result.Err = errors.E(errors.Invalid, "Token not found", err)
 			continue
 		} else if *isStaging {
@@ -297,7 +297,7 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 	return results, nil
 }
 
-func (apiclient *APIClient) isStaging(profileName string) (*bool, error) {
+func (apiclient *APIClient) IsStaging(profileName string) (*bool, error) {
 	var isStaging bool
 
 	for _, profile := range apiclient.Auth.Profiles {
@@ -309,7 +309,7 @@ func (apiclient *APIClient) isStaging(profileName string) (*bool, error) {
 	return &isStaging, nil
 }
 
-func (apiclient *APIClient) getTokenFromAuthConfig(profileName string) (string, error) {
+func (apiclient *APIClient) GetTokenFromAuthConfig(profileName string) (string, error) {
 	var token string
 
 	for _, profile := range apiclient.Auth.Profiles {

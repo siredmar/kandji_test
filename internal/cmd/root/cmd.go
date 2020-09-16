@@ -16,6 +16,7 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/portforward"
 	"github.com/grid-x/gxctl/internal/cmd/restart"
 	"github.com/grid-x/gxctl/internal/cmd/ssh"
+	"github.com/grid-x/gxctl/internal/cmd/sshnext"
 	"github.com/grid-x/gxctl/internal/cmd/syslog"
 	"github.com/grid-x/gxctl/internal/cmd/update"
 	"github.com/grid-x/gxctl/internal/cmd/validate"
@@ -65,6 +66,7 @@ func (c *CMD) Init(s *service.Service) error {
 		portforward.New(),
 		restart.New(),
 		ssh.New(),
+		sshnext.New(),
 		syslog.New(),
 		update.New(),
 		validate.New(),

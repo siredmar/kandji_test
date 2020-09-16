@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
@@ -92,7 +93,7 @@ func GetDevice(
 			return err
 		}
 
-		if (printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide) {
+		if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
 			for _, err := range errs {
 				if err.err != nil {
 					fmt.Printf("%v: %v\n", err.profile, err.err)
@@ -109,12 +110,12 @@ func GetDevice(
 
 }
 
-type getDevicesErrors struct {
+type getDevicesError struct {
 	profile string
 	err     error
 }
 
-func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesErrors) {
+func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesError) {
 	devices := api.Devices{}
 
 	responses, err := client.GetMultiRequest(api.DevicesEndpoint)
@@ -122,7 +123,7 @@ func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesError
 		return devices, err, nil
 	}
 
-	errs := make([]getDevicesErrors, len(responses))
+	errs := make([]getDevicesError, len(responses))
 
 	for i, response := range responses {
 		errs[i].profile = response.Profile
@@ -166,6 +167,50 @@ func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api
 	}
 
 	return device, nil
+}
+
+func getDeviceBySN(client *client.APIClient, sn string) (api.Device, error, string, []getDevicesError) {
+	responses, err := client.GetMultiRequest(fmt.Sprintf("%v?filter=serialnumber:%v", api.DevicesEndpoint, strings.ToUpper(sn)))
+	if err != nil {
+		return api.Device{}, err, "", nil
+	}
+
+	var devicesList []api.Device
+	var profile string
+	errs := make([]getDevicesError, len(responses))
+
+	for i, r := range responses {
+		errs[i] = getDevicesError{
+			profile: r.Profile,
+			err:     r.Err,
+		}
+		if r.Err == nil {
+			devices, err := api.NewDevices(r.Body, false)
+			if err != nil {
+				errs[i].err = err
+				continue
+			}
+			if len(devices.Devices) > 0 {
+				profile = r.Profile
+			}
+			for _, d := range devices.Devices {
+				devicesList = append(devicesList, d)
+			}
+		}
+	}
+
+	switch len(devicesList) {
+	case 0:
+		return api.Device{},
+			errors.E(
+				errors.NotExists,
+				"no device found",
+			), "", errs
+	case 1:
+		return devicesList[0], nil, profile, errs
+	default:
+		return api.Device{}, errors.E(errors.Invalid, "more than one device found"), "", errs
+	}
 }
 
 func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []string) (api.DeviceDockerConfigs, error) {
