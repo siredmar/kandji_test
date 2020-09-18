@@ -127,6 +127,11 @@ func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesError
 
 	for i, response := range responses {
 		errs[i].profile = response.Profile
+		if response.Err != nil {
+			errs[i].err = response.Err
+			continue
+		}
+
 		deviceList, err := api.NewDevices(response.Body, false)
 		if err != nil {
 			errs[i].err = err

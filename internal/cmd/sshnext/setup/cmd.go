@@ -10,18 +10,15 @@ import (
 )
 
 const sshConfig = `
-First, copy the SSH private key to your home directory and protect it:
-  mkdir -p ~/.ssh
-  cp ./internal/certs/ds_wssh_id_rsa ~/.ssh
-  chmod 600 ~/.ssh/ds_wssh_id_rsa
-
-Then append the following to ~/.ssh/config:
+Append the following to ~/.ssh/config:
 
 Host *.gridbox
-  IdentityFile ~/.ssh/ds_wssh_id_rsa
   ProxyCommand gxctl sshnext tunnel --profile='*' $(echo %h | cut -d'.' -f1)
+  ServerAliveInterval 30
   StrictHostKeyChecking no
   HashKnownHosts no
+  RequestTTY Yes
+  RemoteCommand dbclient -p 22222 127.0.0.1
   User root
 `
 

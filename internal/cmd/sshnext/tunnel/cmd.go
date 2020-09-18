@@ -38,7 +38,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
 		Use:   "tunnel SN",
 		Short: "tunnel stdin to device sshd",
-		Long:  `Tunnel std file handles to device sshd, for usage with OpenSSH ProxyCommand directive.
+		Long: `Tunnel std file handles to device sshd, for usage with OpenSSH ProxyCommand directive.
 
 For example, to connect to device with SN D123-FOO-…, use:
   ssh -o ProxyCommand='gxctl --profile='*' sshnext tunnel D123-FOO' root@gridbox
@@ -57,7 +57,7 @@ It is also possible to setup a convient alias using the alias ssh subcommand:
 				return fmt.Errorf("cant check for stdin")
 			}
 			if (info.Mode() & os.ModeCharDevice) == os.ModeCharDevice {
-				fmt.Printf("%s\n\n%s\n",cmd.Usage(), cmd.Long)
+				fmt.Printf("%s\n\n%s\n", cmd.Usage(), cmd.Long)
 				return nil
 			}
 
