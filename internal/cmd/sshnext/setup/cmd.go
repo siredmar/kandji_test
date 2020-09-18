@@ -18,7 +18,7 @@ Host *.gridbox
   StrictHostKeyChecking no
   HashKnownHosts no
   RequestTTY Yes
-  RemoteCommand dbclient -p 22222 127.0.0.1
+  RemoteCommand /dbclient -i /keys/id_dropbear -p 22222 127.0.0.1
   User root
 `
 
