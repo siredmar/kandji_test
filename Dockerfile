@@ -1,4 +1,4 @@
-FROM gridx/devpack:buster.latest-linux-amd64
+FROM 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:devpack-buster.latest
 
 # Install colordiff
 RUN apt-get update && apt-get install -y --no-install-recommends colordiff && \
