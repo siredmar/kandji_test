@@ -9,8 +9,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-const sshConfig = `
-Append the following to ~/.ssh/config:
+const sshConfig = `# Append the following to ~/.ssh/config:
 
 Host *.gridbox
   ProxyCommand gxctl sshnext tunnel --profile='*' $(echo %h | cut -d'.' -f1)
