@@ -15,6 +15,7 @@ func GetDevice(
 	s *service.Service,
 	outputType string,
 	sortBy string,
+	showDeployments bool,
 	showDockerConfig bool,
 	showPods bool,
 	showPublicIP bool,
@@ -54,6 +55,42 @@ func GetDevice(
 					return err
 				}
 				fmt.Println(*device.Spec.PublicKey)
+			} else if showDeployments {
+				// Just show deployments
+				pods, err := getDevicePods(s.Client, a, deviceIDs)
+				if err != nil {
+					return err
+				}
+
+				var deploymentIDs []string
+
+				for _, pod := range pods.Pods {
+
+					if pod.Metadata.Annotations == nil {
+						continue
+					}
+
+					id, ok := pod.Metadata.Annotations["gridx.ai/deployment"]
+
+					if ok {
+						deploymentIDs = append(deploymentIDs, id)
+					}
+				}
+
+				var deployments []api.Deployment
+
+				for _, id := range deploymentIDs {
+					deployment, err := getDeploymentById(s.Client, id, deploymentIDs)
+					if err != nil {
+						return err
+					}
+
+					deployments = append(deployments, deployment)
+				}
+
+				if err := s.Printer.Print(api.Deployments{Deployments: deployments}, printerConfig); err != nil {
+					return err
+				}
 			} else if showDockerConfig {
 				// Just show dockerconfig
 				configs, err := getDeviceDockerConfigs(s.Client, a, deviceIDs)
