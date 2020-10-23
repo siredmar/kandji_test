@@ -39,9 +39,20 @@ func (c *CMD) Init(s *service.Service) error {
 		Short:   "get device",
 		Long:    "print a list of all devices you have access to",
 		Run: func(cmd *clix.Command, args []string) error {
+			showDeployments, _ := cmd.Flags().GetBool("show-deployments")
+			showDeploys, _ := cmd.Flags().GetBool("show-deploys")
+
 			showDockerConfig, _ := cmd.Flags().GetBool("show-dockerconfig")
 			showPods, _ := cmd.Flags().GetBool("show-pods")
 			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
+
+			if (showDeployments || showDeploys) && len(args) != 1 {
+				return errors.E(
+					errors.Invalid,
+					"deployments can just be shown for a single device",
+					nil,
+				)
+			}
 
 			if showDockerConfig && len(args) != 1 {
 				return errors.E(
@@ -72,7 +83,7 @@ func (c *CMD) Init(s *service.Service) error {
 			sortBy, _ := cmd.Flags().GetString("sort-by")
 			showPublicIP, _ := cmd.Flags().GetBool("show-public-ip")
 
-			if err := action.GetDevice(s, outputType, sortBy, showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
+			if err := action.GetDevice(s, outputType, sortBy, (showDeployments || showDeploys), showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
 				return err
 			}
 
@@ -85,6 +96,9 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().Bool("all", false, "show also inactive devices")
+	c.cmd.Flags().Bool("show-deployments", false, "print the deployments of a device")
+	c.cmd.Flags().Bool("show-deploys", false, "print the deployments of a device")
+	c.cmd.Flags().MarkHidden("show-deploys")
 	c.cmd.Flags().Bool("show-dockerconfig", false, "print the docker config for a device")
 	c.cmd.Flags().Bool("show-pods", false, "print the pods for a device")
 	c.cmd.Flags().Bool("show-public-ip", false, "print the public ip for a device")
