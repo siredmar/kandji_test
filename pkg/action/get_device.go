@@ -23,7 +23,7 @@ func GetDevice(
 	showAll bool,
 	ids []string,
 ) error {
-	printerConfig := print.Printconfig{
+	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,

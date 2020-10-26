@@ -12,7 +12,7 @@ import (
 )
 
 func GetDeployment(s *service.Service, outputType string, sortBy string, showDevices bool, ids []string) error {
-	printerConfig := print.Printconfig{
+	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}

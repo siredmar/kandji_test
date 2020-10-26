@@ -21,7 +21,7 @@ type Printer struct {
 	YAML    *yaml.YAMLPrinter
 }
 
-type Printconfig struct {
+type PrintConfig struct {
 	OutputFormat string
 	SortBy       string
 	ShowAll      bool
@@ -35,20 +35,20 @@ func NewPrinter() *Printer {
 	}
 }
 
-func (p *Printer) Print(d interface{}, config Printconfig) error {
+func (p *Printer) Print(d interface{}, config PrintConfig) error {
 	switch config.OutputFormat {
 	case JSON:
 		return p.JSON.Print(d)
 	case YAML:
 		return p.YAML.Print(d)
 	case Console:
-		c := console.ConsolePrintconfig{
+		c := console.ConsolePrintConfig{
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}
 		return p.Console.Print(d, c)
 	case ConsoleWide:
-		c := console.ConsolePrintconfig{
+		c := console.ConsolePrintConfig{
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}

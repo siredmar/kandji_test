@@ -29,14 +29,14 @@ func (do PodsConsoleOutputWide) Inject(i api.Pods) PodsConsoleOutputWide {
 	return do
 }
 
-func (do PodsConsoleOutput) Filter(showAll bool) PodsConsoleOutput {
+func (do PodsConsoleOutput) ShowAll(showAll bool) PodsConsoleOutput {
 	out := filterPods(do.raw.Pods, showAll)
 	do.raw.Pods = out
 
 	return do
 }
 
-func (do PodsConsoleOutputWide) Filter(showAll bool) PodsConsoleOutputWide {
+func (do PodsConsoleOutputWide) ShowAll(showAll bool) PodsConsoleOutputWide {
 	out := filterPods(do.raw.Pods, showAll)
 	do.raw.Pods = out
 

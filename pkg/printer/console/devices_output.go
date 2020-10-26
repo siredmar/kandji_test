@@ -30,15 +30,15 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 	return do
 }
 
-func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
-	out := filterDevices(do.raw.Devices, showAll)
+func (do DevicesConsoleOutput) ShowAll(showAll bool) DevicesConsoleOutput {
+	out := showAllDevices(do.raw.Devices, showAll)
 	do.raw.Devices = out
 
 	return do
 }
 
-func (do DevicesConsoleOutputWide) Filter(showAll bool) DevicesConsoleOutputWide {
-	out := filterDevices(do.raw.Devices, showAll)
+func (do DevicesConsoleOutputWide) ShowAll(showAll bool) DevicesConsoleOutputWide {
+	out := showAllDevices(do.raw.Devices, showAll)
 	do.raw.Devices = out
 
 	return do
@@ -76,7 +76,7 @@ func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide 
 	return do
 }
 
-func filterDevices(in []api.Device, showAll bool) []api.Device {
+func showAllDevices(in []api.Device, showAll bool) []api.Device {
 	var r []api.Device
 	for _, e := range in {
 		// Filter out devices which are not picked up yet if !showAll
