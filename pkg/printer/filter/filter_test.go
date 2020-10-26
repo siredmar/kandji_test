@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	types "github.com/grid-x/ds-api-types"
+	device "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 
 	"github.com/grid-x/gxctl/pkg/api"
 )
@@ -128,6 +129,50 @@ func TestFilters(t *testing.T) {
 				},
 			},
 			wantInclude: false,
+			wantError:   false,
+		},
+		{
+			desc:   "serial empty",
+			filter: NewSerialnumberFilter(""),
+			in: api.Device{
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR",
+				},
+			},
+			wantInclude: true,
+			wantError:   false,
+		},
+		{
+			desc:   "serial match exact",
+			filter: NewSerialnumberFilter("FOO-BAR"),
+			in: api.Device{
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR",
+				},
+			},
+			wantInclude: true,
+			wantError:   false,
+		},
+		{
+			desc:   "serial no match",
+			filter: NewSerialnumberFilter("GOO-BAZ"),
+			in: api.Device{
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR",
+				},
+			},
+			wantInclude: false,
+			wantError:   false,
+		},
+		{
+			desc:   "serial match wildcard",
+			filter: NewSerialnumberFilter("BAR"),
+			in: api.Device{
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR-42",
+				},
+			},
+			wantInclude: true,
 			wantError:   false,
 		},
 	}
