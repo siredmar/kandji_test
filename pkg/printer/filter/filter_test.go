@@ -175,6 +175,74 @@ func TestFilters(t *testing.T) {
 			wantInclude: true,
 			wantError:   false,
 		},
+		{
+			desc:   "composite identity",
+			filter: NewCompositeFilter(NewLabelFilter(""), NewSerialnumberFilter("")),
+			in: api.Device{
+				Metadata: types.Metadata{
+					Labels: map[string]string{
+						"foo": "bar",
+						"goo": "baz",
+					},
+				},
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR-42",
+				},
+			},
+			wantInclude: true,
+			wantError:   false,
+		},
+		{
+			desc:   "composite match label",
+			filter: NewCompositeFilter(NewLabelFilter("foo=bar"), NewSerialnumberFilter("")),
+			in: api.Device{
+				Metadata: types.Metadata{
+					Labels: map[string]string{
+						"foo": "bar",
+						"goo": "baz",
+					},
+				},
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR-42",
+				},
+			},
+			wantInclude: true,
+			wantError:   false,
+		},
+		{
+			desc:   "composite match filter",
+			filter: NewCompositeFilter(NewLabelFilter(""), NewSerialnumberFilter("FOO-BAR-42")),
+			in: api.Device{
+				Metadata: types.Metadata{
+					Labels: map[string]string{
+						"foo": "bar",
+						"goo": "baz",
+					},
+				},
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR-42",
+				},
+			},
+			wantInclude: true,
+			wantError:   false,
+		},
+		{
+			desc:   "composite match xor",
+			filter: NewCompositeFilter(NewLabelFilter("foo=baz"), NewSerialnumberFilter("FOO-BAR-42")),
+			in: api.Device{
+				Metadata: types.Metadata{
+					Labels: map[string]string{
+						"foo": "bar",
+						"goo": "baz",
+					},
+				},
+				Spec: device.DeviceSpec{
+					Serialnumber: "FOO-BAR-42",
+				},
+			},
+			wantInclude: false,
+			wantError:   false,
+		},
 	}
 
 	for _, tc := range testcases {
