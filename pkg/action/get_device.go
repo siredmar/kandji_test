@@ -16,6 +16,7 @@ func GetDevice(
 	s *service.Service,
 	outputType string,
 	label string,
+	serial string,
 	sortBy string,
 	showDeployments bool,
 	showDockerConfig bool,
@@ -29,7 +30,7 @@ func GetDevice(
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,
-		Filter:       filter.NewLabelFilter(label),
+		Filter:       filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)),
 	}
 
 	if len(ids) > 0 {
