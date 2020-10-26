@@ -9,6 +9,7 @@ import (
 	"github.com/landoop/tableprinter"
 
 	api "github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 type ConsolePrinter struct {
@@ -16,6 +17,7 @@ type ConsolePrinter struct {
 }
 
 type ConsolePrintConfig struct {
+	Filter filter.Filter
 	SortBy  string
 	ShowAll bool
 }
@@ -33,7 +35,7 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 	case api.Device:
 		out = DeviceConsoleOutput{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
@@ -77,7 +79,7 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 	case api.Device:
 		out = DeviceConsoleOutputWide{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:

@@ -9,6 +9,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 
 	api "github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 type DevicesConsoleOutput struct {
@@ -16,6 +17,32 @@ type DevicesConsoleOutput struct {
 }
 type DevicesConsoleOutputWide struct {
 	raw api.Devices
+}
+
+func (do DevicesConsoleOutput) Filter(f filter.Filter) DevicesConsoleOutput {
+	do.raw = filterDevices(do.raw, f)
+
+	return do
+}
+
+func (do DevicesConsoleOutputWide) Filter(f filter.Filter) DevicesConsoleOutputWide {
+	do.raw = filterDevices(do.raw, f)
+
+	return do
+}
+
+func filterDevices(devices api.Devices, f filter.Filter) api.Devices {
+	var out api.Devices
+
+	for _, d := range devices.Devices {
+		include, err := f.Eval(d)
+		if err != nil || !include {
+			continue
+		}
+		out.Devices = append(out.Devices, d)
+	}
+
+	return out
 }
 
 func (do DevicesConsoleOutput) Inject(i api.Devices) DevicesConsoleOutput {

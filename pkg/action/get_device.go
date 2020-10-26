@@ -8,12 +8,14 @@ import (
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
 	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
 func GetDevice(
 	s *service.Service,
 	outputType string,
+	label string,
 	sortBy string,
 	showDeployments bool,
 	showDockerConfig bool,
@@ -27,6 +29,7 @@ func GetDevice(
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,
+		Filter:       filter.NewLabelFilter(label),
 	}
 
 	if len(ids) > 0 {
