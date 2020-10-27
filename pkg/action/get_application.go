@@ -11,7 +11,7 @@ import (
 )
 
 func GetApplication(s *service.Service, outputType string, ids []string) error {
-	printerConfig := print.Printconfig{
+	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 	}
 

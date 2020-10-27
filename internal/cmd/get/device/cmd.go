@@ -81,9 +81,11 @@ func (c *CMD) Init(s *service.Service) error {
 			outputType, _ := cmd.Flags().GetString("output")
 			showAll, _ := cmd.Flags().GetBool("all")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
+			label, _ := cmd.Flags().GetString("label")
+			serial, _ := cmd.Flags().GetString("serial")
 			showPublicIP, _ := cmd.Flags().GetBool("show-public-ip")
 
-			if err := action.GetDevice(s, outputType, sortBy, (showDeployments || showDeploys), showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
+			if err := action.GetDevice(s, outputType, label, serial, sortBy, (showDeployments || showDeploys), showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
 				return err
 			}
 
@@ -96,6 +98,8 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().Bool("all", false, "show also inactive devices")
+	c.cmd.Flags().StringP("label", "l", "", "filter results by label")
+	c.cmd.Flags().StringP("serial", "S", "", "filter results by serialnumber")
 	c.cmd.Flags().Bool("show-deployments", false, "print the deployments of a device")
 	c.cmd.Flags().Bool("show-deploys", false, "print the deployments of a device")
 	c.cmd.Flags().MarkHidden("show-deploys")

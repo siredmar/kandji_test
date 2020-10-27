@@ -29,11 +29,11 @@ func (do DeploymentsConsoleOutputWide) Inject(i api.Deployments) DeploymentsCons
 	return do
 }
 
-func (do DeploymentsConsoleOutput) Filter(showAll bool) DeploymentsConsoleOutput {
+func (do DeploymentsConsoleOutput) ShowAll(showAll bool) DeploymentsConsoleOutput {
 	return do
 }
 
-func (do DeploymentsConsoleOutputWide) Filter(showAll bool) DeploymentsConsoleOutputWide {
+func (do DeploymentsConsoleOutputWide) ShowAll(showAll bool) DeploymentsConsoleOutputWide {
 	return do
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 
 	api "github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 type DevicesConsoleOutput struct {
@@ -16,6 +17,32 @@ type DevicesConsoleOutput struct {
 }
 type DevicesConsoleOutputWide struct {
 	raw api.Devices
+}
+
+func (do DevicesConsoleOutput) Filter(f filter.Filter) DevicesConsoleOutput {
+	do.raw = filterDevices(do.raw, f)
+
+	return do
+}
+
+func (do DevicesConsoleOutputWide) Filter(f filter.Filter) DevicesConsoleOutputWide {
+	do.raw = filterDevices(do.raw, f)
+
+	return do
+}
+
+func filterDevices(devices api.Devices, f filter.Filter) api.Devices {
+	var out api.Devices
+
+	for _, d := range devices.Devices {
+		include, err := f.Eval(d)
+		if err != nil || !include {
+			continue
+		}
+		out.Devices = append(out.Devices, d)
+	}
+
+	return out
 }
 
 func (do DevicesConsoleOutput) Inject(i api.Devices) DevicesConsoleOutput {
@@ -30,15 +57,15 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 	return do
 }
 
-func (do DevicesConsoleOutput) Filter(showAll bool) DevicesConsoleOutput {
-	out := filterDevices(do.raw.Devices, showAll)
+func (do DevicesConsoleOutput) ShowAll(showAll bool) DevicesConsoleOutput {
+	out := showAllDevices(do.raw.Devices, showAll)
 	do.raw.Devices = out
 
 	return do
 }
 
-func (do DevicesConsoleOutputWide) Filter(showAll bool) DevicesConsoleOutputWide {
-	out := filterDevices(do.raw.Devices, showAll)
+func (do DevicesConsoleOutputWide) ShowAll(showAll bool) DevicesConsoleOutputWide {
+	out := showAllDevices(do.raw.Devices, showAll)
 	do.raw.Devices = out
 
 	return do
@@ -76,7 +103,7 @@ func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide 
 	return do
 }
 
-func filterDevices(in []api.Device, showAll bool) []api.Device {
+func showAllDevices(in []api.Device, showAll bool) []api.Device {
 	var r []api.Device
 	for _, e := range in {
 		// Filter out devices which are not picked up yet if !showAll

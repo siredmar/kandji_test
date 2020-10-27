@@ -9,13 +9,15 @@ import (
 	"github.com/landoop/tableprinter"
 
 	api "github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 type ConsolePrinter struct {
 	Target io.Writer
 }
 
-type ConsolePrintconfig struct {
+type ConsolePrintConfig struct {
+	Filter filter.Filter
 	SortBy  string
 	ShowAll bool
 }
@@ -26,26 +28,22 @@ func NewConsolePrinter(t io.Writer) *ConsolePrinter {
 	}
 }
 
-type printClient interface {
-	Print(v interface{})
-}
-
-func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintconfig) error {
+func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 	var out interface{}
 
 	switch v := v.(type) {
 	case api.Device:
 		out = DeviceConsoleOutput{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = PodsConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutput{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DeploymentsConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v)
 	case api.Applications:
@@ -74,22 +72,22 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintconfig) error {
 	return nil
 }
 
-func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintconfig) error {
+func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) error {
 	var out interface{}
 
 	switch v := v.(type) {
 	case api.Device:
 		out = DeviceConsoleOutputWide{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = PodsConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Deployment:
 		out = DeploymentConsoleOutputWide{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutputWide{}.Inject(v).Filter(config.ShowAll).Sort(config.SortBy).Map()
+		out = DeploymentsConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v) //TODO make wide mapping
 	case api.Applications:

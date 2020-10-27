@@ -11,7 +11,7 @@ import (
 )
 
 func GetPod(s *service.Service, deviceID string, outputType string, sortBy string, showAll bool, ids []string) error {
-	printerConfig := print.Printconfig{
+	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,

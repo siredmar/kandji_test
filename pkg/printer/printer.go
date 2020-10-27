@@ -6,6 +6,7 @@ import (
 	console "github.com/grid-x/gxctl/pkg/printer/console"
 	json "github.com/grid-x/gxctl/pkg/printer/json"
 	yaml "github.com/grid-x/gxctl/pkg/printer/yaml"
+	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 const (
@@ -21,8 +22,9 @@ type Printer struct {
 	YAML    *yaml.YAMLPrinter
 }
 
-type Printconfig struct {
+type PrintConfig struct {
 	OutputFormat string
+	Filter       filter.Filter
 	SortBy       string
 	ShowAll      bool
 }
@@ -35,20 +37,22 @@ func NewPrinter() *Printer {
 	}
 }
 
-func (p *Printer) Print(d interface{}, config Printconfig) error {
+func (p *Printer) Print(d interface{}, config PrintConfig) error {
 	switch config.OutputFormat {
 	case JSON:
 		return p.JSON.Print(d)
 	case YAML:
 		return p.YAML.Print(d)
 	case Console:
-		c := console.ConsolePrintconfig{
+		c := console.ConsolePrintConfig{
+			Filter: config.Filter,
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}
 		return p.Console.Print(d, c)
 	case ConsoleWide:
-		c := console.ConsolePrintconfig{
+		c := console.ConsolePrintConfig{
+			Filter: config.Filter,
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}
