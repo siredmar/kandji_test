@@ -50,12 +50,6 @@ func Login(s *service.Service, openBrowser bool) error {
 
 	r := http.NewServeMux()
 	server := &http.Server{Addr: localAddress, Handler: r}
-	var shutdown = func() {
-		time.Sleep(time.Second * 1)
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-		_ = server.Shutdown(ctx)
-	}
 
 	var token string
 	r.HandleFunc("/callback", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +61,14 @@ func Login(s *service.Service, openBrowser bool) error {
 
 		// TODO Make a goodlooking exitpage
 		fmt.Fprint(w, auth.Finish)
-		go shutdown()
+
+		// Sanity
+		time.Sleep(time.Second * 1)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		defer cancel()
+		server.Shutdown(ctx)
+
 		return
 	}))
 
