@@ -11,14 +11,21 @@ import (
 
 const sshConfig = `# Append the following to ~/.ssh/config:
 
-Host *.gridbox
+Host *.gridbox-tunnel
   ProxyCommand gxctl sshnext tunnel --profile='*' $(echo %h | cut -d'.' -f1)
   ServerAliveInterval 30
   StrictHostKeyChecking no
   HashKnownHosts no
   RequestTTY Yes
-  RemoteCommand /dbclient -i /keys/id_dropbear -p 22222 127.0.0.1
   User root
+
+Host *.gridbox
+  User root
+  HostName 127.0.0.1
+  Port 22222
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  ProxyCommand ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add /keys/id_wssh_rsa && nc %h %p'
 `
 
 // CMD contains a command and all its sub commands
