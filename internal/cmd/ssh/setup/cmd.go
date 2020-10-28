@@ -12,7 +12,7 @@ import (
 const sshConfig = `# Append the following to ~/.ssh/config:
 
 Host *.gridbox-tunnel
-  ProxyCommand gxctl sshnext tunnel --profile='*' $(echo %h | cut -d'.' -f1)
+  ProxyCommand gxctl ssh tunnel --profile='*' $(echo %h | cut -d'.' -f1)
   ServerAliveInterval 30
   StrictHostKeyChecking no
   HashKnownHosts no
