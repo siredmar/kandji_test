@@ -11,6 +11,6 @@ RUN wget https://github.com/wakeful/yaml2json/releases/download/${YAML2JSON_VERS
 
 COPY ./bin/gxctl /usr/bin/gxctl
 RUN chmod +x /usr/bin/gxctl
-RUN mkdir -p /root/.gxctl && touch /root/.gxctl/config.yaml && /usr/bin/gxctl sshnext setup >> /etc/ssh/ssh_config
+RUN mkdir -p /root/.gxctl && touch /root/.gxctl/config.yaml && /usr/bin/gxctl ssh setup >> /etc/ssh/ssh_config
 
 ENTRYPOINT ["gxctl"]

@@ -5,7 +5,6 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/internal/cmd/apply"
 	"github.com/grid-x/gxctl/internal/cmd/config"
-	"github.com/grid-x/gxctl/internal/cmd/copy"
 	"github.com/grid-x/gxctl/internal/cmd/create"
 	"github.com/grid-x/gxctl/internal/cmd/delete"
 	"github.com/grid-x/gxctl/internal/cmd/diff"
@@ -13,11 +12,8 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/label"
 	"github.com/grid-x/gxctl/internal/cmd/lint"
 	"github.com/grid-x/gxctl/internal/cmd/login"
-	"github.com/grid-x/gxctl/internal/cmd/portforward"
 	"github.com/grid-x/gxctl/internal/cmd/restart"
 	"github.com/grid-x/gxctl/internal/cmd/ssh"
-	"github.com/grid-x/gxctl/internal/cmd/sshnext"
-	"github.com/grid-x/gxctl/internal/cmd/syslog"
 	"github.com/grid-x/gxctl/internal/cmd/update"
 	"github.com/grid-x/gxctl/internal/cmd/validate"
 	"github.com/grid-x/gxctl/internal/cmd/version"
@@ -55,7 +51,6 @@ func (c *CMD) Init(s *service.Service) error {
 	c.children = []cmd.CMD{
 		apply.New(),
 		config.New(),
-		copy.New(),
 		create.New(),
 		delete.New(),
 		diff.New(),
@@ -63,11 +58,8 @@ func (c *CMD) Init(s *service.Service) error {
 		label.New(),
 		lint.New(),
 		login.New(),
-		portforward.New(),
 		restart.New(),
 		ssh.New(),
-		sshnext.New(),
-		syslog.New(),
 		update.New(),
 		validate.New(),
 		version.New(),

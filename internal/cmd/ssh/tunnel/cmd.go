@@ -41,10 +41,7 @@ func (c *CMD) Init(s *service.Service) error {
 		Long: `Tunnel std file handles to device sshd, for usage with OpenSSH ProxyCommand directive.
 
 For example, to connect to device with SN D123-FOO-…, use:
-  ssh -o ProxyCommand='gxctl --profile='*' sshnext tunnel D123-FOO' root@gridbox
-
-It is also possible to setup a convient alias using the alias ssh subcommand:
-  gxctl sshnext setup # run once and follow instructions
+  gxctl ssh setup # run once and follow instructions
   ssh D123-FOO.gridbox
 `,
 		Args: args.Args{
