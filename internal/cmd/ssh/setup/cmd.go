@@ -16,7 +16,6 @@ Host *.gridbox-tunnel
   ServerAliveInterval 30
   StrictHostKeyChecking no
   HashKnownHosts no
-  RequestTTY Yes
   User root
 
 Host *.gridbox
