@@ -24,6 +24,11 @@ $ gxctl login # will open a browser window where you can sign in using your grid
 The generated token is only valid for a limited amount of time (currently 4 weeks); if you see errors regarding authentication
 after that time, you may have to simply refresh the token by running `gxctl login` again.
 
+In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.  
+If running for the first time, you can simply execute `gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
+with the contents of your ssh config and update the latter accordingly.  
+*Note*: As the SSH functionality uses agent forwarding, you may need to spawn the SSH agent once per shell session, e.g. using `eval $(ssh-agent)`.
+
 ## Profiles / Accounts
 
 The managed devices are split into different server-side accounts; to differentiate between them when using gxctl commands, you
@@ -72,15 +77,12 @@ $ gxctl get apps testapp testapp2
 ## Operations
 
 * **config**   `gxctl config [ACTION] [TYPE] [flags]`
-* **copy**   `gxctl copy [SOURCE] [DESTIONATION] [flags]`
 * **create**   `gxctl create [[-f | ----filename]=Filename]`
 * **delete**   `gxctl delete [TYPE] [NAME] [flags]`
 * **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
 * **label**   `gxctl label [TYPE] [NAME] [flags]`
 * **update**   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
-* **port-forward**   `gxctl port-forward [NAME] [LOCALPORT] [TARGET] [flags]`
 * **ssh**   `gxctl ssh [NAME] [flags]`
-* **syslog**   `gxctl syslog [NAME] [flags]`
 
 
 ## General resource types
@@ -161,10 +163,22 @@ $ gxctl get devices
 $ gxctl get devices -o wide
 # get a List of all devices including the ones which were not yet online
 $ gxctl get devices --all
+# get a List of all devicess that match a serialnumber
+$ gxctl get devices --serial D294-200-000-000-581-P-X
+# get a List of all devices that match a serialnumber (wildcard)
+$ gxctl get devices --serial 581-P-X 
+# get a List of all devices that have a label with key gridx.de/channel
+$ gxctl get devices --label gridx.de/channel
+# get a List of all devices that have a label with key gridx.de/channel and value alpha
+$ gxctl get devices --label gridx.de/channel=alpha
+# get a List of all devices that match all key/value label pairs
+$ gxctl get devices --label gridx.de/channel=alpha,gridx.de/datadog=true
 # Get information of a single device
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f
 # Get information of a single device in json format
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f -o json
+# Get information of a single device, showing its deployments
+$ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-deploys
 # Get information of two devices
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f 8st62f8e-22gd-ab45-ll23-115980970ab
 # Get a List of all pods 
@@ -212,29 +226,22 @@ $ gxctl update device 57e82f8e-08f4-48f9-8e75-28552d09701f -m "Sun:11:00-Sun:13:
 $ gxctl apply -f deployment.json
 ```
 
-`gxctl port-forward` - Forward an port from a device to a local port
-
-```shell
-# Forward port 8080 from the device on local port 4444
-$ gxctl port-forward 57e82f8e-08f4-48f9-8e75-28552d09701f --localport 4444 --target 127.0.0.1:8080
-# Forward port 8080 from a machine in the same network as the device (eg. router)  on local port 4444
-$ gxctl port-forward 57e82f8e-08f4-48f9-8e75-28552d09701f --localport 4444 --target 192.168.0.1:8080
-```
-
 `gxctl ssh` - SSH to a devie
 
 ```shell
-# SSH to device 
-$ gxctl ssh 57e82f8e-08f4-48f9-8e75-28552d09701f
-# SSH to device and execute an inital command
-$ gxctl ssh -c "tail -f /var/log/syslog" 57e82f8e-08f4-48f9-8e75-28552d09701f
-```
-
-`gxctl syslog` - Stream device syslog
-
-```shell
-# Stream the current device syslog
-$ gxctl syslog 57e82f8e-08f4-48f9-8e75-28552d09701f
+# all commands below need up-to-date SSH client config according to $(gxctl ssh setup)!
+# SSH remote terminal session to device
+$ ssh D244-200-000-000-445-P-X.gridbox
+# SSH remote terminal session to device (wildcard match)
+$ ssh 445-P-X.gridbox
+# copy local file to device
+$ scp /tmp/foo.txt D244-200-000-000-445-P-X.gridbox:/tmp
+# copy remote file from device
+$ scp D244-200-000-000-445-P-X.gridbox:/tmp/foo.txt /tmp
+# forward port 8080 of devices 192.168.169.198 and 192.168.169.199 in the remote network to local ports 8080 and 8081
+$ ssh -L 8080:192.168.169.198:8080 -L 8081:192.168.169.199:8080 D294-200-000-000-581-P-X.gridbox
+# open up port 2210 on the gridbox in the remote network and forward incoming traffic to local port 2210
+$ ssh -R 2210:localhost:2210 D294-200-000-000-581-P-X.gridbox
 ```
 
 `gxctl restart` - Restarts a device
