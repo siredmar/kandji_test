@@ -24,7 +24,8 @@ Host *.gridbox
   Port 22222
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
-  ProxyCommand ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add /keys/id_wssh_rsa && nc %h %p'
+  LogLevel error
+  ProxyCommand ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -q /keys/id_wssh_rsa && nc %h %p'
 `
 
 // CMD contains a command and all its sub commands
