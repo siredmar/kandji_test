@@ -16,6 +16,7 @@ import (
 	"github.com/grid-x/wssh/pkg/stream/ws"
 
 	"github.com/grid-x/gxctl/pkg/service"
+	"github.com/grid-x/gxctl/pkg/spinner"
 )
 
 var (
@@ -24,15 +25,21 @@ var (
 )
 
 func SSHTunnel(s *service.Service, sn string) error {
+	getDevice := spinner.New("get device")
 	device, err, profile, _ := getDeviceBySN(s.Client, sn)
 	if err != nil {
+		getDevice.Fail()
 		return err
 	}
+	getDevice.Ok()
 
+	auth := spinner.New("auth")
 	token, err := s.Client.GetTokenFromAuthConfig(profile)
 	if err != nil {
+		auth.Fail()
 		return err
 	}
+	auth.Ok()
 
 	c := &http.Client{}
 
@@ -41,10 +48,13 @@ func SSHTunnel(s *service.Service, sn string) error {
 		serverAddr = "ssh.ds.gridx.ai:443"
 	}
 
+	startSession := spinner.New("start session")
 	_, tID, err := NewSession(c, serverAddr, token, device.Metadata.ID)
 	if err != nil {
+		startSession.Fail()
 		return err
 	}
+	startSession.Ok()
 
 	u := url.URL{Scheme: "wss", Host: serverAddr, Path: fmt.Sprintf("/agent/tunnel/%v", tID)}
 
@@ -52,14 +62,17 @@ func SSHTunnel(s *service.Service, sn string) error {
 		"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
 	}
 
+	connectTunnel := spinner.New("connect to tunnel")
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), headers)
 	if err != nil {
+		connectTunnel.Fail()
 		return err
 	}
 
 	wsStream := ws.New(conn)
 	defer conn.Close()
 	stdStream := std.New()
+	connectTunnel.Ok()
 
 	go func() {
 		for {

@@ -58,7 +58,11 @@ For example, to connect to device with SN D123-FOO-…, use:
 				return nil
 			}
 
-			return action.SSHTunnel(s, args[0])
+			err = action.SSHTunnel(s, args[0])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
+			return nil
 		},
 		Predictors: args.Predictors{
 			"SN": args.PredictNil(),
