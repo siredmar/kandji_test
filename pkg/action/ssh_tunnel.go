@@ -9,12 +9,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os/exec"
 
 	"github.com/gorilla/websocket"
 	"github.com/grid-x/wssh/pkg/session"
 	"github.com/grid-x/wssh/pkg/stream/std"
 	"github.com/grid-x/wssh/pkg/stream/ws"
 
+	errs "github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 	"github.com/grid-x/gxctl/pkg/spinner"
 )
@@ -25,6 +27,16 @@ var (
 )
 
 func SSHTunnel(s *service.Service, sn string) error {
+	checkAgent := spinner.New("check ssh agent")
+	if !sshAgentAvailable() {
+		checkAgent.Fail()
+		return errs.E(
+			errs.Service,
+			"ssh-agent unavailable. Please ensure it is running",
+		)
+	}
+	checkAgent.Ok()
+
 	getDevice := spinner.New("get device")
 	device, err, profile, _ := getDeviceBySN(s.Client, sn)
 	if err != nil {
@@ -138,4 +150,18 @@ func Post(c *http.Client, serverAddr string, token string, url string, payload s
 	}
 
 	return json.Unmarshal(resBody, &v)
+}
+
+func sshAgentAvailable() bool {
+	cmd := exec.Command("ssh-add", "-l")
+	_, err := cmd.Output()
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			if exitError.ExitCode() == 2 {
+				return false
+			}
+			return true
+		}
+	}
+	return true
 }
