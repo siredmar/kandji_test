@@ -43,6 +43,14 @@ func SSHTunnel(s *service.Service, sn string) error {
 		getDevice.Fail()
 		return err
 	}
+	if v, ok := device.Metadata.Labels["core.gridx.ai/hardware"]; ok && v == "virtual" {
+		getDevice.Fail()
+		err := errs.E(
+			errs.Invalid,
+			fmt.Sprintf("can't connect to virtual device %v", device.Metadata.ID),
+		)
+		return err
+	}
 	getDevice.Ok()
 
 	auth := spinner.New("auth")
