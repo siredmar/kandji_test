@@ -122,8 +122,6 @@ github.com/pelletier/go-toml
 github.com/pkg/errors
 # github.com/pkg/term v0.0.0-20200520122047-c3ffed290a03
 ## explicit
-github.com/pkg/term
-github.com/pkg/term/termios
 # github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
 ## explicit
 github.com/posener/complete
@@ -152,7 +150,6 @@ github.com/spf13/viper
 github.com/subosito/gotenv
 # github.com/tj/go-spin v1.1.0
 ## explicit
-github.com/tj/go-spin
 # github.com/toqueteos/webbrowser v1.2.1-0.20190725205412-dc97d39f4758
 ## explicit
 github.com/toqueteos/webbrowser
