@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 
@@ -108,9 +107,7 @@ func showAllDevices(in []api.Device, showAll bool) []api.Device {
 	for _, e := range in {
 		// Filter out devices which are not picked up yet if !showAll
 		if !showAll {
-			if e.Status.LastHeartbeat == nil {
-				continue
-			} else if time.Now().Sub(e.Status.LastHeartbeat.Time) > (2 * time.Minute) {
+			if !e.IsOnline() {
 				continue
 			}
 		}

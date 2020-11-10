@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/google/go-cmp/cmp"
+	"time"
 
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
 	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs"
@@ -91,6 +92,10 @@ func (d *Device) IsEmpty() bool {
 		return true
 	}
 	return false
+}
+
+func (d *Device) IsOnline() bool {
+	return d.Status.LastHeartbeat != nil && time.Now().Sub(d.Status.LastHeartbeat.Time) < (2*time.Minute)
 }
 
 func (d *Devices) IsEmpty() bool {

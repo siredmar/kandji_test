@@ -29,10 +29,8 @@ type DeviceConsoleOutputWide struct {
 
 func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
 	offlineIndicator := "* "
-	if d.Status.LastHeartbeat != nil {
-		if time.Now().Sub(d.Status.LastHeartbeat.Time) < (2 * time.Minute) {
-			offlineIndicator = " "
-		}
+	if d.IsOnline() {
+		offlineIndicator = " "
 	}
 	o.ID = offlineIndicator + d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
@@ -52,10 +50,8 @@ func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
 
 func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	offlineIndicator := ""
-	if d.Status.LastHeartbeat != nil {
-		if time.Now().Sub(d.Status.LastHeartbeat.Time) < (2 * time.Minute) {
-			offlineIndicator = " "
-		}
+	if d.IsOnline() {
+		offlineIndicator = " "
 	}
 	o.ID = offlineIndicator + d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
