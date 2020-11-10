@@ -40,7 +40,7 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 	}
 	checkAgent.Ok()
 
-	getDevice := spinner.New("get device")
+	getDevice := spinner.New("device")
 	device, err, profile, _ := getDeviceBySN(s.Client, sn)
 	if err != nil {
 		getDevice.Fail()
@@ -51,6 +51,14 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 		err := errs.E(
 			errs.Invalid,
 			fmt.Sprintf("can't connect to virtual device %v", device.Metadata.ID),
+		)
+		return err
+	}
+	if !device.IsOnline() {
+		getDevice.Fail()
+		err := errs.E(
+			errs.Invalid,
+			fmt.Sprintf("device %v is offline", device.Metadata.ID),
 		)
 		return err
 	}
