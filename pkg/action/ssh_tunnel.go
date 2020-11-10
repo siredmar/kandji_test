@@ -26,7 +26,10 @@ var (
 	ServerSSL = true
 )
 
-func SSHTunnel(s *service.Service, sn string) error {
+func SSHTunnel(s *service.Service, quiet bool, sn string) error {
+	if quiet {
+		spinner.Disable()
+	}
 	checkAgent := spinner.New("check ssh agent")
 	if !sshAgentAvailable() {
 		checkAgent.Fail()

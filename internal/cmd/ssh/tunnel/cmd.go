@@ -58,7 +58,9 @@ For example, to connect to device with SN D123-FOO-…, use:
 				return nil
 			}
 
-			err = action.SSHTunnel(s, args[0])
+			quiet, _ := cmd.Flags().GetBool("quiet")
+
+			err = action.SSHTunnel(s, quiet, args[0])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 			}
@@ -68,6 +70,8 @@ For example, to connect to device with SN D123-FOO-…, use:
 			"SN": args.PredictNil(),
 		},
 	}
+
+	c.cmd.Flags().BoolP("quiet", "q", false, "do not report progress")
 
 	return nil
 }
