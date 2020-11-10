@@ -39,6 +39,7 @@ func Login(s *service.Service, openBrowser bool) error {
 
 	go func() {
 		if openBrowser {
+			// wait for server to startup
 			time.Sleep(time.Second * 1)
 			webbrowser.Open(loginLocation)
 		}
@@ -52,6 +53,16 @@ func Login(s *service.Service, openBrowser bool) error {
 	server := &http.Server{Addr: localAddress, Handler: r}
 
 	var token string
+	tokenChannel := make(chan string)
+
+	go func() {
+		token = <-tokenChannel
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		server.Shutdown(ctx)
+	}()
+
 	r.HandleFunc("/callback", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("error") != "" {
 			http.Error(w, "error happened in callback: "+r.URL.Query().Get("error")+" "+r.URL.Query().Get("error_description")+" "+r.URL.Query().Get("error_debug"), http.StatusInternalServerError)
@@ -62,12 +73,7 @@ func Login(s *service.Service, openBrowser bool) error {
 		// TODO Make a goodlooking exitpage
 		fmt.Fprint(w, auth.Finish)
 
-		// Sanity
-		time.Sleep(time.Second * 1)
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
-		server.Shutdown(ctx)
+		tokenChannel <- token
 
 		return
 	}))
