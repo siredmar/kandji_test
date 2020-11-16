@@ -8,7 +8,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 
 	api "github.com/grid-x/gxctl/pkg/api"
-	"github.com/grid-x/gxctl/pkg/printer/filter"
+	"github.com/grid-x/gxctl/pkg/filter"
 )
 
 type DevicesConsoleOutput struct {
@@ -31,6 +31,10 @@ func (do DevicesConsoleOutputWide) Filter(f filter.Filter) DevicesConsoleOutputW
 }
 
 func filterDevices(devices api.Devices, f filter.Filter) api.Devices {
+	if f == nil {
+		return devices
+	}
+
 	var out api.Devices
 
 	for _, d := range devices.Devices {

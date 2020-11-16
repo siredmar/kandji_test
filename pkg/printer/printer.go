@@ -3,10 +3,10 @@ package printer
 import (
 	"os"
 
+	"github.com/grid-x/gxctl/pkg/filter"
 	console "github.com/grid-x/gxctl/pkg/printer/console"
 	json "github.com/grid-x/gxctl/pkg/printer/json"
 	yaml "github.com/grid-x/gxctl/pkg/printer/yaml"
-	"github.com/grid-x/gxctl/pkg/printer/filter"
 )
 
 const (
@@ -45,14 +45,14 @@ func (p *Printer) Print(d interface{}, config PrintConfig) error {
 		return p.YAML.Print(d)
 	case Console:
 		c := console.ConsolePrintConfig{
-			Filter: config.Filter,
+			Filter:  config.Filter,
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}
 		return p.Console.Print(d, c)
 	case ConsoleWide:
 		c := console.ConsolePrintConfig{
-			Filter: config.Filter,
+			Filter:  config.Filter,
 			SortBy:  config.SortBy,
 			ShowAll: config.ShowAll,
 		}

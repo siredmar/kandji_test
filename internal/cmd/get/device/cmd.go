@@ -6,7 +6,6 @@ import (
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
-	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -45,38 +44,6 @@ func (c *CMD) Init(s *service.Service) error {
 			showDockerConfig, _ := cmd.Flags().GetBool("show-dockerconfig")
 			showPods, _ := cmd.Flags().GetBool("show-pods")
 			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
-
-			if (showDeployments || showDeploys) && len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"deployments can just be shown for a single device",
-					nil,
-				)
-			}
-
-			if showDockerConfig && len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"docker-configs can just be shown for a single device",
-					nil,
-				)
-			}
-
-			if showPods && len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"pods can just be shown for a single device",
-					nil,
-				)
-			}
-
-			if showPublicKey && len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"publickeys can just be shown for a single device",
-					nil,
-				)
-			}
 
 			outputType, _ := cmd.Flags().GetString("output")
 			showAll, _ := cmd.Flags().GetBool("all")

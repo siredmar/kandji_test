@@ -7,8 +7,8 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
+	"github.com/grid-x/gxctl/pkg/filter"
 	print "github.com/grid-x/gxctl/pkg/printer"
-	"github.com/grid-x/gxctl/pkg/printer/filter"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -30,121 +30,150 @@ func GetDevice(
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,
-		Filter:       filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)),
+		//Filter:       filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)),
+	}
+
+	//List all devices
+	var devices api.Devices
+	rawDevices, err, errs := getDevices(s.Client)
+	if err != nil {
+		return err
+	}
+	rawDeviceIDs := rawDevices.GetIds()
+
+	if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
+		for _, err := range errs {
+			if err.err != nil {
+				fmt.Printf("%v: %v\n", err.profile, err.err)
+			}
+		}
 	}
 
 	if len(ids) > 0 {
-		//Get multiple devices
-		//Lookup all existing devices to validate ids and autocomplete them if necessary
-		devices, err, _ := getDevices(s.Client)
-		if err != nil {
-			return err
-		}
-		deviceIDs := devices.GetIds()
-
-		for _, a := range ids {
-			if showPublicIP {
-				// Just show public IP
-				device, err := getDeviceById(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-				if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
-					fmt.Println(*device.Status.Info.PublicIP)
-				}
-			} else if showPublicKey {
-				// Just show publickey
-				device, err := getDeviceById(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-				fmt.Println(*device.Spec.PublicKey)
-			} else if showDeployments {
-				// Just show deployments
-				pods, err := getDevicePods(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-
-				var deploymentIDs []string
-
-				for _, pod := range pods.Pods {
-
-					if pod.Metadata.Annotations == nil {
-						continue
-					}
-
-					id, ok := pod.Metadata.Annotations["gridx.ai/deployment"]
-
-					if ok {
-						deploymentIDs = append(deploymentIDs, id)
-					}
-				}
-
-				var deployments []api.Deployment
-
-				for _, id := range deploymentIDs {
-					deployment, err := getDeploymentById(s.Client, id, deploymentIDs)
-					if err != nil {
-						return err
-					}
-
-					deployments = append(deployments, deployment)
-				}
-
-				if err := s.Printer.Print(api.Deployments{Deployments: deployments}, printerConfig); err != nil {
-					return err
-				}
-			} else if showDockerConfig {
-				// Just show dockerconfig
-				configs, err := getDeviceDockerConfigs(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-
-				if err := s.Printer.Print(configs, printerConfig); err != nil {
-					return err
-				}
-			} else if showPods {
-				// Just show pods
-				pods, err := getDevicePods(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-
-				if err := s.Printer.Print(pods, printerConfig); err != nil {
-					return err
-				}
-			} else {
-				// Print device
-				device, err := getDeviceById(s.Client, a, deviceIDs)
-				if err != nil {
-					return err
-				}
-
-				if err := s.Printer.Print(device, printerConfig); err != nil {
-					return err
-				}
+		for _, id := range ids {
+			device, err := getDeviceById(s.Client, id, rawDeviceIDs)
+			if err != nil {
+				return err
 			}
+
+			devices.Devices = append(devices.Devices, device)
 		}
 	} else {
-		//List all devices
-		devices, err, errs := getDevices(s.Client)
+		devices = rawDevices
+	}
+
+	devices = filter.FilterDevices(devices, filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)))
+
+	if showPublicIP {
+		for _, device := range devices.Devices {
+			if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
+				fmt.Println(*device.Status.Info.PublicIP)
+			}
+		}
+		return nil
+	}
+
+	if showPublicKey {
+		for _, device := range devices.Devices {
+			if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
+				fmt.Println(*device.Spec.PublicKey)
+			}
+		}
+		return nil
+	}
+
+	if showDeployments {
+		if len(devices.Devices) > 1 {
+			return errors.E(
+				errors.Invalid,
+				"Too many devices - Deployments can just be shown for a single device",
+				nil,
+			)
+		}
+
+		// Just show deployments
+		pods, err := getDevicePods(s.Client, devices.Devices[0].Metadata.ID)
 		if err != nil {
 			return err
 		}
 
-		if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
-			for _, err := range errs {
-				if err.err != nil {
-					fmt.Printf("%v: %v\n", err.profile, err.err)
-				}
+		var deploymentIDs []string
+
+		for _, pod := range pods.Pods {
+
+			if pod.Metadata.Annotations == nil {
+				continue
+			}
+
+			id, ok := pod.Metadata.Annotations["gridx.ai/deployment"]
+
+			if ok {
+				deploymentIDs = append(deploymentIDs, id)
 			}
 		}
 
-		if err := s.Printer.Print(devices, printerConfig); err != nil {
+		var deployments []api.Deployment
+
+		for _, id := range deploymentIDs {
+			deployment, err := getDeploymentById(s.Client, id, deploymentIDs)
+			if err != nil {
+				return err
+			}
+
+			deployments = append(deployments, deployment)
+		}
+
+		if err := s.Printer.Print(api.Deployments{Deployments: deployments}, printerConfig); err != nil {
 			return err
 		}
+	}
+
+	if showDockerConfig {
+		if len(devices.Devices) > 1 {
+			return errors.E(
+				errors.Invalid,
+				"Too many devices - Docker-Configs can just be shown for a single device",
+				nil,
+			)
+		}
+
+		// Just show dockerconfig
+		configs, err := getDeviceDockerConfigs(s.Client, devices.Devices[0].Metadata.ID)
+		if err != nil {
+			return err
+		}
+
+		if err := s.Printer.Print(configs, printerConfig); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if showPods {
+		if len(devices.Devices) > 1 {
+			return errors.E(
+				errors.Invalid,
+				"Too many devices - Docker-Configs can just be shown for a single device",
+				nil,
+			)
+		}
+
+		// Just show pods
+		pods, err := getDevicePods(s.Client, devices.Devices[0].Metadata.ID)
+		if err != nil {
+			return err
+		}
+
+		if err := s.Printer.Print(pods, printerConfig); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if err := s.Printer.Print(devices, printerConfig); err != nil {
+		return err
 	}
 
 	return nil
@@ -259,12 +288,7 @@ func getDeviceBySN(client *client.APIClient, sn string) (api.Device, error, stri
 	}
 }
 
-func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []string) (api.DeviceDockerConfigs, error) {
-	deviceID, err := api.LookupID(id, deviceIds)
-	if err != nil {
-		return api.DeviceDockerConfigs{}, err
-	}
-
+func getDeviceDockerConfigs(client *client.APIClient, deviceID string) (api.DeviceDockerConfigs, error) {
 	endpoint := fmt.Sprintf("%s/%s/devicedockerconfigs", api.DevicesEndpoint, deviceID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
@@ -279,12 +303,7 @@ func getDeviceDockerConfigs(client *client.APIClient, id string, deviceIds []str
 	return configs, nil
 }
 
-func getDevicePods(client *client.APIClient, id string, deviceIds []string) (api.Pods, error) {
-	deviceID, err := api.LookupID(id, deviceIds)
-	if err != nil {
-		return api.Pods{}, err
-	}
-
+func getDevicePods(client *client.APIClient, deviceID string) (api.Pods, error) {
 	endpoint := fmt.Sprintf("%s/%s/pods", api.DevicesEndpoint, deviceID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {

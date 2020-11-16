@@ -9,7 +9,7 @@ import (
 	"github.com/landoop/tableprinter"
 
 	api "github.com/grid-x/gxctl/pkg/api"
-	"github.com/grid-x/gxctl/pkg/printer/filter"
+	"github.com/grid-x/gxctl/pkg/filter"
 )
 
 type ConsolePrinter struct {
@@ -17,7 +17,7 @@ type ConsolePrinter struct {
 }
 
 type ConsolePrintConfig struct {
-	Filter filter.Filter
+	Filter  filter.Filter
 	SortBy  string
 	ShowAll bool
 }
