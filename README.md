@@ -27,7 +27,11 @@ after that time, you may have to simply refresh the token by running `gxctl logi
 In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.  
 If running for the first time, you can simply execute `gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
 with the contents of your ssh config and update the latter accordingly.  
-*Note*: As the SSH functionality uses agent forwarding, you may need to spawn the SSH agent once per shell session, e.g. using `eval $(ssh-agent)`.
+*Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.  
+The most simple solution is running `eval $(ssh-agent)` once per terminal session - this will work fine for basic SSH usage, but will not allow you to open more than one connection at a time.  
+If you want to use the convenient multiplexing feature that also significantly speeds up subsequent connections after the first,
+a [more complex setup](./examples/ssh-agent.sh) is required where __ssh-agent__ is launched just once and reused among all terminal sessions.  
+Alternatively, you can remove all settings relating to gridBox multiplexing inside your `~/.ssh/config`, e.g. `Control*`, to disable multiplexing and allow multiple (slower) connections without a shared __ssh-agent__.
 
 ## Profiles / Accounts
 

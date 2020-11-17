@@ -17,6 +17,9 @@ Host *.gridbox-tunnel
   StrictHostKeyChecking no
   HashKnownHosts no
   User root
+  ControlMaster auto
+  ControlPath ~/.ssh/master-%r@%h:%p
+  ControlPersist no
 
 Host *.gridbox
   User root
