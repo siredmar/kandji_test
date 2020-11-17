@@ -12,7 +12,7 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f
 	github.com/gorilla/websocket v1.4.2
-	github.com/grid-x/ds-api-types v0.0.0-20200829103259-d847af2a942f
+	github.com/grid-x/ds-api-types v0.0.0-20201113145058-1172a4042126
 	github.com/grid-x/wssh v0.0.0-20200915135758-cf90385c4fc5
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.1-0.20200422214639-569ae818ccb3 // indirect

@@ -36,6 +36,9 @@ type PodConfig struct {
 	// NOTE: This is currently not supported
 	// +optional
 	Priority *int32 `json:"priority,omitempty"`
+	// Specifies the DNS parameters of a pod.
+	// +optional
+	DNSConfig *PodDNSConfig `json:"dnsConfig,omitempty"`
 	// Lockfile that can be used by the contained application to prevent updates in critical sections. If this file is
 	// present, old pods should not be killed and new pods should not be started.
 	// +optional
@@ -386,6 +389,30 @@ type SecurityContext struct {
 	// Defaults to false.
 	// +optional
 	Privileged *bool `json:"privileged,omitempty"`
+}
+
+// PodDNSConfig defines the DNS parameters of a pod
+type PodDNSConfig struct {
+	// A list of DNS name server IP addresses.
+	// Duplicated nameservers will be removed.
+	// +optional
+	Nameservers []string `json:"nameservers,omitempty"`
+	// A list of DNS search domains for host-name lookup.
+	// Duplicated search paths will be removed.
+	// +optional
+	Searches []string `json:"searches,omitempty"`
+	// A list of DNS resolver options.
+	// Duplicated entries will be removed.
+	// +optional
+	Options []PodDNSConfigOption `json:"options,omitempty"`
+}
+
+// PodDNSConfigOption defines DNS resolver options of a pod.
+type PodDNSConfigOption struct {
+	// Required.
+	Name string `json:"name"`
+	// +optional
+	Value *string `json:"value,omitempty"`
 }
 
 // Container is the specification of a container

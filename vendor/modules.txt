@@ -48,7 +48,7 @@ github.com/googleapis/gnostic/extensions
 # github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket
-# github.com/grid-x/ds-api-types v0.0.0-20200829103259-d847af2a942f
+# github.com/grid-x/ds-api-types v0.0.0-20201113145058-1172a4042126
 ## explicit
 github.com/grid-x/ds-api-types
 github.com/grid-x/ds-api-types/management/2018-11-27/application
