@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os/exec"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/grid-x/wssh/pkg/session"
 	"github.com/grid-x/wssh/pkg/stream/std"
@@ -127,19 +128,19 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 }
 
 // NewSession requests a new session
-func NewSession(c *http.Client, serverAddr string, token string, deviceID string) (int, int, error) {
+func NewSession(c *http.Client, serverAddr string, token string, deviceID string) (*uuid.UUID, *uuid.UUID, error) {
 	var body session.HTTPresponse
 	err := Post(c, serverAddr, token, "/agent/session", fmt.Sprintf(`{"device": "%v"}`, deviceID), &body)
 
 	if err != nil {
-		return -1, -1, err
+		return nil, nil, err
 	}
 
 	if body.ErrorMsg != "" {
-		return -1, -1, errors.New(body.ErrorMsg)
+		return nil, nil, errors.New(body.ErrorMsg)
 	}
 
-	return body.SessionID, body.TunnelID, nil
+	return &body.SessionID, &body.TunnelID, nil
 }
 
 // Post HTTP request
