@@ -3,6 +3,8 @@ package session
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 // HTTPrequest used to setup a session
@@ -12,9 +14,9 @@ type HTTPrequest struct {
 
 // HTTPresponse used to setup a session
 type HTTPresponse struct {
-	SessionID int    `json:"sessionID,omitempty"`
-	TunnelID  int    `json:"tunnelID,omitempty"`
-	ErrorMsg  string `json:"error,omitempty"`
+	SessionID uuid.UUID `json:"sessionID,omitempty"`
+	TunnelID  uuid.UUID `json:"tunnelID,omitempty"`
+	ErrorMsg  string    `json:"error,omitempty"`
 }
 
 // RespondSuccess indicates successful session setup

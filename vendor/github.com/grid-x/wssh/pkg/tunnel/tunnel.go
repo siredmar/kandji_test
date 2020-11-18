@@ -2,16 +2,16 @@ package tunnel
 
 import (
 	"context"
-	"strconv"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 )
 
 // Tunnel is a connection from a Client to the Server
 type Tunnel struct {
-	ID          int
+	ID          uuid.UUID
 	ReadBuffer  chan []byte
 	WriteBuffer chan []byte
 	SigEmit     chan Signal
@@ -24,9 +24,13 @@ type Tunnel struct {
 }
 
 // IDfromString parses a string into a Tunnel ID
-func IDfromString(val string) int {
-	v, _ := strconv.Atoi(val)
-	return v
+func IDfromString(val string) (uuid.UUID, error) {
+	return uuid.Parse(val)
+}
+
+// IDString parses a Tunnel ID into a string
+func IDString(val uuid.UUID) string {
+	return val.String()
 }
 
 // State returns the current State of a Tunnel

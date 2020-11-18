@@ -6,21 +6,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	corev1beta1 "github.com/grid-x/ds-k8s-v2/apis/core/v1beta1"
 	"github.com/sirupsen/logrus"
 
 	"github.com/grid-x/wssh/internal"
-	"github.com/grid-x/wssh/pkg/tunnel"
 	"github.com/grid-x/wssh/internal/devicepod"
+	"github.com/grid-x/wssh/pkg/tunnel"
 )
 
 // Session is a two-way tunnel between two clients
 type Session struct {
-	ID             int
+	ID             uuid.UUID
 	AgentID        string
-	AgentTunnelID  int
+	AgentTunnelID  uuid.UUID
 	DeviceID       string
-	DeviceTunnelID int
+	DeviceTunnelID uuid.UUID
 	Signals        chan Signal
 	state          State
 	log            logrus.FieldLogger
@@ -94,18 +95,12 @@ func stateWaitDevice(ctx context.Context, s *Session) (context.Context, stateFn)
 	} else {
 		s.log.Info("spawn device")
 
-		var accountID string
-		var deviceID string
-		if v := ctx.Value(internal.AccountID); v != nil {
-			accountID = v.(string)
-			s.log.WithField("accountID", accountID).Debug("get accountID")
-		}
-		if v := ctx.Value(internal.DeviceID); v != nil {
-			deviceID = v.(string)
-			s.log.WithField("deviceID", deviceID).Debug("get deviceID")
-		}
-		if accountID == "" || deviceID == "" {
-			s.log.Error("get IDs from context")
+		var sessionCtx internal.SessionContext
+		if v := ctx.Value(internal.SessionContextKey); v != nil {
+			sessionCtx = v.(internal.SessionContext)
+			s.log.WithField("sessionCtx", fmt.Sprintf("%+v", sessionCtx)).Debug("get sessionCtx")
+		} else {
+			s.log.Error("get sessionCtx")
 			return ctx, nil
 		}
 		cfg := s.manager.Config()
@@ -115,13 +110,13 @@ func stateWaitDevice(ctx context.Context, s *Session) (context.Context, stateFn)
 			return ctx, nil
 		}
 
-		devicePod, err := devicepod.Create(s.log, s.manager.pods, accountID, deviceID, deviceTunnel, cfg.DeviceImage, cfg.ExternalAddr)
+		devicePod, err := devicepod.Create(s.log, s.manager.pods, sessionCtx, deviceTunnel, cfg.DeviceImage, cfg.ExternalAddr, cfg.DSAddr)
 		if err != nil {
 			s.log.WithError(err).Error("could not create pod")
 			return ctx, nil
 		}
 
-		ctx = context.WithValue(ctx, internal.DevicePod, devicePod)
+		ctx = context.WithValue(ctx, internal.DevicePodKey, devicePod)
 		if logrus.IsLevelEnabled(logrus.DebugLevel) {
 			s.log.WithField("devicePod", fmt.Sprintf("%+v", devicePod)).Debug("new device pod")
 		} else {
@@ -296,7 +291,7 @@ signals:
 }
 
 func (s *Session) cleanup(ctx context.Context) {
-	if v := ctx.Value(internal.DevicePod); v != nil {
+	if v := ctx.Value(internal.DevicePodKey); v != nil {
 		devicePod := v.(*corev1beta1.DevicePod)
 		s.log.WithField("devicePod", devicePod.Name).Debug("delete devicePod")
 		if err := s.manager.pods.Delete(context.Background(), devicePod); err != nil {

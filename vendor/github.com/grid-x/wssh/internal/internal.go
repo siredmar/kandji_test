@@ -6,13 +6,18 @@ import (
 )
 
 const (
-	// AccountID for usage with context
-	AccountID = "AccountID"
-	// DeviceID  for usage with context
-	DeviceID = "DeviceID"
-	// DevicePod for usage with context
-	DevicePod = "DevicePod"
+	// DevicePodKey for usage with context value
+	DevicePodKey = "DevicePod"
+	// SessionContextKey for usage with context value
+	SessionContextKey = "SessionContext"
 )
+
+// SessionContext contains the spec for launching a Session
+type SessionContext struct {
+	AccountID string
+	AgentID string
+	DeviceID string
+}
 
 // DefaultDeviceImage is set via Makefile build
 var DefaultDeviceImage string

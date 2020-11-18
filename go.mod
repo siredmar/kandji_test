@@ -10,10 +10,10 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-clix/cli v0.1.3-0.20200520201655-dbd6eb1d350c
 	github.com/google/go-cmp v0.5.1
-	github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/grid-x/ds-api-types v0.0.0-20201113145058-1172a4042126
-	github.com/grid-x/wssh v0.0.0-20200915135758-cf90385c4fc5
+	github.com/grid-x/wssh v0.0.0-20201118175459-b894b118767b
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.1-0.20200422214639-569ae818ccb3 // indirect
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23 // indirect

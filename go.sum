@@ -198,6 +198,8 @@ github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f h1:qa1wFcvZzVLbFVPdsdTsWL6k5IP6BEmFmd9SeahRQ5s=
 github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.1.2 h1:EVhdT+1Kseyi1/pUmXKaFxYsDNy9RQYkMWRH68J/W7Y=
+github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d/go.mod h1:sJBsCZ4ayReDTBIg8b9dl28c5xFWyhBTVRp3pOg5EKY=
@@ -233,6 +235,12 @@ github.com/grid-x/wssh v0.0.0-20200914140614-2244ee5947bf h1:bJN/4CeIZ8YR6qwC9nk
 github.com/grid-x/wssh v0.0.0-20200914140614-2244ee5947bf/go.mod h1:qDfjYy7U5S0PjoDgsijme0M2ibLpnleZGOosiwZ/Jwo=
 github.com/grid-x/wssh v0.0.0-20200915135758-cf90385c4fc5 h1:A14XEdWRwxFWjIVI4CXuTpv5YJVECRBRe6e/kNSNzfo=
 github.com/grid-x/wssh v0.0.0-20200915135758-cf90385c4fc5/go.mod h1:qDfjYy7U5S0PjoDgsijme0M2ibLpnleZGOosiwZ/Jwo=
+github.com/grid-x/wssh v0.0.0-20201118160936-e0572af4393c h1:pzvXpaiGAQOAdcpyDkTG4ZLT3B6RWzLaDYD0l5MDwww=
+github.com/grid-x/wssh v0.0.0-20201118160936-e0572af4393c/go.mod h1:ovWJxOBF8KCpm1Z/n5BS5z4MA77lAF5XuLTuh1arWOI=
+github.com/grid-x/wssh v0.0.0-20201118162521-17c0768464a1 h1:bDEnGzB0wzbvN9DnN/QOW6HOwgaSL8KVpvDS96Po67E=
+github.com/grid-x/wssh v0.0.0-20201118162521-17c0768464a1/go.mod h1:ovWJxOBF8KCpm1Z/n5BS5z4MA77lAF5XuLTuh1arWOI=
+github.com/grid-x/wssh v0.0.0-20201118175459-b894b118767b h1:6yfBbHbXgFMs848GnnkwV/JmfrbQSYFovKqABIY+4XE=
+github.com/grid-x/wssh v0.0.0-20201118175459-b894b118767b/go.mod h1:ovWJxOBF8KCpm1Z/n5BS5z4MA77lAF5XuLTuh1arWOI=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0/go.mod h1:8NvIoxWQoOIhqOTXgfV/d3M/q6VIi02HzZEHgUlZvzk=

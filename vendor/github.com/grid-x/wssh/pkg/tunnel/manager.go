@@ -3,12 +3,13 @@ package tunnel
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 // Manager is used to savely modify Tunnel state
 type Manager struct {
-	tunnels map[int]*Tunnel
+	tunnels map[uuid.UUID]*Tunnel
 	log     logrus.FieldLogger
 	n       int
 }
@@ -16,7 +17,7 @@ type Manager struct {
 // NewManager returns a new Manager
 func NewManager(log logrus.FieldLogger) *Manager {
 	m := &Manager{
-		tunnels: make(map[int]*Tunnel),
+		tunnels: make(map[uuid.UUID]*Tunnel),
 		log:     log,
 		n:       1,
 	}
@@ -25,7 +26,7 @@ func NewManager(log logrus.FieldLogger) *Manager {
 }
 
 // Get a Tunnel by its ID
-func (m *Manager) Get(tID int) (*Tunnel, error) {
+func (m *Manager) Get(tID uuid.UUID) (*Tunnel, error) {
 	t, ok := m.tunnels[tID]
 	if !ok {
 		return nil, fmt.Errorf("tunnel with tID %v does not exist", tID)
@@ -55,8 +56,6 @@ func (m *Manager) New() (*Tunnel, error) {
 	return t, nil
 }
 
-func (m *Manager) nextID() int {
-	n := m.n
-	m.n++
-	return n
+func (m *Manager) nextID() uuid.UUID {
+	return uuid.New()
 }

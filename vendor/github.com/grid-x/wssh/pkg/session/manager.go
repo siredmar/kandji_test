@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"github.com/google/uuid"
 
 	"github.com/grid-x/wssh/internal/k8s"
 	"github.com/grid-x/wssh/pkg/config"
@@ -12,7 +13,7 @@ import (
 
 // ManagerI is the managers Interface
 type ManagerI interface {
-	Delete(sID int)
+	Delete(sID uuid.UUID)
 	NewMaybe(agentID string, deviceID string) (*Session, bool, error)
 }
 
@@ -20,10 +21,9 @@ type ManagerI interface {
 type Manager struct {
 	cfg              *config.ServerConfig
 	log              logrus.FieldLogger
-	sessions         map[int]*Session
+	sessions         map[uuid.UUID]*Session
 	pods             *k8s.PodsRepository
 	tunnel           *tunnel.Manager
-	n                int
 	listenAddr       string
 	debugDeviceSpawn bool
 	debugDeviceAddr  string
@@ -40,9 +40,8 @@ func NewManager(
 		cfg:      cfg,
 		tunnel:   tunnelManager,
 		log:      log,
-		sessions: make(map[int]*Session),
+		sessions: make(map[uuid.UUID]*Session),
 		pods:     pods,
-		n:        1,
 	}
 
 	return m
@@ -54,13 +53,13 @@ func (m *Manager) Config() config.ServerConfig {
 }
 
 // Get a Session by its ID
-func (m *Manager) Get(sID int) (*Session, bool) {
+func (m *Manager) Get(sID uuid.UUID) (*Session, bool) {
 	s, ok := m.sessions[sID]
 	return s, ok
 }
 
 // Delete a Session by its ID
-func (m *Manager) Delete(sID int) {
+func (m *Manager) Delete(sID uuid.UUID) {
 	m.log.WithField("sID", sID).Debug("delete session")
 	delete(m.sessions, sID)
 }
@@ -97,7 +96,7 @@ func (m *Manager) NewMaybe(agentID string, deviceID string) (*Session, bool, err
 }
 
 // AgentTunnel returns the Agent Tunnel for a specific Session
-func (m *Manager) AgentTunnel(sID int) (*tunnel.Tunnel, error) {
+func (m *Manager) AgentTunnel(sID uuid.UUID) (*tunnel.Tunnel, error) {
 	s, ok := m.Get(sID)
 	if !ok {
 		return nil, fmt.Errorf("session with sID '%v' does not exist", sID)
@@ -107,7 +106,7 @@ func (m *Manager) AgentTunnel(sID int) (*tunnel.Tunnel, error) {
 }
 
 // DeviceTunnel returns the Device Tunnel for a specific Session
-func (m *Manager) DeviceTunnel(sID int) (*tunnel.Tunnel, error) {
+func (m *Manager) DeviceTunnel(sID uuid.UUID) (*tunnel.Tunnel, error) {
 	s, ok := m.Get(sID)
 	if !ok {
 		return nil, fmt.Errorf("session with sID '%v' does not exist", sID)
@@ -117,7 +116,7 @@ func (m *Manager) DeviceTunnel(sID int) (*tunnel.Tunnel, error) {
 }
 
 // AgentTunnelReady returns true iff the Agent Tunnel is ready for a specific Session
-func (m *Manager) AgentTunnelReady(sID int) bool {
+func (m *Manager) AgentTunnelReady(sID uuid.UUID) bool {
 	t, err := m.AgentTunnel(sID)
 	if err != nil {
 		return false
@@ -126,7 +125,7 @@ func (m *Manager) AgentTunnelReady(sID int) bool {
 }
 
 // DeviceTunnelReady returns true iff the Device Tunnel is ready for a specific Session
-func (m *Manager) DeviceTunnelReady(sID int) bool {
+func (m *Manager) DeviceTunnelReady(sID uuid.UUID) bool {
 	t, err := m.DeviceTunnel(sID)
 	if err != nil {
 		return false
@@ -134,8 +133,6 @@ func (m *Manager) DeviceTunnelReady(sID int) bool {
 	return t.State() == tunnel.StateReady
 }
 
-func (m *Manager) nextID() int {
-	n := m.n
-	m.n++
-	return n
+func (m *Manager) nextID() uuid.UUID {
+	return uuid.New()
 }
