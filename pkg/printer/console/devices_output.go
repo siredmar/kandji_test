@@ -74,19 +74,19 @@ func (do DevicesConsoleOutputWide) ShowAll(showAll bool) DevicesConsoleOutputWid
 	return do
 }
 
-func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
+func (do DevicesConsoleOutput) Map(showAll bool) []DeviceConsoleOutput {
 	var output []DeviceConsoleOutput
 	for _, e := range do.raw.Devices {
-		output = append(output, DeviceConsoleOutput{}.Map(e))
+		output = append(output, DeviceConsoleOutput{}.Map(e, showAll))
 	}
 
 	return output
 }
 
-func (do DevicesConsoleOutputWide) Map() []DeviceConsoleOutputWide {
+func (do DevicesConsoleOutputWide) Map(showAll bool) []DeviceConsoleOutputWide {
 	var output []DeviceConsoleOutputWide
 	for _, e := range do.raw.Devices {
-		output = append(output, DeviceConsoleOutputWide{}.Map(e))
+		output = append(output, DeviceConsoleOutputWide{}.Map(e, showAll))
 	}
 
 	return output

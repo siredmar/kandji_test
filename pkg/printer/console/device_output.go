@@ -27,10 +27,13 @@ type DeviceConsoleOutputWide struct {
 	PublicIP         string `header:"Public IPv4"`
 }
 
-func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
-	offlineIndicator := "* "
-	if d.IsOnline() {
-		offlineIndicator = " "
+func (o DeviceConsoleOutput) Map(d api.Device, showAll bool) DeviceConsoleOutput {
+	offlineIndicator := ""
+	if showAll {
+		offlineIndicator = "* "
+		if d.IsOnline() {
+			offlineIndicator = " "
+		}
 	}
 	o.ID = offlineIndicator + d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
@@ -48,9 +51,9 @@ func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
 	return o
 }
 
-func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
+func (o DeviceConsoleOutputWide) Map(d api.Device, showAll bool) DeviceConsoleOutputWide {
 	offlineIndicator := ""
-	if d.IsOnline() {
+	if showAll && d.IsOnline() {
 		offlineIndicator = " "
 	}
 	o.ID = offlineIndicator + d.Metadata.ID

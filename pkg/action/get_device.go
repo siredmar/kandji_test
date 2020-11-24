@@ -154,7 +154,7 @@ func GetDevice(
 		if len(devices.Devices) > 1 {
 			return errors.E(
 				errors.Invalid,
-				"Too many devices - Docker-Configs can just be shown for a single device",
+				"Too many devices - Pods can just be shown for a single device",
 				nil,
 			)
 		}

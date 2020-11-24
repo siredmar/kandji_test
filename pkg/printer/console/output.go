@@ -33,9 +33,9 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 
 	switch v := v.(type) {
 	case api.Device:
-		out = DeviceConsoleOutput{}.Map(v)
+		out = DeviceConsoleOutput{}.Map(v, config.ShowAll)
 	case api.Devices:
-		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.Pods:
@@ -77,9 +77,9 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 
 	switch v := v.(type) {
 	case api.Device:
-		out = DeviceConsoleOutputWide{}.Map(v)
+		out = DeviceConsoleOutputWide{}.Map(v, config.ShowAll)
 	case api.Devices:
-		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map()
+		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
