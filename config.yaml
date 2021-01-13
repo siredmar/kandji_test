@@ -31,7 +31,7 @@ Profiles:
   Default: false
   Name: viessmann
 - Auth:
-    Auth0ClientID: 95A1kFy4CppCnOWIt2gZCCBZdV4H0er0
+    Auth0ClientID: QNJLmZixoLJYUJBIz3X3RCGUNFvN4Rq6
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
   Default: false
