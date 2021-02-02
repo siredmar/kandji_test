@@ -16,14 +16,7 @@ func UpdateDeployment(
 	updateDeploymentCmdApp string,
 	updateDeploymentCmdSelector string,
 ) error {
-	//Lookup all existing devices to validate ids and autocomplete them if necessary
-	deployments, err := getDeployments(s.Client)
-	if err != nil {
-		return err
-	}
-	deploymentIDs := deployments.GetIds()
-
-	deployment, err := getDeploymentById(s.Client, id, deploymentIDs)
+	deployment, err := getDeploymentById(s.Client, id, nil)
 	if err != nil {
 		return err
 	}

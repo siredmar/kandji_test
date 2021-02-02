@@ -35,23 +35,9 @@ func GetDevice(
 
 	//List all devices
 	var devices api.Devices
-	rawDevices, err, errs := getDevices(s.Client)
-	if err != nil {
-		return err
-	}
-	rawDeviceIDs := rawDevices.GetIds()
-
-	if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
-		for _, err := range errs {
-			if err.err != nil {
-				fmt.Printf("%v: %v\n", err.profile, err.err)
-			}
-		}
-	}
-
 	if len(ids) > 0 {
 		for _, id := range ids {
-			device, err := getDeviceById(s.Client, id, rawDeviceIDs)
+			device, err := getDeviceById(s.Client, id, nil)
 			if err != nil {
 				return err
 			}
@@ -59,6 +45,19 @@ func GetDevice(
 			devices.Devices = append(devices.Devices, device)
 		}
 	} else {
+		rawDevices, err, errs := getDevices(s.Client)
+		if err != nil {
+			return err
+		}
+
+		if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
+			for _, err := range errs {
+				if err.err != nil {
+					fmt.Printf("%v: %v\n", err.profile, err.err)
+				}
+			}
+		}
+
 		devices = rawDevices
 	}
 
@@ -225,6 +224,14 @@ func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesError
 }
 
 func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api.Device, error) {
+	if len(id) != 36 && deviceIds == nil {
+		devices, err, _ := getDevices(client)
+		if err != nil {
+			return api.Device{}, err
+		}
+		deviceIds = devices.GetIds()
+	}
+
 	deviceID, err := api.LookupID(id, deviceIds)
 	if err != nil {
 		return api.Device{}, err

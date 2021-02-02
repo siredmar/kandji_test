@@ -18,18 +18,10 @@ func GetDeployment(s *service.Service, outputType string, sortBy string, showDev
 	}
 
 	if len(ids) > 0 {
-		//Get multiple deployments
-		//Lookup all existing deployments to validate ids and autocomplete them if necessary
-		deployments, err := getDeployments(s.Client)
-		if err != nil {
-			return err
-		}
-		deploymentIDs := deployments.GetIds()
-
 		for _, a := range ids {
 			if showDevices {
 				// Just show devices
-				devices, err := getDeploymentDevices(s.Client, a, deploymentIDs)
+				devices, err := getDeploymentDevices(s.Client, a, nil)
 				if err != nil {
 					return err
 				}
@@ -38,7 +30,7 @@ func GetDeployment(s *service.Service, outputType string, sortBy string, showDev
 					return err
 				}
 			} else {
-				deployment, err := getDeploymentById(s.Client, a, deploymentIDs)
+				deployment, err := getDeploymentById(s.Client, a, nil)
 				if err != nil {
 					return err
 				}
@@ -104,8 +96,16 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 	return deploymentList, nil
 }
 
-func getDeploymentById(client *client.APIClient, id string, deploymentsIds []string) (api.Deployment, error) {
-	deploymentID, err := api.LookupID(id, deploymentsIds)
+func getDeploymentById(client *client.APIClient, id string, deploymentIds []string) (api.Deployment, error) {
+	if len(id) != 36 && deploymentIds == nil {
+		deployments, err := getDeployments(client)
+		if err != nil {
+			return api.Deployment{}, err
+		}
+		deploymentIds = deployments.GetIds()
+	}
+
+	deploymentID, err := api.LookupID(id, deploymentIds)
 	if err != nil {
 		return api.Deployment{}, err
 	}
@@ -125,6 +125,14 @@ func getDeploymentById(client *client.APIClient, id string, deploymentsIds []str
 }
 
 func getDeploymentDevices(client *client.APIClient, id string, deploymentIds []string) (api.Devices, error) {
+	if len(id) != 36 && deploymentIds == nil {
+		deployments, err := getDeployments(client)
+		if err != nil {
+			return api.Devices{}, err
+		}
+		deploymentIds = deployments.GetIds()
+	}
+
 	deploymentID, err := api.LookupID(id, deploymentIds)
 	if err != nil {
 		return api.Devices{}, err
