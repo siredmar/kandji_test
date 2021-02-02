@@ -28,6 +28,7 @@ Host *.gridbox
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
   LogLevel error
+  PubkeyAcceptedKeyTypes +ssh-rsa
   ProxyCommand ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -q /keys/id_wssh_rsa && nc %h %p'
 `
 
