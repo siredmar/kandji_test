@@ -144,7 +144,7 @@ func NewSession(c *http.Client, serverAddr string, token string, deviceID string
 }
 
 // Post HTTP request
-func Post(c *http.Client, serverAddr string, token string, url string, payload string, v interface{}) error {
+func Post(c *http.Client, serverAddr string, token string, url string, payload string, v *session.HTTPresponse) error {
 	var reqURL string
 	if ServerSSL {
 		reqURL = "https://" + serverAddr + url
@@ -169,7 +169,11 @@ func Post(c *http.Client, serverAddr string, token string, url string, payload s
 		return err
 	}
 
-	return json.Unmarshal(resBody, &v)
+	if err := json.Unmarshal(resBody, &v); err != nil {
+		return fmt.Errorf("Unknown error: " + string(resBody))
+	}
+
+	return nil
 }
 
 func sshAgentAvailable() bool {
