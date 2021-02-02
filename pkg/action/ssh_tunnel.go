@@ -2,6 +2,7 @@ package action
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"net/http"
 	"net/url"
 	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -36,10 +39,34 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 		checkAgent.Fail()
 		return errs.E(
 			errs.Service,
-			"ssh-agent unavailable. Please ensure it is running",
+			"        ssh-agent unavailable. Please ensure it is running",
 		)
 	}
 	checkAgent.Ok()
+
+	auth := spinner.New("auth")
+	var sb strings.Builder
+	ok := false
+	for i, p := range s.Client.Auth.Profiles {
+		err := tokenValid(p.Auth.Token)
+		if err == nil {
+			ok = true
+			sb.WriteString(fmt.Sprintf("        %s: \033[32mOK\033[39m", p.Name))
+		} else {
+			sb.WriteString(fmt.Sprintf("        %s: \033[33m%s\033[39m", p.Name, err))
+		}
+
+		if i < len(s.Client.Auth.Profiles)-1 {
+			sb.WriteString("\n")
+		}
+	}
+	if ok {
+		auth.Ok()
+	} else {
+		auth.Fail()
+	}
+
+	auth.Write(sb.String())
 
 	getDevice := spinner.New("device")
 	device, err, profile, _ := getDeviceBySN(s.Client, sn)
@@ -51,7 +78,7 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 		getDevice.Fail()
 		err := errs.E(
 			errs.Invalid,
-			fmt.Sprintf("can't connect to virtual device %v", device.Metadata.ID),
+			fmt.Sprintf("        can't connect to virtual device %v", device.Metadata.ID),
 		)
 		return err
 	}
@@ -59,19 +86,11 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 		getDevice.Fail()
 		err := errs.E(
 			errs.Invalid,
-			fmt.Sprintf("device %v is offline", device.Metadata.ID),
+			fmt.Sprintf("        device %v is offline", device.Metadata.ID),
 		)
 		return err
 	}
 	getDevice.Ok()
-
-	auth := spinner.New("auth")
-	token, err := s.Client.GetTokenFromAuthConfig(profile)
-	if err != nil {
-		auth.Fail()
-		return err
-	}
-	auth.Ok()
 
 	c := &http.Client{}
 
@@ -79,6 +98,14 @@ func SSHTunnel(s *service.Service, quiet bool, sn string) error {
 	if isStaging, _ := s.Client.IsStaging(profile); !*isStaging {
 		serverAddr = "ssh.ds.gridx.ai:443"
 	}
+
+	tokenInject := spinner.New("inject token")
+	token, err := s.Client.GetTokenFromAuthConfig(profile)
+	if err != nil {
+		tokenInject.Fail()
+		return err
+	}
+	tokenInject.Ok()
 
 	startSession := spinner.New("start session")
 	_, tID, err := NewSession(c, serverAddr, token, device.Metadata.ID)
@@ -188,4 +215,36 @@ func sshAgentAvailable() bool {
 		}
 	}
 	return true
+}
+
+type Token struct {
+	Exp int `json:"exp"`
+}
+
+func tokenValid(t string) error {
+	parts := strings.Split(t, ".")
+	if len(parts) != 3 {
+		return fmt.Errorf("Invalid Token")
+	}
+
+	parsedToken := Token{}
+
+	if l := len(parts[1]) % 4; l > 0 {
+		parts[1] += strings.Repeat("=", 4-l)
+	}
+
+	decoded, err := base64.URLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return fmt.Errorf("Invalid Token")
+	}
+
+	if err := json.Unmarshal(decoded, &parsedToken); err != nil {
+		return fmt.Errorf("Invalid Token")
+	}
+
+	if time.Now().After(time.Unix(int64(parsedToken.Exp), 0)) {
+		return fmt.Errorf("Token expired")
+	}
+
+	return nil
 }

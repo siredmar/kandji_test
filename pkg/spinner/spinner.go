@@ -49,13 +49,21 @@ func Disable() {
 	enabled = false
 }
 
+// Write just writes out a message for the spinner
+func (s *Spinner) Write(t string) {
+	if !s.enabled {
+		return
+	}
+	fmt.Fprintf(s.out, "\r"+t+"\n")
+}
+
 // Ok indicates success
 func (s *Spinner) Ok() {
 	if !s.enabled {
 		return
 	}
 	s.stop()
-	fmt.Fprintf(s.out, "\r \033[32mOK\033[39m  \n")
+	fmt.Fprintf(s.out, "\r \033[32mOK\033[39m\n")
 }
 
 // Warn indicates error
@@ -88,6 +96,7 @@ func (s *Spinner) start() {
 			select {
 			case <-s.sigs:
 				s.stop()
+				os.Exit(0)
 			case <-s.done:
 				return
 			case <-s.ticker.C:
