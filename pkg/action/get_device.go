@@ -125,6 +125,8 @@ func GetDevice(
 		if err := s.Printer.Print(api.Deployments{Deployments: deployments}, printerConfig); err != nil {
 			return err
 		}
+
+		return nil
 	}
 
 	if showDockerConfig {
@@ -176,7 +178,6 @@ func GetDevice(
 	}
 
 	return nil
-
 }
 
 type getDevicesError struct {
