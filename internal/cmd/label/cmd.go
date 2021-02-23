@@ -4,6 +4,7 @@ import (
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cmd"
+	"github.com/grid-x/gxctl/internal/cmd/label/deployment"
 	"github.com/grid-x/gxctl/internal/cmd/label/device"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -38,6 +39,7 @@ func (c *CMD) Init(s *service.Service) error {
 
 	c.children = []cmd.CMD{
 		device.New(),
+		deployment.New(),
 	}
 
 	return nil

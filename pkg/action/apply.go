@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 
@@ -17,7 +18,7 @@ var (
 	}
 )
 
-func Apply(s *service.Service, fileName string) error {
+func Apply(s *service.Service, fileName string, skipOnLabel bool) error {
 	contents, err := api.GetFilesContentsToProcess(fileName)
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func Apply(s *service.Service, fileName string) error {
 	resourcesSorted := sortByKind(resources)
 
 	for _, r := range resourcesSorted {
-		if err := apply(r.ID, r.Res, s.Client); err != nil {
+		if err := apply(r.ID, r.Res, skipOnLabel, s.Client); err != nil {
 			return err
 		}
 	}
@@ -90,39 +91,51 @@ func sortByKind(resources map[string]interface{}) []resAssoc {
 	return result
 }
 
-func apply(resID string, res interface{}, client *client.APIClient) error {
+func apply(resID string, res interface{}, skipOnLabel bool, client *client.APIClient) error {
 	if resID == "" {
 		// Create
 		return create(resID, res, client)
 	}
 
 	// Update or Create
-	found := false
-	switch res.(type) {
+	var update interface{}
+	var remoteLabels map[string]string
+
+	switch v := res.(type) {
 	case api.Application:
-		_, err := getApplicationById(client, resID)
+		app, err := getApplicationById(client, resID)
 		if err == nil {
-			found = true
+			remoteLabels = app.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
+			update = v
 		}
 	case api.Device:
-		_, err := getDeviceById(client, resID, nil)
+		device, err := getDeviceById(client, resID, nil)
 		if err == nil {
-			found = true
+			remoteLabels = device.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
+			update = v
 		}
 	case api.Deployment:
-		_, err := getDeploymentById(client, resID, nil)
+		deploy, err := getDeploymentById(client, resID, nil)
 		if err == nil {
-			found = true
+			remoteLabels = deploy.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
+			update = v
 		}
 	case api.DockerConfig:
-		_, err := getDockerConfigById(client, resID, nil)
+		dc, err := getDockerConfigById(client, resID, nil)
 		if err == nil {
-			found = true
+			remoteLabels = dc.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
+			update = v
 		}
 	case api.CleanupConfig:
-		_, err := getCleanupConfigById(client, resID, nil)
+		cc, err := getCleanupConfigById(client, resID, nil)
 		if err == nil {
-			found = true
+			remoteLabels = cc.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(cc.Metadata.Labels, v.Metadata.Labels)
+			update = v
 		}
 	default:
 		return errors.E(
@@ -131,11 +144,24 @@ func apply(resID string, res interface{}, client *client.APIClient) error {
 		)
 	}
 
-	if !found {
+	if update == nil {
 		// Create
 		return create(resID, res, client)
 	}
 
 	// Update
-	return update(resID, res, client)
+	// Skip on label
+	if _, ok := remoteLabels[api.IgnoreLabel]; skipOnLabel && ok {
+		fmt.Printf("%s:\n", resID)
+		fmt.Println("Ignored due to label: " + api.IgnoreLabel)
+		return nil
+	}
+
+	message, err := updateResource(client, update, resID, nil)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(message)
+	return nil
 }

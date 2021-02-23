@@ -7,8 +7,6 @@ import (
 
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/update/deployment"
-	"github.com/grid-x/gxctl/internal/cmd/update/device"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -51,11 +49,6 @@ func (c *CMD) Init(s *service.Service) error {
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
 		},
-	}
-
-	c.children = []cmd.CMD{
-		device.New(),
-		deployment.New(),
 	}
 
 	c.cmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to update the resource")

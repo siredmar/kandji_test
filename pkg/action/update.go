@@ -40,7 +40,67 @@ func Update(s *service.Service, updateCmdFilename string) error {
 }
 
 func update(resID string, res interface{}, client *client.APIClient) error {
-	message, err := updateResource(client, res, resID, nil)
+	var update interface{}
+
+	switch v := res.(type) {
+	case api.Application:
+		app, err := getApplicationById(client, resID)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"application not found",
+			)
+		}
+		app.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
+		update = app
+	case api.Device:
+		device, err := getDeviceById(client, resID, nil)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"device not found",
+			)
+		}
+		device.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
+		update = device
+	case api.Deployment:
+		deploy, err := getDeploymentById(client, resID, nil)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"deployment not found",
+			)
+		}
+		deploy.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
+		update = deploy
+	case api.DockerConfig:
+		dc, err := getDockerConfigById(client, resID, nil)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"dockerconfig not found",
+			)
+		}
+		dc.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
+		update = dc
+	case api.CleanupConfig:
+		cc, err := getCleanupConfigById(client, resID, nil)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"cleanupconfig not found",
+			)
+		}
+		cc.Metadata.Labels = api.ComputeMetadataMap(cc.Metadata.Labels, v.Metadata.Labels)
+		update = cc
+	default:
+		return errors.E(
+			errors.NotImplemented,
+			"Unsupported type",
+		)
+	}
+
+	message, err := updateResource(client, update, resID, nil)
 	if err != nil {
 		return err
 	}
@@ -71,8 +131,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Spec = inSpec
 
 		in.Metadata = &types.UpdateMetadata{}
-		in.Metadata.Annotations = v.Metadata.Annotations
-		in.Metadata.Annotations = v.Metadata.Labels
+		in.Metadata.Labels = v.Metadata.Labels
 
 		response, err := client.PatchRequest(api.DevicesEndpoint, v, resId)
 		if err != nil {
@@ -91,7 +150,6 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 
 		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
-		in.Metadata.Annotations = v.Metadata.Annotations
 
 		response, err := client.PatchRequest(api.DeploymentsEndpoint, v, resId)
 		if err != nil {
@@ -109,7 +167,6 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Spec = &v.Spec
 
 		in.Metadata.Labels = v.Metadata.Labels
-		in.Metadata.Annotations = v.Metadata.Annotations
 
 		response, err := client.PatchRequest(api.DockerConfigsEndpoint, v, resId)
 		if err != nil {
@@ -127,7 +184,6 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Spec = &v.Spec
 
 		in.Metadata.Labels = v.Metadata.Labels
-		in.Metadata.Annotations = v.Metadata.Annotations
 
 		response, err := client.PatchRequest(api.CleanupConfigsEndpoint, v, resId)
 		if err != nil {

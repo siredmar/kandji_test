@@ -89,3 +89,20 @@ func readFile(filepath string) ([]byte, error) {
 
 	return bytes, nil
 }
+
+func ComputeMetadataMap(current map[string]string, update map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	// Prepare to remove entries, which are found in the current state but not in the update from the state.
+	for k := range current {
+		if _, ok := update[k]; !ok {
+			result[k+"-"] = ""
+		}
+	}
+
+	for k, v := range update {
+		result[k] = v
+	}
+
+	return result
+}

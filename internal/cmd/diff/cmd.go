@@ -40,13 +40,14 @@ func (c *CMD) Init(s *service.Service) error {
 		Run: func(cmd *clix.Command, args []string) error {
 			diffCmdFilename, _ := cmd.Flags().GetString("filename")
 			diffCmdDiffer, _ := cmd.Flags().GetString("command")
+			diffCmdSkipOnLabel, _ := cmd.Flags().GetBool("skip-on-label")
 
 			if diffCmdFilename == "" {
 				fmt.Println(cmd.Usage())
 				return nil
 			}
 
-			return action.Diff(s, diffCmdFilename, diffCmdDiffer)
+			return action.Diff(s, diffCmdFilename, diffCmdDiffer, diffCmdSkipOnLabel)
 		},
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
@@ -56,6 +57,7 @@ func (c *CMD) Init(s *service.Service) error {
 
 	c.cmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to create the resource")
 	c.cmd.Flags().StringP("command", "c", "diff", "External diff programm")
+	c.cmd.Flags().BoolP("skip-on-label", "s", false, "Allow to skip resources based on their labels")
 
 	return nil
 }

@@ -39,12 +39,14 @@ func (c *CMD) Init(s *service.Service) error {
 		Short: "apply resources",
 		Run: func(cmd *clix.Command, args []string) error {
 			applyCmdFilename, _ := cmd.Flags().GetString("filename")
+			diffCmdSkipOnLabel, _ := cmd.Flags().GetBool("skip-on-label")
+
 			if applyCmdFilename == "" {
 				fmt.Println(cmd.Usage())
 				return nil
 			}
 
-			return action.Apply(s, applyCmdFilename)
+			return action.Apply(s, applyCmdFilename, diffCmdSkipOnLabel)
 		},
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
@@ -52,6 +54,7 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().StringP("filename", "f", "", "filename or directory to file to use to create the resource")
+	c.cmd.Flags().BoolP("skip-on-label", "s", false, "Allow to skip resources based on their labels")
 
 	return nil
 }

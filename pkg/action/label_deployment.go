@@ -8,8 +8,8 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-func LabelDevice(s *service.Service, ids []string) error {
-	d, err := getDeviceById(s.Client, ids[0], nil)
+func LabelDeployment(s *service.Service, ids []string) error {
+	d, err := getDeploymentById(s.Client, ids[0], nil)
 	if err != nil {
 		return err
 	}

@@ -22,14 +22,14 @@ const (
 	KNOWN_AFTER_APPLY = "(Known after apply)"
 )
 
-func Diff(s *service.Service, fileName string, diffCmd string) error {
+func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool) error {
 	contents, err := api.GetFilesContentsToProcess(fileName)
 	if err != nil {
 		return err
 	}
 
 	for n, c := range contents {
-		if err := diff(n, c, diffCmd, s.Client); err != nil {
+		if err := diff(n, c, diffCmd, skipOnLabel, s.Client); err != nil {
 			return err
 		}
 	}
@@ -37,7 +37,7 @@ func Diff(s *service.Service, fileName string, diffCmd string) error {
 	return nil
 }
 
-func diff(filename string, content []byte, differ string, client *client.APIClient) error {
+func diff(filename string, content []byte, differ string, skipOnLabel bool, client *client.APIClient) error {
 	res, resID, err := checkResourceFile(content, true)
 	if err != nil {
 		return err
@@ -55,30 +55,43 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 	} else {
 		// There is a resID - Check if res already exists
 		var current interface{}
+		var remoteLabels map[string]string
 		var err error
 
 		switch v := res.(type) {
 		case api.Application:
-			current, err = getApplicationById(client, v.Metadata.ID)
+			var app api.Application
+			app, err = getApplicationById(client, v.Metadata.ID)
+			remoteLabels = app.Metadata.Labels
+
+			current = app
 		case api.Device:
 			var device api.Device
 			device, err = getDeviceById(client, v.Metadata.ID, nil)
 			device.Status = deviceApi.DeviceStatus{}
+			remoteLabels = device.Metadata.Labels
+
 			current = device
 		case api.Deployment:
 			var deploy api.Deployment
 			deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
 			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
+			remoteLabels = deploy.Metadata.Labels
+
 			current = deploy
 		case api.DockerConfig:
 			var dc api.DockerConfig
 			dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
 			dc.Status = dockerconfigApi.DockerConfigStatus{}
+			remoteLabels = dc.Metadata.Labels
+
 			current = dc
 		case api.CleanupConfig:
 			var cc api.CleanupConfig
 			cc, err = getCleanupConfigById(client, v.Metadata.ID, nil)
 			cc.Status = cleanupconfigApi.CleanupConfigStatus{}
+			remoteLabels = cc.Metadata.Labels
+
 			current = cc
 		default:
 			return errors.E(
@@ -100,6 +113,13 @@ func diff(filename string, content []byte, differ string, client *client.APIClie
 
 			// It's 404, set current to nil for diff
 			current = nil
+		}
+
+		// Skip on label
+		if _, ok := remoteLabels[api.IgnoreLabel]; skipOnLabel && ok {
+			fmt.Printf("%s:\n", filename)
+			fmt.Println("Ignored due to label: " + api.IgnoreLabel)
+			return nil
 		}
 
 		err, f1, f2 = writeDiffFiles(current, res)
