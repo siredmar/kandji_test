@@ -19,7 +19,13 @@ func LabelDevice(s *service.Service, ids []string) error {
 		return err
 	}
 
-	d.Metadata.Labels = api.ComputeMetadataMap(d.Metadata.Labels, m)
+	for k, v := range m {
+		if strings.HasSuffix(k, "-") {
+			// delete original value in map if label with deletion suffix was found
+			delete(d.Metadata.Labels, k[:len(k)-1])
+		}
+		d.Metadata.Labels[k] = v
+	}
 
 	message, err := updateResource(s.Client, d, d.Metadata.ID, nil)
 	if err != nil {
