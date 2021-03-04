@@ -98,16 +98,6 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		}
 		return fmt.Sprintf("Docker config %s created successfully", resID), nil
 
-	case api.CleanupConfig:
-		response, err := client.PostRequest(api.CleanupConfigsEndpoint, res)
-		if err != nil {
-			return "", err
-		}
-		if _, err := api.NewCleanupConfig(response, false); err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("Cleanup config %s created successfully", resID), nil
-
 	default:
 		return "", errors.E(
 			errors.NotImplemented,

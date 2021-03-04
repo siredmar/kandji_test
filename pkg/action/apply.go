@@ -130,13 +130,6 @@ func apply(resID string, res interface{}, skipOnLabel bool, client *client.APICl
 			v.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
-	case api.CleanupConfig:
-		cc, err := getCleanupConfigById(client, resID, nil)
-		if err == nil {
-			remoteLabels = cc.Metadata.Labels
-			v.Metadata.Labels = api.ComputeMetadataMap(cc.Metadata.Labels, v.Metadata.Labels)
-			update = v
-		}
 	default:
 		return errors.E(
 			errors.NotImplemented,

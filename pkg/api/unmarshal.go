@@ -401,63 +401,6 @@ func NewDeviceDockerConfigs(j []byte, strict bool) (DeviceDockerConfigs, error) 
 	return d, nil
 }
 
-func NewCleanupConfig(j []byte, strict bool) (CleanupConfig, error) {
-	c := CleanupConfig{}
-
-	b, err := yaml.YAMLToJSON(j)
-	if err == nil {
-		j = b
-	}
-
-	dec := json.NewDecoder(bytes.NewReader(j))
-	if strict {
-		dec.DisallowUnknownFields()
-	}
-	if err := dec.Decode(&c); err != nil {
-		return c, err
-	}
-
-	return c, nil
-}
-
-func NewCreateCleanupConfig(j []byte, strict bool) (CreateCleanupConfig, error) {
-	d := CreateCleanupConfig{}
-
-	b, err := yaml.YAMLToJSON(j)
-	if err == nil {
-		j = b
-	}
-
-	dec := json.NewDecoder(bytes.NewReader(j))
-	if strict {
-		dec.DisallowUnknownFields()
-	}
-	if err := dec.Decode(&d); err != nil {
-		return d, err
-	}
-
-	return d, nil
-}
-
-func NewCleanupConfigs(j []byte, strict bool) (CleanupConfigs, error) {
-	c := CleanupConfigs{}
-
-	b, err := yaml.YAMLToJSON(j)
-	if err == nil {
-		j = b
-	}
-
-	dec := json.NewDecoder(bytes.NewReader(j))
-	if strict {
-		dec.DisallowUnknownFields()
-	}
-	if err := dec.Decode(&c); err != nil {
-		return c, err
-	}
-
-	return c, nil
-}
-
 func decode(j []byte, i interface{}, strict bool) (interface{}, error) {
 	b, err := yaml.YAMLToJSON(j)
 	if err == nil {

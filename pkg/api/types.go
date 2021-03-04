@@ -9,7 +9,6 @@ import (
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
-	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 )
@@ -71,15 +70,6 @@ type CreateDockerConfig dockerConfigApi.CreateRequest
 
 type UpdateDockerConfig dockerConfigApi.UpdateRequest
 
-type CleanupConfig cleanupConfigApi.CleanupConfig
-
-type CleanupConfigs struct {
-	CleanupConfigs []CleanupConfig `json:"cleanupConfigs"`
-}
-
-type CreateCleanupConfig cleanupConfigApi.CreateRequest
-
-type UpdateCleanupConfig cleanupConfigApi.UpdateRequest
 
 type DeviceDockerConfig deviceDockerConfigApi.DeviceDockerConfig
 
@@ -328,50 +318,4 @@ func (d *DeviceDockerConfigs) GetIds() []string {
 		out = append(out, con.Metadata.ID)
 	}
 	return out
-}
-
-func (c *CleanupConfig) IsEmpty() bool {
-	if cmp.Diff(CleanupConfigs{}, *c) == "" {
-		return true
-	}
-	return false
-}
-
-func (c *CleanupConfigs) IsEmpty() bool {
-	if len(c.CleanupConfigs) == 0 {
-		return true
-	}
-	return false
-}
-
-func (c *CleanupConfigs) GetIds() []string {
-	out := make([]string, len(c.CleanupConfigs))
-	for _, con := range c.CleanupConfigs {
-		out = append(out, con.Metadata.ID)
-	}
-	return out
-}
-
-func (d *CreateCleanupConfig) IsEmpty() bool {
-	if cmp.Diff(CreateCleanupConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (a *CreateCleanupConfig) IsValid() bool {
-	// Todo
-	return true
-}
-
-func (d *UpdateCleanupConfig) IsEmpty() bool {
-	if cmp.Diff(UpdateCleanupConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (a *UpdateCleanupConfig) IsValid() bool {
-	// Todo
-	return true
 }

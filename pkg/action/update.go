@@ -5,7 +5,6 @@ import (
 
 	types "github.com/grid-x/ds-api-types"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
-	cleanupConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
@@ -83,16 +82,6 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 		}
 		dc.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
 		update = dc
-	case api.CleanupConfig:
-		cc, err := getCleanupConfigById(client, resID, nil)
-		if err != nil {
-			return errors.E(
-				errors.NotExists,
-				"cleanupconfig not found",
-			)
-		}
-		cc.Metadata.Labels = api.ComputeMetadataMap(cc.Metadata.Labels, v.Metadata.Labels)
-		update = cc
 	default:
 		return errors.E(
 			errors.NotImplemented,
@@ -179,23 +168,6 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		}
 
 		return fmt.Sprintf("DockerConfig %s updated successfully", config.Metadata.ID), nil
-	case api.CleanupConfig:
-		in := cleanupConfigApi.UpdateRequest{}
-		in.Spec = &v.Spec
-
-		in.Metadata.Labels = v.Metadata.Labels
-
-		response, err := client.PatchRequest(api.CleanupConfigsEndpoint, v, resId)
-		if err != nil {
-			return "", err
-		}
-
-		config, err := api.NewCleanupConfig(response, false)
-		if err != nil {
-			return "", err
-		}
-
-		return fmt.Sprintf("CleanupConfig %s updated successfully", config.Metadata.ID), nil
 	default:
 		return "", errors.E(
 			errors.NotImplemented,

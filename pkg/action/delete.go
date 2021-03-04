@@ -61,12 +61,6 @@ func deleteResource(resID string, res interface{}, client *client.APIClient) err
 		}
 		break
 
-	case api.CleanupConfig:
-		if _, err := client.DeleteRequest(api.CleanupConfigsEndpoint, resID); err != nil {
-			return err
-		}
-		break
-
 	default:
 		return errors.E(
 			errors.NotImplemented,

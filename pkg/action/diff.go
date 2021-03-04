@@ -8,7 +8,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
-	cleanupconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/cleanupconfigs"
 	dockerconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
@@ -86,13 +85,6 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 			remoteLabels = dc.Metadata.Labels
 
 			current = dc
-		case api.CleanupConfig:
-			var cc api.CleanupConfig
-			cc, err = getCleanupConfigById(client, v.Metadata.ID, nil)
-			cc.Status = cleanupconfigApi.CleanupConfigStatus{}
-			remoteLabels = cc.Metadata.Labels
-
-			current = cc
 		default:
 			return errors.E(
 				errors.NotImplemented,
@@ -176,12 +168,6 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 	if err == nil {
 		dockerConfig.Metadata.ID = resID
 		return dockerConfig, resID, nil
-	}
-
-	cleanupConfig, err := api.NewCleanupConfig(bytes, true)
-	if err == nil {
-		cleanupConfig.Metadata.ID = resID
-		return cleanupConfig, resID, nil
 	}
 
 	maintenanceTask, err := api.NewMaintenanceTask(bytes, true)

@@ -114,12 +114,8 @@ $ gxctl [command] [TYPE] [NAME] -o=<output_format>
 ```shell
 # Get a List of docker configurations
 $ gxctl config get docker
-# Get a List of cleanup configurations
-$ gxctl config get cleanup
 # Get a List of docker configurations and include additional information (such as selectors).
 $ gxctl config get docker -o wide
-# Get a List of cleanup configurations and include additional information (such as selectors).
-$ gxctl config get cleanup -o wide
 # Create a docker config for AWS targeting all devices with label demo=demo
 $ gxctl config create docker-aws https://123456789.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=AAABBBCCCDDDEEE --secret-access-key=dpohx+EgPWQK+Fadsads123adeqwuIwnM4atH --region=eu-central-1 --selector demo=demo
 # Delete a docker configuration

@@ -4,7 +4,6 @@ import (
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/config/get/cleanup"
 	"github.com/grid-x/gxctl/internal/cmd/config/get/docker"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -39,7 +38,6 @@ func (c *CMD) Init(s *service.Service) error {
 
 	c.children = []cmd.CMD{
 		docker.New(),
-		cleanup.New(),
 	}
 
 	return nil
