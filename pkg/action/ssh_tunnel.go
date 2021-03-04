@@ -30,16 +30,31 @@ var (
 	ServerSSL = true
 )
 
-func SSHTunnel(s *service.Service, quiet bool, sn string) error {
+func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error {
 	if quiet {
 		spinner.Disable()
 	}
+	checkConfig := spinner.New("check config")
+	if err := SSHConfigCheck(s); err != nil {
+		if skipConfigCheck {
+			checkConfig.Warn()
+		} else {
+			checkConfig.Fail()
+			return errs.E(
+				err,
+				"edit SSH config so it matches 'gxctl ssh setup' output OR invoke 'gxctl ssh tunnel …' with --skip-config-check flag",
+			)
+		}
+	} else {
+		checkConfig.Ok()
+	}
+
 	checkAgent := spinner.New("check ssh agent")
 	if !sshAgentAvailable() {
 		checkAgent.Fail()
 		return errs.E(
 			errs.Service,
-			"        ssh-agent unavailable. Please ensure it is running",
+			"      ssh-agent unavailable. Please ensure it is running",
 		)
 	}
 	checkAgent.Ok()

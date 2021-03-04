@@ -1,13 +1,12 @@
-package ssh
+package check
 
 import (
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/ssh/check"
-	"github.com/grid-x/gxctl/internal/cmd/ssh/setup"
-	"github.com/grid-x/gxctl/internal/cmd/ssh/tunnel"
+	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
+	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 // CMD contains a command and all its sub commands
@@ -34,13 +33,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "ssh",
-		Short: "ssh to different devices",
-	}
-	c.children = []cmd.CMD{
-		check.New(),
-		setup.New(),
-		tunnel.New(),
+		Use:   "check",
+		Short: "Check if current SSH config is valid",
+		Run: func(cmd *clix.Command, args []string) error {
+			err := action.SSHConfigCheck(s)
+			if err != nil {
+				return errors.E(err, "SSH config differs from expected")
+			}
+			return nil
+		},
 	}
 
 	return nil

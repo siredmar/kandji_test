@@ -6,31 +6,9 @@ import (
 	clix "github.com/go-clix/cli"
 
 	"github.com/grid-x/gxctl/internal/cmd"
+	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
-
-const sshConfig = `# Append the following to ~/.ssh/config:
-
-Host *.gridbox-tunnel
-  ProxyCommand gxctl ssh tunnel --profile='*' $(echo %h | cut -d'.' -f1)
-  ServerAliveInterval 30
-  StrictHostKeyChecking no
-  HashKnownHosts no
-  User root
-  ControlMaster auto
-  ControlPath ~/.ssh/master-%r@%h:%p
-  ControlPersist no
-
-Host *.gridbox
-  User root
-  HostName 127.0.0.1
-  Port 22222
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  LogLevel error
-  PubkeyAcceptedKeyTypes +ssh-rsa
-  ProxyCommand ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -q /keys/id_wssh_rsa && nc %h %p'
-`
 
 // CMD contains a command and all its sub commands
 type CMD struct {
@@ -59,8 +37,8 @@ func (c *CMD) Init(s *service.Service) error {
 		Use:   "setup",
 		Short: "Print instructions to setup OpenSSH aliases for easy tunneling to devices",
 		Run: func(cmd *clix.Command, args []string) error {
-			fmt.Println(sshConfig)
-			return nil
+			fmt.Println("# Append the following to ~/.ssh/config:")
+			return action.SSHConfigPrint(s)
 		},
 	}
 
