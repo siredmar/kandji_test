@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"path"
+
 	"github.com/spf13/viper"
 
 	"github.com/grid-x/gxctl/pkg/client"
@@ -24,9 +27,14 @@ func (c *Config) readAuth() error {
 		// Use config file from the flag.
 		viper.SetConfigFile(c.ConfigFile)
 	} else {
+		xdgConfigHome := path.Join("$HOME", ".config")
+		if envXdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); envXdgConfigHome != "" {
+			xdgConfigHome = envXdgConfigHome
+		}
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("config")
-		viper.AddConfigPath("$HOME/.gxctl")
+		viper.AddConfigPath(path.Join("$HOME", ".gxctl"))
+		viper.AddConfigPath(path.Join(xdgConfigHome, "gxctl"))
 		viper.AddConfigPath(".") // optionally look for config in the working directory
 	}
 
