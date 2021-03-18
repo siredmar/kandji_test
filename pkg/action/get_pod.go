@@ -106,6 +106,10 @@ func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
 
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
+		if errors.IsKind(err, errors.NotExists) {
+			return api.Pods{}, nil
+		}
+
 		return api.Pods{}, err
 	}
 
