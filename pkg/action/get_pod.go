@@ -102,26 +102,12 @@ func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, 
 }
 
 func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
-	return api.Pods{}, errors.E(
-		errors.NotImplemented,
-		"Getting Pods by Device-ID is not yet implemented",
-	)
-	/*
-		endpoint := fmt.Sprintf("%s/%s/pods"", api.PodsEndpoint, id)
-		response, err := apiClient.Request(endpoint)
-		if err != nil {
-			return api.Pods{}, err
-		}
-		podList, err := api.NewPods(response)
+	endpoint := fmt.Sprintf("%s/%s/pods", api.DevicesEndpoint, id)
 
-		if err != nil {
-			return pods, err
-		}
+	response, err := client.GetRequest(endpoint)
+	if err != nil {
+		return api.Pods{}, err
+	}
 
-		if podList.IsEmpty() {
-			return podList, errors.NotFoundError(errors.ErrorDetails{Command: "pods"})
-		}
-
-		return pods, nil
-	*/
+	return api.NewPods(response, false)
 }
