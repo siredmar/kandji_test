@@ -46,6 +46,15 @@ type tokenParsed struct {
 	Nonce         string `json:"nonce"`
 }
 
+// Email of this Token
+func (t *Token) Email() string {
+	token, err := t.parse()
+	if err != nil {
+		return ""
+	}
+	return token.Email
+}
+
 func (t *Token) parse() (*tokenParsed, error) {
 	parts := strings.Split(t.String(), ".")
 	if len(parts) != 3 {
