@@ -31,7 +31,7 @@ type AuthConfig struct {
 		Auth    struct {
 			Auth0Tenant   string `yaml:"auth0Tenant"`
 			Auth0ClientID string `yaml:"auth0ClientID"`
-			Token         string `yaml:"token"`
+			Token         Token `yaml:"token"`
 		} `yaml:"auth"`
 	} `yaml:"profiles"`
 }
@@ -153,7 +153,7 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 			continue
 		}
 
-		if err := TokenValid(token); err != nil {
+		if err := token.Validate(); err != nil {
 			result.Err = err
 			continue
 		}
@@ -261,8 +261,8 @@ func (apiclient *APIClient) IsStaging(profileName string) bool {
 	return isStaging
 }
 
-func (apiclient *APIClient) GetTokenFromAuthConfig(profileName string) (string, error) {
-	var token string
+func (apiclient *APIClient) GetTokenFromAuthConfig(profileName string) (Token, error) {
+	var token Token
 
 	for _, profile := range apiclient.Auth.Profiles {
 		if profile.Name == profileName {
@@ -277,7 +277,7 @@ func (apiclient *APIClient) GetTokenFromAuthConfig(profileName string) (string, 
 	return token, nil
 }
 
-func (apiclient *APIClient) SetTokenInAuthConfig(token string) error {
+func (apiclient *APIClient) SetTokenInAuthConfig(token Token) error {
 	p, err := apiclient.resolveProfileNames()
 	if err != nil {
 		return err

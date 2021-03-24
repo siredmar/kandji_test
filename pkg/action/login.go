@@ -11,6 +11,7 @@ import (
 	"github.com/toqueteos/webbrowser"
 
 	"github.com/grid-x/gxctl/pkg/auth"
+	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -86,7 +87,7 @@ func Login(s *service.Service, openBrowser bool) error {
 	server.ListenAndServe()
 
 	if token != "" {
-		if err := s.Client.SetTokenInAuthConfig(token); err != nil {
+		if err := s.Client.SetTokenInAuthConfig(client.Token(token)); err != nil {
 			return err
 		}
 		fmt.Println("Authenticated!")

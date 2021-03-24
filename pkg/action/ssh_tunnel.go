@@ -19,7 +19,6 @@ import (
 	"github.com/grid-x/wssh/pkg/stream/ws"
 
 	"github.com/grid-x/gxctl/pkg/api"
-	"github.com/grid-x/gxctl/pkg/client"
 	errs "github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 	"github.com/grid-x/gxctl/pkg/spinner"
@@ -63,7 +62,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	var sb strings.Builder
 	ok := false
 	for i, p := range s.Client.Auth.Profiles {
-		err := client.TokenValid(p.Auth.Token)
+		err := p.Auth.Token.Validate()
 		if err == nil {
 			ok = true
 			sb.WriteString(fmt.Sprintf("        %s: \033[32mOK\033[39m", p.Name))
@@ -158,7 +157,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	tokenInject.Ok()
 
 	startSession := spinner.New("start session")
-	_, tID, err := NewSession(c, serverAddr, token, device.Metadata.ID)
+	_, tID, err := NewSession(c, serverAddr, token.String(), device.Metadata.ID)
 	if err != nil {
 		startSession.Fail()
 		return err
