@@ -11,14 +11,12 @@ import (
 )
 
 func Restart(s *service.Service, id string) error {
-	//Lookup all existing devices to validate ids and autocomplete them if necessary
-	devices, err, _ := getDevices(s.Client)
+	d, err := getDeviceById(s.Client, id, nil)
 	if err != nil {
 		return err
 	}
-	deviceIDs := devices.GetIds()
 
-	message, err := restartDevice(s.Client, id, deviceIDs)
+	message, err := restartDevice(s.Client, d.Metadata.ID)
 	if err != nil {
 		return err
 	}
@@ -27,16 +25,7 @@ func Restart(s *service.Service, id string) error {
 	return nil
 }
 
-func restartDevice(client *client.APIClient, id string, ids []string) (string, error) {
-	devID := id
-	if ids != nil {
-		var err error
-		devID, err = api.LookupID(id, ids)
-		if err != nil {
-			return "", err
-		}
-	}
-
+func restartDevice(client *client.APIClient, devID string) (string, error) {
 	d := api.CreateMaintenanceTask{
 		Spec: &maintenanceApi.MaintenanceTaskSpec{
 			Type:     maintenanceApi.MaintenanceTaskTypeRestart,

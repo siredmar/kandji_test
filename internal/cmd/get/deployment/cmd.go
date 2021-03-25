@@ -6,7 +6,6 @@ import (
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
-	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -39,28 +38,21 @@ func (c *CMD) Init(s *service.Service) error {
 		Short:   "get deployment",
 		Long:    "print a list of all deployments you have access to",
 		Run: func(cmd *clix.Command, args []string) error {
+			deviceID, _ := cmd.Flags().GetString("device-id")
 			outputType, _ := cmd.Flags().GetString("output")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
-			showDevices, _ := cmd.Flags().GetBool("show-devices")
 
-			if showDevices && len(args) != 1 {
-				return errors.E(
-					errors.Invalid,
-					"devices can just be shown for a single deployment",
-					[]string{"run 'gxctl get deployment --help' for usage"},
-				)
-			}
-
-			return action.GetDeployment(s, outputType, sortBy, showDevices, args)
+			return action.GetDeployment(s, deviceID, outputType, sortBy, args)
 		},
 		Predictors: args.Predictors{
-			"output":  args.PredictOutputType(),
-			"sort-by": args.PredictNil(),
+			"output":    args.PredictOutputType(),
+			"device-id": args.PredictNil(),
+			"sort-by":   args.PredictNil(),
 		},
 	}
 
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
-	c.cmd.Flags().Bool("show-devices", false, "print the devices for a deployment")
+	c.cmd.Flags().StringP("device-id", "d", "", "specify device id")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
 
 	return nil

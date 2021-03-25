@@ -2,7 +2,6 @@ package action
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"net/url"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -20,6 +18,8 @@ import (
 	"github.com/grid-x/wssh/pkg/stream/std"
 	"github.com/grid-x/wssh/pkg/stream/ws"
 
+	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	errs "github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 	"github.com/grid-x/gxctl/pkg/spinner"
@@ -63,7 +63,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	var sb strings.Builder
 	ok := false
 	for i, p := range s.Client.Auth.Profiles {
-		err := tokenValid(p.Auth.Token)
+		err := client.TokenValid(p.Auth.Token)
 		if err == nil {
 			ok = true
 			sb.WriteString(fmt.Sprintf("        %s: \033[32mOK\033[39m", p.Name))
@@ -84,11 +84,46 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	auth.Write(sb.String())
 
 	getDevice := spinner.New("device")
-	device, err, profile, _ := getDeviceBySN(s.Client, sn)
+	responseList, err := getDeviceBySN(s.Client, sn)
 	if err != nil {
 		getDevice.Fail()
 		return err
 	}
+
+	var device api.Device
+	var profile string
+
+	for _, r := range responseList {
+		if len(r.device.Devices) > 1 {
+			getDevice.Fail()
+			err := errs.E(
+				errs.Invalid,
+				fmt.Sprintf("        more than one device found"),
+			)
+			return err
+		} else if len(r.device.Devices) == 1 {
+			if !device.IsEmpty() {
+				getDevice.Fail()
+				err := errs.E(
+					errs.Invalid,
+					fmt.Sprintf("        more than one device found"),
+				)
+				return err
+			}
+			device = r.device.Devices[0]
+			profile = r.profile
+		}
+	}
+
+	if device.IsEmpty() {
+		getDevice.Fail()
+		err := errs.E(
+			errs.Invalid,
+			fmt.Sprintf("        no device found"),
+		)
+		return err
+	}
+
 	if v, ok := device.Metadata.Labels["core.gridx.ai/hardware"]; ok && v == "virtual" {
 		getDevice.Fail()
 		err := errs.E(
@@ -110,7 +145,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	c := &http.Client{}
 
 	serverAddr := "ssh.staging.ds.gridx.ai:443"
-	if isStaging, _ := s.Client.IsStaging(profile); !*isStaging {
+	if isStaging := s.Client.IsStaging(profile); !isStaging {
 		serverAddr = "ssh.ds.gridx.ai:443"
 	}
 
@@ -230,36 +265,4 @@ func sshAgentAvailable() bool {
 		}
 	}
 	return true
-}
-
-type Token struct {
-	Exp int `json:"exp"`
-}
-
-func tokenValid(t string) error {
-	parts := strings.Split(t, ".")
-	if len(parts) != 3 {
-		return fmt.Errorf("Invalid Token")
-	}
-
-	parsedToken := Token{}
-
-	if l := len(parts[1]) % 4; l > 0 {
-		parts[1] += strings.Repeat("=", 4-l)
-	}
-
-	decoded, err := base64.URLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return fmt.Errorf("Invalid Token")
-	}
-
-	if err := json.Unmarshal(decoded, &parsedToken); err != nil {
-		return fmt.Errorf("Invalid Token")
-	}
-
-	if time.Now().After(time.Unix(int64(parsedToken.Exp), 0)) {
-		return fmt.Errorf("Token expired")
-	}
-
-	return nil
 }

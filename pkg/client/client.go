@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 	"golang.org/x/time/rate"
 
@@ -52,8 +51,8 @@ type Error struct {
 
 type RequestResult struct {
 	Profile string
-	Body []byte
-	Err  error
+	Body    []byte
+	Err     error
 }
 
 func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
@@ -63,55 +62,6 @@ func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 		Auth:    auth,
 		Profile: &profile,
 	}
-}
-
-//GetWebsocketConnection returns a websocket connection
-func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHeaders map[string]string) (*websocket.Conn, error) {
-	p, err := apiclient.resolveProfileNames()
-	if err != nil {
-		return nil, errors.E(
-			errors.Internal,
-			"resolve profile",
-		)
-	}
-	if len(p) > 1 {
-		return nil, errors.E(
-			errors.Internal,
-			"more than 1 profile",
-		)
-	}
-
-	token, err := apiclient.GetTokenFromAuthConfig(p[0])
-	if err != nil {
-		return nil, err
-	}
-
-	base := baseURL
-	if isStaging, err := apiclient.IsStaging(p[0]); err != nil {
-		return nil, err
-	} else if *isStaging {
-		base = baseURLStaging
-	}
-
-	h := http.Header{}
-	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	h.Set("Accept", api.APIVersion)
-	for k, v := range additionalHeaders {
-		h.Set(k, v)
-	}
-
-	url := fmt.Sprintf("wss://%s/%s", base, endpoint)
-
-	conn, resp, err := websocket.DefaultDialer.Dial(url, h)
-	if err != nil {
-		if err == websocket.ErrBadHandshake {
-			fmt.Printf("handshake failed with status %d", resp.StatusCode)
-		}
-
-		return nil, err
-	}
-
-	return conn, nil
 }
 
 //GetRequest to call via GET
@@ -203,11 +153,13 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 			continue
 		}
 
-		base := baseURL
-		if isStaging, err := apiclient.IsStaging(p); err != nil {
-			result.Err = errors.E(errors.Invalid, "Token not found", err)
+		if err := TokenValid(token); err != nil {
+			result.Err = err
 			continue
-		} else if *isStaging {
+		}
+
+		base := baseURL
+		if isStaging := apiclient.IsStaging(p); isStaging {
 			base = baseURLStaging
 		}
 
@@ -297,7 +249,7 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 	return results, nil
 }
 
-func (apiclient *APIClient) IsStaging(profileName string) (*bool, error) {
+func (apiclient *APIClient) IsStaging(profileName string) bool {
 	var isStaging bool
 
 	for _, profile := range apiclient.Auth.Profiles {
@@ -306,7 +258,7 @@ func (apiclient *APIClient) IsStaging(profileName string) (*bool, error) {
 		}
 	}
 
-	return &isStaging, nil
+	return isStaging
 }
 
 func (apiclient *APIClient) GetTokenFromAuthConfig(profileName string) (string, error) {

@@ -11,33 +11,31 @@ import (
 	print "github.com/grid-x/gxctl/pkg/printer"
 )
 
-func GetDeployment(s *service.Service, outputType string, sortBy string, showDevices bool, ids []string) error {
+func GetDeployment(s *service.Service, deviceID string, outputType string, sortBy string, ids []string) error {
 	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}
 
-	if len(ids) > 0 {
+	if deviceID != "" {
+		//Get deployments by Device ID
+		deployments, err := getDeploymentsByDeviceId(s.Client, deviceID)
+		if err != nil {
+			return err
+		}
+
+		if err := s.Printer.Print(deployments, printerConfig); err != nil {
+			return err
+		}
+	} else if len(ids) > 0 {
 		for _, a := range ids {
-			if showDevices {
-				// Just show devices
-				devices, err := getDeploymentDevices(s.Client, a, nil)
-				if err != nil {
-					return err
-				}
+			deployment, err := getDeploymentById(s.Client, a, nil)
+			if err != nil {
+				return err
+			}
 
-				if err := s.Printer.Print(devices, printerConfig); err != nil {
-					return err
-				}
-			} else {
-				deployment, err := getDeploymentById(s.Client, a, nil)
-				if err != nil {
-					return err
-				}
-
-				if err := s.Printer.Print(deployment, printerConfig); err != nil {
-					return err
-				}
+			if err := s.Printer.Print(deployment, printerConfig); err != nil {
+				return err
 			}
 		}
 	} else {
@@ -124,30 +122,34 @@ func getDeploymentById(client *client.APIClient, id string, deploymentIds []stri
 	return deployment, nil
 }
 
-func getDeploymentDevices(client *client.APIClient, id string, deploymentIds []string) (api.Devices, error) {
-	if len(id) != 36 && deploymentIds == nil {
-		deployments, err := getDeployments(client)
-		if err != nil {
-			return api.Devices{}, err
+func getDeploymentsByDeviceId(client *client.APIClient, deviceID string) (api.Deployments, error) {
+	pods, err := getPodByDeviceId(client, deviceID)
+	if err != nil {
+		return api.Deployments{}, err
+	}
+
+	var deploymentIDs []string
+
+	for _, pod := range pods.Pods {
+		if pod.Metadata.Annotations == nil {
+			continue
 		}
-		deploymentIds = deployments.GetIds()
+		id, ok := pod.Metadata.Annotations["gridx.ai/deployment"]
+		if ok {
+			deploymentIDs = append(deploymentIDs, id)
+		}
 	}
 
-	deploymentID, err := api.LookupID(id, deploymentIds)
-	if err != nil {
-		return api.Devices{}, err
+	var deployments []api.Deployment
+
+	for _, id := range deploymentIDs {
+		deployment, err := getDeploymentById(client, id, deploymentIDs)
+		if err != nil {
+			return api.Deployments{}, err
+		}
+
+		deployments = append(deployments, deployment)
 	}
 
-	endpoint := fmt.Sprintf("%s/%s/devices", api.DeploymentsEndpoint, deploymentID)
-	response, err := client.GetRequest(endpoint)
-	if err != nil {
-		return api.Devices{}, err
-	}
-
-	devices, err := api.NewDevices(response, false)
-	if err != nil {
-		return devices, err
-	}
-
-	return devices, nil
+	return api.Deployments{Deployments: deployments}, nil
 }

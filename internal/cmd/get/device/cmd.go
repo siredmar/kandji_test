@@ -38,42 +38,34 @@ func (c *CMD) Init(s *service.Service) error {
 		Short:   "get device",
 		Long:    "print a list of all devices you have access to",
 		Run: func(cmd *clix.Command, args []string) error {
-			showDeployments, _ := cmd.Flags().GetBool("show-deployments")
-			showDeploys, _ := cmd.Flags().GetBool("show-deploys")
-
-			showDockerConfig, _ := cmd.Flags().GetBool("show-dockerconfig")
-			showPods, _ := cmd.Flags().GetBool("show-pods")
-			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
-
 			outputType, _ := cmd.Flags().GetString("output")
 			showAll, _ := cmd.Flags().GetBool("all")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
 			label, _ := cmd.Flags().GetString("label")
 			serial, _ := cmd.Flags().GetString("serial")
 			showPublicIP, _ := cmd.Flags().GetBool("show-public-ip")
+			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
+			deploymentID, _ := cmd.Flags().GetString("deployment-id")
 
-			if err := action.GetDevice(s, outputType, label, serial, sortBy, (showDeployments || showDeploys), showDockerConfig, showPods, showPublicIP, showPublicKey, showAll, args); err != nil {
+			if err := action.GetDevice(s, outputType, label, serial, sortBy, showPublicIP, showPublicKey, deploymentID, showAll, args); err != nil {
 				return err
 			}
 
 			return nil
 		},
 		Predictors: args.Predictors{
-			"sort-by": args.PredictNil(),
-			"output":  args.PredictOutputType(),
+			"sort-by":       args.PredictNil(),
+			"deployment-id": args.PredictNil(),
+			"output":        args.PredictOutputType(),
 		},
 	}
 
 	c.cmd.Flags().Bool("all", false, "show also inactive devices")
 	c.cmd.Flags().StringP("label", "l", "", "filter results by label")
 	c.cmd.Flags().StringP("serial", "S", "", "filter results by serialnumber")
-	c.cmd.Flags().Bool("show-deployments", false, "print the deployments of a device")
-	c.cmd.Flags().Bool("show-deploys", false, "print the deployments of a device")
-	c.cmd.Flags().MarkHidden("show-deploys")
-	c.cmd.Flags().Bool("show-dockerconfig", false, "print the docker config for a device")
-	c.cmd.Flags().Bool("show-pods", false, "print the pods for a device")
 	c.cmd.Flags().Bool("show-public-ip", false, "print the public ip for a device")
 	c.cmd.Flags().Bool("show-publickey", false, "print the public key for a device")
+	c.cmd.Flags().StringP("deployment-id", "d", "", "specify deployment id")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 

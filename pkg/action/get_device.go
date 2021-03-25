@@ -18,11 +18,9 @@ func GetDevice(
 	label string,
 	serial string,
 	sortBy string,
-	showDeployments bool,
-	showDockerConfig bool,
-	showPods bool,
 	showPublicIP bool,
 	showPublicKey bool,
+	deploymentID string,
 	showAll bool,
 	ids []string,
 ) error {
@@ -30,207 +28,153 @@ func GetDevice(
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 		ShowAll:      showAll,
-		//Filter:       filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)),
 	}
 
-	//List all devices
-	var devices api.Devices
-	if len(ids) > 0 {
+	responseList := make(map[string]getDevicesResponse)
+	var err error
+	if deploymentID != "" {
+		//Get devices by Deployment ID
+		devices, err := getDevicesByDeploymentId(s.Client, deploymentID)
+		if err != nil {
+			return err
+		}
+
+		responseList["default"] = getDevicesResponse{device: devices}
+	} else if len(ids) > 0 {
+		resp := getDevicesResponse{}
 		for _, id := range ids {
 			device, err := getDeviceById(s.Client, id, nil)
 			if err != nil {
 				return err
 			}
 
-			devices.Devices = append(devices.Devices, device)
+			resp.device.Devices = append(resp.device.Devices, device)
 		}
+		responseList["default"] = resp
+
+		// If just looking for one specific device, make sure to print it even if it is offline
+		printerConfig.ShowAll = true
 	} else {
-		rawDevices, err, errs := getDevices(s.Client)
+		//List all devices
+		responseList, err = getDevices(s.Client, "", filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)))
 		if err != nil {
 			return err
 		}
+	}
 
+	for _, resp := range responseList {
 		if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
-			for _, err := range errs {
-				if err.err != nil {
-					fmt.Printf("%v: %v\n", err.profile, err.err)
+			if len(responseList) > 1 {
+				if resp.err != nil {
+					fmt.Printf("%v:\n%v\n\n", resp.profile, resp.err)
+					continue
+				} else {
+					fmt.Println(resp.profile)
+				}
+			} else {
+				if resp.err != nil {
+					fmt.Println(resp.err)
 				}
 			}
-		}
 
-		devices = rawDevices
-	}
-
-	devices = filter.FilterDevices(devices, filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)))
-
-	if showPublicIP {
-		for _, device := range devices.Devices {
-			if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
-				fmt.Println(*device.Status.Info.PublicIP)
-			}
-		}
-		return nil
-	}
-
-	if showPublicKey {
-		for _, device := range devices.Devices {
-			if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
-				fmt.Println(*device.Spec.PublicKey)
-			}
-		}
-		return nil
-	}
-
-	if showDeployments {
-		if len(devices.Devices) > 1 {
-			return errors.E(
-				errors.Invalid,
-				"Too many devices - Deployments can just be shown for a single device",
-				nil,
-			)
-		}
-
-		// Just show deployments
-		pods, err := getDevicePods(s.Client, devices.Devices[0].Metadata.ID)
-		if err != nil {
-			return err
-		}
-
-		var deploymentIDs []string
-
-		for _, pod := range pods.Pods {
-
-			if pod.Metadata.Annotations == nil {
-				continue
+			if showPublicIP {
+				for _, device := range resp.device.Devices {
+					if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
+						fmt.Println(*device.Status.Info.PublicIP)
+					}
+				}
+				return nil
 			}
 
-			id, ok := pod.Metadata.Annotations["gridx.ai/deployment"]
-
-			if ok {
-				deploymentIDs = append(deploymentIDs, id)
+			if showPublicKey {
+				for _, device := range resp.device.Devices {
+					if device.Status.Info != nil && device.Status.Info.PublicIP != nil {
+						fmt.Println(*device.Spec.PublicKey)
+					}
+				}
+				return nil
 			}
-		}
 
-		var deployments []api.Deployment
-
-		for _, id := range deploymentIDs {
-			deployment, err := getDeploymentById(s.Client, id, deploymentIDs)
-			if err != nil {
+			if err := s.Printer.Print(resp.device, printerConfig); err != nil {
 				return err
 			}
-
-			deployments = append(deployments, deployment)
 		}
-
-		if err := s.Printer.Print(api.Deployments{Deployments: deployments}, printerConfig); err != nil {
-			return err
-		}
-
-		return nil
 	}
-
-	if showDockerConfig {
-		if len(devices.Devices) > 1 {
-			return errors.E(
-				errors.Invalid,
-				"Too many devices - Docker-Configs can just be shown for a single device",
-				nil,
-			)
+	if printerConfig.OutputFormat == print.JSON || printerConfig.OutputFormat == print.YAML {
+		// raw
+		var devices []api.Device
+		for _, resp := range responseList {
+			devices = append(devices, resp.device.Devices...)
 		}
 
-		// Just show dockerconfig
-		configs, err := getDeviceDockerConfigs(s.Client, devices.Devices[0].Metadata.ID)
-		if err != nil {
+		if err := s.Printer.Print(devices, printerConfig); err != nil {
 			return err
 		}
-
-		if err := s.Printer.Print(configs, printerConfig); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	if showPods {
-		if len(devices.Devices) > 1 {
-			return errors.E(
-				errors.Invalid,
-				"Too many devices - Pods can just be shown for a single device",
-				nil,
-			)
-		}
-
-		// Just show pods
-		pods, err := getDevicePods(s.Client, devices.Devices[0].Metadata.ID)
-		if err != nil {
-			return err
-		}
-
-		if err := s.Printer.Print(pods, printerConfig); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	if err := s.Printer.Print(devices, printerConfig); err != nil {
-		return err
 	}
 
 	return nil
 }
 
-type getDevicesError struct {
+type getDevicesResponse struct {
+	device  api.Devices
 	profile string
 	err     error
 }
 
-func getDevices(client *client.APIClient) (api.Devices, error, []getDevicesError) {
-	devices := api.Devices{}
+func getDevices(c *client.APIClient, sn string, f filter.Filter) (map[string]getDevicesResponse, error) {
+	var responses []client.RequestResult
+	var err error
 
-	responses, err := client.GetMultiRequest(api.DevicesEndpoint)
+	if sn == "" {
+		responses, err = c.GetMultiRequest(api.DevicesEndpoint)
+	} else {
+		responses, err = c.GetMultiRequest(fmt.Sprintf("%v?filter=serialnumber:%v", api.DevicesEndpoint, strings.ToUpper(sn)))
+	}
 	if err != nil {
-		return devices, err, nil
+		return nil, err
 	}
 
-	errs := make([]getDevicesError, len(responses))
-
-	for i, response := range responses {
-		errs[i].profile = response.Profile
+	responseList := make(map[string]getDevicesResponse)
+	for _, response := range responses {
+		resp := getDevicesResponse{}
+		resp.profile = response.Profile
 		if response.Err != nil {
-			errs[i].err = response.Err
-			continue
+			resp.err = response.Err
 		}
 
 		deviceList, err := api.NewDevices(response.Body, false)
 		if err != nil {
-			errs[i].err = err
-			continue
+			resp.err = err
 		}
 
-		if deviceList.IsEmpty() {
-			errs[i].err = errors.E(
+		if f != nil {
+			deviceList = filter.FilterDevices(deviceList, f)
+		}
+
+		if resp.err == nil && deviceList.IsEmpty() {
+			resp.err = errors.E(
 				errors.NotExists,
 				"no devices found",
 			)
 		} else {
-			for _, d := range deviceList.Devices {
-				devices.Devices = append(devices.Devices, d)
-			}
+			resp.device = deviceList
 		}
+
+		responseList[response.Profile] = resp
 	}
 
-	return devices, nil, errs
-
+	return responseList, nil
 }
 
 func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api.Device, error) {
 	if len(id) != 36 && deviceIds == nil {
-		devices, err, _ := getDevices(client)
+		responseList, err := getDevices(client, "", nil)
 		if err != nil {
 			return api.Device{}, err
 		}
-		deviceIds = devices.GetIds()
+		for _, r := range responseList {
+			deviceIds = append(deviceIds, r.device.GetIds()...)
+		}
 	}
 
 	deviceID, err := api.LookupID(id, deviceIds)
@@ -252,76 +196,21 @@ func getDeviceById(client *client.APIClient, id string, deviceIds []string) (api
 	return device, nil
 }
 
-func getDeviceBySN(client *client.APIClient, sn string) (api.Device, error, string, []getDevicesError) {
-	responses, err := client.GetMultiRequest(fmt.Sprintf("%v?filter=serialnumber:%v", api.DevicesEndpoint, strings.ToUpper(sn)))
-	if err != nil {
-		return api.Device{}, err, "", nil
-	}
-
-	var devicesList []api.Device
-	var profile string
-	errs := make([]getDevicesError, len(responses))
-
-	for i, r := range responses {
-		errs[i] = getDevicesError{
-			profile: r.Profile,
-			err:     r.Err,
-		}
-		if r.Err == nil {
-			devices, err := api.NewDevices(r.Body, false)
-			if err != nil {
-				errs[i].err = err
-				continue
-			}
-			if len(devices.Devices) > 0 {
-				profile = r.Profile
-			}
-			for _, d := range devices.Devices {
-				devicesList = append(devicesList, d)
-			}
-		}
-	}
-
-	switch len(devicesList) {
-	case 0:
-		return api.Device{},
-			errors.E(
-				errors.NotExists,
-				"no device found",
-			), "", errs
-	case 1:
-		return devicesList[0], nil, profile, errs
-	default:
-		return api.Device{}, errors.E(errors.Invalid, "more than one device found"), "", errs
-	}
+func getDeviceBySN(client *client.APIClient, sn string) (map[string]getDevicesResponse, error) {
+	return getDevices(client, sn, nil)
 }
 
-func getDeviceDockerConfigs(client *client.APIClient, deviceID string) (api.DeviceDockerConfigs, error) {
-	endpoint := fmt.Sprintf("%s/%s/devicedockerconfigs", api.DevicesEndpoint, deviceID)
+func getDevicesByDeploymentId(client *client.APIClient, deploymentID string) (api.Devices, error) {
+	endpoint := fmt.Sprintf("%s/%s/devices", api.DeploymentsEndpoint, deploymentID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
-		return api.DeviceDockerConfigs{}, err
+		return api.Devices{}, err
 	}
 
-	configs, err := api.NewDeviceDockerConfigs(response, false)
+	devices, err := api.NewDevices(response, false)
 	if err != nil {
-		return configs, err
+		return devices, err
 	}
 
-	return configs, nil
-}
-
-func getDevicePods(client *client.APIClient, deviceID string) (api.Pods, error) {
-	endpoint := fmt.Sprintf("%s/%s/pods", api.DevicesEndpoint, deviceID)
-	response, err := client.GetRequest(endpoint)
-	if err != nil {
-		return api.Pods{}, err
-	}
-
-	pods, err := api.NewPods(response, false)
-	if err != nil {
-		return pods, err
-	}
-
-	return pods, nil
+	return devices, nil
 }
