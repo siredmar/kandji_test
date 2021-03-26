@@ -11,6 +11,10 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
+const (
+	GxctlManagedLabelKey = "gxctl.gridx.ai/managed"
+)
+
 var (
 	kindOrder = map[string]int{
 		"Application": 0,
@@ -100,7 +104,32 @@ func sortByKind(resources map[string]api.Resource) []resAssoc {
 	return result
 }
 
+func withManagedMeta(res api.Resource) error {
+	if res == nil {
+		return fmt.Errorf("res nil")
+	}
+	meta := res.Meta()
+	if meta == nil {
+		return fmt.Errorf("meta nil")
+	}
+	if meta.Labels == nil {
+		meta.Labels = make(map[string]string)
+	}
+	meta.Labels[GxctlManagedLabelKey] = "true"
+
+	return nil
+}
+
 func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIClient) error {
+	err := withManagedMeta(res)
+	if err != nil {
+		return errors.E(
+			errors.Internal,
+			"Inject managed annotation",
+			err,
+		)
+	}
+
 	if resID == "" {
 		// Create
 		return create(resID, res, client)
