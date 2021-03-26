@@ -114,6 +114,11 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 			return nil
 		}
 
+		err = withoutManagedMeta(current)
+		if err != nil {
+			return errors.E(errors.Internal, "remove managed meta", err)
+		}
+
 		err, f1, f2 = writeDiffFiles(current, res)
 		defer os.Remove(f1)
 		defer os.Remove(f2)
@@ -219,4 +224,23 @@ func writeDiffFiles(i1, i2 interface{}) (error, string, string) {
 	}
 
 	return nil, rev1.Name(), rev2.Name()
+}
+
+func withoutManagedMeta(res api.Resource) error {
+	if res == nil {
+		return fmt.Errorf("res nil")
+	}
+
+	meta := res.Meta()
+	if meta == nil {
+		return nil
+	}
+
+	if meta.Labels == nil {
+		return nil
+	}
+
+	delete(meta.Labels, GxctlManagedLabelKey)
+
+	return nil
 }
