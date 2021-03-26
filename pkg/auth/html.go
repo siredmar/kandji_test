@@ -17,7 +17,18 @@ const Redirect = `
       console.error('This page found an empty id_token in the location hash.');
     }
   } else {
-    console.error('This page expected an id_token in the location hash.');
+    var idx = hash.indexOf('#error=');
+    if (idx >= 0) {
+      var err_str = hash.substr(idx);
+      var end = err_str.indexOf('&');
+      if (end < 0) {
+        end = err_str.length;
+      }
+      var err = err_str.substring(err_str.indexOf('=') + 1, end);
+      document.write(err);
+    } else {
+      console.error('This page expected an id_token in the location hash.');
+    }
   }
 </script>
 </html>
