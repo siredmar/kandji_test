@@ -64,6 +64,75 @@ func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	}
 }
 
+// GetToken of current profile
+func (apiclient *APIClient) GetToken() (*Token, error) {
+	p, err := apiclient.resolveProfileNames()
+	if err != nil {
+		return nil, errors.E(
+			errors.Internal,
+			"resolve profile",
+		)
+	}
+	if len(p) > 1 {
+		return nil, errors.E(
+			errors.Internal,
+			"more than 1 profile",
+		)
+	}
+
+	token, err := apiclient.GetTokenFromAuthConfig(p[0])
+	return &token, err
+}
+
+//GetWebsocketConnection returns a websocket connection
+func (apiclient *APIClient) GetWebsocketConnection(endpoint string, additionalHeaders map[string]string) (*websocket.Conn, error) {
+	p, err := apiclient.resolveProfileNames()
+	if err != nil {
+		return nil, errors.E(
+			errors.Internal,
+			"resolve profile",
+		)
+	}
+	if len(p) > 1 {
+		return nil, errors.E(
+			errors.Internal,
+			"more than 1 profile",
+		)
+	}
+
+	token, err := apiclient.GetTokenFromAuthConfig(p[0])
+	if err != nil {
+		return nil, err
+	}
+
+	base := baseURL
+	if isStaging, err := apiclient.IsStaging(p[0]); err != nil {
+		return nil, err
+	} else if *isStaging {
+		base = baseURLStaging
+	}
+
+	h := http.Header{}
+	h.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	h.Set("Accept", api.APIVersion)
+	for k, v := range additionalHeaders {
+		h.Set(k, v)
+	}
+
+	url := fmt.Sprintf("wss://%s/%s", base, endpoint)
+
+	conn, resp, err := websocket.DefaultDialer.Dial(url, h)
+	if err != nil {
+		if err == websocket.ErrBadHandshake {
+			fmt.Printf("handshake failed with status %d", resp.StatusCode)
+		}
+
+		return nil, err
+	}
+
+	return conn, nil
+}
+
 //GetRequest to call via GET
 func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
 	result, err := apiclient.internalRequest(http.MethodGet, nil, endpoint)
