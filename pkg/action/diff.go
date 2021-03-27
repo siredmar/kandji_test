@@ -225,22 +225,3 @@ func writeDiffFiles(i1, i2 interface{}) (error, string, string) {
 
 	return nil, rev1.Name(), rev2.Name()
 }
-
-func withoutManagedMeta(res api.Resource) error {
-	if res == nil {
-		return fmt.Errorf("res nil")
-	}
-
-	meta := res.Meta()
-	if meta == nil {
-		return nil
-	}
-
-	if meta.Labels == nil {
-		return nil
-	}
-
-	delete(meta.Labels, GxctlManagedLabelKey)
-
-	return nil
-}
