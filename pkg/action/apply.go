@@ -24,7 +24,7 @@ func Apply(s *service.Service, fileName string, skipOnLabel bool) error {
 		return err
 	}
 
-	resources := make(map[string]interface{}, len(contents))
+	resources := make(map[string]api.Resource, len(contents))
 	for _, c := range contents {
 		res, resID, err := checkResourceFile(c, false)
 		if err != nil {
@@ -46,15 +46,24 @@ func Apply(s *service.Service, fileName string, skipOnLabel bool) error {
 
 type resAssoc struct {
 	ID    string
-	Res   interface{}
+	Res   api.Resource
 	Order int
 }
 
-func sortByKind(resources map[string]interface{}) []resAssoc {
+func sortByKind(resources map[string]api.Resource) []resAssoc {
 	result := make([]resAssoc, len(resources))
 	i := 0
 	for resID, res := range resources {
-		kind := reflect.TypeOf(res).Name()
+		if res == nil {
+			result[i] = resAssoc{
+				resID,
+				res,
+				-1,
+			}
+			i++
+			continue
+		}
+		kind := reflect.TypeOf(res).Elem().Name()
 		var order int
 		var exists bool
 		if order, exists = kindOrder[kind]; kind == "" || !exists {
@@ -91,39 +100,39 @@ func sortByKind(resources map[string]interface{}) []resAssoc {
 	return result
 }
 
-func apply(resID string, res interface{}, skipOnLabel bool, client *client.APIClient) error {
+func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIClient) error {
 	if resID == "" {
 		// Create
 		return create(resID, res, client)
 	}
 
 	// Update or Create
-	var update interface{}
+	var update api.Resource
 	var remoteLabels map[string]string
 
 	switch v := res.(type) {
-	case api.Application:
+	case *api.Application:
 		app, err := getApplicationById(client, resID)
 		if err == nil {
 			remoteLabels = app.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
-	case api.Device:
+	case *api.Device:
 		device, err := getDeviceById(client, resID, nil)
 		if err == nil {
 			remoteLabels = device.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
-	case api.Deployment:
+	case *api.Deployment:
 		deploy, err := getDeploymentById(client, resID, nil)
 		if err == nil {
 			remoteLabels = deploy.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
-	case api.DockerConfig:
+	case *api.DockerConfig:
 		dc, err := getDockerConfigById(client, resID, nil)
 		if err == nil {
 			remoteLabels = dc.Metadata.Labels
@@ -133,7 +142,7 @@ func apply(resID string, res interface{}, skipOnLabel bool, client *client.APICl
 	default:
 		return errors.E(
 			errors.NotImplemented,
-			"Unsupported type",
+			fmt.Sprintf("Unsupported type: %T", res),
 		)
 	}
 

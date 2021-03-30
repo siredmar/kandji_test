@@ -1,9 +1,10 @@
 package api
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	types "github.com/grid-x/ds-api-types"
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
 	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
@@ -12,6 +13,10 @@ import (
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 )
+
+type Resource interface {
+	Meta() *types.Metadata
+}
 
 type FullObjectMeta struct {
 	Meta struct {
@@ -60,6 +65,10 @@ type MaintenanceTasks struct {
 
 type CreateMaintenanceTask maintenanceApi.CreateRequest
 
+func (cmt *CreateMaintenanceTask) Meta() *types.Metadata {
+	return nil
+}
+
 type DockerConfig dockerConfigApi.DockerConfig
 
 type DockerConfigs struct {
@@ -70,11 +79,14 @@ type CreateDockerConfig dockerConfigApi.CreateRequest
 
 type UpdateDockerConfig dockerConfigApi.UpdateRequest
 
-
 type DeviceDockerConfig deviceDockerConfigApi.DeviceDockerConfig
 
 type DeviceDockerConfigs struct {
 	DeviceDockerConfigs []DeviceDockerConfig `json:"deviceDockerConfigs"`
+}
+
+func (d *Device) Meta() *types.Metadata {
+	return &d.Metadata
 }
 
 func (d *Device) IsEmpty() bool {
@@ -103,6 +115,10 @@ func (d *Devices) GetIds() []string {
 	return out
 }
 
+func (d *UpdateDevice) Meta() *types.Metadata {
+	return nil
+}
+
 func (d *UpdateDevice) IsEmpty() bool {
 	if cmp.Diff(UpdateDevice{}, *d) == "" {
 		return true
@@ -116,6 +132,10 @@ func (d *UpdateDevice) IsValid() bool {
 	}
 
 	return true
+}
+
+func (p *Pod) Meta() *types.Metadata {
+	return &p.Metadata
 }
 
 func (p *Pod) IsEmpty() bool {
@@ -138,6 +158,14 @@ func (p *Pods) GetIds() []string {
 		out = append(out, po.Metadata.ID)
 	}
 	return out
+}
+
+func (d *UpdateDeployment) Meta() *types.Metadata {
+	return nil
+}
+
+func (d *Deployment) Meta() *types.Metadata {
+	return &d.Metadata
 }
 
 func (d *Deployment) IsEmpty() bool {
@@ -204,6 +232,10 @@ func (a *UpdateDeployment) IsValid() bool {
 	return true
 }
 
+func (a *Application) Meta() *types.Metadata {
+	return &a.Metadata
+}
+
 func (a *Application) IsEmpty() bool {
 	if cmp.Diff(Application{}, *a) == "" {
 		return true
@@ -230,6 +262,10 @@ func (a *CreateApplication) IsValid() bool {
 	return true
 }
 
+func (mt *MaintenanceTask) Meta() *types.Metadata {
+	return &mt.Metadata
+}
+
 func (m *MaintenanceTask) IsEmpty() bool {
 	if cmp.Diff(MaintenanceTask{}, *m) == "" {
 		return true
@@ -250,6 +286,14 @@ func (m *MaintenanceTasks) GetIds() []string {
 		out = append(out, dev.Metadata.ID)
 	}
 	return out
+}
+
+func (dc *UpdateDockerConfig) Meta() *types.Metadata {
+	return nil
+}
+
+func (dc *DockerConfig) Meta() *types.Metadata {
+	return &dc.Metadata
 }
 
 func (d *DockerConfig) IsEmpty() bool {
@@ -296,6 +340,10 @@ func (d *UpdateDockerConfig) IsEmpty() bool {
 func (a *UpdateDockerConfig) IsValid() bool {
 	// Todo
 	return true
+}
+
+func (ddc *DeviceDockerConfig) Meta() *types.Metadata {
+	return &ddc.Metadata
 }
 
 func (d *DeviceDockerConfig) IsEmpty() bool {

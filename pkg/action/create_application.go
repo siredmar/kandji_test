@@ -8,7 +8,7 @@ import (
 )
 
 func CreateApplication(s *service.Service, createApplicationCmdName string) error {
-	d := api.Application{}
+	d := &api.Application{}
 
 	if createApplicationCmdName != "" {
 		d.Name = createApplicationCmdName

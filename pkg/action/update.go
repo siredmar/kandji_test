@@ -5,8 +5,6 @@ import (
 
 	types "github.com/grid-x/ds-api-types"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
-	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
-	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
@@ -20,7 +18,7 @@ func Update(s *service.Service, updateCmdFilename string) error {
 		return err
 	}
 
-	resources := make(map[string]interface{}, len(contents))
+	resources := make(map[string]api.Resource, len(contents))
 	for _, c := range contents {
 		res, resID, err := checkResourceFile(c, false)
 		if err != nil {
@@ -38,11 +36,11 @@ func Update(s *service.Service, updateCmdFilename string) error {
 	return nil
 }
 
-func update(resID string, res interface{}, client *client.APIClient) error {
-	var update interface{}
+func update(resID string, res api.Resource, client *client.APIClient) error {
+	var update api.Resource
 
 	switch v := res.(type) {
-	case api.Application:
+	case *api.Application:
 		app, err := getApplicationById(client, resID)
 		if err != nil {
 			return errors.E(
@@ -50,9 +48,9 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"application not found",
 			)
 		}
-		v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
-		update = v
-	case api.Device:
+		app.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
+		update = &app
+	case *api.Device:
 		device, err := getDeviceById(client, resID, nil)
 		if err != nil {
 			return errors.E(
@@ -60,9 +58,9 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"device not found",
 			)
 		}
-		v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
-		update = v
-	case api.Deployment:
+		device.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
+		update = &device
+	case *api.Deployment:
 		deploy, err := getDeploymentById(client, resID, nil)
 		if err != nil {
 			return errors.E(
@@ -70,9 +68,9 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"deployment not found",
 			)
 		}
-		v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
-		update = v
-	case api.DockerConfig:
+		deploy.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
+		update = &deploy
+	case *api.DockerConfig:
 		dc, err := getDockerConfigById(client, resID, nil)
 		if err != nil {
 			return errors.E(
@@ -80,12 +78,12 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"dockerconfig not found",
 			)
 		}
-		v.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
-		update = v
+		dc.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
+		update = &dc
 	default:
 		return errors.E(
 			errors.NotImplemented,
-			"Unsupported type",
+			fmt.Sprintf("Unsupported type: %T", res),
 		)
 	}
 
@@ -98,7 +96,7 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 	return nil
 }
 
-func updateResource(client *client.APIClient, v interface{}, id string, ids []string) (string, error) {
+func updateResource(client *client.APIClient, v api.Resource, id string, ids []string) (string, error) {
 	resId := id
 	if ids != nil {
 		var err error
@@ -109,10 +107,10 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 	}
 
 	switch v := v.(type) {
-	case api.Application:
+	case *api.Application:
 		return fmt.Sprintf("WARNING: Skipped application %s from update as applications cannot be updated", v.Metadata.ID), nil
-	case api.Device:
-		in := devicesApi.UpdateRequest{}
+	case *api.Device:
+		in := api.UpdateDevice{}
 		inSpec := devicesApi.UpdateSpec{}
 
 		inSpec.MACAddress = v.Spec.MACAddress
@@ -122,7 +120,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Metadata = &types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DevicesEndpoint, in, resId)
+		response, err := client.PatchRequest(api.DevicesEndpoint, &in, resId)
 		if err != nil {
 			return "", err
 		}
@@ -133,14 +131,14 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		}
 
 		return fmt.Sprintf("Device %s updated successfully", device.Metadata.ID), nil
-	case api.Deployment:
-		in := deploymentsApi.UpdateRequest{}
+	case *api.Deployment:
+		in := api.UpdateDeployment{}
 		in.Spec = &v.Spec
 
 		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DeploymentsEndpoint, in, resId)
+		response, err := client.PatchRequest(api.DeploymentsEndpoint, &in, resId)
 		if err != nil {
 			return "", err
 		}
@@ -151,13 +149,13 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		}
 
 		return fmt.Sprintf("Deployment %s updated successfully", deployment.Metadata.ID), nil
-	case api.DockerConfig:
-		in := dockerConfigApi.UpdateRequest{}
+	case *api.DockerConfig:
+		in := api.UpdateDockerConfig{}
 		in.Spec = &v.Spec
 
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DockerConfigsEndpoint, in, resId)
+		response, err := client.PatchRequest(api.DockerConfigsEndpoint, &in, resId)
 		if err != nil {
 			return "", err
 		}
@@ -171,7 +169,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 	default:
 		return "", errors.E(
 			errors.NotImplemented,
-			"Unsupported type",
+			fmt.Sprintf("Unsupported type: %T", v),
 		)
 	}
 }

@@ -15,7 +15,7 @@ func Delete(s *service.Service, deleteCmdFileName string) error {
 		return err
 	}
 
-	resources := make(map[string]interface{}, len(contents))
+	resources := make(map[string]api.Resource, len(contents))
 	for _, c := range contents {
 		res, resID, err := checkResourceFile(c, false)
 		if err != nil {
@@ -33,29 +33,29 @@ func Delete(s *service.Service, deleteCmdFileName string) error {
 	return nil
 }
 
-func deleteResource(resID string, res interface{}, client *client.APIClient) error {
+func deleteResource(resID string, res api.Resource, client *client.APIClient) error {
 	fmt.Printf("deleting resource %s… ", resID)
 
 	switch res.(type) {
-	case api.Application:
+	case *api.Application:
 		if _, err := client.DeleteRequest(api.ApplicationsEndpoint, resID); err != nil {
 			return err
 		}
 		break
 
-	case api.Device:
+	case *api.Device:
 		if _, err := client.DeleteRequest(api.DevicesEndpoint, resID); err != nil {
 			return err
 		}
 		break
 
-	case api.Deployment:
+	case *api.Deployment:
 		if _, err := client.DeleteRequest(api.DeploymentsEndpoint, resID); err != nil {
 			return err
 		}
 		break
 
-	case api.DockerConfig:
+	case *api.DockerConfig:
 		if _, err := client.DeleteRequest(api.DockerConfigsEndpoint, resID); err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func deleteResource(resID string, res interface{}, client *client.APIClient) err
 	default:
 		return errors.E(
 			errors.NotImplemented,
-			"Unsupported type",
+			fmt.Sprintf("Unsupported type: %T", res),
 		)
 	}
 

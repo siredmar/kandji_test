@@ -10,46 +10,51 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 )
 
+type mockResource struct {}
+func (m *mockResource) Meta() *types.Metadata {
+	return nil
+}
+
 func TestSortByKind(t *testing.T) {
 	testcases := []struct {
 		desc      string
-		resources map[string]interface{}
+		resources map[string]api.Resource
 		want      []resAssoc
 	}{
 		{
 			desc: "Application before Deployment",
-			resources: map[string]interface{}{
-				"foo": api.Application{},
-				"bar": api.Deployment{},
+			resources: map[string]api.Resource{
+				"foo": &api.Application{},
+				"bar": &api.Deployment{},
 			},
 			want: []resAssoc{
 				{
 					"foo",
-					api.Application{},
+					&api.Application{},
 					0,
 				},
 				{
 					"bar",
-					api.Deployment{},
+					&api.Deployment{},
 					1,
 				},
 			},
 		},
 		{
 			desc: "Applications (sorted by by Name) before Deployments (sorted by ID)",
-			resources: map[string]interface{}{
-				"d": api.Application{
+			resources: map[string]api.Resource{
+				"d": &api.Application{
 					Name: "d",
 				},
-				"c": api.Application{
+				"c": &api.Application{
 					Name: "c",
 				},
-				"b": api.Deployment{
+				"b": &api.Deployment{
 					Metadata: types.Metadata{
 						ID: "b",
 					},
 				},
-				"a": api.Deployment{
+				"a": &api.Deployment{
 					Metadata: types.Metadata{
 						ID: "a",
 					},
@@ -58,21 +63,21 @@ func TestSortByKind(t *testing.T) {
 			want: []resAssoc{
 				{
 					"c",
-					api.Application{
+					&api.Application{
 						Name: "c",
 					},
 					0,
 				},
 				{
 					"d",
-					api.Application{
+					&api.Application{
 						Name: "d",
 					},
 					0,
 				},
 				{
 					"a",
-					api.Deployment{
+					&api.Deployment{
 						Metadata: types.Metadata{
 							ID: "a",
 						},
@@ -81,7 +86,7 @@ func TestSortByKind(t *testing.T) {
 				},
 				{
 					"b",
-					api.Deployment{
+					&api.Deployment{
 						Metadata: types.Metadata{
 							ID: "b",
 						},
@@ -92,26 +97,26 @@ func TestSortByKind(t *testing.T) {
 		},
 		{
 			desc: "Deployments before unspecified",
-			resources: map[string]interface{}{
-				"b": api.Deployment{},
-				"a": int(42),
+			resources: map[string]api.Resource{
+				"b": &api.Deployment{},
+				"a": &mockResource{},
 			},
 			want: []resAssoc{
 				{
 					"b",
-					api.Deployment{},
+					&api.Deployment{},
 					1,
 				},
 				{
 					"a",
-					42,
+					&mockResource{},
 					-1,
 				},
 			},
 		},
 		{
 			desc:      "no resources",
-			resources: map[string]interface{}{},
+			resources: map[string]api.Resource{},
 			want:      []resAssoc{},
 		},
 	}

@@ -96,7 +96,7 @@ func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte,
 }
 
 //PatchRequest to call via PATCH
-func (apiclient *APIClient) PatchRequest(endpoint string, v interface{}, id string) ([]byte, error) {
+func (apiclient *APIClient) PatchRequest(endpoint string, v api.Resource, id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", endpoint, id)
 	body, err := json.Marshal(v)
 	if err != nil {

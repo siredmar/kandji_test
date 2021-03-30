@@ -15,7 +15,7 @@ func Create(s *service.Service, fileName string) error {
 		return err
 	}
 
-	resources := make(map[string]interface{}, len(contents))
+	resources := make(map[string]api.Resource, len(contents))
 
 	for _, c := range contents {
 		res, resID, err := checkResourceFile(c, false)
@@ -36,7 +36,7 @@ func Create(s *service.Service, fileName string) error {
 	return nil
 }
 
-func create(resID string, res interface{}, client *client.APIClient) error {
+func create(resID string, res api.Resource, client *client.APIClient) error {
 	message, err := createResource(resID, res, client)
 	if err != nil {
 		return err
@@ -46,9 +46,9 @@ func create(resID string, res interface{}, client *client.APIClient) error {
 	return nil
 }
 
-func createResource(resID string, res interface{}, client *client.APIClient) (string, error) {
+func createResource(resID string, res api.Resource, client *client.APIClient) (string, error) {
 	switch res := res.(type) {
-	case api.Device:
+	case *api.Device:
 		response, err := client.PostRequest(api.DevicesEndpoint, res)
 		if err != nil {
 			return "", err
@@ -58,7 +58,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		}
 		return fmt.Sprintf("Device %s created successfully", resID), nil
 
-	case api.Deployment:
+	case *api.Deployment:
 		response, err := client.PostRequest(api.DeploymentsEndpoint, res)
 		if err != nil {
 			return "", err
@@ -68,7 +68,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		}
 		return fmt.Sprintf("Deployment %s created successfully", resID), nil
 
-	case api.Application:
+	case *api.Application:
 		response, err := client.PostRequest(api.ApplicationsEndpoint, res)
 		if err != nil {
 			return "", err
@@ -78,7 +78,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		}
 		return fmt.Sprintf("Application %s created successfully", resID), nil
 
-	case api.MaintenanceTask:
+	case *api.MaintenanceTask:
 		response, err := client.PostRequest(api.MaintenanceEndpoint, res)
 		if err != nil {
 			return "", err
@@ -88,7 +88,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 		}
 		return fmt.Sprintf("Maintenance task %s created successfully", resID), nil
 
-	case api.DockerConfig:
+	case *api.DockerConfig:
 		response, err := client.PostRequest(api.DockerConfigsEndpoint, res)
 		if err != nil {
 			return "", err
@@ -101,7 +101,7 @@ func createResource(resID string, res interface{}, client *client.APIClient) (st
 	default:
 		return "", errors.E(
 			errors.NotImplemented,
-			"Unsupported type",
+			fmt.Sprintf("Unsupported type: %T", res),
 		)
 	}
 }

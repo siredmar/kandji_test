@@ -27,7 +27,7 @@ func LabelDevice(s *service.Service, ids []string) error {
 		d.Metadata.Labels[k] = v
 	}
 
-	message, err := updateResource(s.Client, d, d.Metadata.ID, nil)
+	message, err := updateResource(s.Client, &d, d.Metadata.ID, nil)
 	if err != nil {
 		return err
 	}

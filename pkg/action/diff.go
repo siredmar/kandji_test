@@ -53,42 +53,42 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 		}
 	} else {
 		// There is a resID - Check if res already exists
-		var current interface{}
+		var current api.Resource
 		var remoteLabels map[string]string
 		var err error
 
 		switch v := res.(type) {
-		case api.Application:
+		case *api.Application:
 			var app api.Application
 			app, err = getApplicationById(client, v.Metadata.ID)
 			remoteLabels = app.Metadata.Labels
+			current = &app
 
-			current = app
-		case api.Device:
+		case *api.Device:
 			var device api.Device
 			device, err = getDeviceById(client, v.Metadata.ID, nil)
 			device.Status = deviceApi.DeviceStatus{}
 			remoteLabels = device.Metadata.Labels
+			current = &device
 
-			current = device
-		case api.Deployment:
+		case *api.Deployment:
 			var deploy api.Deployment
 			deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
 			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
 			remoteLabels = deploy.Metadata.Labels
+			current = &deploy
 
-			current = deploy
-		case api.DockerConfig:
+		case *api.DockerConfig:
 			var dc api.DockerConfig
 			dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
 			dc.Status = dockerconfigApi.DockerConfigStatus{}
 			remoteLabels = dc.Metadata.Labels
+			current = &dc
 
-			current = dc
 		default:
 			return errors.E(
 				errors.NotImplemented,
-				"Unsupported type",
+				fmt.Sprintf("Unsupported type: %T", res),
 			)
 		}
 
@@ -140,7 +140,7 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 	return nil
 }
 
-func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error) {
+func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error) {
 	resID, err := resolveIdentifierFromFile(bytes)
 	if err != nil && readOnly {
 		resID = KNOWN_AFTER_APPLY
@@ -149,31 +149,31 @@ func checkResourceFile(bytes []byte, readOnly bool) (interface{}, string, error)
 	application, err := api.NewApplication(bytes, true)
 	if err == nil {
 		application.Name = resID
-		return application, resID, nil
+		return &application, resID, nil
 	}
 
 	deployment, err := api.NewDeployment(bytes, true)
 	if err == nil {
 		deployment.Metadata.ID = resID
-		return deployment, resID, nil
+		return &deployment, resID, nil
 	}
 
 	device, err := api.NewDevice(bytes, true)
 	if err == nil {
 		device.Metadata.ID = resID
-		return device, resID, nil
+		return &device, resID, nil
 	}
 
 	dockerConfig, err := api.NewDockerConfig(bytes, true)
 	if err == nil {
 		dockerConfig.Metadata.ID = resID
-		return dockerConfig, resID, nil
+		return &dockerConfig, resID, nil
 	}
 
 	maintenanceTask, err := api.NewMaintenanceTask(bytes, true)
 	if err == nil {
 		maintenanceTask.Metadata.ID = resID
-		return maintenanceTask, resID, nil
+		return &maintenanceTask, resID, nil
 	}
 
 	//Nothing found
