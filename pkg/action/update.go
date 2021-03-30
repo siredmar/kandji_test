@@ -50,8 +50,8 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"application not found",
 			)
 		}
-		app.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
-		update = app
+		v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
+		update = v
 	case api.Device:
 		device, err := getDeviceById(client, resID, nil)
 		if err != nil {
@@ -60,8 +60,8 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"device not found",
 			)
 		}
-		device.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
-		update = device
+		v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
+		update = v
 	case api.Deployment:
 		deploy, err := getDeploymentById(client, resID, nil)
 		if err != nil {
@@ -70,8 +70,8 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"deployment not found",
 			)
 		}
-		deploy.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
-		update = deploy
+		v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
+		update = v
 	case api.DockerConfig:
 		dc, err := getDockerConfigById(client, resID, nil)
 		if err != nil {
@@ -80,8 +80,8 @@ func update(resID string, res interface{}, client *client.APIClient) error {
 				"dockerconfig not found",
 			)
 		}
-		dc.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
-		update = dc
+		v.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
+		update = v
 	default:
 		return errors.E(
 			errors.NotImplemented,
@@ -122,7 +122,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Metadata = &types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DevicesEndpoint, v, resId)
+		response, err := client.PatchRequest(api.DevicesEndpoint, in, resId)
 		if err != nil {
 			return "", err
 		}
@@ -140,7 +140,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DeploymentsEndpoint, v, resId)
+		response, err := client.PatchRequest(api.DeploymentsEndpoint, in, resId)
 		if err != nil {
 			return "", err
 		}
@@ -157,7 +157,7 @@ func updateResource(client *client.APIClient, v interface{}, id string, ids []st
 
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DockerConfigsEndpoint, v, resId)
+		response, err := client.PatchRequest(api.DockerConfigsEndpoint, in, resId)
 		if err != nil {
 			return "", err
 		}
