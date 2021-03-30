@@ -28,7 +28,11 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool)
 	}
 
 	for n, c := range contents {
-		if err := diff(n, c, diffCmd, skipOnLabel, s.Client); err != nil {
+		res, resID, err := checkResourceFile(c, true)
+		if err != nil {
+			return err
+		}
+		if err := diff(n, res, resID, diffCmd, skipOnLabel, s.Client); err != nil {
 			return err
 		}
 	}
@@ -36,16 +40,12 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool)
 	return nil
 }
 
-func diff(filename string, content []byte, differ string, skipOnLabel bool, client *client.APIClient) error {
-	res, resID, err := checkResourceFile(content, true)
-	if err != nil {
-		return err
-	}
+func diff(filename string, res api.Resource, resID string, differ string, skipOnLabel bool, client *client.APIClient) error {
 
 	var f1, f2 string
 	if resID == KNOWN_AFTER_APPLY {
 		// Looks like a new resource... Diff against empty file
-		err, f1, f2 = writeDiffFiles(nil, res)
+		err, f1, f2 := writeDiffFiles(nil, res)
 		defer os.Remove(f1)
 		defer os.Remove(f2)
 		if err != nil {
@@ -53,44 +53,7 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 		}
 	} else {
 		// There is a resID - Check if res already exists
-		var current api.Resource
-		var remoteLabels map[string]string
-		var err error
-
-		switch v := res.(type) {
-		case *api.Application:
-			var app api.Application
-			app, err = getApplicationById(client, v.Metadata.ID)
-			remoteLabels = app.Metadata.Labels
-			current = &app
-
-		case *api.Device:
-			var device api.Device
-			device, err = getDeviceById(client, v.Metadata.ID, nil)
-			device.Status = deviceApi.DeviceStatus{}
-			remoteLabels = device.Metadata.Labels
-			current = &device
-
-		case *api.Deployment:
-			var deploy api.Deployment
-			deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
-			deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
-			remoteLabels = deploy.Metadata.Labels
-			current = &deploy
-
-		case *api.DockerConfig:
-			var dc api.DockerConfig
-			dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
-			dc.Status = dockerconfigApi.DockerConfigStatus{}
-			remoteLabels = dc.Metadata.Labels
-			current = &dc
-
-		default:
-			return errors.E(
-				errors.NotImplemented,
-				fmt.Sprintf("Unsupported type: %T", res),
-			)
-		}
+		current, err := getResource(client, res)
 
 		// Check if api returned something else then 404
 		if err != nil {
@@ -107,11 +70,14 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 			current = nil
 		}
 
-		// Skip on label
-		if _, ok := remoteLabels[api.IgnoreLabel]; skipOnLabel && ok {
-			fmt.Printf("%s:\n", filename)
-			fmt.Println("Ignored due to label: " + api.IgnoreLabel)
-			return nil
+		if current != nil && current.Meta() != nil {
+			remoteLabels := current.Meta().Labels
+			// Skip on label
+			if _, ok := remoteLabels[api.IgnoreLabel]; skipOnLabel && ok {
+				fmt.Printf("%s:\n", filename)
+				fmt.Println("Ignored due to label: " + api.IgnoreLabel)
+				return nil
+			}
 		}
 
 		err = withoutManagedMeta(current)
@@ -143,6 +109,43 @@ func diff(filename string, content []byte, differ string, skipOnLabel bool, clie
 		fmt.Println(string(output))
 	}
 	return nil
+}
+
+func getResource(client *client.APIClient, req api.Resource) (api.Resource, error) {
+	var res api.Resource
+	var err error
+
+	switch v := req.(type) {
+	case *api.Application:
+		var app api.Application
+		app, err = getApplicationById(client, v.Metadata.ID)
+		res = &app
+
+	case *api.Device:
+		var device api.Device
+		device, err = getDeviceById(client, v.Metadata.ID, nil)
+		device.Status = deviceApi.DeviceStatus{}
+		res = &device
+
+	case *api.Deployment:
+		var deploy api.Deployment
+		deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
+		deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
+		res = &deploy
+
+	case *api.DockerConfig:
+		var dc api.DockerConfig
+		dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
+		dc.Status = dockerconfigApi.DockerConfigStatus{}
+		res = &dc
+
+	default:
+		return nil, errors.E(
+			errors.NotImplemented,
+			fmt.Sprintf("Unsupported type: %T", res),
+		)
+	}
+	return res, err
 }
 
 func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error) {
