@@ -114,6 +114,15 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 				err,
 			)
 		}
+	} else {
+		err := withoutManagedMeta(res)
+		if err != nil {
+			return errors.E(
+				errors.Internal,
+				"Remove managed annotation",
+				err,
+			)
+		}
 	}
 
 	if resID == "" {
