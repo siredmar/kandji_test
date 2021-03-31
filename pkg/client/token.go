@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	emailCI = "ci@gridx.ai"
+)
+
 // Token used for DS API authentication
 type Token string
 
@@ -53,6 +57,10 @@ func (t *Token) Email() string {
 		return ""
 	}
 	return token.Email
+}
+
+func (t *Token) IsCI() bool {
+	return t.Email() == emailCI
 }
 
 func (t *Token) parse() (*tokenParsed, error) {

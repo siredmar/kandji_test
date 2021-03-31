@@ -12,10 +12,6 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-const (
-	emailCI = "ci@gridx.ai"
-)
-
 // CMD contains a command and all its sub commands
 type CMD struct {
 	cmd      *clix.Command
@@ -58,7 +54,7 @@ func (c *CMD) Init(s *service.Service) error {
 				if err != nil {
 					return err
 				}
-				if token.Email() != emailCI {
+				if !token.IsCI() {
 					return errors.E(err, "This command is meant to be used in CI exclusively")
 				}
 			}
