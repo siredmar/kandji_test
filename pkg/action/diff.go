@@ -22,6 +22,15 @@ const (
 )
 
 func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool) error {
+	var isCI bool
+	token, err := s.Client.GetToken()
+	if err != nil {
+		return err
+	}
+	if token.IsCI() {
+		isCI = true
+	}
+
 	contents, err := api.GetFilesContentsToProcess(fileName)
 	if err != nil {
 		return err
@@ -32,7 +41,7 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool)
 		if err != nil {
 			return err
 		}
-		if err := diff(n, res, resID, diffCmd, skipOnLabel, s.Client); err != nil {
+		if err := diff(n, res, resID, diffCmd, skipOnLabel, isCI, s.Client); err != nil {
 			return err
 		}
 	}
@@ -40,7 +49,7 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool)
 	return nil
 }
 
-func diff(filename string, res api.Resource, resID string, differ string, skipOnLabel bool, client *client.APIClient) error {
+func diff(filename string, res api.Resource, resID string, differ string, skipOnLabel bool, isCI bool, client *client.APIClient) error {
 
 	var f1, f2 string
 	if resID == KNOWN_AFTER_APPLY {
@@ -80,9 +89,11 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 			}
 		}
 
-		err = withoutManagedMeta(current)
-		if err != nil {
-			return errors.E(errors.Internal, "remove managed meta", err)
+		if isCI {
+			err = withoutManagedMeta(current)
+			if err != nil {
+				return errors.E(errors.Internal, "remove managed meta", err)
+			}
 		}
 
 		err, f1, f2 = writeDiffFiles(current, res)
