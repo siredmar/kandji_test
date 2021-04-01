@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -14,19 +15,19 @@ const (
 	GxctlManagedLabelKey = "gxctl.gridx.ai/managed"
 )
 
+type record struct {
+	local    api.Deployment
+	remote   api.Deployment
+	fileName string
+}
+
 // Prune resources from remote state that don't exist in local state
 func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd string) error {
-
 	contents, err := api.GetFilesContentsToProcess(fileName)
 	if err != nil {
 		return err
 	}
 
-	type record struct {
-		local    api.Deployment
-		remote   api.Deployment
-		fileName string
-	}
 	state := make(map[string]*record)
 
 	for fn, c := range contents {
@@ -55,8 +56,7 @@ func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd s
 			if _, ok := state[id]; !ok {
 				state[id] = &record{}
 			}
-			err = withoutManagedMeta(&deploy)
-			if err != nil {
+			if err = withoutManagedMeta(&deploy); err != nil {
 				return err
 			}
 			state[id].remote = deploy
@@ -64,37 +64,44 @@ func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd s
 	}
 
 	for id, rec := range state {
-		err, f1, f2 := writeDiffFiles(rec.local, rec.remote)
-		defer os.Remove(f1)
-		defer os.Remove(f2)
-		if err != nil {
+		if err := prune(s.Client, diffCmd, dryRun, yes, id, rec); err != nil {
 			return err
-		}
-
-		output, err := exec.Command(diffCmd, f1, f2).Output()
-		if err != nil {
-			switch err.(type) {
-			case *exec.ExitError:
-				// this is just an exit code error, no worries
-			default: //couldnt run diff
-				return err
-			}
-		}
-
-		if len(output) == 0 {
-			continue
-		}
-		fmt.Printf("%s:\n", rec.fileName)
-		fmt.Println(string(output))
-
-		if !dryRun && (yes || confirmCli("Apply?")) {
-			err := apply(id, &rec.local, false, s.Client)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
+	return nil
+}
+
+func prune(client *client.APIClient, diffCmd string, dryRun bool, yes bool, id string, rec *record) error {
+	err, f1, f2 := writeDiffFiles(rec.local, rec.remote)
+	defer os.Remove(f1)
+	defer os.Remove(f2)
+	if err != nil {
+		return err
+	}
+
+	output, err := exec.Command(diffCmd, f1, f2).Output()
+	if err != nil {
+		switch err.(type) {
+		case *exec.ExitError:
+			// this is just an exit code error, no worries
+		default: //couldnt run diff
+			return err
+		}
+	}
+
+	if len(output) == 0 {
+		return nil
+	}
+	fmt.Printf("%s:\n", rec.fileName)
+	fmt.Println(string(output))
+
+	if !dryRun && (yes || confirmCli("Apply?")) {
+		err := apply(id, &rec.local, false, client)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
