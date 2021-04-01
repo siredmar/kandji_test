@@ -1,13 +1,13 @@
 package action
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/grid-x/gxctl/pkg/api"
-	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -23,14 +23,46 @@ type record struct {
 
 // Prune resources from remote state that don't exist in local state
 func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd string) error {
-	contents, err := api.GetFilesContentsToProcess(fileName)
+	var (
+		err    error
+		local  map[string][]byte
+		remote api.Deployments
+	)
+	if local, err = api.GetFilesContentsToProcess(fileName); err != nil {
+		return err
+	}
+
+	if remote, err = getDeployments(s.Client); err != nil {
+		return err
+	}
+
+	state, err := buildPruneState(local, remote)
 	if err != nil {
 		return err
 	}
 
+	for id, rec := range state {
+		var (
+			ok  bool
+			err error
+		)
+		if ok, err = shouldPrune(diffCmd, dryRun, yes, id, rec); err != nil {
+			return err
+		}
+		if ok {
+			if err := apply(id, &rec.local, false, s.Client); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func buildPruneState(local map[string][]byte, remote api.Deployments) (map[string]*record, error) {
 	state := make(map[string]*record)
 
-	for fn, c := range contents {
+	for fn, c := range local {
 		res, resID, err := checkResourceFile(c, true)
 		if err != nil {
 			continue
@@ -45,39 +77,31 @@ func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd s
 		}
 	}
 
-	deploys, err := getDeployments(s.Client)
-	if err != nil {
-		return err
-	}
-
-	for _, deploy := range deploys.Deployments {
+	for _, deploy := range remote.Deployments {
 		if isManaged(&deploy) {
 			id := deploy.Meta().ID
 			if _, ok := state[id]; !ok {
 				state[id] = &record{}
 			}
-			if err = withoutManagedMeta(&deploy); err != nil {
-				return err
+			if err := withoutManagedMeta(&deploy); err != nil {
+				return nil, err
 			}
 			state[id].remote = deploy
 		}
 	}
-
-	for id, rec := range state {
-		if err := prune(s.Client, diffCmd, dryRun, yes, id, rec); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return state, nil
 }
 
-func prune(client *client.APIClient, diffCmd string, dryRun bool, yes bool, id string, rec *record) error {
+func shouldPrune(diffCmd string, dryRun bool, yes bool, id string, rec *record) (bool, error) {
+	if rec == nil {
+		return false, errors.New("nil record")
+	}
+
 	err, f1, f2 := writeDiffFiles(rec.local, rec.remote)
 	defer os.Remove(f1)
 	defer os.Remove(f2)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	output, err := exec.Command(diffCmd, f1, f2).Output()
@@ -86,23 +110,21 @@ func prune(client *client.APIClient, diffCmd string, dryRun bool, yes bool, id s
 		case *exec.ExitError:
 			// this is just an exit code error, no worries
 		default: //couldnt run diff
-			return err
+			return false, err
 		}
 	}
 
 	if len(output) == 0 {
-		return nil
+		return false, nil
 	}
 	fmt.Printf("%s:\n", rec.fileName)
 	fmt.Println(string(output))
 
 	if !dryRun && (yes || confirmCli("Apply?")) {
-		err := apply(id, &rec.local, false, client)
-		if err != nil {
-			return err
-		}
+		return true, nil
 	}
-	return nil
+
+	return false, nil
 }
 
 func confirmCli(msg string) bool {
