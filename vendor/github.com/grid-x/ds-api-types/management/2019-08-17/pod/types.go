@@ -246,6 +246,53 @@ type VolumeSource struct {
 	// directly exposed to the container.
 	// +optional
 	HostPath *HostPathVolumeSource `json:"hostPath,omitempty"`
+	// ConfigMap represents a configMap that should populate this volume
+	// +optional
+	ConfigMap *ConfigMapVolumeSource `json:"configMap,omitempty"`
+}
+
+// ConfigMapVolumeSource adapts a ConfigMap into a volume.
+//
+// The contents of the target ConfigMap's Data field will be presented in a
+// volume as files using the keys in the Data field as the file names, unless
+// the items element is populated with specific mappings of keys to paths.
+// ConfigMap volumes support ownership management and SELinux relabeling.
+type ConfigMapVolumeSource struct {
+	// Name of the DeviceConfigMap to reference. The DeviceConfigMap needs to be within the same namespace
+	Name string `json:"name"`
+	// If unspecified, each key-value pair in the Data field of the referenced
+	// ConfigMap will be projected into the volume as a file whose name is the
+	// key and content is the value. If specified, the listed keys will be
+	// projected into the specified paths, and unlisted keys will not be
+	// present. If a key is specified which is not present in the ConfigMap,
+	// the volume setup will error unless it is marked optional. Paths must be
+	// relative and may not contain the '..' path or start with '..'.
+	// +optional
+	Items []KeyToPath `json:"items,omitempty"`
+	// Mode bits to use on created files by default. Must be a value between
+	// 0 and 0777.
+	// Directories within the path are not affected by this setting.
+	// This might be in conflict with other options that affect the file
+	// mode, like fsGroup, and the result can be other mode bits set.
+	// +optional
+	DefaultMode *int32 `json:"defaultMode,omitempty"`
+}
+
+// KeyToPath maps a string key to a path within a volume.
+type KeyToPath struct {
+	// The key to project.
+	Key string `json:"key"`
+	// The relative path of the file to map the key to.
+	// May not be an absolute path.
+	// May not contain the path element '..'.
+	// May not start with the string '..'.
+	Path string `json:"path"`
+	// Optional: mode bits to use on this file, should be a value between 0
+	// and 0777. If not specified, the volume defaultMode will be used.
+	// This might be in conflict with other options that affect the file
+	// mode, like fsGroup, and the result can be other mode bits set.
+	// +optional
+	Mode *int32 `json:"mode,omitempty"`
 }
 
 // HostPathVolumeSource represents a host path mapped into a pod.
