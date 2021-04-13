@@ -7,6 +7,7 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/get/application"
 	"github.com/grid-x/gxctl/internal/cmd/get/deployment"
 	"github.com/grid-x/gxctl/internal/cmd/get/device"
+	"github.com/grid-x/gxctl/internal/cmd/get/deviceconfigmap"
 	"github.com/grid-x/gxctl/internal/cmd/get/maintenance"
 	"github.com/grid-x/gxctl/internal/cmd/get/pod"
 	"github.com/grid-x/gxctl/pkg/service"
@@ -43,6 +44,7 @@ func (c *CMD) Init(s *service.Service) error {
 		application.New(),
 		deployment.New(),
 		device.New(),
+		deviceconfigmap.New(),
 		maintenance.New(),
 		pod.New(),
 	}

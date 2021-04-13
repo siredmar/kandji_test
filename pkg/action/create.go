@@ -58,6 +58,16 @@ func createResource(resID string, res api.Resource, client *client.APIClient) (s
 		}
 		return fmt.Sprintf("Device %s created successfully", resID), nil
 
+	case *api.DeviceConfigMap:
+		response, err := client.PostRequest(api.DeviceConfigMapsEndpoint, res)
+		if err != nil {
+			return "", err
+		}
+		if _, err := api.NewDeviceConfigMap(response, false); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("DeviceConfigMap %s created successfully", resID), nil
+
 	case *api.Deployment:
 		response, err := client.PostRequest(api.DeploymentsEndpoint, res)
 		if err != nil {

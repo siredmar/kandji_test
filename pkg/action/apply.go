@@ -140,6 +140,13 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
+	case *api.DeviceConfigMap:
+		dcm, err := getDeviceConfigMapByID(client, resID)
+		if err == nil {
+			remoteLabels = dcm.Metadata.Labels
+			v.Metadata.Labels = api.ComputeMetadataMap(dcm.Metadata.Labels, v.Metadata.Labels)
+			update = v
+		}
 	case *api.Deployment:
 		deploy, err := getDeploymentById(client, resID, nil)
 		if err == nil {

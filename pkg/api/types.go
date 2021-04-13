@@ -12,6 +12,7 @@ import (
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
 	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
+	deviceConfigMapApi "github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps"
 )
 
 type Resource interface {
@@ -48,6 +49,12 @@ type UpdateDeployment deploymentsApi.UpdateRequest
 type Deployments struct {
 	Deployments []Deployment `json:"deployments"`
 }
+
+type DeviceConfigMap deviceConfigMapApi.DeviceConfigMap
+type DeviceConfigMaps struct {
+	DeviceConfigMaps []DeviceConfigMap `json:"deviceConfigMaps"`
+}
+type UpdateDeviceConfigMap deviceConfigMapApi.UpdateRequest
 
 type Application applicationsApi.Application
 
@@ -132,6 +139,14 @@ func (d *UpdateDevice) IsValid() bool {
 	}
 
 	return true
+}
+
+func (dcm *DeviceConfigMap) Meta() *types.Metadata {
+	return &dcm.Metadata
+}
+
+func (dcm *UpdateDeviceConfigMap) Meta() *types.Metadata {
+	return nil
 }
 
 func (p *Pod) Meta() *types.Metadata {

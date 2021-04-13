@@ -183,6 +183,13 @@ func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error
 		return &device, resID, nil
 	}
 
+	dcm, err := api.NewDeviceConfigMap(bytes, true)
+	if err == nil {
+		dcm.Metadata.ID = resID
+		return &dcm, resID, nil
+	}
+	fmt.Printf("%+v\n", err)
+
 	dockerConfig, err := api.NewDockerConfig(bytes, true)
 	if err == nil {
 		dockerConfig.Metadata.ID = resID

@@ -60,6 +60,17 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		}
 		device.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 		update = &device
+	case *api.DeviceConfigMap:
+		dcm, err := getDeviceConfigMapByID(client, resID)
+		if err != nil {
+			return errors.E(
+				errors.NotExists,
+				"deviceconfigmap not found",
+			)
+		}
+		dcm.Metadata.Labels = api.ComputeMetadataMap(dcm.Metadata.Labels, v.Metadata.Labels)
+		update = &dcm
+
 	case *api.Deployment:
 		deploy, err := getDeploymentById(client, resID, nil)
 		if err != nil {
@@ -109,6 +120,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 	switch v := v.(type) {
 	case *api.Application:
 		return fmt.Sprintf("WARNING: Skipped application %s from update as applications cannot be updated", v.Metadata.ID), nil
+
 	case *api.Device:
 		in := api.UpdateDevice{}
 		inSpec := devicesApi.UpdateSpec{}
@@ -131,6 +143,32 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		}
 
 		return fmt.Sprintf("Device %s updated successfully", device.Metadata.ID), nil
+
+	case *api.DeviceConfigMap:
+		in := api.UpdateDeviceConfigMap{}
+		inSpec := &v.Spec
+
+		inSpec.Immutable = v.Spec.Immutable
+		inSpec.Data = v.Spec.Data
+		inSpec.BinaryData = v.Spec.BinaryData
+		in.Spec = inSpec
+
+		in.Metadata = types.UpdateMetadata{}
+		in.Metadata.Labels = v.Metadata.Labels
+
+		response, err := client.PatchRequest(api.DeviceConfigMapsEndpoint, &in, resId)
+		if err != nil {
+			return "", err
+		}
+
+		dcm, err := api.NewDeviceConfigMap(response, false)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("DeviceConfigMap %s updated successfully", dcm.Metadata.ID), nil
+
+
 	case *api.Deployment:
 		in := api.UpdateDeployment{}
 		in.Spec = &v.Spec
@@ -149,6 +187,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		}
 
 		return fmt.Sprintf("Deployment %s updated successfully", deployment.Metadata.ID), nil
+
 	case *api.DockerConfig:
 		in := api.UpdateDockerConfig{}
 		in.Spec = &v.Spec
@@ -166,6 +205,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		}
 
 		return fmt.Sprintf("DockerConfig %s updated successfully", config.Metadata.ID), nil
+
 	default:
 		return "", errors.E(
 			errors.NotImplemented,

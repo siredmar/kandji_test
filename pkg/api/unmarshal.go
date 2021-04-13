@@ -80,6 +80,44 @@ func NewUpdateDevice(j []byte, strict bool) (UpdateDevice, error) {
 	return d, nil
 }
 
+func NewDeviceConfigMap(j []byte, strict bool) (DeviceConfigMap, error) {
+	dcm := DeviceConfigMap{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(j))
+	if strict {
+		dec.DisallowUnknownFields()
+	}
+	if err := dec.Decode(&dcm); err != nil {
+		return dcm, err
+	}
+
+	return dcm, nil
+}
+
+func NewDeviceConfigMaps(j []byte, strict bool) (DeviceConfigMaps, error) {
+	dcm := DeviceConfigMaps{}
+
+	b, err := yaml.YAMLToJSON(j)
+	if err == nil {
+		j = b
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(j))
+	if strict {
+		dec.DisallowUnknownFields()
+	}
+	if err := dec.Decode(&dcm); err != nil {
+		return dcm, err
+	}
+
+	return dcm, nil
+}
+
 func NewPod(j []byte, strict bool) (Pod, error) {
 	p := Pod{}
 
