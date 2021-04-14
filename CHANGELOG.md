@@ -1,7 +1,19 @@
 
 # Changelog
 
-### 0.29.0 (Unreleased)
+### 0.30.0 (Unreleased)
+
+**Image:**
+
+- `108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl:v0.1.30-linux-amd64`
+
+_New Features:_
+
+_Changes:_
+
+_Documentation:_
+
+### 0.29.0
 
 **Image:**
 
@@ -9,7 +21,17 @@
 
 _New Features:_
 
+- [X] [#140](https://github.com/grid-x/gxctl/pull/140) Add `gxctl prune` command for usage in CI which will delete resources which got removed from the repo.
+- [X] [#139](https://github.com/grid-x/gxctl/pull/139) Improve token handling to print out expiry error in all commands
+- [X] [#135](https://github.com/grid-x/gxctl/pull/135) Make is easier to find devices in all available accounts by running `gxctl get device --profile='*'`. This command can be combined with eg. `--serial` Note: get devices will be the only command working on multiple accounts
+
 _Changes:_
+
+- [X] [#138](https://github.com/grid-x/gxctl/pull/138) Fix `gxctl update` command which did not properly pick up changes
+- [X] [#136](https://github.com/grid-x/gxctl/pull/136) Show callback error of `gxctl login` on HTML result page
+- [X] [#135](https://github.com/grid-x/gxctl/pull/135) Rework get commands. **This is a BREAKING CHANGE!**
+  Removed `gxctl get deployment XYZ --show-devices`, `gxctl get devices XYZ --show-deployments` and `gxctl get devices XYZ --show-pods`
+  in favor of `gxctl get deployment --device-id`, `gxctl get pod --device-id` and `gxctl get devices --deployment-id`
 
 _Documentation:_
 
