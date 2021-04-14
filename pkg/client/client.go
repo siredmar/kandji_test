@@ -31,7 +31,7 @@ type AuthConfig struct {
 		Auth    struct {
 			Auth0Tenant   string `yaml:"auth0Tenant"`
 			Auth0ClientID string `yaml:"auth0ClientID"`
-			Token         Token `yaml:"token"`
+			Token         Token  `yaml:"token"`
 		} `yaml:"auth"`
 	} `yaml:"profiles"`
 }
@@ -62,6 +62,26 @@ func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 		Auth:    auth,
 		Profile: &profile,
 	}
+}
+
+// GetToken of current profile
+func (apiclient *APIClient) GetToken() (*Token, error) {
+	p, err := apiclient.resolveProfileNames()
+	if err != nil {
+		return nil, errors.E(
+			errors.Internal,
+			"resolve profile",
+		)
+	}
+	if len(p) > 1 {
+		return nil, errors.E(
+			errors.Internal,
+			"more than 1 profile",
+		)
+	}
+
+	token, err := apiclient.GetTokenFromAuthConfig(p[0])
+	return &token, err
 }
 
 //GetRequest to call via GET

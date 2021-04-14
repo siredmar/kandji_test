@@ -101,6 +101,21 @@ func sortByKind(resources map[string]api.Resource) []resAssoc {
 }
 
 func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIClient) error {
+	token, err := client.GetToken()
+	if err != nil {
+		return err
+	}
+	if token.IsCI() {
+		err := withManagedMeta(res)
+		if err != nil {
+			return errors.E(
+				errors.Internal,
+				"Inject managed annotation",
+				err,
+			)
+		}
+	}
+
 	if resID == "" {
 		// Create
 		return create(resID, res, client)
