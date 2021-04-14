@@ -23,15 +23,16 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 		rules = append(rules,
 			&rule.DeploymentAppExists{},
 			&rule.DeploymentContainersUnique{},
-			rule.NewDeploymentVolumeMountsAllowed([]string{"/proc"}),
-			rule.NewDeploymentVolumesAllowed([]string{"/var/run/supervisor.sock"}),
+			&rule.DeploymentDeviceConfigMapExist{},
+			&rule.DeploymentSelectorDeviceExists{},
 			&rule.DeploymentSelectorSingleMatching{},
 			&rule.DeploymentSelectorSpecified{},
 			&rule.DeploymentSelectorUniqueMatchByDeviceID{},
-			&rule.DeploymentSelectorDeviceExists{},
 			&rule.DeploymentVolumesExist{},
 			&rule.DeploymentVolumesUnique{},
 			&rule.ResourceUniqueID{},
+			rule.NewDeploymentVolumeMountsAllowed([]string{"/proc"}),
+			rule.NewDeploymentVolumesAllowed([]string{"/var/run/supervisor.sock"}),
 		)
 	}
 
