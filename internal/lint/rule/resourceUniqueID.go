@@ -72,6 +72,28 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 		}
 		break
 
+	case api.DeviceConfigMap:
+		ID := res.Metadata.ID
+		if ID == "" {
+			result.Skip = true
+			result.Have = "Metadata.ID not set"
+			return result, nil
+		}
+		dcms := ctx.Desired.DeviceConfigMaps
+		if len(dcms) == 0 {
+			result.Skip = true
+			result.Have = "no deviceConfigMaps"
+			return result, nil
+		}
+		for _, d := range dcms {
+			if d.Metadata.ID == ID {
+				result.Pass = false
+				result.Have = ID
+				break
+			}
+		}
+		break
+
 	default:
 		return nil, errors.E(
 			errors.Internal,
