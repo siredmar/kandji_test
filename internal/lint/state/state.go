@@ -6,7 +6,8 @@ import (
 
 // State contains all resources that are relevant to linting
 type State struct {
-	Applications []api.Application
-	Deployments  []api.Deployment
-	Devices      []api.Device
+	Applications     []api.Application
+	Deployments      []api.Deployment
+	Devices          []api.Device
+	DeviceConfigMaps []api.DeviceConfigMap
 }
