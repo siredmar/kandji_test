@@ -19,6 +19,10 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 		rules = append(rules,
 			&rule.ResourceUniqueID{},
 		)
+	case *api.DeviceConfigMap:
+		rules = append(rules,
+			&rule.DeviceConfigMapUniqueKeys{},
+		)
 	case *api.Deployment:
 		rules = append(rules,
 			&rule.DeploymentAppExists{},
