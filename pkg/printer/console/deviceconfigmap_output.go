@@ -71,7 +71,7 @@ func (o DeviceConfigMapConsoleOutputWide) Map(d api.DeviceConfigMap) []DeviceCon
 			j++
 		}
 		o.Data = k
-		o.Contents = v
+		o.Contents = truncate(v)
 
 		output = append(output, o)
 	}
@@ -83,4 +83,12 @@ func (o DeviceConfigMapConsoleOutputWide) Map(d api.DeviceConfigMap) []DeviceCon
 	}
 
 	return output
+}
+
+func truncate(in string) string {
+	if len(in) < 50 {
+		return in
+	}
+
+	return in[:50] + "..."
 }
