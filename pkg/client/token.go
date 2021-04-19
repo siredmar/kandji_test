@@ -32,7 +32,7 @@ func (t *Token) Validate() error {
 		return fmt.Errorf("invalid token")
 	}
 
-	if time.Now().After(time.Unix(int64(token.Exp), 0)) {
+	if token.Exp != 0 && time.Now().After(time.Unix(int64(token.Exp), 0)) {
 		return fmt.Errorf("Token expired")
 	}
 
