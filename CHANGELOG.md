@@ -5,7 +5,7 @@
 
 **Image:**
 
-- `108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl:v0.1.30-linux-amd64`
+- `108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl:v0.30.0-linux-amd64`
 
 _New Features:_
 
@@ -13,7 +13,24 @@ _Changes:_
 
 _Documentation:_
 
-### 0.29.0
+### 0.29.1
+
+**Image:**
+
+- `108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl:v0.29.1-linux-amd64`
+
+_New Features:_
+
+_Changes:_
+
+- [X] [#143](https://github.com/grid-x/gxctl/pull/143) Make token check work in CI
+- [X] [#143](https://github.com/grid-x/gxctl/pull/143) Change version schema
+
+_Documentation:_
+
+# Changelog old version schema
+
+### 0.1.29 (equivalent with 0.29.0 in current version schema)
 
 **Image:**
 
@@ -36,7 +53,7 @@ _Changes:_
 _Documentation:_
 
 
-### 0.28.0
+### 0.1.28 (equivalent with 0.28.0 in current version schema)
 
 **Image:**
 
