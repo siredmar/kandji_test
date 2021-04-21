@@ -25,7 +25,7 @@ func TestDeploymentContainersUnique(t *testing.T) {
 			desc: "containers unique",
 			rule: NewDeploymentContainersUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -50,7 +50,7 @@ func TestDeploymentContainersUnique(t *testing.T) {
 			desc: "containers not unique",
 			rule: NewDeploymentContainersUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -75,7 +75,7 @@ func TestDeploymentContainersUnique(t *testing.T) {
 			desc: "no containers",
 			rule: NewDeploymentContainersUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{

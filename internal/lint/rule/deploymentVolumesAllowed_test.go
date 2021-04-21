@@ -25,7 +25,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 			desc: "volumes allowed",
 			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -52,7 +52,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 			desc: "volumes not allowed",
 			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -87,7 +87,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 			desc: "no volumes",
 			rule: NewDeploymentVolumesAllowed([]string{"/tmp/goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{

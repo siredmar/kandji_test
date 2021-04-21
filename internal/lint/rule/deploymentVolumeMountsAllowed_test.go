@@ -25,7 +25,7 @@ func TestDeploymentVolumeMountsAllowed(t *testing.T) {
 			desc: "allowed volumeMounts",
 			rule: NewDeploymentVolumeMountsAllowed([]string{"goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -52,7 +52,7 @@ func TestDeploymentVolumeMountsAllowed(t *testing.T) {
 			desc: "disallowed volumeMounts",
 			rule: NewDeploymentVolumeMountsAllowed([]string{"/etc/goobaz", "/dev/blub"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -95,7 +95,7 @@ func TestDeploymentVolumeMountsAllowed(t *testing.T) {
 			desc: "no containers",
 			rule: NewDeploymentVolumeMountsAllowed([]string{"goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "app-foo",
 					Template: deployments.PodTemplate{
@@ -113,7 +113,7 @@ func TestDeploymentVolumeMountsAllowed(t *testing.T) {
 			desc: "no volumeMounts",
 			rule: NewDeploymentVolumeMountsAllowed([]string{"/etc/goobaz"}),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{

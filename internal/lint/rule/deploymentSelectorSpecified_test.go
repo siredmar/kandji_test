@@ -24,7 +24,7 @@ func TestDeploymentSelectorSpecified(t *testing.T) {
 		{
 			desc: "only MatchByDeviceID",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
@@ -38,7 +38,7 @@ func TestDeploymentSelectorSpecified(t *testing.T) {
 		{
 			desc: "only MatchByLabels",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByLabels: map[string]string{
@@ -54,7 +54,7 @@ func TestDeploymentSelectorSpecified(t *testing.T) {
 		{
 			desc: "both",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
@@ -71,7 +71,7 @@ func TestDeploymentSelectorSpecified(t *testing.T) {
 		{
 			desc: "none",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{},
 				},

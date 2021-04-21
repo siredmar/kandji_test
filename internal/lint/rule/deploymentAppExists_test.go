@@ -25,7 +25,7 @@ func TestDeploymentAppExists(t *testing.T) {
 		{
 			desc: "no applications",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 				},
@@ -46,7 +46,7 @@ func TestDeploymentAppExists(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 				},
@@ -67,7 +67,7 @@ func TestDeploymentAppExists(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 				},
@@ -88,7 +88,7 @@ func TestDeploymentAppExists(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 				},
@@ -109,7 +109,7 @@ func TestDeploymentAppExists(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "goo",
 				},

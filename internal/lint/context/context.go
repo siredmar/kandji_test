@@ -50,10 +50,10 @@ func (c *Context) SetDesired(resources []interface{}) {
 
 	for _, res := range resources {
 		switch v := res.(type) {
-		case api.Application:
-			apps = append(apps, v)
-		case api.Deployment:
-			deps = append(deps, v)
+		case *api.Application:
+			apps = append(apps, *v)
+		case *api.Deployment:
+			deps = append(deps, *v)
 		}
 	}
 

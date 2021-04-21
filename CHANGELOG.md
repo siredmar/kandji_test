@@ -13,6 +13,20 @@ _Changes:_
 
 _Documentation:_
 
+### 0.29.2
+
+**Image:**
+
+- `108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl:v0.29.2-linux-amd64`
+
+_New Features:_
+
+_Changes:_
+
+- [X] [#144](https://github.com/grid-x/gxctl/pull/144) Fix lint command after rework
+
+_Documentation:_
+
 ### 0.29.1
 
 **Image:**
