@@ -40,7 +40,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &goo,
@@ -54,7 +54,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 		{
 			desc: "no deployments",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
@@ -82,7 +82,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "gooApp",
 					Selector: deployments.Selector{
@@ -114,7 +114,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},
@@ -149,7 +149,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},
@@ -184,7 +184,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},
@@ -219,7 +219,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},
@@ -254,7 +254,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},
@@ -289,7 +289,7 @@ func TestDeploymentSelectorUniqueMatchByDeviceID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo-1234",
 				},

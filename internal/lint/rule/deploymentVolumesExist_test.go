@@ -25,7 +25,7 @@ func TestDeploymentVolumesExist(t *testing.T) {
 		{
 			desc: "volumes exist",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -63,7 +63,7 @@ func TestDeploymentVolumesExist(t *testing.T) {
 		{
 			desc: "volume does not exist",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -98,7 +98,7 @@ func TestDeploymentVolumesExist(t *testing.T) {
 		{
 			desc: "no containers",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "app-foo",
 					Template: deployments.PodTemplate{
@@ -115,7 +115,7 @@ func TestDeploymentVolumesExist(t *testing.T) {
 		{
 			desc: "no volumes",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "app-foo",
 					Template: deployments.PodTemplate{
@@ -142,7 +142,7 @@ func TestDeploymentVolumesExist(t *testing.T) {
 		{
 			desc: "no volumeMounts",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{

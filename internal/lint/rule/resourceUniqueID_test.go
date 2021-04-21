@@ -26,7 +26,7 @@ func TestResourceUniqueID(t *testing.T) {
 		{
 			desc: "no applications",
 			ctx:  nilCtx,
-			res: api.Application{
+			res: &api.Application{
 				Name: "foo",
 			},
 			wantPass:  true,
@@ -45,7 +45,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Application{
+			res: &api.Application{
 				Name: "goo",
 			},
 			wantPass:  true,
@@ -55,7 +55,7 @@ func TestResourceUniqueID(t *testing.T) {
 		{
 			desc: "app has no name",
 			ctx:  nilCtx,
-			res: api.Application{
+			res: &api.Application{
 				Name: "",
 			},
 			wantPass:  true,
@@ -74,7 +74,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Application{
+			res: &api.Application{
 				Name: "foo",
 			},
 			wantPass:  true,
@@ -93,7 +93,7 @@ func TestResourceUniqueID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Application{
+			res: &api.Application{
 				Name: "foo",
 			},
 			wantPass:  false,
@@ -103,7 +103,7 @@ func TestResourceUniqueID(t *testing.T) {
 		{
 			desc: "no deployments",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
@@ -129,7 +129,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "goo",
 				},
@@ -141,7 +141,7 @@ func TestResourceUniqueID(t *testing.T) {
 		{
 			desc: "deployment does not have an ID",
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "",
 				},
@@ -167,7 +167,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
@@ -196,7 +196,7 @@ func TestResourceUniqueID(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
@@ -225,7 +225,7 @@ func TestResourceUniqueID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
@@ -254,7 +254,7 @@ func TestResourceUniqueID(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},

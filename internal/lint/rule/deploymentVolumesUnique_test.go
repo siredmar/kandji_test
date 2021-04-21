@@ -25,7 +25,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 			desc: "volumes unique",
 			rule: NewDeploymentVolumesUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -60,7 +60,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 			desc: "volumes not unique",
 			rule: NewDeploymentVolumesUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{
@@ -95,7 +95,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 			desc: "no volumes",
 			rule: NewDeploymentVolumesUnique(),
 			ctx:  nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					App: "foo",
 					Template: deployments.PodTemplate{

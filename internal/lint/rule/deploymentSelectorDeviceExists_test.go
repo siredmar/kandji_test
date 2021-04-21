@@ -38,7 +38,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
@@ -63,7 +63,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
 						MatchByDeviceID: &foo,
