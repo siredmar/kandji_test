@@ -55,7 +55,10 @@ func Lint(s *service.Service, lintCmdFilename string) error {
 		}
 		ctx.SetDesired(desired)
 
-		result, _ := lint.Lint(ctx, fileName, fsResources[fileName])
+		result, err := lint.Lint(ctx, fileName, fsResources[fileName])
+		if err != nil {
+			fmt.Println(err)
+		}
 		results = append(results, result...)
 	}
 

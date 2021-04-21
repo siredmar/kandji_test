@@ -15,11 +15,11 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 	var results []result.Result
 
 	switch resource.(type) {
-	case api.Application:
+	case *api.Application:
 		rules = append(rules,
 			&rule.ResourceUniqueID{},
 		)
-	case api.Deployment:
+	case *api.Deployment:
 		rules = append(rules,
 			&rule.DeploymentAppExists{},
 			&rule.DeploymentContainersUnique{},

@@ -8,7 +8,7 @@ import (
 )
 
 // DeploymentContainersUnique passes iff the specified containers are unique
-type DeploymentContainersUnique struct {}
+type DeploymentContainersUnique struct{}
 
 // NewDeploymentContainersUnique returns a new DeploymentContainersUnique rule
 func NewDeploymentContainersUnique() *DeploymentContainersUnique {
@@ -28,7 +28,7 @@ func (r *DeploymentContainersUnique) Desc() string {
 // Exec checks compliance of the given resource with the rule
 func (r *DeploymentContainersUnique) Exec(ctx *context.Context, resource interface{}) (*result.Result, error) {
 
-	res, ok := resource.(api.Deployment)
+	res, ok := resource.(*api.Deployment)
 	if !ok {
 		return nil, errors.E(
 			errors.Internal,

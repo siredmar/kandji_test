@@ -28,7 +28,7 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 	}
 
 	switch res := resource.(type) {
-	case api.Application:
+	case *api.Application:
 		ID := res.Name
 		if ID == "" {
 			result.Skip = true
@@ -50,7 +50,7 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 		}
 		break
 
-	case api.Deployment:
+	case *api.Deployment:
 		ID := res.Metadata.ID
 		if ID == "" {
 			result.Skip = true

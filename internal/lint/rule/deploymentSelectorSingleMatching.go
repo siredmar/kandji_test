@@ -23,7 +23,7 @@ func (r *DeploymentSelectorSingleMatching) Desc() string {
 
 // Exec checks compliance of the given resource with the rule
 func (r *DeploymentSelectorSingleMatching) Exec(ctx *context.Context, resource interface{}) (*result.Result, error) {
-	res, ok := resource.(api.Deployment)
+	res, ok := resource.(*api.Deployment)
 	if !ok {
 		return nil, errors.E(
 			errors.Internal,
