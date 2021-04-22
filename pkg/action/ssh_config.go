@@ -20,6 +20,7 @@ var configWant = map[string]map[string]string{
 		"ControlMaster":         "auto",
 		"ControlPath":           "~/.ssh/master-%r@%h:%p",
 		"ControlPersist":        "no",
+		"LogLevel":              "ERROR",
 	},
 	"*.gridbox": {
 		"User":                   "root",
