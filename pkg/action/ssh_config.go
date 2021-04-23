@@ -68,7 +68,7 @@ func SSHConfigCheck(s *service.Service) error {
 
 	var res []string
 	for _, d := range diffs {
-		s := fmt.Sprintf("[%v] %v\n  have: %v\n  want: %v", d.host, d.key, d.have, d.want)
+		s := fmt.Sprintf("[%v] %v\n  have: %v\n  want: %v\n", d.host, d.key, d.have, d.want)
 		res = append(res, s)
 	}
 
