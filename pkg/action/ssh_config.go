@@ -20,6 +20,7 @@ var configWant = map[string]map[string]string{
 		"ControlMaster":         "auto",
 		"ControlPath":           "~/.ssh/master-%r@%h:%p",
 		"ControlPersist":        "no",
+		"LogLevel":              "ERROR",
 	},
 	"*.gridbox": {
 		"User":                   "root",
@@ -67,7 +68,7 @@ func SSHConfigCheck(s *service.Service) error {
 
 	var res []string
 	for _, d := range diffs {
-		s := fmt.Sprintf("[%v] %v\n  have: %v\n  want: %v", d.host, d.key, d.have, d.want)
+		s := fmt.Sprintf("[%v] %v\n  have: %v\n  want: %v\n", d.host, d.key, d.have, d.want)
 		res = append(res, s)
 	}
 
