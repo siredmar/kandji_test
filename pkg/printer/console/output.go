@@ -38,6 +38,10 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
+	case api.DeviceConfigMap:
+		out = DeviceConfigMapConsoleOutput{}.Map(v)
+	case api.DeviceConfigMaps:
+		out = DeviceConfigMapsConsoleOutput{}.Inject(v).Map()
 	case api.Pods:
 		out = PodsConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Deployment:
@@ -72,7 +76,12 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 	return nil
 }
 
+func noRowLengthTitle(_ int) bool { return false }
+
 func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) error {
+	printer := tableprinter.New(c.Target)
+	printer.HeaderLine = false
+
 	var out interface{}
 
 	switch v := v.(type) {
@@ -80,6 +89,12 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 		out = DeviceConsoleOutputWide{}.Map(v, config.ShowAll)
 	case api.Devices:
 		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
+	case api.DeviceConfigMap:
+		printer.RowLengthTitle = noRowLengthTitle
+		out = DeviceConfigMapConsoleOutputWide{}.Map(v)
+	case api.DeviceConfigMaps:
+		printer.RowLengthTitle = noRowLengthTitle
+		out = DeviceConfigMapsConsoleOutputWide{}.Inject(v).Map()
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
@@ -89,9 +104,9 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 	case api.Deployments:
 		out = DeploymentsConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
 	case api.Application:
-		out = ApplicationConsoleOutput{}.Map(v) //TODO make wide mapping
+		out = ApplicationConsoleOutput{}.Map(v) // TODO make wide mapping
 	case api.Applications:
-		out = ApplicationsConsoleOutput{}.Map(v).Sort() //TODO make wide mapping
+		out = ApplicationsConsoleOutput{}.Map(v).Sort() // TODO make wide mapping
 	case api.MaintenanceTask:
 		out = MaintenanceConsoleOutputWide{}.Map(v)
 	case api.MaintenanceTasks:
@@ -108,9 +123,6 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 		s := fmt.Sprintf("Not able to print to console! Unknow type %s.", v)
 		return errors.New(s)
 	}
-
-	printer := tableprinter.New(c.Target)
-	printer.HeaderLine = false
 
 	printer.Print(out)
 	return nil

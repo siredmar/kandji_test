@@ -34,7 +34,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 								{
 									Name: "foovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/foo",
 										},
 									},
@@ -42,7 +42,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 								{
 									Name: "barvolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/bar",
 										},
 									},
@@ -69,7 +69,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 								{
 									Name: "foovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/foo",
 										},
 									},
@@ -77,7 +77,7 @@ func TestDeploymentVolumesUnique(t *testing.T) {
 								{
 									Name: "foovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/bar",
 										},
 									},

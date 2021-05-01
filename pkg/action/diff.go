@@ -10,6 +10,7 @@ import (
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	dockerconfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
+	dcmApi "github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
@@ -144,6 +145,12 @@ func getResource(client *client.APIClient, req api.Resource) (api.Resource, erro
 		deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
 		res = &deploy
 
+	case *api.DeviceConfigMap:
+		var dcm api.DeviceConfigMap
+		dcm, err = getDeviceConfigMapByID(client, v.Metadata.ID)
+		dcm.Status = dcmApi.DeviceConfigMapStatus{}
+		res = &dcm
+
 	case *api.DockerConfig:
 		var dc api.DockerConfig
 		dc, err = getDockerConfigById(client, v.Metadata.ID, nil)
@@ -181,6 +188,12 @@ func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error
 	if err == nil {
 		device.Metadata.ID = resID
 		return &device, resID, nil
+	}
+
+	dcm, err := api.NewDeviceConfigMap(bytes, true)
+	if err == nil {
+		dcm.Metadata.ID = resID
+		return &dcm, resID, nil
 	}
 
 	dockerConfig, err := api.NewDockerConfig(bytes, true)

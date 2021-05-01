@@ -19,19 +19,27 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 		rules = append(rules,
 			&rule.ResourceUniqueID{},
 		)
+	case *api.DeviceConfigMap:
+		rules = append(rules,
+			&rule.DeviceConfigMapImmutable{},
+			&rule.DeviceConfigMapUniqueKeys{},
+			&rule.ResourceUniqueID{},
+		)
 	case *api.Deployment:
 		rules = append(rules,
 			&rule.DeploymentAppExists{},
 			&rule.DeploymentContainersUnique{},
-			rule.NewDeploymentVolumeMountsAllowed([]string{"/proc"}),
-			rule.NewDeploymentVolumesAllowed([]string{"/var/run/supervisor.sock"}),
+			&rule.DeploymentDeviceConfigMapExist{},
+			&rule.DeploymentDeviceConfigMapItemsExist{},
+			&rule.DeploymentSelectorDeviceExists{},
 			&rule.DeploymentSelectorSingleMatching{},
 			&rule.DeploymentSelectorSpecified{},
 			&rule.DeploymentSelectorUniqueMatchByDeviceID{},
-			&rule.DeploymentSelectorDeviceExists{},
 			&rule.DeploymentVolumesExist{},
 			&rule.DeploymentVolumesUnique{},
 			&rule.ResourceUniqueID{},
+			rule.NewDeploymentVolumeMountsAllowed([]string{"/proc"}),
+			rule.NewDeploymentVolumesAllowed([]string{"/var/run/supervisor.sock"}),
 		)
 	}
 

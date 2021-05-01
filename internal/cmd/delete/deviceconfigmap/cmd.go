@@ -1,15 +1,11 @@
-package get
+package deviceconfigmap
 
 import (
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/get/application"
-	"github.com/grid-x/gxctl/internal/cmd/get/deployment"
-	"github.com/grid-x/gxctl/internal/cmd/get/device"
-	"github.com/grid-x/gxctl/internal/cmd/get/deviceconfigmap"
-	"github.com/grid-x/gxctl/internal/cmd/get/maintenance"
-	"github.com/grid-x/gxctl/internal/cmd/get/pod"
+	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -37,16 +33,16 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "get",
-		Short: "get different resources",
-	}
-	c.children = []cmd.CMD{
-		application.New(),
-		deployment.New(),
-		device.New(),
-		deviceconfigmap.New(),
-		maintenance.New(),
-		pod.New(),
+		Use:     "deviceconfigmap ID",
+		Aliases: []string{"configmaps", "configmap", "cm", "deviceconfigmaps", "dcm"},
+		Short:   "delete device config map",
+		Args: args.Args{
+			args.ValidateSingle("ID"),
+			args.PredictNil(),
+		},
+		Run: func(cmd *clix.Command, args []string) error {
+			return action.DeleteDeviceConfigMap(s, args)
+		},
 	}
 
 	return nil

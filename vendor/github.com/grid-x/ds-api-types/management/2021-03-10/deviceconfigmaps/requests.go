@@ -1,46 +1,46 @@
-package v20191210
+package v20210310
 
 import (
 	types "github.com/grid-x/ds-api-types"
 )
 
 // CreateRequest represents the request type
-// Endpoint: POST /cleanupconfigs
+// Endpoint: POST /DeviceConfigMaps
 type CreateRequest struct {
-	Metadata types.Metadata     `json:"metadata"`
-	Spec     *CleanupConfigSpec `json:"spec"`
+	Metadata types.Metadata       `json:"metadata"`
+	Spec     *DeviceConfigMapSpec `json:"spec"`
 }
 
 // CreateResponse represents the response type
 type CreateResponse struct {
-	*CleanupConfig
+	*DeviceConfigMap
 }
 
 // UpdateRequest represents the request type
-// Endpoint: PATCH /cleanupconfigs/{cleanupConfigID}
+// Endpoint: PATCH /DeviceConfigMaps/{DeviceConfigMapID}
 type UpdateRequest struct {
 	Metadata types.UpdateMetadata `json:"metadata"`
-	Spec     *CleanupConfigSpec   `json:"spec"`
+	Spec     *DeviceConfigMapSpec `json:"spec"`
 }
 
 // UpdateResponse represents the response type
 type UpdateResponse struct {
-	*CleanupConfig
+	*DeviceConfigMap
 }
 
 // GetRequest represents the request type
-// Endpoint: GET /cleanupconfigs/{cleanupConfigID}
+// Endpoint: GET /DeviceConfigMaps/{DeviceConfigMapID}
 type GetRequest struct{}
 
 // GetResponse represents the response type
 type GetResponse struct {
-	*CleanupConfig
+	*DeviceConfigMap
 }
 
 // ListResponse represents the response type
-// Endpoint: GET /cleanupconfigs
+// Endpoint: GET /DeviceConfigMaps
 type ListResponse struct {
-	CleanupConfigs []*CleanupConfig `json:"cleanupConfigs"`
+	DeviceConfigMaps []*DeviceConfigMap `json:"deviceConfigMaps"`
 }
 
 // DeleteResponse represents the response type

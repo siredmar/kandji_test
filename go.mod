@@ -12,7 +12,7 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/grid-x/ds-api-types v0.0.0-20201113145058-1172a4042126
+	github.com/grid-x/ds-api-types v0.0.0-20210408073354-9848b73cc682
 	github.com/grid-x/wssh v0.0.0-20201118175459-b894b118767b
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.1-0.20200422214639-569ae818ccb3 // indirect
@@ -22,7 +22,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.3.1 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
-	github.com/pkg/term v0.0.0-20200520122047-c3ffed290a03 // indirect
 	github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
 	github.com/spf13/afero v1.2.3-0.20200520213233-a7dc6ae3c554 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -30,7 +29,6 @@ require (
 	github.com/spf13/pflag v1.0.6-0.20200504143853-81378bbcd8a1 // indirect
 	github.com/spf13/viper v1.7.0
 	github.com/subosito/gotenv v1.2.1-0.20190917103637-de67a6614a4d // indirect
-	github.com/tj/go-spin v1.1.0 // indirect
 	github.com/toqueteos/webbrowser v1.2.1-0.20190725205412-dc97d39f4758
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e

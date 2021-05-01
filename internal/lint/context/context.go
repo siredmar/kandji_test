@@ -32,10 +32,16 @@ func New(client *client.APIClient) (*Context, error) {
 		return nil, err
 	}
 
+	dcms, err := fetchDeviceConfigMaps(client)
+	if err != nil {
+		return nil, err
+	}
+
 	current := state.State{
-		Applications: a.Applications,
-		Deployments:  deps.Deployments,
-		Devices:      devs.Devices,
+		Applications:     a.Applications,
+		Deployments:      deps.Deployments,
+		Devices:          devs.Devices,
+		DeviceConfigMaps: dcms.DeviceConfigMaps,
 	}
 
 	return &Context{
@@ -47,6 +53,7 @@ func New(client *client.APIClient) (*Context, error) {
 func (c *Context) SetDesired(resources []interface{}) {
 	var apps []api.Application
 	var deps []api.Deployment
+	var dcms []api.DeviceConfigMap
 
 	for _, res := range resources {
 		switch v := res.(type) {
@@ -54,12 +61,15 @@ func (c *Context) SetDesired(resources []interface{}) {
 			apps = append(apps, *v)
 		case *api.Deployment:
 			deps = append(deps, *v)
+		case *api.DeviceConfigMap:
+			dcms = append(dcms, *v)
 		}
 	}
 
 	c.Desired = state.State{
-		Applications: apps,
-		Deployments:  deps,
+		Applications:     apps,
+		Deployments:      deps,
+		DeviceConfigMaps: dcms,
 	}
 }
 
@@ -69,6 +79,15 @@ func (c *Context) String() string {
 	str.WriteString("Devices:\n")
 	str.WriteString("  Current:\n")
 	for _, x := range c.Current.Devices {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
+	}
+	str.WriteString("DeviceConfigMaps:\n")
+	str.WriteString("  Current:\n")
+	for _, x := range c.Current.DeviceConfigMaps {
+		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
+	}
+	str.WriteString("  Desired:\n")
+	for _, x := range c.Desired.DeviceConfigMaps {
 		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
 	}
 	str.WriteString("Applications:\n")
@@ -114,6 +133,14 @@ func (c *Context) Devices() []api.Device {
 	return c.Current.Devices
 }
 
+// DeviceConfigMaps returns all deployments
+func (c *Context) DeviceConfigMaps() []api.DeviceConfigMap {
+	var dcms []api.DeviceConfigMap
+	dcms = append(dcms, c.Current.DeviceConfigMaps...)
+	dcms = append(dcms, c.Desired.DeviceConfigMaps...)
+	return dcms
+}
+
 func fetchApplications(client *client.APIClient) (api.Applications, error) {
 	response, err := client.GetRequest(api.ApplicationsEndpoint)
 	if err != nil {
@@ -154,4 +181,18 @@ func fetchDevices(client *client.APIClient) (api.Devices, error) {
 	}
 
 	return deviceList, nil
+}
+
+func fetchDeviceConfigMaps(client *client.APIClient) (api.DeviceConfigMaps, error) {
+	response, err := client.GetRequest(api.DeviceConfigMapsEndpoint)
+	if err != nil {
+		return api.DeviceConfigMaps{}, err
+	}
+
+	dcms, err := api.NewDeviceConfigMaps(response, false)
+	if err != nil {
+		return api.DeviceConfigMaps{}, err
+	}
+
+	return dcms, nil
 }

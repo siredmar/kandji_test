@@ -266,6 +266,64 @@ func TestResourceUniqueID(t *testing.T) {
 			wantSkip:  false,
 			wantError: false,
 		},
+		{
+			desc: "no dcms",
+			ctx:  nilCtx,
+			res: api.DeviceConfigMap{
+				Metadata: types.Metadata{
+					ID: "foo",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
+			desc: "dcm does not exist",
+			ctx: &context.Context{
+				Current: nilState,
+				Desired: state.State{
+					DeviceConfigMaps: []api.DeviceConfigMap{
+						{
+							Metadata: types.Metadata{
+								ID: "foo",
+							},
+						},
+					},
+				},
+			},
+			res: api.DeviceConfigMap{
+				Metadata: types.Metadata{
+					ID: "goo",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  false,
+			wantError: false,
+		},
+		{
+			desc: "dcm does exist",
+			ctx: &context.Context{
+				Current: nilState,
+				Desired: state.State{
+					DeviceConfigMaps: []api.DeviceConfigMap{
+						{
+							Metadata: types.Metadata{
+								ID: "foo",
+							},
+						},
+					},
+				},
+			},
+			res: api.DeviceConfigMap{
+				Metadata: types.Metadata{
+					ID: "foo",
+				},
+			},
+			wantPass:  false,
+			wantSkip:  false,
+			wantError: false,
+		},
 	}
 
 	for _, tc := range testcases {

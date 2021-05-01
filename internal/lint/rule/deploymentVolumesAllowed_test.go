@@ -34,7 +34,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 								{
 									Name: "foovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/foobar",
 										},
 									},
@@ -61,7 +61,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 								{
 									Name: "foovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/foobar",
 										},
 									},
@@ -69,7 +69,7 @@ func TestDeploymentVolumesAllowed(t *testing.T) {
 								{
 									Name: "goovolume",
 									VolumeSource: v20190817Pod.VolumeSource{
-										&v20190817Pod.HostPathVolumeSource{
+										HostPath: &v20190817Pod.HostPathVolumeSource{
 											Path: "/tmp/goobaz",
 										},
 									},
