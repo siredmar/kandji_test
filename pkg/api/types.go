@@ -6,11 +6,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	types "github.com/grid-x/ds-api-types"
 	applicationsApi "github.com/grid-x/ds-api-types/management/2018-11-27/application"
-	deviceDockerConfigApi "github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs"
 	devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	podsApi "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
-	dockerConfigApi "github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 	deviceConfigMapApi "github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps"
 )
@@ -74,22 +72,6 @@ type CreateMaintenanceTask maintenanceApi.CreateRequest
 
 func (cmt *CreateMaintenanceTask) Meta() *types.Metadata {
 	return nil
-}
-
-type DockerConfig dockerConfigApi.DockerConfig
-
-type DockerConfigs struct {
-	DockerConfigs []DockerConfig `json:"dockerConfigs"`
-}
-
-type CreateDockerConfig dockerConfigApi.CreateRequest
-
-type UpdateDockerConfig dockerConfigApi.UpdateRequest
-
-type DeviceDockerConfig deviceDockerConfigApi.DeviceDockerConfig
-
-type DeviceDockerConfigs struct {
-	DeviceDockerConfigs []DeviceDockerConfig `json:"deviceDockerConfigs"`
 }
 
 func (d *Device) Meta() *types.Metadata {
@@ -299,86 +281,6 @@ func (m *MaintenanceTasks) GetIds() []string {
 	out := make([]string, len(m.MaintenanceTasks))
 	for _, dev := range m.MaintenanceTasks {
 		out = append(out, dev.Metadata.ID)
-	}
-	return out
-}
-
-func (dc *UpdateDockerConfig) Meta() *types.Metadata {
-	return nil
-}
-
-func (dc *DockerConfig) Meta() *types.Metadata {
-	return &dc.Metadata
-}
-
-func (d *DockerConfig) IsEmpty() bool {
-	if cmp.Diff(DockerConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (d *DockerConfigs) IsEmpty() bool {
-	if len(d.DockerConfigs) == 0 {
-		return true
-	}
-	return false
-}
-
-func (d *DockerConfigs) GetIds() []string {
-	out := make([]string, len(d.DockerConfigs))
-	for _, con := range d.DockerConfigs {
-		out = append(out, con.Metadata.ID)
-	}
-	return out
-}
-
-func (d *CreateDockerConfig) IsEmpty() bool {
-	if cmp.Diff(CreateDockerConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (a *CreateDockerConfig) IsValid() bool {
-	// Todo
-	return true
-}
-
-func (d *UpdateDockerConfig) IsEmpty() bool {
-	if cmp.Diff(UpdateDockerConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (a *UpdateDockerConfig) IsValid() bool {
-	// Todo
-	return true
-}
-
-func (ddc *DeviceDockerConfig) Meta() *types.Metadata {
-	return &ddc.Metadata
-}
-
-func (d *DeviceDockerConfig) IsEmpty() bool {
-	if cmp.Diff(DeviceDockerConfig{}, *d) == "" {
-		return true
-	}
-	return false
-}
-
-func (d *DeviceDockerConfigs) IsEmpty() bool {
-	if len(d.DeviceDockerConfigs) == 0 {
-		return true
-	}
-	return false
-}
-
-func (d *DeviceDockerConfigs) GetIds() []string {
-	out := make([]string, len(d.DeviceDockerConfigs))
-	for _, con := range d.DeviceDockerConfigs {
-		out = append(out, con.Metadata.ID)
 	}
 	return out
 }

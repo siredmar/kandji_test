@@ -8,5 +8,4 @@ const (
 	DeploymentsEndpoint      = "api/management/deployments"
 	ApplicationsEndpoint     = "api/management/applications"
 	MaintenanceEndpoint      = "api/management/maintenance"
-	DockerConfigsEndpoint    = "api/management/dockerconfigs"
 )

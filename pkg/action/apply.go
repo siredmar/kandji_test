@@ -154,13 +154,6 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
-	case *api.DockerConfig:
-		dc, err := getDockerConfigById(client, resID, nil)
-		if err == nil {
-			remoteLabels = dc.Metadata.Labels
-			v.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
-			update = v
-		}
 	default:
 		return errors.E(
 			errors.NotImplemented,

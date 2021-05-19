@@ -98,16 +98,6 @@ func createResource(resID string, res api.Resource, client *client.APIClient) (s
 		}
 		return fmt.Sprintf("Maintenance task %s created successfully", resID), nil
 
-	case *api.DockerConfig:
-		response, err := client.PostRequest(api.DockerConfigsEndpoint, res)
-		if err != nil {
-			return "", err
-		}
-		if _, err := api.NewDockerConfig(response, false); err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("Docker config %s created successfully", resID), nil
-
 	default:
 		return "", errors.E(
 			errors.NotImplemented,
