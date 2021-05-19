@@ -58,8 +58,6 @@ github.com/grid-x/ds-api-types/management/2019-06-09/devicedockerconfigs
 github.com/grid-x/ds-api-types/management/2019-06-13/device
 github.com/grid-x/ds-api-types/management/2019-08-17/pod
 github.com/grid-x/ds-api-types/management/2019-11-04/maintenance
-github.com/grid-x/ds-api-types/management/2019-12-10/deployments
-github.com/grid-x/ds-api-types/management/2019-12-10/dockerconfigs
 github.com/grid-x/ds-api-types/management/2020-08-29/deployments
 github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps
 # github.com/grid-x/ds-k8s-v2 v0.0.0-20200730080902-b4f0d16a7521
