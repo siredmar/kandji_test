@@ -31,6 +31,7 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 			&rule.DeploymentContainersUnique{},
 			&rule.DeploymentDeviceConfigMapExist{},
 			&rule.DeploymentDeviceConfigMapItemsExist{},
+			&rule.DeploymentImageRefValid{},
 			&rule.DeploymentSelectorDeviceExists{},
 			&rule.DeploymentSelectorSingleMatching{},
 			&rule.DeploymentSelectorSpecified{},
