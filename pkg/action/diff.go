@@ -21,7 +21,13 @@ const (
 	KNOWN_AFTER_APPLY = "(Known after apply)"
 )
 
-func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool) error {
+func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool, lint bool) error {
+	if lint {
+		if err := Lint(s, fileName, true); err != nil {
+			return err
+		}
+	}
+
 	var isCI bool
 	token, err := s.Client.GetToken()
 	if err != nil {
@@ -50,7 +56,6 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool)
 }
 
 func diff(filename string, res api.Resource, resID string, differ string, skipOnLabel bool, isCI bool, client *client.APIClient) error {
-
 	var f1, f2 string
 	if resID == KNOWN_AFTER_APPLY {
 		// Looks like a new resource... Diff against empty file
@@ -63,7 +68,6 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 	} else {
 		// There is a resID - Check if res already exists
 		current, err := getResource(client, res)
-
 		// Check if api returned something else then 404
 		if err != nil {
 			e, ok := err.(*errors.Error)
@@ -110,7 +114,7 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 		switch err.(type) {
 		case *exec.ExitError:
 			// this is just an exit code error, no worries
-		default: //couldnt run diff
+		default: // couldnt run diff
 			return err
 		}
 	}
@@ -195,7 +199,7 @@ func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error
 		return &maintenanceTask, resID, nil
 	}
 
-	//Nothing found
+	// Nothing found
 	return nil, "", errors.E(errors.Invalid, "Unsupported type")
 }
 

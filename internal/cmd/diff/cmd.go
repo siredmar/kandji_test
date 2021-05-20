@@ -41,13 +41,14 @@ func (c *CMD) Init(s *service.Service) error {
 			diffCmdFilename, _ := cmd.Flags().GetString("filename")
 			diffCmdDiffer, _ := cmd.Flags().GetString("command")
 			diffCmdSkipOnLabel, _ := cmd.Flags().GetBool("skip-on-label")
+			lint, _ := cmd.Flags().GetBool("lint")
 
 			if diffCmdFilename == "" {
 				fmt.Println(cmd.Usage())
 				return nil
 			}
 
-			return action.Diff(s, diffCmdFilename, diffCmdDiffer, diffCmdSkipOnLabel)
+			return action.Diff(s, diffCmdFilename, diffCmdDiffer, diffCmdSkipOnLabel, lint)
 		},
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
@@ -58,6 +59,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to create the resource")
 	c.cmd.Flags().StringP("command", "c", "diff", "External diff programm")
 	c.cmd.Flags().BoolP("skip-on-label", "s", false, "Allow to skip resources based on their labels")
+	c.cmd.Flags().BoolP("lint", "l", false, "Lint resources before diffing")
 
 	return nil
 }

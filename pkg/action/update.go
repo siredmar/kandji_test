@@ -12,7 +12,13 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-func Update(s *service.Service, updateCmdFilename string) error {
+func Update(s *service.Service, updateCmdFilename string, lint bool) error {
+	if lint {
+		if err := Lint(s, updateCmdFilename, true); err != nil {
+			return err
+		}
+	}
+
 	contents, err := api.GetFilesContentsToProcess(updateCmdFilename)
 	if err != nil {
 		return err
@@ -157,7 +163,6 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		}
 
 		return fmt.Sprintf("DeviceConfigMap %s updated successfully", dcm.Metadata.ID), nil
-
 
 	case *api.Deployment:
 		in := api.UpdateDeployment{}

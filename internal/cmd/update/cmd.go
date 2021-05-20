@@ -39,12 +39,13 @@ func (c *CMD) Init(s *service.Service) error {
 		Short: "update different resources",
 		Run: func(cmd *clix.Command, args []string) error {
 			updateCmdFilename, _ := cmd.Flags().GetString("filename")
+			lint, _ := cmd.Flags().GetBool("lint")
 			if updateCmdFilename == "" {
 				fmt.Println(cmd.Usage())
 				return nil
 			}
 
-			return action.Update(s, updateCmdFilename)
+			return action.Update(s, updateCmdFilename, lint)
 		},
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
@@ -52,6 +53,7 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().StringP("filename", "f", "", "Filename or directory to file to use to update the resource")
+	c.cmd.Flags().BoolP("lint", "l", true, "Lint resources before updating")
 
 	return nil
 }

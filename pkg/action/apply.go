@@ -18,7 +18,13 @@ var (
 	}
 )
 
-func Apply(s *service.Service, fileName string, skipOnLabel bool) error {
+func Apply(s *service.Service, fileName string, skipOnLabel bool, lint bool) error {
+	if lint {
+		if err := Lint(s, fileName, true); err != nil {
+			return err
+		}
+	}
+
 	contents, err := api.GetFilesContentsToProcess(fileName)
 	if err != nil {
 		return err
