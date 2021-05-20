@@ -46,7 +46,7 @@ func TestDeploymentDeviceConfigMapItemsExist(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
@@ -95,7 +95,7 @@ func TestDeploymentDeviceConfigMapItemsExist(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
@@ -144,7 +144,7 @@ func TestDeploymentDeviceConfigMapItemsExist(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{

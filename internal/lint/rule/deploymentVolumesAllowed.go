@@ -63,6 +63,9 @@ func (r *DeploymentVolumesAllowed) Exec(ctx *context.Context, resource interface
 	}
 
 	for _, v := range volumes {
+		if v.VolumeSource.HostPath == nil {
+			continue
+		}
 		if _, exists := r.exclude[v.VolumeSource.HostPath.Path]; exists {
 			result.Pass = false
 			result.Have = v.VolumeSource.HostPath.Path
