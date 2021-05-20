@@ -11,7 +11,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-func Lint(s *service.Service, lintCmdFilename string) error {
+func Lint(s *service.Service, lintCmdFilename string, quiet bool) error {
 	// read raw file contents into fileName -> bytes map
 	fsContents, err := api.GetFilesContentsToProcess(lintCmdFilename)
 	if err != nil {
@@ -24,7 +24,9 @@ func Lint(s *service.Service, lintCmdFilename string) error {
 	for fileName, x := range fsContents {
 		res, _, err := checkResourceFile(x, false) // true will return (Known after apply) for unset IDs
 		if err != nil {
-			fmt.Printf("SKIP %v: %v\n", fileName, err)
+			if !quiet {
+				fmt.Printf("SKIP %v: %v\n", fileName, err)
+			}
 			continue
 		}
 		fsNames = append(fsNames, fileName)
@@ -74,15 +76,27 @@ func Lint(s *service.Service, lintCmdFilename string) error {
 		}
 	}
 
-	fmt.Printf("%v / %v passed (%v skipped)\n", pass, total, skip)
-	for _, result := range results {
-		fmt.Println(result)
+	if !quiet {
+		fmt.Printf("%v / %v passed (%v skipped)\n", pass, total, skip)
+		for _, result := range results {
+			fmt.Println(result)
+		}
 	}
 
 	if pass != total {
+		var errs []string
+
+		if quiet {
+			for _, r := range results {
+				if !r.Pass {
+					errs = append(errs, r.String())
+				}
+			}
+		}
 		return errors.E(
 			errors.Validation,
 			"Some linting rules did not pass",
+			errs,
 		)
 	}
 
