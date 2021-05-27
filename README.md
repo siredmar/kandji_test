@@ -110,18 +110,6 @@ $ gxctl [command] [TYPE] [NAME] -o=<output_format>
 
 ## Examples: Common operations
 
-`gxctl config` - All device config related commands
-```shell
-# Get a List of docker configurations
-$ gxctl config get docker
-# Get a List of docker configurations and include additional information (such as selectors).
-$ gxctl config get docker -o wide
-# Create a docker config for AWS targeting all devices with label demo=demo
-$ gxctl config create docker-aws https://123456789.dkr.ecr.eu-central-1.amazonaws.com --access-key-id=AAABBBCCCDDDEEE --secret-access-key=dpohx+EgPWQK+Fadsads123adeqwuIwnM4atH --region=eu-central-1 --selector demo=demo
-# Delete a docker configuration
-$ gxctl config delete docker 35e3dede-2b45-4212-82fb-b92f7d391e05 
-```
-
 `gxctl copy` - Copies files to devices
 ```shell
 # Copy a local file to a device
@@ -270,8 +258,6 @@ $ gxctl diff -f deployment.json
 ```shell
 # Get the public key of a device
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-publickey
-# Get the docker config of a device
-$ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f --show-dockerconfig
 ```
 
 ## Examples: Sorted output

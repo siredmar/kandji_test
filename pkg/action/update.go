@@ -81,16 +81,6 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		}
 		deploy.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
 		update = &deploy
-	case *api.DockerConfig:
-		dc, err := getDockerConfigById(client, resID, nil)
-		if err != nil {
-			return errors.E(
-				errors.NotExists,
-				"dockerconfig not found",
-			)
-		}
-		dc.Metadata.Labels = api.ComputeMetadataMap(dc.Metadata.Labels, v.Metadata.Labels)
-		update = &dc
 	default:
 		return errors.E(
 			errors.NotImplemented,
@@ -187,24 +177,6 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		}
 
 		return fmt.Sprintf("Deployment %s updated successfully", deployment.Metadata.ID), nil
-
-	case *api.DockerConfig:
-		in := api.UpdateDockerConfig{}
-		in.Spec = &v.Spec
-
-		in.Metadata.Labels = v.Metadata.Labels
-
-		response, err := client.PatchRequest(api.DockerConfigsEndpoint, &in, resId)
-		if err != nil {
-			return "", err
-		}
-
-		config, err := api.NewDockerConfig(response, false)
-		if err != nil {
-			return "", err
-		}
-
-		return fmt.Sprintf("DockerConfig %s updated successfully", config.Metadata.ID), nil
 
 	default:
 		return "", errors.E(

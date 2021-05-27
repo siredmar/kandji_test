@@ -222,8 +222,6 @@ github.com/grid-x/ds-api v0.0.0-20200810091810-9968420b98ac/go.mod h1:J9YuCzg92p
 github.com/grid-x/ds-api-client v0.0.0-20200616143905-1aa090075812/go.mod h1:oIFSkyo61fjIHfLbkSN9bv7NLuM2SGP5Ub6X2B99CUo=
 github.com/grid-x/ds-api-types v0.0.0-20200730075832-96eb89671b69 h1:4FRzOwdCBPjKB3Ur4j9QCNoIjx33BgkmZGWnocKNRXA=
 github.com/grid-x/ds-api-types v0.0.0-20200730075832-96eb89671b69/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
-github.com/grid-x/ds-api-types v0.0.0-20210317150102-f2f134d9dafe h1:Ktqg6FOImrK3nW2Rie8PwPwbcu1U5MZR/tM7LO+eYnk=
-github.com/grid-x/ds-api-types v0.0.0-20210317150102-f2f134d9dafe/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
 github.com/grid-x/ds-api-types v0.0.0-20210408073354-9848b73cc682 h1:DU1+0A39znqdI1N1DvMVifEAJDnoFHy9f/D1EKhPwgI=
 github.com/grid-x/ds-api-types v0.0.0-20210408073354-9848b73cc682/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
 github.com/grid-x/ds-k8s-v2 v0.0.0-20200730080902-b4f0d16a7521 h1:3A/lCUdMXvEnDZ97Dw1fK7pvGJvMXwa4++cCG6rGN78=

@@ -55,12 +55,6 @@ func deleteResource(resID string, res api.Resource, client *client.APIClient) er
 		}
 		break
 
-	case *api.DockerConfig:
-		if _, err := client.DeleteRequest(api.DockerConfigsEndpoint, resID); err != nil {
-			return err
-		}
-		break
-
 	default:
 		return errors.E(
 			errors.NotImplemented,
