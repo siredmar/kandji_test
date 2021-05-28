@@ -30,7 +30,7 @@ func TestDeviceConfigMapImmutable(t *testing.T) {
 		{
 			desc: "dcm does not exist",
 			ctx: nilCtx,
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "foo-dcm",
 				},
@@ -63,7 +63,7 @@ func TestDeviceConfigMapImmutable(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "foo-dcm",
 				},
@@ -96,7 +96,7 @@ func TestDeviceConfigMapImmutable(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "foo-dcm",
 				},

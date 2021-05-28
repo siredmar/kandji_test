@@ -39,13 +39,14 @@ func (c *CMD) Init(s *service.Service) error {
 		Short: "Lint resources by evaluating both desired (local files) and current (remote) state",
 		Run: func(cmd *clix.Command, args []string) error {
 			lintCmdFilename, _ := cmd.Flags().GetString("filename")
+			quiet, _ := cmd.Flags().GetBool("quiet")
 
 			if lintCmdFilename == "" {
 				fmt.Println(cmd.Usage())
 				return nil
 			}
 
-			return action.Lint(s, lintCmdFilename)
+			return action.Lint(s, lintCmdFilename, quiet)
 		},
 		Predictors: args.Predictors{
 			"filename": args.PredictFile(),
@@ -53,6 +54,7 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().StringP("filename", "f", "", "filename or directory of files to lint")
+	c.cmd.Flags().BoolP("quiet", "q", false, "don't print details")
 
 	return nil
 }

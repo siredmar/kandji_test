@@ -44,7 +44,7 @@ func TestDeploymentDeviceConfigMapExist(t *testing.T) {
 				},
 				Desired: nilState,
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
@@ -91,7 +91,7 @@ func TestDeploymentDeviceConfigMapExist(t *testing.T) {
 					},
 				},
 			},
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{
@@ -123,7 +123,7 @@ func TestDeploymentDeviceConfigMapExist(t *testing.T) {
 		{
 			desc: "dcm does not exist",
 			ctx: nilCtx,
-			res: api.Deployment{
+			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
 						Spec: v20190817Pod.PodConfig{

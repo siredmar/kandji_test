@@ -26,7 +26,7 @@ func TestDeviceConfigMapUniqueKeys(t *testing.T) {
 		{
 			desc: "keys unique",
 			ctx: nilCtx,
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{},
 				Spec:     deviceConfigMapApi.DeviceConfigMapSpec{
 					Immutable:  new(bool),
@@ -48,7 +48,7 @@ func TestDeviceConfigMapUniqueKeys(t *testing.T) {
 		{
 			desc: "keys duplicate",
 			ctx: nilCtx,
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{},
 				Spec:     deviceConfigMapApi.DeviceConfigMapSpec{
 					Immutable:  new(bool),

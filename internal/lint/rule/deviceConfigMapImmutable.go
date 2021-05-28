@@ -22,7 +22,7 @@ func (r *DeviceConfigMapImmutable) Desc() string {
 
 // Exec checks compliance of the given resource with the rule
 func (r *DeviceConfigMapImmutable) Exec(ctx *context.Context, resource interface{}) (*result.Result, error) {
-	res, ok := resource.(api.DeviceConfigMap)
+	res, ok := resource.(*api.DeviceConfigMap)
 	if !ok {
 		return nil, errors.E(
 			errors.Internal,
