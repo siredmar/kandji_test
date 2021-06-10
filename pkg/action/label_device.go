@@ -20,6 +20,9 @@ func LabelDevice(s *service.Service, ids []string) error {
 	}
 
 	for k, v := range m {
+		if d.Metadata.Labels == nil {
+			d.Metadata.Labels = make(map[string]string)
+		}
 		if strings.HasSuffix(k, "-") {
 			// delete original value in map if label with deletion suffix was found
 			delete(d.Metadata.Labels, k[:len(k)-1])
