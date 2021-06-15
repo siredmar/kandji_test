@@ -1,4 +1,6 @@
 FROM 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:devpack-buster.latest
+ENV GOOS=linux
+ENV GOARCH=amd64
 
 # Install colordiff and new OpenSSH from backports (OpenSSH from buster doesn't fully support
 # the needed SSH config)
@@ -12,7 +14,7 @@ RUN wget https://github.com/wakeful/yaml2json/releases/download/${YAML2JSON_VERS
   mv yaml2json-linux-amd64 /usr/local/bin/yaml2json && \
   chmod +x /usr/local/bin/yaml2json
 
-COPY ./bin/gxctl /usr/bin/gxctl
+COPY ./bin/gxctl-${GOOS}-${GOARCH} /usr/bin/gxctl
 RUN chmod +x /usr/bin/gxctl
 RUN mkdir -p /root/.gxctl && \
   touch /root/.gxctl/config.yaml && \
