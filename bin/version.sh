@@ -14,4 +14,9 @@ if [[ ! "${VERSION}" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
 	exit 1
 fi
 
-echo $VERSION
+export VERSION
+export V_MAJOR="${BASH_REMATCH[1]}"
+export V_MINOR="${BASH_REMATCH[2]}"
+export V_PATCH="${BASH_REMATCH[3]}"
+
+echo "${VERSION}"
