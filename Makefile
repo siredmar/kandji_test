@@ -4,7 +4,7 @@ VERSION := $(shell cat VERSION)
 GO_BUILD := CGO_ENABLED=0 go build -o bin/gxctl -ldflags=\"-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'\" ./cmd/gxctl
 GO_TOOLS := 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:golang-dev-1.15.latest
 GO_PROJECT := github.com/grid-x/gxctl
-DOCKER_RUN := docker run -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
+DOCKER_RUN := docker run --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
 
 BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
