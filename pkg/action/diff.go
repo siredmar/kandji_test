@@ -43,6 +43,9 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool,
 	}
 
 	for n, c := range contents {
+		if !hasSupportedExtension(n) && fileName != n {
+			continue
+		}
 		res, resID, err := checkResourceFile(c, true)
 		if err != nil {
 			return err
