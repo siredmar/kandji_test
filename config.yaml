@@ -4,7 +4,7 @@ Profiles:
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
   Default: false
-  Name: os-tests
+  Name: testing
 - Auth:
     Auth0ClientID: hzOXwM0npvgI6xmIJzN8IGCfhCublPDd
     Auth0Tenant: gridx-ds-root.eu.auth0.com
