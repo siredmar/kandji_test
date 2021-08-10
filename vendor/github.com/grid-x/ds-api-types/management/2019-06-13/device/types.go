@@ -30,6 +30,10 @@ type DeviceSpec struct {
 	MaintenanceWindow *types.MaintenanceWindow `json:"maintenanceWindow,omitempty"`
 	// Architecture is the architecture of the device eg. arm32v7 or arm64v8
 	Architecture *string `json:"architecture,omitempty"`
+	// The time when the device was first seen online after being provisioned
+	// This field will be set by the api after receiving the first status update outside of the provisioning process
+	// In case the device has not been online yet this will be null
+	FirstSeen *types.Time `json:"firstSeen,omitempty"`
 }
 
 // UpdateSpec represents the update spec type
@@ -42,7 +46,7 @@ type UpdateSpec struct {
 // DeviceStatus represents the status of a device
 type DeviceStatus struct {
 	// The time when the device was first seen online after being provisioned
-	// This field will be set by the api after receiving the first status update outside of the provisionig process
+	// This field will be set by the api after receiving the first status update outside of the provisioning process
 	// In case the device has not been online yet this will be null
 	FirstSeen *metav1.Time `json:"firstSeen,omitempty"`
 	// The time of the last heartbeat
