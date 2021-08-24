@@ -1,6 +1,6 @@
 GO_TOOLS := gridx/golang-dev:1.12.latest-linux-amd64
 GO_PROJECT := github.com/grid-x/ds-api-types
-DOCKER_RUN := docker run -it --rm -v $$PWD:/go/src/${GO_PROJECT} -w /go/src/${GO_PROJECT}
+DOCKER_RUN := docker run --init -it --rm -v $$PWD:/go/src/${GO_PROJECT} -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
 
 lint:

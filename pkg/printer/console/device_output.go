@@ -61,8 +61,8 @@ func (o DeviceConsoleOutputWide) Map(d api.Device, showAll bool) DeviceConsoleOu
 	if d.Status.LastHeartbeat != nil {
 		o.LastHeartbeat = units.HumanDuration(time.Now().Sub(d.Status.LastHeartbeat.Time)) + " ago"
 	}
-	if d.Status.FirstSeen != nil {
-		o.FirstSeen = d.Status.FirstSeen.Format("02.01.2006 15:04:05")
+	if d.Spec.FirstSeen != nil {
+		o.FirstSeen = d.Spec.FirstSeen.Format("02.01.2006 15:04:05")
 	}
 	if d.Metadata.Labels != nil {
 		o.Labels = SortedString(d.Metadata.Labels)
