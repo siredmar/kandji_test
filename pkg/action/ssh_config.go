@@ -30,7 +30,7 @@ var configWant = map[string]map[string]string{
 		"StrictHostKeyChecking":  "no",
 		"LogLevel":               "ERROR",
 		"PubkeyAcceptedKeyTypes": "+ssh-rsa",
-		"ProxyCommand":           "ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -q /keys/id_wssh_rsa && nc %h %p'",
+		"ProxyCommand":           "ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -t 60 -q /keys/id_wssh_rsa && nc %h %p'",
 	},
 }
 
