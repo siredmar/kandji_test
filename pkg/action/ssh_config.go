@@ -109,7 +109,7 @@ type sshConfigDiff struct {
 }
 
 func sshDiff(host, key string, configHave map[string]string, want string) (*sshConfigDiff, error) {
-	have, haveKey := configHave[strings.ToLower(key)]
+	have, _ := configHave[strings.ToLower(key)]
 	d := &sshConfigDiff{
 		host: host,
 		key:  key,
@@ -134,16 +134,6 @@ func sshDiff(host, key string, configHave map[string]string, want string) (*sshC
 		d.have = strings.Replace(d.have, "root", "%r", 1)
 		d.have = strings.Replace(d.have, "*.gridbox-tunnel", "%h", 1)
 		d.have = strings.Replace(d.have, "22", "%p", 1)
-	case "pubkeyacceptedkeytypes":
-		// The keyword was renamed in OpenSSH 8.5
-		// https://www.openssh.com/txt/release-8.5
-		if acceptedAlgorithms, haveRenamedKey := configHave["pubkeyacceptedalgorithms"]; !haveKey && haveRenamedKey {
-			d.have = acceptedAlgorithms
-		}
-
-		if strings.Contains(d.have, strings.TrimLeft(d.want, "+")) {
-			return nil, nil
-		}
 	default:
 	}
 
