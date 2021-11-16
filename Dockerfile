@@ -17,7 +17,7 @@ RUN chmod +x /usr/bin/gxctl
 RUN mkdir -p /root/.gxctl && \
   touch /root/.gxctl/config.yaml && \
   /usr/bin/gxctl ssh setup > /tmp/ssh_config && \
-  sed -e s~"gxctl ssh tunnel --profile"~"gxctl ssh tunnel -q --profile"~g /tmp/ssh_config >> /etc/ssh/ssh_config && \
+  sed -e s~"gxctl ssh tunnel --profile"~"gxctl ssh tunnel --skip-config-check -q --profile"~g /tmp/ssh_config >> /etc/ssh/ssh_config && \
   rm /root/.gxctl/config.yaml
 
 ENTRYPOINT ["gxctl"]
