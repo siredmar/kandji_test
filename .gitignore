@@ -1,1 +1,2 @@
-bin/gxctl
+bin/gxctl*
+dist
