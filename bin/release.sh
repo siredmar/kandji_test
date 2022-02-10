@@ -22,7 +22,7 @@ CHANGELOG="CHANGELOG.md"
 README="README.md"
 
 OPTERR=0
-while getopts mMpy OPT; do
+while getopts dmMpy OPT; do
 	case "${OPT}" in
 	m)
 		RELEASE_SCOPE="minor"
