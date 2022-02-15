@@ -20,13 +20,3 @@ steps:
   label: ":docker: Build docker image"
   agents:
   - "queue=default"
-  branches: "!master"
-- command:
-  - "buildkite-agent artifact download \"bin/gxctl-*\" . --step \":golang: Build\""
-  - "make docker"
-  - ".buildkite/steps/aws_ecr_auth.sh"
-  - ".buildkite/steps/release.sh && echo make docker_push || make docker_push_release"
-  label: ":docker: Push docker image"
-  agents:
-  - "queue=default"
-  branches: "master"
