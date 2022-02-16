@@ -72,7 +72,7 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 		}
 		break
 
-	case api.DeviceConfigMap:
+	case *api.DeviceConfigMap:
 		ID := res.Metadata.ID
 		if ID == "" {
 			result.Skip = true
