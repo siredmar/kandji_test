@@ -194,3 +194,10 @@ func withoutManagedMeta(res api.Resource) error {
 
 	return nil
 }
+
+func withoutAnnotations(res api.Resource) {
+	meta := res.Meta()
+	if meta != nil && meta.Annotations != nil {
+		meta.Annotations = map[string]string{}
+	}
+}
