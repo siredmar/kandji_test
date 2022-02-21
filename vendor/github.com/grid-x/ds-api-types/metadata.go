@@ -15,11 +15,10 @@ type Metadata struct {
 
 // UpdateMetadata contains metadata which can be updated
 type UpdateMetadata struct {
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
-// ConvertFromK8sMetadata covernts k8s metadata to internal metadata
+// ConvertFromK8sMetadata converts k8s metadata to internal metadata
 func ConvertFromK8sMetadata(meta metav1.ObjectMeta, unfiltered bool) Metadata {
 	if unfiltered {
 		return Metadata{
