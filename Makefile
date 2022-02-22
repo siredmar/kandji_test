@@ -4,7 +4,7 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILDTIME := $(shell date)
 VERSION ?= $(shell bin/version.sh)
 GO_BUILD := GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build -o bin/gxctl-${GOOS}-${GOARCH} -ldflags=\"-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'\" ./cmd/gxctl
-GO_TOOLS := 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:golang-dev-1.15.latest
+GO_TOOLS := public.ecr.aws/gridx/base-images:golang-dev-1.17.latest
 GO_PROJECT := github.com/grid-x/gxctl
 DOCKER_RUN := docker run --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c

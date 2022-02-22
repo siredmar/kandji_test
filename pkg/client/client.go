@@ -7,11 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"golang.org/x/time/rate"
 
@@ -224,20 +222,8 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 		if err != nil {
 			// non-JSON (text) response
 			if r.StatusCode == http.StatusNotFound {
-
-				// check if we requested a specific resource
-				path := strings.Split(r.Request.URL.Path, "/")
-				_, err := uuid.Parse(path[len(path)-1])
-				if err == nil {
-					result.Err = errors.E(
-						errors.NotExists,
-					)
-					continue
-				}
-
 				result.Err = errors.E(
-					errors.Internal,
-					fmt.Sprintf("API endpoint or resource not found. Most likely, the version of gxctl you are using (%s) is outdated. Please update to the latest version", version.Version),
+					errors.NotExists,
 				)
 				continue
 			}

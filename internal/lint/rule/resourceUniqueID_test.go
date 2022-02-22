@@ -269,7 +269,7 @@ func TestResourceUniqueID(t *testing.T) {
 		{
 			desc: "no dcms",
 			ctx:  nilCtx,
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},
@@ -292,7 +292,7 @@ func TestResourceUniqueID(t *testing.T) {
 					},
 				},
 			},
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "goo",
 				},
@@ -315,7 +315,7 @@ func TestResourceUniqueID(t *testing.T) {
 					},
 				},
 			},
-			res: api.DeviceConfigMap{
+			res: &api.DeviceConfigMap{
 				Metadata: types.Metadata{
 					ID: "foo",
 				},

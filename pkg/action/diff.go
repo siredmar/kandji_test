@@ -103,6 +103,10 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 			}
 		}
 
+		// Drop annotations if existing
+		withoutAnnotations(current)
+		withoutAnnotations(res)
+
 		err, f1, f2 = writeDiffFiles(current, res)
 		defer os.Remove(f1)
 		defer os.Remove(f2)
