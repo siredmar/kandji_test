@@ -17,7 +17,7 @@ SKIP_CONFIRM=""
 DRY_RUN=""
 GH_TOKEN="${GH_TOKEN:-}"
 
-PLATFORMS=("linux/amd64" "darwin/amd64" "windows/amd64")
+PLATFORMS=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
 CHANGELOG="CHANGELOG.md"
 README="README.md"
 
