@@ -1,4 +1,9 @@
 steps:
+- label: ":bash: Shellcheck"
+  plugins:
+  - shellcheck#v1.1.2:
+      files:
+      - "bin/*.sh"
 - command:
   - "make ci_test"
   label: ":golang: Test"
