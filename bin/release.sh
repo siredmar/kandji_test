@@ -22,7 +22,7 @@ CHANGELOG="CHANGELOG.md"
 README="README.md"
 
 OPTERR=0
-while getopts dmMpy OPT; do
+while getopts hdmMpy OPT; do
 	case "${OPT}" in
 	m)
 		RELEASE_SCOPE="minor"
@@ -131,7 +131,7 @@ main() {
 	COMMITS=$(git log "${VERSION}..HEAD" --pretty=format:"%H" --no-merges)
 	CHANGES="### ${V_NEXT}\n"
 	for REF in $COMMITS; do
-		MSG=$(git log -1 ${REF} --pretty=format:"%s")
+		MSG=$(git log -1 "${REF}" --pretty=format:"%s")
 		CHANGES+="${MSG}\n"
 	done
 	echo -e "# Changelog\n${CHANGES}\n$(cat ${CHANGELOG})\n" >"${CHANGELOG}"
@@ -157,7 +157,7 @@ main() {
 		export GOARCH=${TARGET[1]}
 		BUILD="bin/gxctl-${GOOS}-${GOARCH}"
 		make build
-		if [ $GOOS = "windows" ]; then
+		if [[ $GOOS = "windows" ]]; then
 			mv "${BUILD}" "${BUILD}.exe"
 			BUILD="${BUILD}.exe"
 		fi
@@ -209,11 +209,11 @@ main() {
 
 	echo "get releases…"
 	declare -a RELEASES
-	RELEASES=($(http --check-status "${API_BASE}/releases" "${AUTH_HEADER}" | jq -r 'map(.tag_name) | @sh'))
-	echo "  ${RELEASES[@]}"
+	IFS="" read -r -a RELEASES <<< "$(http --check-status "${API_BASE}/releases" "${AUTH_HEADER}" | jq -r 'map(.tag_name) | @sh')"
+	echo "  ${RELEASES[*]}"
 
 	for TAG in "${RELEASES[@]}"; do
-		TAG=$(echo $TAG | tr -d \')
+		TAG=$(echo "$TAG" | tr -d \')
 		if [[ "${TAG}" == "${V_NEXT}" ]]; then
 			echo "ERR: ${TAG} already exists!"
 			exit 1
@@ -228,20 +228,22 @@ main() {
 			target_commitish="${V_NEXT}" \
 			body=@CHANGELOG.md
 	)
-	RELEASE_ID=$(echo $RELEASE | jq .id)
+	RELEASE_ID=$(echo "$RELEASE" | jq .id)
 
 	API_ASSETS="https://uploads.github.com/repos/grid-x/gxctl/releases/${RELEASE_ID}/assets"
 	for FILE in dist/*.zip; do
 		case $FILE in
 		dist/gxctl-${V_NEXT}*)
 			echo "upload ${FILE}…"
-			NAME=$(http --check-status POST "${API_ASSETS}?name=$(basename ${FILE})" "${AUTH_HEADER}" "${BIN_HEADER}" <${FILE})
+			BASENAME="$(basename "${FILE}")"
+			NAME=$(http --check-status POST "${API_ASSETS}?name=${BASENAME}" "${AUTH_HEADER}" "${BIN_HEADER}" <"${FILE}")
+			echo "uploaded as ${NAME}"
 			;;
 		esac
 	done
 
 	echo "Success!"
-	echo "Review draft release @ $(echo ${RELEASE} | jq -r .html_url)"
+	echo "Review draft release @ $(echo "${RELEASE}" | jq -r .html_url)"
 }
 
 main
