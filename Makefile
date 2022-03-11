@@ -1,12 +1,10 @@
-GOOS ?= linux
-GOARCH ?= amd64
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILDTIME := $(shell date)
 VERSION ?= $(shell bin/version.sh)
-GO_BUILD := GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build -o bin/gxctl-${GOOS}-${GOARCH} -ldflags=\"-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'\" ./cmd/gxctl
+GO_BUILD := GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build -o bin/gxctl-$(shell go env GOOS)-$(shell go env GOARCH) -ldflags=\"-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'\" ./cmd/gxctl
 GO_TOOLS := public.ecr.aws/gridx/base-images:golang-dev-1.17.latest
 GO_PROJECT := github.com/grid-x/gxctl
-DOCKER_RUN := docker run --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
+DOCKER_RUN := docker run -e GOOS=${GOOS} -e GOARCH=${GOARCH} --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
 GO_RUN := ${DOCKER_RUN} ${GO_TOOLS} bash -c
 
 BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
@@ -30,7 +28,7 @@ ci_lint:
 	${GO_RUN} "make lint"
 
 ci_build:
-	${DOCKER_RUN} ${GO_TOOLS} bash -c "${GO_BUILD}"
+	${GO_RUN} "make build"
 
 ci_test:
 	${GO_RUN} "make test"
