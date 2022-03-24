@@ -48,3 +48,9 @@ Profiles:
     Token: '...'
   Default: false
   Name: electris
+- Auth:
+    Auth0ClientID: rfHlztrEhDwXnPuMrE8C41JZ2vYIVQxR
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: engie
