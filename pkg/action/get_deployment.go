@@ -5,7 +5,6 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
-	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 
 	print "github.com/grid-x/gxctl/pkg/printer"
@@ -82,13 +81,6 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 	deploymentList, err := api.NewDeployments(response, false)
 	if err != nil {
 		return deploymentList, err
-	}
-
-	if deploymentList.IsEmpty() {
-		return deploymentList, errors.E(
-			errors.NotExists,
-			"no deployments found",
-		)
 	}
 
 	return deploymentList, nil
