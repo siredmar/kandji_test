@@ -57,7 +57,7 @@ type RequestResult struct {
 
 func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
-		Http:    &http.Client{Timeout: 10 * time.Second},
+		Http:    &http.Client{Timeout: 15 * time.Second},
 		limiter: rate.NewLimiter(rate.Every(100*time.Millisecond), 1),
 		Auth:    auth,
 		Profile: &profile,
