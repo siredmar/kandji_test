@@ -29,20 +29,6 @@ func (do PodsConsoleOutputWide) Inject(i api.Pods) PodsConsoleOutputWide {
 	return do
 }
 
-func (do PodsConsoleOutput) ShowAll(showAll bool) PodsConsoleOutput {
-	out := filterPods(do.raw.Pods, showAll)
-	do.raw.Pods = out
-
-	return do
-}
-
-func (do PodsConsoleOutputWide) ShowAll(showAll bool) PodsConsoleOutputWide {
-	out := filterPods(do.raw.Pods, showAll)
-	do.raw.Pods = out
-
-	return do
-}
-
 func (do PodsConsoleOutput) Map() []PodConsoleOutput {
 	var output []PodConsoleOutput
 	for _, e := range do.raw.Pods {
@@ -73,21 +59,6 @@ func (do PodsConsoleOutputWide) Sort(sortBy string) PodsConsoleOutputWide {
 	do.raw.Pods = out
 
 	return do
-}
-
-func filterPods(in []api.Pod, showAll bool) []api.Pod {
-	var r []api.Pod
-	for _, e := range in {
-		// Filter out pods which are not picked up yet if !showAll
-		if !showAll {
-			if e.Status.StartTime == nil {
-				continue
-			}
-		}
-		r = append(r, e)
-	}
-
-	return r
 }
 
 func sortPods(in api.Pods, sortBy string) []api.Pod {

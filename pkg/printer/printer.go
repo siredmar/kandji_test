@@ -26,7 +26,6 @@ type PrintConfig struct {
 	OutputFormat string
 	Filter       filter.Filter
 	SortBy       string
-	ShowAll      bool
 }
 
 func NewPrinter() *Printer {
@@ -45,16 +44,14 @@ func (p *Printer) Print(d interface{}, config PrintConfig) error {
 		return p.YAML.Print(d)
 	case Console:
 		c := console.ConsolePrintConfig{
-			Filter:  config.Filter,
-			SortBy:  config.SortBy,
-			ShowAll: config.ShowAll,
+			Filter: config.Filter,
+			SortBy: config.SortBy,
 		}
 		return p.Console.Print(d, c)
 	case ConsoleWide:
 		c := console.ConsolePrintConfig{
-			Filter:  config.Filter,
-			SortBy:  config.SortBy,
-			ShowAll: config.ShowAll,
+			Filter: config.Filter,
+			SortBy: config.SortBy,
 		}
 		return p.Console.PrintWide(d, c)
 	default:

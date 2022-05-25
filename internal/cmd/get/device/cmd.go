@@ -39,7 +39,6 @@ func (c *CMD) Init(s *service.Service) error {
 		Long:    "print a list of all devices you have access to",
 		Run: func(cmd *clix.Command, args []string) error {
 			outputType, _ := cmd.Flags().GetString("output")
-			showAll, _ := cmd.Flags().GetBool("all")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
 			label, _ := cmd.Flags().GetString("label")
 			serial, _ := cmd.Flags().GetString("serial")
@@ -47,7 +46,7 @@ func (c *CMD) Init(s *service.Service) error {
 			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
 			deploymentID, _ := cmd.Flags().GetString("deployment-id")
 
-			if err := action.GetDevice(s, outputType, label, serial, sortBy, showPublicIP, showPublicKey, deploymentID, showAll, args); err != nil {
+			if err := action.GetDevice(s, outputType, label, serial, sortBy, showPublicIP, showPublicKey, deploymentID, args); err != nil {
 				return err
 			}
 

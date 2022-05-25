@@ -60,38 +60,23 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 	return do
 }
 
-func (do DevicesConsoleOutput) ShowAll(showAll bool) DevicesConsoleOutput {
-	out := showAllDevices(do.raw.Devices, showAll)
-	do.raw.Devices = out
-
-	return do
-}
-
-func (do DevicesConsoleOutputWide) ShowAll(showAll bool) DevicesConsoleOutputWide {
-	out := showAllDevices(do.raw.Devices, showAll)
-	do.raw.Devices = out
-
-	return do
-}
-
-func (do DevicesConsoleOutput) Map(showAll bool) []DeviceConsoleOutput {
+func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
 	var output []DeviceConsoleOutput
 	for _, e := range do.raw.Devices {
-		output = append(output, DeviceConsoleOutput{}.Map(e, showAll))
+		output = append(output, DeviceConsoleOutput{}.Map(e))
 	}
 
 	return output
 }
 
-func (do DevicesConsoleOutputWide) Map(showAll bool) []DeviceConsoleOutputWide {
+func (do DevicesConsoleOutputWide) Map() []DeviceConsoleOutputWide {
 	var output []DeviceConsoleOutputWide
 	for _, e := range do.raw.Devices {
-		output = append(output, DeviceConsoleOutputWide{}.Map(e, showAll))
+		output = append(output, DeviceConsoleOutputWide{}.Map(e))
 	}
 
 	return output
 }
-
 func (do DevicesConsoleOutput) Sort(sortBy string) DevicesConsoleOutput {
 	out := sortDevices(do.raw, sortBy)
 	do.raw.Devices = out
@@ -104,21 +89,6 @@ func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide 
 	do.raw.Devices = out
 
 	return do
-}
-
-func showAllDevices(in []api.Device, showAll bool) []api.Device {
-	var r []api.Device
-	for _, e := range in {
-		// Filter out devices which are not picked up yet if !showAll
-		if !showAll {
-			if !e.IsOnline() {
-				continue
-			}
-		}
-		r = append(r, e)
-	}
-
-	return r
 }
 
 func sortDevices(in api.Devices, sortBy string) []api.Device {

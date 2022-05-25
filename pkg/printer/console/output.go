@@ -17,9 +17,8 @@ type ConsolePrinter struct {
 }
 
 type ConsolePrintConfig struct {
-	Filter  filter.Filter
-	SortBy  string
-	ShowAll bool
+	Filter filter.Filter
+	SortBy string
 }
 
 func NewConsolePrinter(t io.Writer) *ConsolePrinter {
@@ -33,9 +32,9 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 
 	switch v := v.(type) {
 	case api.Device:
-		out = DeviceConsoleOutput{}.Map(v, config.ShowAll)
+		out = DeviceConsoleOutput{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
+		out = DevicesConsoleOutput{}.Inject(v).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.Pod:
 		out = PodConsoleOutput{}.Map(v)
 	case api.DeviceConfigMap:
@@ -43,11 +42,11 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 	case api.DeviceConfigMaps:
 		out = DeviceConfigMapsConsoleOutput{}.Inject(v).Map()
 	case api.Pods:
-		out = PodsConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
+		out = PodsConsoleOutput{}.Inject(v).Sort(config.SortBy).Map()
 	case api.Deployment:
 		out = DeploymentConsoleOutput{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutput{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
+		out = DeploymentsConsoleOutput{}.Inject(v).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v)
 	case api.Applications:
@@ -78,9 +77,9 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 
 	switch v := v.(type) {
 	case api.Device:
-		out = DeviceConsoleOutputWide{}.Map(v, config.ShowAll)
+		out = DeviceConsoleOutputWide{}.Map(v)
 	case api.Devices:
-		out = DevicesConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Filter(config.Filter).Sort(config.SortBy).Map(config.ShowAll)
+		out = DevicesConsoleOutputWide{}.Inject(v).Filter(config.Filter).Sort(config.SortBy).Map()
 	case api.DeviceConfigMap:
 		printer.RowLengthTitle = noRowLengthTitle
 		out = DeviceConfigMapConsoleOutputWide{}.Map(v)
@@ -90,11 +89,11 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 	case api.Pod:
 		out = PodConsoleOutputWide{}.Map(v)
 	case api.Pods:
-		out = PodsConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
+		out = PodsConsoleOutputWide{}.Inject(v).Sort(config.SortBy).Map()
 	case api.Deployment:
 		out = DeploymentConsoleOutputWide{}.Map(v)
 	case api.Deployments:
-		out = DeploymentsConsoleOutputWide{}.Inject(v).ShowAll(config.ShowAll).Sort(config.SortBy).Map()
+		out = DeploymentsConsoleOutputWide{}.Inject(v).Sort(config.SortBy).Map()
 	case api.Application:
 		out = ApplicationConsoleOutput{}.Map(v) // TODO make wide mapping
 	case api.Applications:

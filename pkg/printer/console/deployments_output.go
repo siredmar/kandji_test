@@ -29,14 +29,6 @@ func (do DeploymentsConsoleOutputWide) Inject(i api.Deployments) DeploymentsCons
 	return do
 }
 
-func (do DeploymentsConsoleOutput) ShowAll(showAll bool) DeploymentsConsoleOutput {
-	return do
-}
-
-func (do DeploymentsConsoleOutputWide) ShowAll(showAll bool) DeploymentsConsoleOutputWide {
-	return do
-}
-
 func (do DeploymentsConsoleOutput) Map() []DeploymentConsoleOutput {
 	var output []DeploymentConsoleOutput
 	for _, e := range do.raw.Deployments {

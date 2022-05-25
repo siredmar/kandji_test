@@ -40,10 +40,9 @@ func (c *CMD) Init(s *service.Service) error {
 		Run: func(cmd *clix.Command, args []string) error {
 			deviceID, _ := cmd.Flags().GetString("device-id")
 			outputType, _ := cmd.Flags().GetString("output")
-			showAll, _ := cmd.Flags().GetBool("all")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
 
-			return action.GetPod(s, deviceID, outputType, sortBy, showAll, args)
+			return action.GetPod(s, deviceID, outputType, sortBy, args)
 		},
 		Predictors: args.Predictors{
 			"output":    args.PredictOutputType(),

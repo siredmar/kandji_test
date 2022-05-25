@@ -21,13 +21,11 @@ func GetDevice(
 	showPublicIP bool,
 	showPublicKey bool,
 	deploymentID string,
-	showAll bool,
 	ids []string,
 ) error {
 	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
-		ShowAll:      showAll,
 	}
 
 	responseList := make(map[string]getDevicesResponse)
@@ -52,8 +50,6 @@ func GetDevice(
 		}
 		responseList["default"] = resp
 
-		// If just looking for one specific device, make sure to print it even if it is offline
-		printerConfig.ShowAll = true
 	} else {
 		//List all devices
 		responseList, err = getDevices(s.Client, "", filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)))
