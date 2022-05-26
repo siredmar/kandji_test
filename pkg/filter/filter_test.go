@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	types "github.com/grid-x/ds-api-types"
-	device "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 
 	"github.com/grid-x/gxctl/pkg/api"
 )
@@ -126,118 +125,6 @@ func TestFilters(t *testing.T) {
 						"foo": "bar",
 						"goo": "NOPE",
 					},
-				},
-			},
-			wantInclude: false,
-			wantError:   false,
-		},
-		{
-			desc:   "serial empty",
-			filter: NewSerialnumberFilter(""),
-			in: api.Device{
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "serial match exact",
-			filter: NewSerialnumberFilter("FOO-BAR"),
-			in: api.Device{
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "serial no match",
-			filter: NewSerialnumberFilter("GOO-BAZ"),
-			in: api.Device{
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR",
-				},
-			},
-			wantInclude: false,
-			wantError:   false,
-		},
-		{
-			desc:   "serial match wildcard",
-			filter: NewSerialnumberFilter("BAR"),
-			in: api.Device{
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR-42",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "composite identity",
-			filter: NewCompositeFilter(NewLabelFilter(""), NewSerialnumberFilter("")),
-			in: api.Device{
-				Metadata: types.Metadata{
-					Labels: map[string]string{
-						"foo": "bar",
-						"goo": "baz",
-					},
-				},
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR-42",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "composite match label",
-			filter: NewCompositeFilter(NewLabelFilter("foo=bar"), NewSerialnumberFilter("")),
-			in: api.Device{
-				Metadata: types.Metadata{
-					Labels: map[string]string{
-						"foo": "bar",
-						"goo": "baz",
-					},
-				},
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR-42",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "composite match filter",
-			filter: NewCompositeFilter(NewLabelFilter(""), NewSerialnumberFilter("FOO-BAR-42")),
-			in: api.Device{
-				Metadata: types.Metadata{
-					Labels: map[string]string{
-						"foo": "bar",
-						"goo": "baz",
-					},
-				},
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR-42",
-				},
-			},
-			wantInclude: true,
-			wantError:   false,
-		},
-		{
-			desc:   "composite match xor",
-			filter: NewCompositeFilter(NewLabelFilter("foo=baz"), NewSerialnumberFilter("FOO-BAR-42")),
-			in: api.Device{
-				Metadata: types.Metadata{
-					Labels: map[string]string{
-						"foo": "bar",
-						"goo": "baz",
-					},
-				},
-				Spec: device.DeviceSpec{
-					Serialnumber: "FOO-BAR-42",
 				},
 			},
 			wantInclude: false,

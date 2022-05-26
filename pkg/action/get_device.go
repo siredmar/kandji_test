@@ -49,10 +49,14 @@ func GetDevice(
 			resp.device.Devices = append(resp.device.Devices, device)
 		}
 		responseList["default"] = resp
-
+	} else if serial != "" {
+		responseList, err = getDeviceBySN(s.Client, serial)
+		if err != nil {
+			return err
+		}
 	} else {
 		//List all devices
-		responseList, err = getDevices(s.Client, "", filter.NewCompositeFilter(filter.NewLabelFilter(label), filter.NewSerialnumberFilter(serial)))
+		responseList, err = getDevices(s.Client, "", filter.NewLabelFilter(label))
 		if err != nil {
 			return err
 		}
