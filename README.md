@@ -18,7 +18,7 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 
 ### Configuration
 
-- Navigate to your home directory and create a folder called `.gxctl`.
+- Navigate to your home directory and create a folder called `.gxctl`. For Windows, this is the root of your %USERPROFILE% directory of the user that will be running the gxctl command.
 - Copy the provided base config file in to `~/.gxctl/config.yaml`. This file mainly lists the settings for
 authenticating gxctl for usage with the different subaccounts. Before you can start working, you have to use `gxctl login` to retrieve a token by
 authenticating with your user account.
@@ -36,8 +36,9 @@ after that time, you may have to simply refresh the token by running `gxctl logi
 
 In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.  
 If running for the first time, you can simply execute `gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
-with the contents of your ssh config and update the latter accordingly.  
-*Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.  
+with the contents of your ssh config and update the latter accordingly. You can run `gxctl ssh check` to find out, if your local configuration has been setup correctly. It will error and print a diff if there are issues and succeed otherwise.
+*Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.
+The most simple solution is running `eval $(ssh-agent)` once per terminal session - this will work fine for basic SSH usage, but will not allow you to open more than one connection at a time.
 
 ## Profiles / Accounts
 
@@ -100,11 +101,11 @@ $ gxctl get apps testapp testapp2
 
 
 ## General resource types
-* **applications**   Abbreviated alias `application`,`app`
-* **deployments**   Abbreviated alias `deployment`,`deploy`
-* **devices**   Abbreviated alias `device`
-* **configmaps**   Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`
-* **pods**   Abbreviated alias `pod`,`po`
+* **applications**   Abbreviated alias `application`,`app`. Applications are used to allow a logical grouping of deployments. Read more about [Device Selectors](#howto-device-selectors).
+* **configmaps**   Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`. Configmaps can be used to inject arbitary data into a container. It can eg. be used to provide the a JSON or YAML config file or add some custom content. In our [Example Deployment](#howto-example-deployment), we're using a Configmap to provide the NGINX container with some custom HTML content to display.
+* **deployments**   Abbreviated alias `deployment`,`deploy`. Deployments are defining a container blueprint. They're are getting translated into Pods as a concrete instance. Those Pods are getting started as a container on the corresponding device. Deployments can either match a single device or a group of devices. Read more about [Device Selectors](#howto-device-selectors).
+* **devices**   Abbreviated alias `device`. Devices are the API representation of the physical gateway. The resource stores general information like the serialnumber or MAC address and a current state of the device providing real time information about the device itself as well as information about the network the device is operationg in.
+* **pods**   Abbreviated alias `pod`,`po`. Pods are the API representation of a container running on a specific device. They're getting created by a controller for the best matching deployment of an application.
 
 
 ## Output options
@@ -126,7 +127,7 @@ gxctl is designed to be used in a declarative way, thus most commands are expect
 The following files are given an easy example of a combination of deployment and configmap to deploy a NGINX including a specific content on a specific device called `7b6419fa-7ac5-4320-a87b-8fe8513130dc`.
 
 ***configmap.yaml***
-```shell
+```yaml
 metadata:
   id: 2cde6802-a7f9-4a35-872c-c10c364babec
 spec:
@@ -144,7 +145,7 @@ spec:
 ```
 
 ***deployment.yaml***
-```shell
+```yaml
 metadata:
   id: 5c4dc7b2-c684-41c5-9e83-b2cc87b5c3cb
 spec:
@@ -169,13 +170,13 @@ spec:
         name: content
 ```
 
-## Howto: Device Selectors
+## Device Selectors
 
 We're using the concept of a device selector to make sure the right pods are running on the right device. There are two different types of selector's which can be added to a deployment, namely `matchByDeviceID` and `matchByLabels`. While `matchByDeviceID` is used as a 1:1 relation to allocate a deployment to a specific device using it's UUID, `matchByLabels` can be used to target a set of devices based on their labels. Those selector's are always working in the scope of an `application`.
 
-For `matchByLabels`, the following apply to allocate a deployment to a set of devices:
+For `matchByLabels`, the following applies to allocate a deployment to a set of devices:
 
-* Always scoped on `application`.
+* The following rules are always evaluated per `application`.
 * `matchByDeviceID` has precedence over `matchByLabels`
 * All labels defined in a `matchByLabels` selector must be attached to the targeted devices in order to match.
 * If there are multiple deployments matching a device for the same `application`, the one will be choosen, which matches most specificly, meaning having the biggest nummer of matching labels.
@@ -186,7 +187,7 @@ For `matchByLabels`, the following apply to allocate a deployment to a set of de
 Following we got a set of devices an deployments.
 
 ***Device01***
-```shell
+```yaml
 id: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 labels:
   core.gridx.ai/status: running
@@ -195,7 +196,7 @@ labels:
 ```
 
 ***Device02***
-```shell
+```yaml
 id: de6dfaf0-bebd-4338-b4ce-bd451406b39a
 labels:
   core.gridx.ai/status: running
@@ -204,7 +205,7 @@ labels:
 ```
 
 ***Device03***
-```shell
+```yaml
 id: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 labels:
   core.gridx.ai/status: running
@@ -213,28 +214,34 @@ labels:
 ```
 
 ***Deployment1***
-```shell
-matchByDeviceID: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
+```yaml
+app: nginx
+selector:
+  matchByDeviceID: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 ```
 
 ***Deployment2***
-```shell
-matchByLabels:
-  gridx.de/channel: stable
+```yaml
+app: nginx
+selector:
+  matchByLabels:
+    gridx.de/channel: stable
 ```
 
 ***Deployment3***
-```shell
-matchByLabels:
-  gridx.de/channel: stable
-  gridx.de/region: eu-west
+```yaml
+app: nginx
+selector:
+  matchByLabels:
+    gridx.de/channel: stable
+    gridx.de/region: eu-west
 ```
 
 We end up with the following allocation:
 
-* `Device01` runs `Deployment1`. Even though `Deployment2` would also match, based on it's values, it runs on `Deployment1` as `matchByDeviceID` always has precedence over `matchByLabels`
+* `Device01` runs `Deployment1`. Even though `Deployment2` would also match, based on it's values, it runs on `Deployment1` as `matchByDeviceID` always has precedence over `matchByLabels`. Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.
 * `Device02` runs `Deployment2` as the labels are matching.
-* `Device03` runs `Deployment3`. Even though, both `Deployment2` and `Deployment3` are matching based on the labels, `Deployment3` is more specific (2 vs. 1 matching labels).
+* `Device03` runs `Deployment3`. Even though, both `Deployment2` and `Deployment3` are matching based on the labels, `Deployment3` is more specific (2 vs. 1 matching labels). Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.. 
 
 ## Howto: Common operations
 
@@ -321,6 +328,27 @@ $ gxctl label device 57e82f8e-08f4-48f9-8e75-28552d09701f test- demo=demo
 # Creates a resource if not existing, otherwise updates.
 $ gxctl apply -f deployment.json
 ```
+
+`gxctl ssh` - Show SSH config and setup tunnel
+
+```shell
+# Pint SSH config which needs to be setup
+$ gxctl ssh setup
+# Check if local SSH config has been setup correctly
+$ gxctl ssh check
+# all commands below need up-to-date SSH client config according to $(gxctl ssh setup)!
+# SSH remote terminal session to device
+$ ssh D244-200-000-000-445-P-X.gridbox
+# SSH remote terminal session to device (wildcard match)
+$ ssh 445-P-X.gridbox
+# copy local file to device
+$ scp /tmp/foo.txt D244-200-000-000-445-P-X.gridbox:/tmp
+# copy remote file from device
+$ scp D244-200-000-000-445-P-X.gridbox:/tmp/foo.txt /tmp
+# forward port 8080 of devices 192.168.169.198 and 192.168.169.199 in the remote network to local ports 8080 and 8081
+$ ssh -L 8080:192.168.169.198:8080 -L 8081:192.168.169.199:8080 D294-200-000-000-581-P-X.gridbox
+# open up port 2210 on the gridbox in the remote network and forward incoming traffic to local port 2210
+$ ssh -R 2210:localhost:2210 D294-200-000-000-581-P-X.gridbox
 
 `gxctl diff` - Diff a resource file
 
