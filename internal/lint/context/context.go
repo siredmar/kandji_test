@@ -13,6 +13,7 @@ import (
 type Context struct {
 	Current state.State
 	Desired state.State
+	Cl      *client.APIClient
 }
 
 // New creates a new Context
@@ -27,11 +28,6 @@ func New(client *client.APIClient) (*Context, error) {
 		return nil, err
 	}
 
-	devs, err := fetchDevices(client)
-	if err != nil {
-		return nil, err
-	}
-
 	dcms, err := fetchDeviceConfigMaps(client)
 	if err != nil {
 		return nil, err
@@ -40,12 +36,12 @@ func New(client *client.APIClient) (*Context, error) {
 	current := state.State{
 		Applications:     a.Applications,
 		Deployments:      deps.Deployments,
-		Devices:          devs.Devices,
 		DeviceConfigMaps: dcms.DeviceConfigMaps,
 	}
 
 	return &Context{
 		Current: current,
+		Cl:      client,
 	}, nil
 }
 
@@ -76,11 +72,6 @@ func (c *Context) SetDesired(resources []interface{}) {
 func (c *Context) String() string {
 	var str strings.Builder
 
-	str.WriteString("Devices:\n")
-	str.WriteString("  Current:\n")
-	for _, x := range c.Current.Devices {
-		str.WriteString(fmt.Sprintf("    %v\n", x.Metadata.ID))
-	}
 	str.WriteString("DeviceConfigMaps:\n")
 	str.WriteString("  Current:\n")
 	for _, x := range c.Current.DeviceConfigMaps {
@@ -128,9 +119,9 @@ func (c *Context) Deployments() []api.Deployment {
 	return deps
 }
 
-// Devices returns all devices
-func (c *Context) Devices() []api.Device {
-	return c.Current.Devices
+// Client returns APIClient
+func (c *Context) Client() *client.APIClient {
+	return c.Cl
 }
 
 // DeviceConfigMaps returns all deployments

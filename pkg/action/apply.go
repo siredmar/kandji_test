@@ -106,8 +106,8 @@ func sortByKind(resources map[string]api.Resource) []resAssoc {
 	return result
 }
 
-func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIClient) error {
-	token, err := client.GetToken()
+func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClient) error {
+	token, err := cl.GetToken()
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 
 	if resID == "" {
 		// Create
-		return create(resID, res, client)
+		return create(resID, res, cl)
 	}
 
 	// Update or Create
@@ -135,7 +135,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 	switch v := res.(type) {
 	case *api.Application:
 		var app api.Application
-		app, getErr = getApplicationById(client, resID)
+		app, getErr = getApplicationById(cl, resID)
 		if err == nil {
 			remoteLabels = app.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
@@ -143,7 +143,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		}
 	case *api.Device:
 		var device api.Device
-		device, getErr = getDeviceById(client, resID, nil)
+		device, getErr = client.GetDeviceById(cl, resID, nil)
 		if err == nil {
 			remoteLabels = device.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
@@ -151,7 +151,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		}
 	case *api.DeviceConfigMap:
 		var dcm api.DeviceConfigMap
-		dcm, getErr = getDeviceConfigMapByID(client, resID)
+		dcm, getErr = getDeviceConfigMapByID(cl, resID)
 		if err == nil {
 			remoteLabels = dcm.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(dcm.Metadata.Labels, v.Metadata.Labels)
@@ -159,7 +159,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		}
 	case *api.Deployment:
 		var deploy api.Deployment
-		deploy, getErr = getDeploymentById(client, resID, nil)
+		deploy, getErr = getDeploymentById(cl, resID, nil)
 		if err == nil {
 			remoteLabels = deploy.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
@@ -186,7 +186,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 
 	if update == nil {
 		// Create
-		return create(resID, res, client)
+		return create(resID, res, cl)
 	}
 
 	// Update
@@ -197,7 +197,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		return nil
 	}
 
-	message, err := updateResource(client, update, resID, nil)
+	message, err := updateResource(cl, update, resID, nil)
 	if err != nil {
 		return err
 	}

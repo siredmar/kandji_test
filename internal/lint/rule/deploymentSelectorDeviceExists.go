@@ -4,6 +4,7 @@ import (
 	"github.com/grid-x/gxctl/internal/lint/context"
 	"github.com/grid-x/gxctl/internal/lint/result"
 	"github.com/grid-x/gxctl/pkg/api"
+	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
 )
 
@@ -42,27 +43,16 @@ func (r *DeploymentSelectorDeviceExists) Exec(ctx *context.Context, resource int
 		return result, nil
 	}
 
-	foundDevice := false
-	devices := ctx.Devices()
-
-	if len(devices) == 0 {
-		result.Pass = false
-		result.Have = "no devices"
-		return result, nil
-	}
-
-	for _, dev := range devices {
-		if dev.Metadata.ID == *selector {
-			foundDevice = true
-			break
-		}
-	}
-
-	if !foundDevice {
+	_, err := client.GetDeviceById(ctx.Client(), *selector, nil)
+	if err != nil {
 		result.Pass = false
 		result.Have = *selector
 		return result, nil
 	}
 
 	return result, nil
+}
+
+func (r *DeploymentSelectorDeviceExists) GetDeviceById() error {
+	return nil
 }

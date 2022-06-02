@@ -42,12 +42,12 @@ func Update(s *service.Service, updateCmdFilename string, lint bool) error {
 	return nil
 }
 
-func update(resID string, res api.Resource, client *client.APIClient) error {
+func update(resID string, res api.Resource, cl *client.APIClient) error {
 	var update api.Resource
 
 	switch v := res.(type) {
 	case *api.Application:
-		app, err := getApplicationById(client, resID)
+		app, err := getApplicationById(cl, resID)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -57,7 +57,7 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		app.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
 		update = &app
 	case *api.Device:
-		device, err := getDeviceById(client, resID, nil)
+		device, err := client.GetDeviceById(cl, resID, nil)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -67,7 +67,7 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		device.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 		update = &device
 	case *api.DeviceConfigMap:
-		dcm, err := getDeviceConfigMapByID(client, resID)
+		dcm, err := getDeviceConfigMapByID(cl, resID)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -78,7 +78,7 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		update = &dcm
 
 	case *api.Deployment:
-		deploy, err := getDeploymentById(client, resID, nil)
+		deploy, err := getDeploymentById(cl, resID, nil)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -94,7 +94,7 @@ func update(resID string, res api.Resource, client *client.APIClient) error {
 		)
 	}
 
-	message, err := updateResource(client, update, resID, nil)
+	message, err := updateResource(cl, update, resID, nil)
 	if err != nil {
 		return err
 	}

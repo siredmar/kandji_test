@@ -93,14 +93,14 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	var profile string
 
 	for _, r := range responseList {
-		if len(r.device.Devices) > 1 {
+		if len(r.Device.Devices) > 1 {
 			getDevice.Fail()
 			err := errs.E(
 				errs.Invalid,
 				fmt.Sprintf("        more than one device found"),
 			)
 			return err
-		} else if len(r.device.Devices) == 1 {
+		} else if len(r.Device.Devices) == 1 {
 			if !device.IsEmpty() {
 				getDevice.Fail()
 				err := errs.E(
@@ -109,8 +109,8 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 				)
 				return err
 			}
-			device = r.device.Devices[0]
-			profile = r.profile
+			device = r.Device.Devices[0]
+			profile = r.Profile
 		}
 	}
 
