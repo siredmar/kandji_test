@@ -106,8 +106,8 @@ func sortByKind(resources map[string]api.Resource) []resAssoc {
 	return result
 }
 
-func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIClient) error {
-	token, err := client.GetToken()
+func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClient) error {
+	token, err := cl.GetToken()
 	if err != nil {
 		return err
 	}
@@ -124,37 +124,42 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 
 	if resID == "" {
 		// Create
-		return create(resID, res, client)
+		return create(resID, res, cl)
 	}
 
 	// Update or Create
 	var update api.Resource
 	var remoteLabels map[string]string
+	var getErr error
 
 	switch v := res.(type) {
 	case *api.Application:
-		app, err := getApplicationById(client, resID)
+		var app api.Application
+		app, getErr = getApplicationById(cl, resID)
 		if err == nil {
 			remoteLabels = app.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
 	case *api.Device:
-		device, err := getDeviceById(client, resID, nil)
+		var device api.Device
+		device, getErr = client.GetDeviceById(cl, resID, nil)
 		if err == nil {
 			remoteLabels = device.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
 	case *api.DeviceConfigMap:
-		dcm, err := getDeviceConfigMapByID(client, resID)
+		var dcm api.DeviceConfigMap
+		dcm, getErr = getDeviceConfigMapByID(cl, resID)
 		if err == nil {
 			remoteLabels = dcm.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(dcm.Metadata.Labels, v.Metadata.Labels)
 			update = v
 		}
 	case *api.Deployment:
-		deploy, err := getDeploymentById(client, resID, nil)
+		var deploy api.Deployment
+		deploy, getErr = getDeploymentById(cl, resID, nil)
 		if err == nil {
 			remoteLabels = deploy.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
@@ -167,9 +172,21 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		)
 	}
 
+	// Check if api returned something else then 404, if so we need to exit
+	if getErr != nil {
+		e, ok := getErr.(*errors.Error)
+		if !ok {
+			return errors.E(errors.Other, getErr)
+		}
+
+		if e.Kind != errors.NotExists {
+			return e
+		}
+	}
+
 	if update == nil {
 		// Create
-		return create(resID, res, client)
+		return create(resID, res, cl)
 	}
 
 	// Update
@@ -180,7 +197,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, client *client.APIC
 		return nil
 	}
 
-	message, err := updateResource(client, update, resID, nil)
+	message, err := updateResource(cl, update, resID, nil)
 	if err != nil {
 		return err
 	}

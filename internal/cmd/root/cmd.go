@@ -11,8 +11,6 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/label"
 	"github.com/grid-x/gxctl/internal/cmd/lint"
 	"github.com/grid-x/gxctl/internal/cmd/login"
-	"github.com/grid-x/gxctl/internal/cmd/prune"
-	"github.com/grid-x/gxctl/internal/cmd/restart"
 	"github.com/grid-x/gxctl/internal/cmd/ssh"
 	"github.com/grid-x/gxctl/internal/cmd/update"
 	"github.com/grid-x/gxctl/internal/cmd/validate"
@@ -57,8 +55,8 @@ func (c *CMD) Init(s *service.Service) error {
 		label.New(),
 		lint.New(),
 		login.New(),
-		prune.New(),
-		restart.New(),
+		//prune.New(),
+		//restart.New(),
 		ssh.New(),
 		update.New(),
 		validate.New(),

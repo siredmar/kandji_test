@@ -133,31 +133,31 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 	return nil
 }
 
-func getResource(client *client.APIClient, req api.Resource) (api.Resource, error) {
+func getResource(cl *client.APIClient, req api.Resource) (api.Resource, error) {
 	var res api.Resource
 	var err error
 
 	switch v := req.(type) {
 	case *api.Application:
 		var app api.Application
-		app, err = getApplicationById(client, v.Metadata.ID)
+		app, err = getApplicationById(cl, v.Metadata.ID)
 		res = &app
 
 	case *api.Device:
 		var device api.Device
-		device, err = getDeviceById(client, v.Metadata.ID, nil)
+		device, err = client.GetDeviceById(cl, v.Metadata.ID, nil)
 		device.Status = deviceApi.DeviceStatus{}
 		res = &device
 
 	case *api.Deployment:
 		var deploy api.Deployment
-		deploy, err = getDeploymentById(client, v.Metadata.ID, nil)
+		deploy, err = getDeploymentById(cl, v.Metadata.ID, nil)
 		deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
 		res = &deploy
 
 	case *api.DeviceConfigMap:
 		var dcm api.DeviceConfigMap
-		dcm, err = getDeviceConfigMapByID(client, v.Metadata.ID)
+		dcm, err = getDeviceConfigMapByID(cl, v.Metadata.ID)
 		dcm.Status = dcmApi.DeviceConfigMapStatus{}
 		res = &dcm
 

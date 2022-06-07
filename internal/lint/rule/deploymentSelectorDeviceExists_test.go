@@ -1,10 +1,10 @@
 package rule
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
-	types "github.com/grid-x/ds-api-types"
 	// devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
 	deployments "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 
@@ -13,12 +13,21 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 )
 
+type mockClient struct {
+	err error
+}
+
+func (m mockClient) GetDeviceById(id string) (api.Device, error) {
+	return api.Device{}, m.err
+}
+
 func TestDeploymentSelectorDeviceExists(t *testing.T) {
 	r := DeploymentSelectorDeviceExists{}
 
 	testcases := []struct {
 		desc      string
 		ctx       *context.Context
+		deviceErr error
 		res       interface{}
 		wantPass  bool
 		wantSkip  bool
@@ -27,17 +36,10 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 		{
 			desc: "does exist",
 			ctx: &context.Context{
-				Current: state.State{
-					Devices: []api.Device{
-						{
-							Metadata: types.Metadata{
-								ID: foo,
-							},
-						},
-					},
-				},
+				Current: state.State{},
 				Desired: nilState,
 			},
+			deviceErr: nil, // no error -> assumed the device exists
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
@@ -52,17 +54,10 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 		{
 			desc: "does not exist",
 			ctx: &context.Context{
-				Current: state.State{
-					Devices: []api.Device{
-						{
-							Metadata: types.Metadata{
-								ID: goo,
-							},
-						},
-					},
-				},
+				Current: state.State{},
 				Desired: nilState,
 			},
+			deviceErr: errors.New("does not exist!"),
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
@@ -78,6 +73,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+			tc.ctx.Cl = mockClient{tc.deviceErr}
 			got, gotErr := r.Exec(tc.ctx, tc.res)
 			got.SourceID = "test"
 			got.Rule = &r

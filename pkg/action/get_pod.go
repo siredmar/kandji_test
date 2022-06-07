@@ -10,11 +10,10 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-func GetPod(s *service.Service, deviceID string, outputType string, sortBy string, showAll bool, ids []string) error {
+func GetPod(s *service.Service, deviceID string, outputType string, sortBy string, ids []string) error {
 	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
-		ShowAll:      showAll,
 	}
 
 	if deviceID != "" {

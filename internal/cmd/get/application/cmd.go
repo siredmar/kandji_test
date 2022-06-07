@@ -37,10 +37,6 @@ func (c *CMD) Init(s *service.Service) error {
 		Aliases: []string{"app", "apps"},
 		Short:   "get application(s)",
 		Long:    "print a list of all applications you have access to",
-		Args: args.Args{
-			args.ValidateNil(),
-			args.PredictNil(),
-		},
 		Run: func(cmd *clix.Command, args []string) error {
 			outputType, _ := cmd.Flags().GetString("output")
 			if err := action.GetApplication(s, outputType, args); err != nil {
