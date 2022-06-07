@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -12,14 +13,21 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 )
 
+type mockClient struct {
+	err error
+}
+
+func (m mockClient) GetDeviceById(id string) (api.Device, error) {
+	return api.Device{}, m.err
+}
+
 func TestDeploymentSelectorDeviceExists(t *testing.T) {
 	r := DeploymentSelectorDeviceExists{}
-
-	t.Skip()
 
 	testcases := []struct {
 		desc      string
 		ctx       *context.Context
+		deviceErr error
 		res       interface{}
 		wantPass  bool
 		wantSkip  bool
@@ -31,6 +39,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 				Current: state.State{},
 				Desired: nilState,
 			},
+			deviceErr: nil, // no error -> assumed the device exists
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
@@ -48,6 +57,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 				Current: state.State{},
 				Desired: nilState,
 			},
+			deviceErr: errors.New("does not exist!"),
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
@@ -63,6 +73,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+			tc.ctx.Cl = mockClient{tc.deviceErr}
 			got, gotErr := r.Exec(tc.ctx, tc.res)
 			got.SourceID = "test"
 			got.Rule = &r

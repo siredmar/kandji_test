@@ -13,7 +13,21 @@ import (
 type Context struct {
 	Current state.State
 	Desired state.State
-	Cl      *client.APIClient
+	Cl      Client
+}
+
+// Client encapsulates the API methods (besides current and desired state) that linting rules need.
+// It is normally implemented in terms of *client.APIClient, but wrapped for mocking in testing.
+type Client interface {
+	GetDeviceById(id string) (api.Device, error)
+}
+
+type clientImpl struct {
+	*client.APIClient
+}
+
+func (c clientImpl) GetDeviceById(id string) (api.Device, error) {
+	return client.GetDeviceById(c.APIClient, id, nil)
 }
 
 // New creates a new Context
@@ -41,7 +55,7 @@ func New(client *client.APIClient) (*Context, error) {
 
 	return &Context{
 		Current: current,
-		Cl:      client,
+		Cl:      clientImpl{client},
 	}, nil
 }
 
@@ -117,11 +131,6 @@ func (c *Context) Deployments() []api.Deployment {
 	deps = append(deps, c.Current.Deployments...)
 	deps = append(deps, c.Desired.Deployments...)
 	return deps
-}
-
-// Client returns APIClient
-func (c *Context) Client() *client.APIClient {
-	return c.Cl
 }
 
 // DeviceConfigMaps returns all deployments
