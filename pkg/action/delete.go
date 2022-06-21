@@ -25,44 +25,46 @@ func Delete(s *service.Service, deleteCmdFileName string) error {
 	}
 
 	for resID, res := range resources {
-		if err := deleteResource(resID, res, s.Client); err != nil {
+		message, err := deleteResource(resID, res, s.Client)
+		if err != nil {
 			return err
 		}
+		fmt.Println(message)
 	}
 
 	return nil
 }
 
-func deleteResource(resID string, res api.Resource, client *client.APIClient) error {
-	fmt.Printf("deleting resource %s… ", resID)
-
+func deleteResource(resID string, res api.Resource, client *client.APIClient) (string, error) {
 	switch res.(type) {
 	case *api.Application:
 		if _, err := client.DeleteRequest(api.ApplicationsEndpoint, resID); err != nil {
-			return err
+			return "", err
 		}
-		break
+		return fmt.Sprintf("Application %s deleted successfully", resID), nil
 
 	case *api.Device:
 		if _, err := client.DeleteRequest(api.DevicesEndpoint, resID); err != nil {
-			return err
+			return "", err
 		}
-		break
+		return fmt.Sprintf("Device %s deleted successfully", resID), nil
 
 	case *api.Deployment:
 		if _, err := client.DeleteRequest(api.DeploymentsEndpoint, resID); err != nil {
-			return err
+			return "", err
 		}
-		break
+		return fmt.Sprintf("Deployment %s deleted successfully", resID), nil
+
+	case *api.DeviceConfigMap:
+		if _, err := client.DeleteRequest(api.DeviceConfigMapsEndpoint, resID); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("DeviceConfigMap %s deleted successfully", resID), nil
 
 	default:
-		return errors.E(
+		return "", errors.E(
 			errors.NotImplemented,
 			fmt.Sprintf("Unsupported type: %T", res),
 		)
 	}
-
-	fmt.Print("success\n")
-
-	return nil
 }
