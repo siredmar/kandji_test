@@ -136,7 +136,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClien
 	case *api.Application:
 		var app api.Application
 		app, getErr = getApplicationById(cl, resID)
-		if err == nil {
+		if getErr == nil {
 			remoteLabels = app.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
 			update = v
@@ -144,7 +144,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClien
 	case *api.Device:
 		var device api.Device
 		device, getErr = client.GetDeviceById(cl, resID, nil)
-		if err == nil {
+		if getErr == nil {
 			remoteLabels = device.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(device.Metadata.Labels, v.Metadata.Labels)
 			update = v
@@ -152,7 +152,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClien
 	case *api.DeviceConfigMap:
 		var dcm api.DeviceConfigMap
 		dcm, getErr = getDeviceConfigMapByID(cl, resID)
-		if err == nil {
+		if getErr == nil {
 			remoteLabels = dcm.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(dcm.Metadata.Labels, v.Metadata.Labels)
 			update = v
@@ -160,7 +160,7 @@ func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClien
 	case *api.Deployment:
 		var deploy api.Deployment
 		deploy, getErr = getDeploymentById(cl, resID, nil)
-		if err == nil {
+		if getErr == nil {
 			remoteLabels = deploy.Metadata.Labels
 			v.Metadata.Labels = api.ComputeMetadataMap(deploy.Metadata.Labels, v.Metadata.Labels)
 			update = v
