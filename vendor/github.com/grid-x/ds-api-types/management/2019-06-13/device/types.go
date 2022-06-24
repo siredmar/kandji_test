@@ -1,8 +1,6 @@
 package v20190613
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	types "github.com/grid-x/ds-api-types"
 )
 
@@ -34,13 +32,18 @@ type DeviceSpec struct {
 	// This field will be set by the api after receiving the first status update outside of the provisioning process
 	// In case the device has not been online yet this will be null
 	FirstSeen *types.Time `json:"firstSeen,omitempty"`
+	// Additional identifier to be used e.g. during commissioning on application layer
+	Startcode *string `json:"startcode,omitempty"`
+	// Specifies the complete networking configuration of a device.
+	NetworkConfig map[string]NetworkInterfaceSpec `json:"networkConfig,omitempty"`
 }
 
 // UpdateSpec represents the update spec type
 type UpdateSpec struct {
-	MACAddress        *string                  `json:"macAddress,omitempty"`
-	MaintenanceWindow *types.MaintenanceWindow `json:"maintenanceWindow,omitempty"`
-	MenderDeviceID    *string                  `json:"menderDeviceID,omitempty"`
+	MACAddress        *string                         `json:"macAddress,omitempty"`
+	MaintenanceWindow *types.MaintenanceWindow        `json:"maintenanceWindow,omitempty"`
+	MenderDeviceID    *string                         `json:"menderDeviceID,omitempty"`
+	NetworkConfig     map[string]NetworkInterfaceSpec `json:"networkConfig,omitempty"`
 }
 
 // DeviceStatus represents the status of a device
@@ -48,10 +51,10 @@ type DeviceStatus struct {
 	// The time when the device was first seen online after being provisioned
 	// This field will be set by the api after receiving the first status update outside of the provisioning process
 	// In case the device has not been online yet this will be null
-	FirstSeen *metav1.Time `json:"firstSeen,omitempty"`
+	FirstSeen *types.Time `json:"firstSeen,omitempty"`
 	// The time of the last heartbeat
 	// In case the device never contacted us this will be null
-	LastHeartbeat *metav1.Time `json:"lastHeartbeat,omitempty"`
+	LastHeartbeat *types.Time `json:"lastHeartbeat,omitempty"`
 	// Capacity represents the total capacity of this device
 	Capacity ResourceList `json:"capacity,omitempty"`
 	// Allocated represents the resources that are allocated
@@ -102,10 +105,10 @@ type DeviceCondition struct {
 	Status ConditionStatus `json:"status,omitempty"`
 	// LastHeartbeatTime is the timestamp for when the Pod condition was
 	// last probed.
-	LastHeartbeatTime metav1.Time `json:"lastHeartbeatTime,omitempty"`
+	LastHeartbeatTime types.Time `json:"lastHeartbeatTime,omitempty"`
 	// LastTransitionTime provides a timestamp for when the Pod last
 	// transitioned from one status to another.
-	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty"`
+	LastTransitionTime *types.Time `json:"lastTransitionTime,omitempty"`
 	// Reason is a unique, one-word, CamelCase reason for the condition’s
 	// last transition.
 	Reason *string `json:"reason,omitempty"`
@@ -124,6 +127,18 @@ type NetworkInterface struct {
 	IPv4 *string `json:"ipV4,omitempty"`
 	// IPVv6 is the IP v6 address of this inteface
 	IPv6 *string `json:"ipV6,omitempty"`
+}
+
+// NetworkInterfaceSpec represents the desired state of a network interface's configuration
+type NetworkInterfaceSpec struct {
+	// IPv4 address to be assigned to this interface, or the special string "dhcp" to use DHCP.
+	Address string `json:"address"`
+	// If non-empty, a default route via this interface is added. If "address" is "dhcp", this value is ignored and the
+	// gateway provided via DHCP is used. Otherwise, this must be an IPv4 address that is used as the gateway for the
+	// default route.
+	Gateway *string `json:"gateway,omitempty"`
+	// If "address" is not "dhcp", this is used as the subnet mask for this interface's route. Otherwise this value is ignored.
+	Subnet *string `json:"subnet,omitempty"`
 }
 
 // DeviceSystemInfo represents the system info of a device

@@ -1,8 +1,6 @@
 package v20191104
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	types "github.com/grid-x/ds-api-types"
 )
 
@@ -27,12 +25,12 @@ type MaintenanceTaskSpec struct {
 // MaintenanceTaskStatus defines the observed state of MaintenanceTask
 type MaintenanceTaskStatus struct {
 	//+optional
-	StartedAt *metav1.Time `json:"startedAt,omitempty"`
+	StartedAt *types.Time `json:"startedAt,omitempty"`
 	//+optional
-	FinishedAt *metav1.Time `json:"finishedAt,omitempty"`
-	Successful int          `json:"successful"`
-	Failed     int          `json:"failed"`
-	Running    int          `json:"running"`
+	FinishedAt *types.Time `json:"finishedAt,omitempty"`
+	Successful int         `json:"successful"`
+	Failed     int         `json:"failed"`
+	Running    int         `json:"running"`
 }
 
 // MaintenanceTaskType indicates the type of the task
