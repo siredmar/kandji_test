@@ -123,6 +123,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 
 		inSpec.MACAddress = v.Spec.MACAddress
 		inSpec.MaintenanceWindow = v.Spec.MaintenanceWindow
+		inSpec.NetworkConfig = v.Spec.NetworkConfig
 		in.Spec = inSpec
 
 		in.Metadata = &types.UpdateMetadata{}
