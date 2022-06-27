@@ -217,6 +217,10 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 			continue
 		}
 
+		if r.StatusCode == http.StatusNoContent {
+			continue
+		}
+
 		respError := Error{}
 		err = json.Unmarshal(bodyBytes, &respError)
 		if err != nil {
