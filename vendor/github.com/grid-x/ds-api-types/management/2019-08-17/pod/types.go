@@ -1,8 +1,6 @@
 package v20190817
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	types "github.com/grid-x/ds-api-types"
 )
 
@@ -51,7 +49,7 @@ type DevicePodStatus struct {
 	// This is before the supervisor pulled the container image(s) for the
 	// pod.
 	// +optional
-	StartTime *metav1.Time `json:"startTime,omitempty"`
+	StartTime *types.Time `json:"startTime,omitempty"`
 	// Conditions of the pod
 	// +optional
 	Conditions []PodCondition `json:"conditions,omitempty"`
@@ -75,7 +73,7 @@ type ContainerStateWaiting struct {
 // ContainerStateRunning represents the state when a container is running
 type ContainerStateRunning struct {
 	// +optional
-	StartedAt metav1.Time `json:"startedAt,omitempty"`
+	StartedAt types.Time `json:"startedAt,omitempty"`
 }
 
 // ContainerStateTerminated represents the state when a container has terminated
@@ -88,9 +86,9 @@ type ContainerStateTerminated struct {
 	// +optional
 	Message string `json:"message,omitempty"`
 	// +optional
-	StartedAt metav1.Time `json:"startedAt,omitempty"`
+	StartedAt types.Time `json:"startedAt,omitempty"`
 	// +optional
-	FinishedAt metav1.Time `json:"finishedAt,omitempty"`
+	FinishedAt types.Time `json:"finishedAt,omitempty"`
 	// +optional
 	ContainerID string `json:"containerID,omitempty"`
 }
@@ -156,9 +154,9 @@ type PodCondition struct {
 	Type   PodConditionType `json:"type"`
 	Status ConditionStatus  `json:"status"`
 	// +optional
-	LastProbeTime metav1.Time `json:"lastProbeTime,omitempty"`
+	LastProbeTime types.Time `json:"lastProbeTime,omitempty"`
 	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	LastTransitionTime types.Time `json:"lastTransitionTime,omitempty"`
 	// +optional
 	Reason string `json:"reason,omitempty"`
 	// +optional
