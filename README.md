@@ -305,6 +305,10 @@ $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
 $ gxctl get deploy
 # Get information of a single device, showing its deployments
 $ gxctl get deploy --device-id 57e82f8e-08f4-48f9-8e75-28552d09701f
+# Get information of a single device, showing its deployments by using the serialnumber
+$ gxctl get deploy -S D294-200-000-000-581-P-X
+# Get information of monitoring deployment by using the serialnumber
+$ gxctl get deploy -S D294-200-000-000-581-P-X -a monitoring -o yaml
 # Get a information of a deployment include additional information using uuid abbreviation
 $ gxctl get deploy c78 -o wide
 ```

@@ -41,8 +41,10 @@ func (c *CMD) Init(s *service.Service) error {
 			deviceID, _ := cmd.Flags().GetString("device-id")
 			outputType, _ := cmd.Flags().GetString("output")
 			sortBy, _ := cmd.Flags().GetString("sort-by")
+			serial, _ := cmd.Flags().GetString("serial")
+			app, _ := cmd.Flags().GetString("application")
 
-			return action.GetDeployment(s, deviceID, outputType, sortBy, args)
+			return action.GetDeployment(s, deviceID, outputType, serial, app, sortBy, args)
 		},
 		Predictors: args.Predictors{
 			"output":    args.PredictOutputType(),
@@ -54,6 +56,8 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 	c.cmd.Flags().StringP("device-id", "d", "", "specify device id")
 	c.cmd.Flags().StringP("sort-by", "s", "", "sort by")
+	c.cmd.Flags().StringP("serial", "S", "", "filter results by serialnumber")
+	c.cmd.Flags().StringP("application", "a", "", "filter results by application, e.g. -a monitoring")
 
 	return nil
 }
