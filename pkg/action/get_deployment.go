@@ -37,6 +37,30 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, sortB
 				return err
 			}
 		}
+	} else if serial != "" {
+		responseList, err := getDeviceBySN(s.Client, serial)
+		if err != nil {
+			return err
+		}
+
+		if len(responseList) != 1 {
+			fmt.Println("unexpected length of responseList: %v", responseList)
+		}
+
+		for _, devices := range responseList {
+			// TODO
+		}
+
+		//Get deployments by Device ID
+		deployments, err := getDeploymentsByDeviceId(s.Client, deviceID)
+		if err != nil {
+			return err
+		}
+
+		if err := s.Printer.Print(deployments, printerConfig); err != nil {
+			return err
+		}
+
 	} else {
 		deployments, err := getDeployments(s.Client)
 		if err != nil {
