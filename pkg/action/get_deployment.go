@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -48,7 +47,7 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, seria
 		}
 
 		if len(responseList) != 1 {
-			return errors.New(fmt.Sprintf("unexpected length of responseList: %v", responseList))
+			return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber.", len(responseList))
 		}
 
 		var deviceID string
@@ -56,7 +55,7 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, seria
 		for _, devices := range responseList {
 			ids := devices.Device.GetIds()
 			if len(ids) != 1 {
-				return errors.New(fmt.Sprintf("unexpected length of devices: %v", len(ids)))
+				return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber.", len(ids))
 			}
 			deviceID = ids[0]
 		}
