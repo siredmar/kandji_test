@@ -1,7 +1,9 @@
 package action
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
@@ -10,7 +12,7 @@ import (
 	print "github.com/grid-x/gxctl/pkg/printer"
 )
 
-func GetDeployment(s *service.Service, deviceID string, outputType string, sortBy string, ids []string) error {
+func GetDeployment(s *service.Service, deviceID string, outputType string, serial string, app string, sortBy string, ids []string) error {
 	printerConfig := print.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
@@ -22,6 +24,8 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, sortB
 		if err != nil {
 			return err
 		}
+
+		deployments = filterByApp(deployments, app)
 
 		if err := s.Printer.Print(deployments, printerConfig); err != nil {
 			return err
@@ -44,18 +48,26 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, sortB
 		}
 
 		if len(responseList) != 1 {
-			fmt.Println("unexpected length of responseList: %v", responseList)
+			return errors.New(fmt.Sprintf("unexpected length of responseList: %v", responseList))
 		}
+
+		var deviceID string
 
 		for _, devices := range responseList {
-			// TODO
+			ids := devices.Device.GetIds()
+			if len(ids) != 1 {
+				return errors.New(fmt.Sprintf("unexpected length of devices: %v", len(ids)))
+			}
+			deviceID = ids[0]
 		}
 
-		//Get deployments by Device ID
+		// Get deployments by Device ID
 		deployments, err := getDeploymentsByDeviceId(s.Client, deviceID)
 		if err != nil {
 			return err
 		}
+
+		deployments = filterByApp(deployments, app)
 
 		if err := s.Printer.Print(deployments, printerConfig); err != nil {
 			return err
@@ -66,6 +78,8 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, sortB
 		if err != nil {
 			return err
 		}
+
+		deployments = filterByApp(deployments, app)
 
 		if outputType == "json" || outputType == "yaml" {
 			if err := s.Printer.Print(api.Deployments{Deployments: deployments.Deployments}, printerConfig); err != nil {
@@ -168,4 +182,19 @@ func getDeploymentsByDeviceId(client *client.APIClient, deviceID string) (api.De
 	}
 
 	return api.Deployments{Deployments: deployments}, nil
+}
+
+func filterByApp(depls api.Deployments, filter string) api.Deployments {
+	if filter == "" {
+		return depls
+	}
+	retDepls := api.Deployments{Deployments: make([]api.Deployment, 0, len(depls.Deployments))}
+
+	for _, depl := range depls.Deployments {
+		if strings.EqualFold(depl.Spec.App, filter) {
+			retDepls.Deployments = append(retDepls.Deployments, depl)
+
+		}
+	}
+	return retDepls
 }

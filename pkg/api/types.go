@@ -97,7 +97,7 @@ func (d *Devices) IsEmpty() bool {
 }
 
 func (d *Devices) GetIds() []string {
-	out := make([]string, len(d.Devices))
+	out := make([]string, 0, len(d.Devices))
 	for _, dev := range d.Devices {
 		out = append(out, dev.Metadata.ID)
 	}
