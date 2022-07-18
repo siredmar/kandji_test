@@ -27,7 +27,7 @@ archives:
         dst: .
         strip_parent: true
       - src: doc/README.md
-        dst: README.md
+        dst: .
         strip_parent: true
       - src: config/gridx/config.yaml
         dst: .
