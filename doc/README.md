@@ -7,14 +7,14 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 ### Installation
 
 #### Linux
-- Download the binary and run `sudo install -o root -g root -m 0755 gxctl /usr/local/bin/gxctl`
+- Extract the binary and run `sudo install -o root -g root -m 0755 gxctl /usr/local/bin/gxctl`
 
 #### MacOS
-- Download the binary and make it executable by running `chmod +x ./gxctl`
+- Extract the binary and make it executable by running `chmod +x ./gxctl`
 - Move the gxctl binary to a file location on your system PATH. `sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
 
 #### Windows
-- Append or prepend the folder containig the gxctl binary to your PATH environment variable.
+- Extract the binary and append or prepend the folder containig the gxctl binary to your PATH environment variable.
 
 ### Configuration
 
@@ -49,7 +49,7 @@ $ gxctl --profile profile1 login
 $ gxctl --profile profile1 get device
 ```
 
-*Note*: You can set a default profile using `Default: true` in your config file atx `~/.gxctl/config.yaml`.
+*Note*: You can set a default profile using `Default: true` in your config file at `~/.gxctl/config.yaml`.
 
 ## Syntax
 
