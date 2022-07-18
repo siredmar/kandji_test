@@ -1,0 +1,76 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - main: ./cmd/gxctl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - replacements:
+      darwin: Mac
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - src: dist/CHANGELOG.md
+        dst: .
+        strip_parent: true
+      - src: doc/README.md
+        dst: README.md
+        strip_parent: true
+      - src: config/gridx/config.yaml
+        dst: .
+        strip_parent: true
+  - id: eis
+    replacements:
+      darwin: Mac
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: '{{ .ProjectName }}_eis_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    files:
+      - src: dist/CHANGELOG.md
+        dst: .
+        strip_parent: true
+      - src: doc/README.md
+        dst: .
+        strip_parent: true
+      - src: config/eis/config.yaml
+        dst: .
+        strip_parent: true
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  groups:
+  - title: Features
+    regexp: "^.*feat[(\\w)/]*:+.*$"
+    order: 0
+  - title: 'Bug fixes'
+    regexp: "^.*fix[(\\w)/]*:+.*$"
+    order: 1
+  - title: Others
+    order: 999
+  filters:
+    exclude:
+      - '^doc'
+      - '^test'
+      - '^chore'
+      - '^Merge '
