@@ -25,3 +25,9 @@ steps:
   label: ":docker: Build docker image"
   agents:
   - "queue=default"
+- command:
+  - "make ci_release"
+  label: ":golang: Release"
+  artifact_paths:
+  - "dist/*"
+  if: "build.tag != null"

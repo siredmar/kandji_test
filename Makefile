@@ -2,6 +2,7 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILDTIME := $(shell date)
 VERSION ?= $(shell bin/version.sh)
 GO_BUILD := GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build -o bin/gxctl-$(shell go env GOOS)-$(shell go env GOARCH) -ldflags=\"-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'\" ./cmd/gxctl
+# specific revision for goreleaser
 GO_TOOLS := public.ecr.aws/gridx/base-images:golang-dev-1.17.latest
 GO_PROJECT := github.com/grid-x/gxctl
 DOCKER_RUN := docker run -e GOOS=${GOOS} -e GOARCH=${GOARCH} --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT}
@@ -24,6 +25,10 @@ test:
 build: 
 	bash -c "${GO_BUILD}"
 
+release:
+	# TODO actually integrate publishing
+	goreleaser release --skip-publish
+
 ci_lint:
 	${GO_RUN} "make lint"
 
@@ -32,6 +37,9 @@ ci_build:
 
 ci_test:
 	${GO_RUN} "make test"
+
+ci_release:
+	${GO_RUN} "make release"
 
 docker:
 	docker build -t gxctl -f Dockerfile .
