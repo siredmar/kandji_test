@@ -12,6 +12,12 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -w
+      - -s
+      - -X 'github.com/grid-x/gxctl/internal/version.GitCommit={{.FullCommit}}'
+      - -X 'github.com/grid-x/gxctl/internal/version.BuildTime={{.Date}}'
+      - -X 'github.com/grid-x/gxctl/internal/version.Version={{.Version}}'
 archives:
   - replacements:
       darwin: Mac
