@@ -1,6 +1,3 @@
-before:
-  hooks:
-    - sh -c 'GOMODPRIVATE=github.com/grid-x go mod tidy'
 builds:
   - main: ./cmd/gxctl
     env:
