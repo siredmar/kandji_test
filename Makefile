@@ -39,6 +39,7 @@ ci_test:
 	${GO_RUN} "make test"
 
 ci_release:
+	git fetch --tags
 	${DOCKER_RUN} -e GORELEASER_CURRENT_TAG=$$BUILDKITE_TAG ${GO_TOOLS} bash -c "make release"
 
 docker:

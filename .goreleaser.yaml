@@ -77,3 +77,4 @@ changelog:
       - '^test'
       - '^chore'
       - '^Merge '
+      - '^fix\(build\)'
