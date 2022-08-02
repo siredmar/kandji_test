@@ -1,0 +1,300 @@
+metadata:
+  id: 35cc20b0-94ee-475f-9a0e-8b53a08f2143
+spec:
+  app: ds-internal-docker-auth
+  selector:
+    matchByLabels:
+      gridx.de/channel: stable
+  template:
+    spec:
+      containers:
+      - env:
+        - name: AWS_ACCESS_KEY_ID
+          value: ""
+        - name: AWS_SECRET_ACCESS_KEY
+          value: ""
+        - name: AWS_REGION
+          value: eu-central-1
+        image: registry.gridx.de/gridx/ds-docker-authenticator:master-2021_06_04-138-ad26469
+        name: ds-docker-authenticator
+        volumeMounts:
+        - mountPath: /var/run
+          name: runtime
+      volumes:
+      - hostPath:
+          path: /var/run
+          type: Directory
+        name: runtime
+status: {}
+---
+metadata:
+  annotations:
+    gridx.ai/contenthash: 699fc8966b
+  id: 691573be-a7d8-47bb-9aea-0337009a981d
+spec:
+  data:
+    config.yaml: |-
+      devices:
+        - id: "tq_meter_300"
+          unit_id: 1
+          ip_address: "192.168.0.200"
+          port: 502
+          request_response_timeout: "10s"
+          aggregation: "false"
+          data_points:
+            - key: "powerfactor"
+              address: 64
+              function_code: 3
+              registers: 4
+              format: "int32"
+              byte_order: "big-endian"
+              scale_factor: 0.001
+              interval: "60s"
+            - key: "active_energy_positive"
+              address: 512
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "Wh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "active_energy_negative"
+              address: 516
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "Wh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "reactive_energy_positive"
+              address: 520
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "varh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "active_energy_negative"
+              address: 524
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "varh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "apparent_energy_positive"
+              address: 520
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "VAh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "apparent_energy_negative"
+              address: 548
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "VAh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "ac_frequency"
+              address: 40085
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              unit: "Hz"
+              scale_factor: 1
+              interval: "60s"
+            - key: "ac_frequency_sf"
+              address: 40086
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              # unit: "Hz"
+              scale_factor: 1
+              interval: "60s"
+            - key: "total_real_power"
+              address: 40087
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              unit: "W"
+              scale_factor: 1
+              interval: "60s"
+            - key: "total_real_power_sf"
+              address: 40091
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              # unit: ""
+              scale_factor: 1
+              interval: "60s"
+        - id: "tq_meter_201"
+          unit_id: 1
+          ip_address: "192.168.0.201"
+          port: 502
+          request_response_timeout: "10s"
+          aggregation: "false"
+          data_points:
+            - key: "powerfactor"
+              address: 64
+              function_code: 3
+              registers: 4
+              format: "int32"
+              byte_order: "big-endian"
+              scale_factor: 0.001
+              interval: "60s"
+            - key: "active_energy_positive"
+              address: 512
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "Wh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "active_energy_negative"
+              address: 516
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "Wh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "reactive_energy_positive"
+              address: 520
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "varh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "active_energy_negative"
+              address: 524
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "varh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "apparent_energy_positive"
+              address: 520
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "VAh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "apparent_energy_negative"
+              address: 548
+              function_code: 3
+              registers: 4
+              format: "uint64"
+              byte_order: "big-endian"
+              unit: "VAh"
+              scale_factor: 10
+              interval: "120s"
+            - key: "ac_frequency"
+              address: 40085
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              unit: "Hz"
+              scale_factor: 1
+              interval: "60s"
+            - key: "ac_frequency_sf"
+              address: 40086
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              # unit: "Hz"
+              scale_factor: 1
+              interval: "60s"
+            - key: "total_real_power"
+              address: 40087
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              unit: "W"
+              scale_factor: 1
+              interval: "60s"
+            - key: "total_real_power_sf"
+              address: 40091
+              function_code: 3
+              registers: 1
+              format: "int16"
+              byte_order: "big-endian"
+              # unit: ""
+              scale_factor: 1
+              interval: "60s"
+        - id: "Powerside_PQube3"
+          unit_id: 1
+          ip_address: "192.168.0.228"
+          port: 502
+          request_response_timeout: "10s"
+          aggregation: "false"
+          data_points:
+            - key: "voltage_l1"
+              address: 7008
+              function_code: 3
+              registers: 2
+              format: "float32"
+              byte_order: "big-endian"
+              unit: "V"
+              interval: "60s"
+            - key: "voltage_l2"
+              address: 7010
+              function_code: 3
+              registers: 2
+              format: "float32"
+              byte_order: "big-endian"
+              unit: "V"
+              interval: "60s"
+            - key: "voltage_l3"
+              address: 7012
+              function_code: 3
+              registers: 2
+              format: "float32"
+              byte_order: "big-endian"
+              unit: "V"
+              interval: "60s"
+            - key: "firmware_major"
+              address: 8000
+              function_code: 3
+              registers: 1
+              format: "uint16"
+              byte_order: "big-endian"
+              interval: "120s"
+            - key: "firmware_minor"
+              address: 8001
+              function_code: 3
+              registers: 1
+              format: "uint16"
+              byte_order: "big-endian"
+              interval: "120s"
+            - key: "firmware_bugfix"
+              address: 8003
+              function_code: 3
+              registers: 1
+              format: "uint16"
+              byte_order: "big-endian"
+              interval: "120s"
+status: {}

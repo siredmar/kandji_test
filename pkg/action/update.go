@@ -19,22 +19,13 @@ func Update(s *service.Service, updateCmdFilename string, lint bool) error {
 		}
 	}
 
-	contents, err := api.GetFilesContentsToProcess(updateCmdFilename)
+	resources, err := api.GetResources(updateCmdFilename, false, false)
 	if err != nil {
 		return err
 	}
 
-	resources := make(map[string]api.Resource, len(contents))
-	for _, c := range contents {
-		res, resID, err := checkResourceFile(c, false)
-		if err != nil {
-			return err
-		}
-		resources[resID] = res
-	}
-
-	for resID, res := range resources {
-		if err := update(resID, res, s.Client); err != nil {
+	for _, r := range resources {
+		if err := update(r.ID, r.Res, s.Client); err != nil {
 			return err
 		}
 	}
@@ -190,20 +181,4 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 			fmt.Sprintf("Unsupported type: %T", v),
 		)
 	}
-}
-
-func resolveIdentifierFromFile(bytes []byte) (string, error) {
-	fullMeta, err := api.NewFullObjectMeta(bytes)
-	if err != nil {
-		return "", err
-	}
-
-	if fullMeta.Meta.Name != "" {
-		return fullMeta.Meta.Name, nil
-	}
-	if fullMeta.Meta.Id != "" {
-		return fullMeta.Meta.Id, nil
-	}
-
-	return "", fmt.Errorf("not found")
 }

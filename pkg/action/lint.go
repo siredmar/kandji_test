@@ -13,24 +13,22 @@ import (
 
 func Lint(s *service.Service, lintCmdFilename string, quiet bool) error {
 	// read raw file contents into fileName -> bytes map
-	fsContents, err := api.GetFilesContentsToProcess(lintCmdFilename)
+	// and parse file contents into fileName -> resource map
+	contents, err := api.GetFilesContentsToProcess(lintCmdFilename)
 	if err != nil {
 		return err
 	}
 
-	// parse file contents into fileName -> resource map
-	fsResources := make(map[string]interface{})
 	var fsNames []string
-	for fileName, x := range fsContents {
-		res, _, err := checkResourceFile(x, false) // true will return (Known after apply) for unset IDs
+	fsResources := make(map[string]interface{})
+
+	for n, c := range contents {
+		res, _, err := api.CheckResourceFile(c, false)
 		if err != nil {
-			if !quiet {
-				fmt.Printf("SKIP %v: %v\n", fileName, err)
-			}
-			continue
+			return err
 		}
-		fsNames = append(fsNames, fileName)
-		fsResources[fileName] = res
+		fsNames = append(fsNames, n)
+		fsResources[n] = res
 	}
 
 	// init context with current state

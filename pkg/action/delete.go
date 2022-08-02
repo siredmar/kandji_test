@@ -10,22 +10,13 @@ import (
 )
 
 func Delete(s *service.Service, deleteCmdFileName string) error {
-	contents, err := api.GetFilesContentsToProcess(deleteCmdFileName)
+	resources, err := api.GetResources(deleteCmdFileName, false, false)
 	if err != nil {
 		return err
 	}
 
-	resources := make(map[string]api.Resource, len(contents))
-	for _, c := range contents {
-		res, resID, err := checkResourceFile(c, false)
-		if err != nil {
-			return err
-		}
-		resources[resID] = res
-	}
-
-	for resID, res := range resources {
-		message, err := deleteResource(resID, res, s.Client)
+	for _, r := range resources {
+		message, err := deleteResource(r.ID, r.Res, s.Client)
 		if err != nil {
 			return err
 		}

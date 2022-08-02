@@ -37,20 +37,13 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool,
 		isCI = true
 	}
 
-	contents, err := api.GetFilesContentsToProcess(fileName)
+	resources, err := api.GetResources(fileName, true, true)
 	if err != nil {
 		return err
 	}
 
-	for n, c := range contents {
-		if !hasSupportedExtension(n) && fileName != n {
-			continue
-		}
-		res, resID, err := checkResourceFile(c, true)
-		if err != nil {
-			return err
-		}
-		if err := diff(n, res, resID, diffCmd, skipOnLabel, isCI, s.Client); err != nil {
+	for _, r := range resources {
+		if err := diff(fileName, r.Res, r.ID, diffCmd, skipOnLabel, isCI, s.Client); err != nil {
 			return err
 		}
 	}
@@ -168,46 +161,6 @@ func getResource(cl *client.APIClient, req api.Resource) (api.Resource, error) {
 		)
 	}
 	return res, err
-}
-
-func checkResourceFile(bytes []byte, readOnly bool) (api.Resource, string, error) {
-	resID, err := resolveIdentifierFromFile(bytes)
-	if err != nil && readOnly {
-		resID = KNOWN_AFTER_APPLY
-	}
-
-	application, err := api.NewApplication(bytes, true)
-	if err == nil {
-		application.Name = resID
-		return &application, resID, nil
-	}
-
-	deployment, err := api.NewDeployment(bytes, true)
-	if err == nil {
-		deployment.Metadata.ID = resID
-		return &deployment, resID, nil
-	}
-
-	device, err := api.NewDevice(bytes, true)
-	if err == nil {
-		device.Metadata.ID = resID
-		return &device, resID, nil
-	}
-
-	dcm, err := api.NewDeviceConfigMap(bytes, true)
-	if err == nil {
-		dcm.Metadata.ID = resID
-		return &dcm, resID, nil
-	}
-
-	maintenanceTask, err := api.NewMaintenanceTask(bytes, true)
-	if err == nil {
-		maintenanceTask.Metadata.ID = resID
-		return &maintenanceTask, resID, nil
-	}
-
-	// Nothing found
-	return nil, "", errors.E(errors.Invalid, "Unsupported type")
 }
 
 func writeDiffFiles(i1, i2 interface{}) (error, string, string) {

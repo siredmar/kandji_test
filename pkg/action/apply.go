@@ -2,20 +2,11 @@ package action
 
 import (
 	"fmt"
-	"reflect"
-	"sort"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
-)
-
-var (
-	kindOrder = map[string]int{
-		"Application": 0,
-		"Deployment":  1,
-	}
 )
 
 func Apply(s *service.Service, fileName string, skipOnLabel bool, lint bool) error {
@@ -25,85 +16,18 @@ func Apply(s *service.Service, fileName string, skipOnLabel bool, lint bool) err
 		}
 	}
 
-	contents, err := api.GetFilesContentsToProcess(fileName)
+	resources, err := api.GetResources(fileName, false, false)
 	if err != nil {
 		return err
 	}
 
-	resources := make(map[string]api.Resource, len(contents))
-	for _, c := range contents {
-		res, resID, err := checkResourceFile(c, false)
-		if err != nil {
-			return err
-		}
-		resources[resID] = res
-	}
-
-	resourcesSorted := sortByKind(resources)
-
-	for _, r := range resourcesSorted {
+	for _, r := range resources {
 		if err := apply(r.ID, r.Res, skipOnLabel, s.Client); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-type resAssoc struct {
-	ID    string
-	Res   api.Resource
-	Order int
-}
-
-func sortByKind(resources map[string]api.Resource) []resAssoc {
-	result := make([]resAssoc, len(resources))
-	i := 0
-	for resID, res := range resources {
-		if res == nil {
-			result[i] = resAssoc{
-				resID,
-				res,
-				-1,
-			}
-			i++
-			continue
-		}
-		kind := reflect.TypeOf(res).Elem().Name()
-		var order int
-		var exists bool
-		if order, exists = kindOrder[kind]; kind == "" || !exists {
-			order = -1
-		}
-		result[i] = resAssoc{
-			resID,
-			res,
-			order,
-		}
-		i++
-	}
-	sort.SliceStable(result, func(i, j int) bool {
-		s := result[i].Order
-		t := result[j].Order
-
-		// resources with no kind go last
-		if s > -1 && t == -1 {
-			return true
-		}
-		if t > -1 && s == -1 {
-			return false
-		}
-
-		// fallback: sort by id
-		if s == -1 && t == -1 || s == t {
-			return result[i].ID < result[j].ID
-		}
-
-		// sort by kind
-		return s < t
-	})
-
-	return result
 }
 
 func apply(resID string, res api.Resource, skipOnLabel bool, cl *client.APIClient) error {
