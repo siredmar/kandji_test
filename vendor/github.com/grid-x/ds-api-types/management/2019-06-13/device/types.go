@@ -35,15 +35,15 @@ type DeviceSpec struct {
 	// Additional identifier to be used e.g. during commissioning on application layer
 	Startcode *string `json:"startcode,omitempty"`
 	// Specifies the complete networking configuration of a device.
-	NetworkConfig map[string]NetworkInterfaceSpec `json:"networkConfig,omitempty"`
+	NetworkConfig types.NetworkConfig `json:"networkConfig,omitempty"`
 }
 
 // UpdateSpec represents the update spec type
 type UpdateSpec struct {
-	MACAddress        *string                         `json:"macAddress,omitempty"`
-	MaintenanceWindow *types.MaintenanceWindow        `json:"maintenanceWindow,omitempty"`
-	MenderDeviceID    *string                         `json:"menderDeviceID,omitempty"`
-	NetworkConfig     map[string]NetworkInterfaceSpec `json:"networkConfig,omitempty"`
+	MACAddress        *string                  `json:"macAddress,omitempty"`
+	MaintenanceWindow *types.MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	MenderDeviceID    *string                  `json:"menderDeviceID,omitempty"`
+	NetworkConfig     types.NetworkConfig      `json:"networkConfig,omitempty"`
 }
 
 // DeviceStatus represents the status of a device
@@ -127,19 +127,28 @@ type NetworkInterface struct {
 	IPv4 *string `json:"ipV4,omitempty"`
 	// IPVv6 is the IP v6 address of this inteface
 	IPv6 *string `json:"ipV6,omitempty"`
+	// Status is a rough indication of this interface's status, if possible to determine.
+	Status *NetworkInterfaceStatus `json:"status,omitempty"`
+	// If true, this interface was last used to reach the DS API.
+	DSUsed bool `json:"dsUsed,omitempty"`
 }
 
-// NetworkInterfaceSpec represents the desired state of a network interface's configuration
-type NetworkInterfaceSpec struct {
-	// IPv4 address to be assigned to this interface, or the special string "dhcp" to use DHCP.
-	Address string `json:"address"`
-	// If non-empty, a default route via this interface is added. If "address" is "dhcp", this value is ignored and the
-	// gateway provided via DHCP is used. Otherwise, this must be an IPv4 address that is used as the gateway for the
-	// default route.
-	Gateway *string `json:"gateway,omitempty"`
-	// If "address" is not "dhcp", this is used as the subnet mask for this interface's route. Otherwise this value is ignored.
-	Subnet *string `json:"subnet,omitempty"`
-}
+// NetworkInterfaceStatus is a rough indication of this interface's status.
+type NetworkInterfaceStatus string
+
+const (
+	// NetworkInterfaceStatusUnavailable means that some hard precondition for using this interface is not fulfilled, e.g. the Ethernet cable is not plugged.
+	NetworkInterfaceStatusUnavailable NetworkInterfaceStatus = "Unavailable"
+	// NetworkInterfaceStatusDisconnected means that the interface can possibly be used, but is not connected right now.
+	NetworkInterfaceStatusDisconnected NetworkInterfaceStatus = "Disconnected"
+	// NetworkInterfaceStatusActivating is reported while e.g. DHCP requests are being made, Modem is dialed...
+	NetworkInterfaceStatusActivating NetworkInterfaceStatus = "Activating"
+	// NetworkInterfaceStatusActivated is reported for an interface that is ready to use.
+	NetworkInterfaceStatusActivated NetworkInterfaceStatus = "Activated"
+	// NetworkInterfaceStatusDeactivating is repoted if the interface was deactivated by the user, or because some
+	// earlier step failed.
+	NetworkInterfaceStatusDeactivating NetworkInterfaceStatus = "Deactivating"
+)
 
 // DeviceSystemInfo represents the system info of a device
 type DeviceSystemInfo struct {
