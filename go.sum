@@ -220,6 +220,8 @@ github.com/grid-x/ds-api-client v0.0.0-20200616143905-1aa090075812/go.mod h1:oIF
 github.com/grid-x/ds-api-types v0.0.0-20200730075832-96eb89671b69/go.mod h1:BIhrzOzfCWcRqlPRR28wLjT5s3P/rqcV6mEs2Dc6+aw=
 github.com/grid-x/ds-api-types v0.0.0-20220623060531-581ebf7692f6 h1:aC+hE8QswKk3b++5TCttNBxANY4zQryBBRqCRbaWoBU=
 github.com/grid-x/ds-api-types v0.0.0-20220623060531-581ebf7692f6/go.mod h1:ulnYVXKmk5tPa35+0grlUK2+gU8FGhI0wLonelLUsAs=
+github.com/grid-x/ds-api-types v0.0.0-20220810075806-1ab735dfe890 h1:Q26aGwji8hv3l6a61hVixhQrNGzai8wwgIoI2XYr0VU=
+github.com/grid-x/ds-api-types v0.0.0-20220810075806-1ab735dfe890/go.mod h1:ulnYVXKmk5tPa35+0grlUK2+gU8FGhI0wLonelLUsAs=
 github.com/grid-x/ds-k8s-v2 v0.0.0-20200730080902-b4f0d16a7521 h1:3A/lCUdMXvEnDZ97Dw1fK7pvGJvMXwa4++cCG6rGN78=
 github.com/grid-x/ds-k8s-v2 v0.0.0-20200730080902-b4f0d16a7521/go.mod h1:HJjZ+qimSJpSRnSfG+JRPlSs282/IpTTcrpcUfE5h2I=
 github.com/grid-x/ds-supervisor-client v0.0.0-20191112132435-e903ea16c3cb/go.mod h1:uciCfpMlDqH8oPpbPIQcF/Rk02MpTf5PWhweG7j9ji0=

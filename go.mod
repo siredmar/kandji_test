@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/websocket v1.4.2
-	github.com/grid-x/ds-api-types v0.0.0-20220623060531-581ebf7692f6
+	github.com/grid-x/ds-api-types v0.0.0-20220810075806-1ab735dfe890
 	github.com/grid-x/wssh v0.0.0-20201118175459-b894b118767b
 	github.com/landoop/tableprinter v0.0.0-20200104100433-ae9249991eb1
 	github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
