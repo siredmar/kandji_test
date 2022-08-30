@@ -101,13 +101,31 @@ func GetDevice(
 	if printerConfig.OutputFormat == print.JSON || printerConfig.OutputFormat == print.YAML {
 		// raw
 		var devices []api.Device
-		for _, resp := range responseList {
-			devices = append(devices, resp.Device.Devices...)
+		var device api.Device
+		if len(responseList) > 1 {
+			for _, resp := range responseList {
+				devices = append(devices, resp.Device.Devices...)
+			}
+			if err := s.Printer.Print(devices, printerConfig); err != nil {
+				return err
+			}
+		} else {
+			for _, resp := range responseList {
+				if len(resp.Device.Devices) == 1 && len(ids) == 1 {
+					device = resp.Device.Devices[0]
+					if err := s.Printer.Print(device, printerConfig); err != nil {
+						return err
+					}
+				} else {
+					devices = resp.Device.Devices
+					if err := s.Printer.Print(devices, printerConfig); err != nil {
+						return err
+					}
+				}
+			}
+
 		}
 
-		if err := s.Printer.Print(devices, printerConfig); err != nil {
-			return err
-		}
 	}
 
 	return nil
