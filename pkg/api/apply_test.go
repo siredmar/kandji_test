@@ -1,4 +1,4 @@
-package action
+package api
 
 import (
 	"fmt"
@@ -6,11 +6,10 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	types "github.com/grid-x/ds-api-types"
-
-	"github.com/grid-x/gxctl/pkg/api"
 )
 
-type mockResource struct {}
+type mockResource struct{}
+
 func (m *mockResource) Meta() *types.Metadata {
 	return nil
 }
@@ -18,94 +17,128 @@ func (m *mockResource) Meta() *types.Metadata {
 func TestSortByKind(t *testing.T) {
 	testcases := []struct {
 		desc      string
-		resources map[string]api.Resource
-		want      []resAssoc
+		resources map[string]Resource
+		want      []ResAssoc
 	}{
 		{
 			desc: "Application before Deployment",
-			resources: map[string]api.Resource{
-				"foo": &api.Application{},
-				"bar": &api.Deployment{},
+			resources: map[string]Resource{
+				"foo": &Application{},
+				"bar": &Deployment{},
+				"config": &DeviceConfigMap{},
 			},
-			want: []resAssoc{
+			want: []ResAssoc{
 				{
 					"foo",
-					&api.Application{},
+					&Application{},
 					0,
 				},
 				{
-					"bar",
-					&api.Deployment{},
+					"config",
+					&DeviceConfigMap{},
 					1,
+				},
+				{
+					"bar",
+					&Deployment{},
+					2,
 				},
 			},
 		},
 		{
 			desc: "Applications (sorted by by Name) before Deployments (sorted by ID)",
-			resources: map[string]api.Resource{
-				"d": &api.Application{
+			resources: map[string]Resource{
+				"d": &Application{
 					Name: "d",
 				},
-				"c": &api.Application{
+				"c": &Application{
 					Name: "c",
 				},
-				"b": &api.Deployment{
+				"f": &DeviceConfigMap{
+					Metadata: types.Metadata{
+						ID: "f",
+					},
+				},
+				"e": &DeviceConfigMap{
+					Metadata: types.Metadata{
+						ID: "e",
+					},
+				},
+				"b": &Deployment{
 					Metadata: types.Metadata{
 						ID: "b",
 					},
 				},
-				"a": &api.Deployment{
+				"a": &Deployment{
 					Metadata: types.Metadata{
 						ID: "a",
 					},
 				},
 			},
-			want: []resAssoc{
+			want: []ResAssoc{
 				{
 					"c",
-					&api.Application{
+					&Application{
 						Name: "c",
 					},
 					0,
 				},
 				{
 					"d",
-					&api.Application{
+					&Application{
 						Name: "d",
 					},
 					0,
 				},
 				{
-					"a",
-					&api.Deployment{
+					"e",
+					&DeviceConfigMap{
 						Metadata: types.Metadata{
-							ID: "a",
+							ID: "e",
 						},
 					},
 					1,
 				},
 				{
+					"f",
+					&DeviceConfigMap{
+						Metadata: types.Metadata{
+							ID: "f",
+						},
+					},
+					1,
+				},
+				{
+					"a",
+					&Deployment{
+						Metadata: types.Metadata{
+							ID: "a",
+						},
+					},
+					2,
+				},
+				{
 					"b",
-					&api.Deployment{
+					&Deployment{
 						Metadata: types.Metadata{
 							ID: "b",
 						},
 					},
-					1,
+					2,
 				},
 			},
 		},
 		{
 			desc: "Deployments before unspecified",
-			resources: map[string]api.Resource{
-				"b": &api.Deployment{},
+			resources: map[string]Resource{
+				"b": &Deployment{},
 				"a": &mockResource{},
 			},
-			want: []resAssoc{
+			want: []ResAssoc{
 				{
 					"b",
-					&api.Deployment{},
-					1,
+					&Deployment{},
+					2,
 				},
 				{
 					"a",
@@ -116,8 +149,8 @@ func TestSortByKind(t *testing.T) {
 		},
 		{
 			desc:      "no resources",
-			resources: map[string]api.Resource{},
-			want:      []resAssoc{},
+			resources: map[string]Resource{},
+			want:      []ResAssoc{},
 		},
 	}
 

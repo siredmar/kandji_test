@@ -10,24 +10,12 @@ import (
 )
 
 func Create(s *service.Service, fileName string) error {
-	contents, err := api.GetFilesContentsToProcess(fileName)
+	resources, err := api.GetResources(fileName, false, false)
 	if err != nil {
 		return err
 	}
 
-	resources := make(map[string]api.Resource, len(contents))
-
-	for _, c := range contents {
-		res, resID, err := checkResourceFile(c, false)
-		if err != nil {
-			return err
-		}
-		resources[resID] = res
-	}
-
-	resourcesSorted := sortByKind(resources)
-
-	for _, r := range resourcesSorted {
+	for _, r := range resources {
 		if err := create(r.ID, r.Res, s.Client); err != nil {
 			return err
 		}

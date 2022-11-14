@@ -1,13 +1,18 @@
 package api
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/grid-x/gxctl/pkg/errors"
+	"sigs.k8s.io/yaml"
 )
 
 func LookupID(prefix string, ids []string) (string, error) {
@@ -36,6 +41,166 @@ func LookupID(prefix string, ids []string) (string, error) {
 	return out, nil
 }
 
+func resolveIdentifierFromFile(bytes []byte) (string, error) {
+	fullMeta, err := NewFullObjectMeta(bytes)
+	if err != nil {
+		return "", err
+	}
+
+	if fullMeta.Meta.Name != "" {
+		return fullMeta.Meta.Name, nil
+	}
+	if fullMeta.Meta.Id != "" {
+		return fullMeta.Meta.Id, nil
+	}
+
+	return "", fmt.Errorf("not found")
+}
+
+const (
+	KNOWN_AFTER_APPLY = "(Known after apply)"
+)
+
+func CheckResourceFile(bytes []byte, readOnly bool) (Resource, string, error) {
+	resID, err := resolveIdentifierFromFile(bytes)
+	if err != nil && readOnly {
+		resID = KNOWN_AFTER_APPLY
+	}
+
+	application, err := NewApplication(bytes, true)
+	if err == nil {
+		application.Name = resID
+		return &application, resID, nil
+	}
+
+	deployment, err := NewDeployment(bytes, true)
+	if err == nil {
+		deployment.Metadata.ID = resID
+		return &deployment, resID, nil
+	}
+
+	device, err := NewDevice(bytes, true)
+	if err == nil {
+		device.Metadata.ID = resID
+		return &device, resID, nil
+	}
+
+	dcm, err := NewDeviceConfigMap(bytes, true)
+	if err == nil {
+		dcm.Metadata.ID = resID
+		return &dcm, resID, nil
+	}
+
+	maintenanceTask, err := NewMaintenanceTask(bytes, true)
+	if err == nil {
+		maintenanceTask.Metadata.ID = resID
+		return &maintenanceTask, resID, nil
+	}
+
+	// Nothing found
+	return nil, "", errors.E(errors.Invalid, "Unsupported type")
+}
+
+type ResAssoc struct {
+	ID    string
+	Res   Resource
+	Order int
+}
+
+var (
+	kindOrder = map[string]int{
+		"Application":     0,
+		"DeviceConfigMap": 1,
+		"Deployment":      2,
+	}
+)
+
+func sortByKind(resources map[string]Resource) []ResAssoc {
+	result := make([]ResAssoc, len(resources))
+	i := 0
+	for resID, res := range resources {
+		if res == nil {
+			result[i] = ResAssoc{
+				resID,
+				res,
+				-1,
+			}
+			i++
+			continue
+		}
+		kind := reflect.TypeOf(res).Elem().Name()
+		var order int
+		var exists bool
+		if order, exists = kindOrder[kind]; kind == "" || !exists {
+			order = -1
+		}
+		result[i] = ResAssoc{
+			resID,
+			res,
+			order,
+		}
+		i++
+	}
+	sort.SliceStable(result, func(i, j int) bool {
+		s := result[i].Order
+		t := result[j].Order
+
+		// resources with no kind go last
+		if s > -1 && t == -1 {
+			return true
+		}
+		if t > -1 && s == -1 {
+			return false
+		}
+
+		// fallback: sort by id
+		if s == -1 && t == -1 || s == t {
+			return result[i].ID < result[j].ID
+		}
+
+		// sort by kind
+		return s < t
+	})
+
+	return result
+}
+
+func hasSupportedExtension(filename string) bool {
+	for _, ext := range []string{"yaml", "yml", "json"} {
+		if strings.HasSuffix(filename, ext) {
+			return true
+		}
+	}
+	return false
+}
+
+func GetResources(loc string, readOnly bool, checkForExtensionSupport bool) ([]ResAssoc, error) {
+	contents, err := GetFilesContentsToProcess(loc)
+	if err != nil {
+		return nil, err
+	}
+
+	resources := make(map[string]Resource, len(contents))
+	for n, c := range contents {
+		var err error
+		var res Resource
+		var resID string
+		
+		if checkForExtensionSupport && !hasSupportedExtension(n) && loc != n {
+			continue
+		}
+
+		res, resID, err = CheckResourceFile(c, readOnly)
+		if err != nil {
+			return nil, err
+		}
+		resources[resID] = res
+	}
+
+	return sortByKind(resources), nil
+
+}
+
 func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 	info, err := os.Stat(loc)
 	if err != nil {
@@ -53,41 +218,111 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 				return nil
 			}
 
-			b, err := readFile(path)
+			retVal, err := readFile(path)
 			if err != nil {
 				return err
 			}
-			ret[path] = b
+
+			for key, val := range retVal {
+				b, err := yaml.YAMLToJSON(val)
+				if err == nil {
+					val = b
+				}
+
+				ret[key] = val
+			}
 			return nil
 		})
 
 		return ret, err
 	case mode.IsRegular():
-		b, err := readFile(loc)
+		retVal, err := readFile(loc)
 		if err != nil {
 			return nil, err
 		}
 
-		ret[loc] = b
+		for key, val := range retVal {
+			b, err := yaml.YAMLToJSON(val)
+			if err == nil {
+				val = b
+			}
+
+			ret[key] = val
+		}
 		return ret, nil
 	}
 
 	return nil, fmt.Errorf("Unknown error while processing filename")
 }
 
-func readFile(filepath string) ([]byte, error) {
-	file, err := os.Open(filepath)
+const yamlSeparator = "---"
+
+// splitYAMLDocument is a bufio.SplitFunc for splitting YAML streams into individual documents.
+// The following function is taken from 'splitYAMLDocument' function in
+// https://github.com/kubernetes/apimachinery/blob/master/pkg/util/yaml/decoder.go
+func splitYAMLDocument(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+
+	sep := len([]byte(yamlSeparator))
+
+	if i := bytes.Index(data, []byte(yamlSeparator)); i >= 0 {
+		// We have a potential document terminator
+		i += sep
+		after := data[i:]
+
+		if len(after) == 0 {
+			// we can't read any more characters
+			if atEOF {
+				return len(data), data[:len(data)-sep], nil
+			}
+			return 0, nil, nil
+		}
+
+		if i == sep {
+			return sep, nil, nil
+		}
+
+		if j := bytes.IndexByte(after, '\n'); j >= 0 {
+			return i + j + 1, data[0 : i-sep], nil
+		}
+		return 0, nil, nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), data, nil
+	}
+	// Request more data.
+	return 0, nil, nil
+}
+
+func readFile(filepath string) (map[string][]byte, error) {
+	f, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
+	scanner := bufio.NewScanner(f)
+	buf := make([]byte, 4*1024)
+	scanner.Buffer(buf, 5*1024*1024)
+	scanner.Split(splitYAMLDocument)
+
+	fileCounter := 0
+	retVal := make(map[string][]byte)
+
+	for scanner.Scan() {
+		bytes := scanner.Bytes()
+		// Do not add empty documents
+		if len(bytes) > 1 {
+			fileCounter += 1
+			// Trim whitespace in both ends of each yaml docs.
+			trimmedString := strings.TrimSpace(scanner.Text())
+			retVal[strconv.Itoa(fileCounter)+"/"+filepath] = []byte(trimmedString)
+		}
 	}
 
-	return bytes, nil
+	return retVal, nil
 }
 
 func ComputeMetadataMap(current map[string]string, update map[string]string) map[string]string {

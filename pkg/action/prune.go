@@ -63,7 +63,7 @@ func buildPruneState(local map[string][]byte, remote api.Deployments) (map[strin
 	state := make(map[string]*record)
 
 	for fn, c := range local {
-		res, resID, err := checkResourceFile(c, true)
+		res, resID, err := api.CheckResourceFile(c, true)
 		if err != nil {
 			continue
 		}
