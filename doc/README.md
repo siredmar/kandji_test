@@ -11,7 +11,9 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 
 #### MacOS
 - Extract the binary and make it executable by running `chmod +x ./gxctl`
+- Create /usr/local/bin if it doesn't exist yet: `sudo mkdir -p /usr/local/bin`
 - Move the gxctl binary to a file location on your system PATH. `sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
+- After trying to run `gxctl` for the first time, you might have to make an exception in your system settings to allow it to run even though it is not signed.
 
 #### Windows
 - Extract the binary and append or prepend the folder containig the gxctl binary to your PATH environment variable.
@@ -35,7 +37,7 @@ after that time, you may have to simply refresh the token by running `gxctl logi
 ### Remote Maintenance
 
 In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.  
-If running for the first time, you can simply execute `gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
+If running for the first time, you can simply execute `mkdir -p ~/.ssh && gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
 with the contents of your ssh config and update the latter accordingly. You can run `gxctl ssh check` to find out, if your local configuration has been setup correctly. It will error and print a diff if there are issues and succeed otherwise.
 *Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.
 The most simple solution is running `eval $(ssh-agent)` once per terminal session - this will work fine for basic SSH usage, but will not allow you to open more than one connection at a time.
