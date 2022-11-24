@@ -54,3 +54,9 @@ Profiles:
     Token: '...'
   Default: false
   Name: engie
+- Auth:
+    Auth0ClientID: t6AdvSFooErolljJzoxHRZX3LWCm2vgc
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: 1komma5
