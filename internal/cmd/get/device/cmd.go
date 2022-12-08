@@ -59,7 +59,6 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().Bool("all", false, "show also inactive devices")
 	c.cmd.Flags().StringP("label", "l", "", "filter results by label")
 	c.cmd.Flags().StringP("serial", "S", "", "filter results by serialnumber")
 	c.cmd.Flags().Bool("show-public-ip", false, "print the public ip for a device")
