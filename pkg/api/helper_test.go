@@ -78,15 +78,15 @@ func TestComputeMetadataMap(t *testing.T) {
 
 func TestGetResources(t *testing.T) {
 	testcases := []struct {
-		loc     string
-		readOnly bool
+		loc                      string
+		readOnly                 bool
 		checkForExtensionSupport bool
-		want    []ResAssoc
-		wantErr bool
+		want                     []ResAssoc
+		wantErr                  bool
 	}{
 		{
-			loc:     "testdata/test1.yaml",
-			readOnly: false,
+			loc:                      "testdata/test1.yaml",
+			readOnly:                 false,
 			checkForExtensionSupport: false,
 			want: []ResAssoc{
 				{
@@ -99,10 +99,20 @@ func TestGetResources(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			loc:     "testdata/test2.yaml",
-			readOnly: true,
+			loc:                      "testdata/device.json",
+			readOnly:                 false,
 			checkForExtensionSupport: true,
-			wantErr: true,
+			want: []ResAssoc{
+				{
+					ID: "411cbc75-44ed-4c94-82cd-272f337cf371", Res: &Device{}, Order: -1,
+				},
+			},
+		},
+		{
+			loc:                      "testdata/test2.yaml",
+			readOnly:                 true,
+			checkForExtensionSupport: true,
+			wantErr:                  true,
 		},
 	}
 
