@@ -136,7 +136,7 @@ func getDeviceBySN(cl *client.APIClient, sn string) (map[string]client.GetDevice
 }
 
 func getDevicesByDeploymentId(client *client.APIClient, deploymentID string) (api.Devices, error) {
-	endpoint := fmt.Sprintf("%s/%s/devices", api.DeploymentsEndpoint, deploymentID)
+	endpoint := fmt.Sprintf("%s?filter=deployment:%s", api.DevicesEndpoint, deploymentID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.Devices{}, err
