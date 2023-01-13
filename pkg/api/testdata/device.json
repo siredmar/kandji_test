@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "id": "411cbc75-44ed-4c94-82cd-272f337cf371",
+    "labels": {
+      "core.gridx.ai/architecture": "arm32v7",
+      "core.gridx.ai/batch": "2020-05-06",
+      "core.gridx.ai/hardware": "v4",
+      "core.gridx.ai/loglevel": "debug",
+      "core.gridx.ai/status": "running",
+      "gridx.de/channel": "stable",
+      "gridx.de/monitoring": "true"
+    }
+  },
+  "spec": {
+    "serialnumber": "E254-400-000-000-329-P-X",
+    "menderDeviceID": "bcee1051-dfc7-4c87-9b5d-f55d29e3237f",
+    "internalDeviceID": "1407645a490e38488aae054af9b34c82bb705f3ba204ec8835b1d2da5f92a4a7",
+    "macAddress": "40:2c:7c:c0:01:b1",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxBS+nP23mrqsHiWnZCvn\nEmPpWW+k81lT8+yIg1FvH4YviIJFqfH4rKiygZNVJSp6FO+fJj2PlGtyiqBCJFX5\n1/PP6GgVo6+QeTR1L92NQvfaoXMePYjoFhB9n9Dp5u7XU4YnbMRMdnVfYmbriwUh\nb5hu+FQu6migvkYHl1ATX2jSJThR5xFyGmD1uzQw6edH2saY5Hhym69j2Dm2lgB7\nnqDXXM+wi1hNeh2hhXqlDHaBPAjdeqbgdlRRjoxRToaQxLAPnqd8Rz9teJazZsHR\niAS/lTdcRw0eu41Mr+alD954RVfcl8aJ0YWHYN4Xq5uCNNfc9JgLgaMQM04PyL9n\nywIDAQAB\n-----END PUBLIC KEY-----\n",
+    "maintenanceWindow": {
+      "fromWeekday": 6,
+      "fromHour": 2,
+      "toWeekday": 6,
+      "toHour": 4
+    },
+    "architecture": "arm32v7"
+  }
+}

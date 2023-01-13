@@ -11,8 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/grid-x/gxctl/pkg/errors"
 	"sigs.k8s.io/yaml"
+
+	"github.com/grid-x/gxctl/pkg/errors"
 )
 
 func LookupID(prefix string, ids []string) (string, error) {
@@ -185,7 +186,7 @@ func GetResources(loc string, readOnly bool, checkForExtensionSupport bool) ([]R
 		var err error
 		var res Resource
 		var resID string
-		
+
 		if checkForExtensionSupport && !hasSupportedExtension(n) && loc != n {
 			continue
 		}
@@ -255,7 +256,7 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 	return nil, fmt.Errorf("Unknown error while processing filename")
 }
 
-const yamlSeparator = "---"
+const yamlSeparator = "\n---"
 
 // splitYAMLDocument is a bufio.SplitFunc for splitting YAML streams into individual documents.
 // The following function is taken from 'splitYAMLDocument' function in
