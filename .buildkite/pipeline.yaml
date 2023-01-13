@@ -7,21 +7,32 @@ steps:
 - command:
   - "make ci_test"
   label: ":golang: Test"
+  env:
+    HOST_GOOS: "linux"
+    HOST_GOARCH: "amd64"
   agents:
   - "queue=default"
 - command:
-  - "make ci_build"
+  - "TARGET_GOOS=linux TARGET_GOARCH=amd64 make ci_build"
+  - "TARGET_GOOS=linux TARGET_GOARCH=arm64 make ci_build"
   label: ":golang: Build"
+  env:
+    HOST_GOOS: "linux"
+    HOST_GOARCH: "amd64"
   agents:
   - "queue=default"
   artifact_paths:
-  - "bin/*"
+  - "bin/gxctl-*"
 - wait
 - command:
   - "buildkite-agent artifact download \"bin/gxctl-*\" . --step \":golang: Build\""
-  - "make docker"
+  - "TARGET_GOOS=linux TARGET_GOARCH=amd64 make docker"
+  - "TARGET_GOOS=linux TARGET_GOARCH=arm64 make docker"
   - "make docker_push"
   label: ":docker: Build docker image"
+  env:
+    HOST_GOOS: "linux"
+    HOST_GOARCH: "amd64"
   agents:
   - "queue=default"
 - command:

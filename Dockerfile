@@ -1,6 +1,22 @@
+FROM public.ecr.aws/n0w6x8l1/base-images:golang-dev-1.17.latest AS config
+
+ARG HOST_GOOS
+ARG HOST_GOARCH
+ARG SRC_BIN=bin/gxctl-${HOST_GOOS}-${HOST_GOARCH}
+
+COPY ${SRC_BIN} /usr/bin/gxctl
+RUN chmod +x /usr/bin/gxctl
+RUN mkdir -p /root/.gxctl && \
+  touch /root/.gxctl/config.yaml && \
+  /usr/bin/gxctl ssh setup > /tmp/ssh_config && \
+  sed -e s~"gxctl ssh tunnel --profile"~"gxctl ssh tunnel --skip-config-check -q --profile"~g /tmp/ssh_config >> /etc/ssh/ssh_config && \
+  rm /root/.gxctl/config.yaml
+
 FROM 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:devpack-buster.latest
-ENV GOOS=linux
-ENV GOARCH=amd64
+
+ARG TARGET_GOOS
+ARG TARGET_GOARCH
+ARG SRC_BIN=bin/gxctl-${TARGET_GOOS}-${TARGET_GOARCH}
 
 # Install colordiff and new OpenSSH from backports (OpenSSH from buster doesn't fully support
 # the needed SSH config)
@@ -14,12 +30,8 @@ RUN wget https://github.com/wakeful/yaml2json/releases/download/${YAML2JSON_VERS
   mv yaml2json-linux-amd64 /usr/local/bin/yaml2json && \
   chmod +x /usr/local/bin/yaml2json
 
-COPY ./bin/gxctl-${GOOS}-${GOARCH} /usr/bin/gxctl
-RUN chmod +x /usr/bin/gxctl
-RUN mkdir -p /root/.gxctl && \
-  touch /root/.gxctl/config.yaml && \
-  /usr/bin/gxctl ssh setup > /tmp/ssh_config && \
-  sed -e s~"gxctl ssh tunnel --profile"~"gxctl ssh tunnel --skip-config-check -q --profile"~g /tmp/ssh_config >> /etc/ssh/ssh_config && \
-  rm /root/.gxctl/config.yaml
+COPY ${SRC_BIN} /usr/bin/gxctl
+
+COPY --from=config /etc/ssh/ssh_config /etc/ssh/ssh_config
 
 ENTRYPOINT ["gxctl"]
