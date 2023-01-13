@@ -2,3 +2,4 @@ bin/gxctl*
 dist
 
 dist/
+/bin/ssh_config
