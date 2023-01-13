@@ -20,7 +20,6 @@ steps:
 - command:
   - "buildkite-agent artifact download \"bin/gxctl-*\" . --step \":golang: Build\""
   - "make docker"
-  - ".buildkite/steps/aws_ecr_auth.sh"
   - "make docker_push"
   label: ":docker: Build docker image"
   agents:
