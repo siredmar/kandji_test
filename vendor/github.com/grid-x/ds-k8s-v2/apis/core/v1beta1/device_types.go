@@ -26,6 +26,8 @@ type DeviceSpec struct {
 	// The AccountID the device belongs to (the namespace is also dependent on this id)
 	AccountID string `json:"accountID"`
 	// the Serialnumber of the device
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern=`[A-Z][0-9]{3}-[0-9]{3}-[0-9]{3}-[0-9]{3}-[0-9]{3}-(A|B|P|Z)-X`
 	Serialnumber string `json:"serialnumber"`
 	// The deviceID mender assigned to this device. This can later be used
 	// to automate deployment
@@ -43,7 +45,13 @@ type DeviceSpec struct {
 	// Defines a weekly time window of the form Sun:04:00-Sun:06:00
 	MaintenanceWindow *string `json:"maintenanceWindow,omitempty"`
 	// Architecture is the architecture of the device
+	// +kubebuilder:validation:Enum=arm32v7;arm64v8;amd64
 	Architecture *string `json:"architecture,omitempty"`
+	// The time when the device was first seen online after being provisioned
+	// This field will be set by the api after receiving the first status update outside of the provisionig process
+	// In case the device has not been online yet this will be null
+	// +optional
+	FirstSeen *metav1.Time `json:"firstSeen,omitempty"`
 }
 
 // DeviceStatus defines the observed state of Device

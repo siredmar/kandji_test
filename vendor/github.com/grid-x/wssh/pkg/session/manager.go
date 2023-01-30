@@ -3,22 +3,37 @@ package session
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 
+	"github.com/grid-x/wssh/internal"
 	"github.com/grid-x/wssh/internal/k8s"
 	"github.com/grid-x/wssh/pkg/config"
 	"github.com/grid-x/wssh/pkg/tunnel"
 )
 
+// prom methods used by session FSMs
+type promRepository interface {
+	DeviceConnectDurationSecondsObserve(internal.SessionContext) func(float64)
+	SessionsActiveInc(internal.SessionContext)
+	SessionsActiveDec(internal.SessionContext)
+	SessionsStateInc(internal.SessionContext, fmt.Stringer)
+	SessionsStateDec(internal.SessionContext, fmt.Stringer)
+	SessionsTransmittedBytesAdd(internal.SessionContext) func(int)
+	SessionsDurationSecondsObserve(internal.SessionContext) func(float64)
+}
+
 // ManagerI is the managers Interface
 type ManagerI interface {
+	Get(sID uuid.UUID) (*Session, bool)
 	Delete(sID uuid.UUID)
-	NewMaybe(agentID string, deviceID string) (*Session, bool, error)
+	NewMaybe(agentID string, deviceID string, flavor SSHFlavor) (*Session, bool, error)
 }
 
 // Manager is used to savely modify Session state
 type Manager struct {
+	Prom promRepository
+
 	cfg              *config.ServerConfig
 	log              logrus.FieldLogger
 	sessions         map[uuid.UUID]*Session
@@ -35,8 +50,10 @@ func NewManager(
 	log logrus.FieldLogger,
 	tunnelManager *tunnel.Manager,
 	pods *k8s.PodsRepository,
+	promRepo promRepository,
 ) *Manager {
 	m := &Manager{
+		Prom:     promRepo,
 		cfg:      cfg,
 		tunnel:   tunnelManager,
 		log:      log,
@@ -65,7 +82,7 @@ func (m *Manager) Delete(sID uuid.UUID) {
 }
 
 // NewMaybe returns a Session
-func (m *Manager) NewMaybe(agentID string, deviceID string) (*Session, bool, error) {
+func (m *Manager) NewMaybe(agentID string, deviceID string, flavor SSHFlavor) (*Session, bool, error) {
 	// TODO: implement session reconnect
 	// TODO: check if clients exist
 	tunnelAgent, err := m.tunnel.New()
@@ -85,6 +102,7 @@ func (m *Manager) NewMaybe(agentID string, deviceID string) (*Session, bool, err
 		AgentTunnelID:  tunnelAgent.ID,
 		DeviceID:       deviceID,
 		DeviceTunnelID: tunnelDevice.ID,
+		SSHFlavor:      flavor,
 		Signals:        make(chan Signal),
 		log:            m.log.WithField("sID", sID),
 		manager:        m,

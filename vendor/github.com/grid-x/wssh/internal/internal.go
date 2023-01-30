@@ -14,6 +14,7 @@ const (
 
 // SessionContext contains the spec for launching a Session
 type SessionContext struct {
+	SessionID string
 	AccountID string
 	AgentID string
 	DeviceID string
