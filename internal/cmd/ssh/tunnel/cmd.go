@@ -60,8 +60,9 @@ For example, to connect to device with SN D123-FOO-…, use:
 
 			quiet, _ := cmd.Flags().GetBool("quiet")
 			skipConfigCheck, _ := cmd.Flags().GetBool("skip-config-check")
+			flavor, _ := cmd.Flags().GetString("flavor")
 
-			err = action.SSHTunnel(s, quiet, skipConfigCheck, args[0])
+			err = action.SSHTunnel(s, quiet, skipConfigCheck, flavor, args[0])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 			}
@@ -73,6 +74,7 @@ For example, to connect to device with SN D123-FOO-…, use:
 	}
 
 	c.cmd.Flags().BoolP("quiet", "q", false, "do not report progress")
+	c.cmd.Flags().StringP("flavor", "f", "", "SSH flavor for the device side")
 	c.cmd.Flags().BoolP("skip-config-check", "", false, "do not fail on config mismatch")
 
 	return nil

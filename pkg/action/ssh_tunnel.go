@@ -29,7 +29,7 @@ var (
 	ServerSSL = true
 )
 
-func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error {
+func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, flavor, sn string) error {
 	if quiet {
 		spinner.Disable()
 	}
@@ -157,7 +157,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 	tokenInject.Ok()
 
 	startSession := spinner.New("start session")
-	_, tID, err := NewSession(c, serverAddr, token.String(), device.Metadata.ID)
+	_, tID, err := NewSession(c, serverAddr, token.String(), device.Metadata.ID, flavor)
 	if err != nil {
 		startSession.Fail()
 		return err
@@ -204,30 +204,45 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, sn string) error
 }
 
 // NewSession requests a new session
-func NewSession(c *http.Client, serverAddr string, token string, deviceID string) (*uuid.UUID, *uuid.UUID, error) {
-	var body session.HTTPresponse
-	err := Post(c, serverAddr, token, "/agent/session", fmt.Sprintf(`{"device": "%v"}`, deviceID), &body)
+func NewSession(c *http.Client, serverAddr, token, deviceID, flavor string) (*uuid.UUID, *uuid.UUID, error) {
+	req := &session.HTTPrequest{
+		Device: deviceID,
+	}
+	switch flavor {
+	case "":
+		// don't set excplicitly
+	case "dropbear-gridos":
+		req.SSHFlavor = session.SSHFlavorDropbearGridOS
+	case "openssh":
+		req.SSHFlavor = session.SSHFlavorOpenSSH
+	}
+	marshalledReq, err := json.Marshal(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	var respBody session.HTTPresponse
+	err = Post(c, serverAddr, token, "/agent/session", marshalledReq, &respBody)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if body.ErrorMsg != "" {
-		return nil, nil, errors.New(body.ErrorMsg)
+	if respBody.ErrorMsg != "" {
+		return nil, nil, errors.New(respBody.ErrorMsg)
 	}
 
-	return &body.SessionID, &body.TunnelID, nil
+	return &respBody.SessionID, &respBody.TunnelID, nil
 }
 
 // Post HTTP request
-func Post(c *http.Client, serverAddr string, token string, url string, payload string, v *session.HTTPresponse) error {
+func Post(c *http.Client, serverAddr string, token string, url string, payload []byte, v *session.HTTPresponse) error {
 	var reqURL string
 	if ServerSSL {
 		reqURL = "https://" + serverAddr + url
 	} else {
 		reqURL = "http://" + serverAddr + url
 	}
-	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer([]byte(payload)))
+	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(payload))
 	if err != nil {
 		return err
 	}
