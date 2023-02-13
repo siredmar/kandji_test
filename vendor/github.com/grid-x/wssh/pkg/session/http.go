@@ -9,7 +9,8 @@ import (
 
 // HTTPrequest used to setup a session
 type HTTPrequest struct {
-	Device string `json:"device"`
+	Device    string    `json:"device"`
+	SSHFlavor SSHFlavor `json:"sshFlavor,omitempty"`
 }
 
 // HTTPresponse used to setup a session

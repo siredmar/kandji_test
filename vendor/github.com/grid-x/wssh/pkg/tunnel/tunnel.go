@@ -95,8 +95,6 @@ func stateInit(ctx context.Context, t *Tunnel) stateFn {
 // ready: exchange data
 func stateReady(ctx context.Context, t *Tunnel) stateFn {
 	t.setState(StateReady)
-	t.connMutex.Lock()
-	defer t.connMutex.Unlock()
 
 	conn := t.Conn()
 
@@ -140,12 +138,14 @@ func stateReady(ctx context.Context, t *Tunnel) stateFn {
 				t.log.WithField("routine", "write").Trace("done")
 				return
 			case msg := <-t.WriteBuffer:
+				t.connMutex.Lock()
 				err := conn.WriteMessage(websocket.BinaryMessage, msg)
 				if err != nil {
 					t.log.WithError(err).Error("writeSocket")
 				} else {
 					t.log.WithField("message", string(msg)).Trace("writeSocket")
 				}
+				t.connMutex.Unlock()
 			}
 		}
 	}()
