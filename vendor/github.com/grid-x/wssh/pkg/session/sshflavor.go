@@ -29,7 +29,7 @@ func (s SSHFlavor) String() string {
 
 // MarshalJSON implements json.Marshaler.
 func (s SSHFlavor) MarshalJSON() ([]byte, error) {
-	return []byte(s.String()), nil
+	return []byte(`"` + s.String() + `"`), nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -43,15 +43,17 @@ func (s *SSHFlavor) UnmarshalJSON(b []byte) error {
 		*s = SSHFlavorDropbearGridOS
 	case "openssh":
 		*s = SSHFlavorOpenSSH
+	default:
+		return fmt.Errorf("invalid SSH flavor %q", str)
 	}
-	return fmt.Errorf("invalid SSH flavor %q", str)
+	return nil
 }
 
 // KeysPath returns the directory where the authorized_keys files resides on the target.
 func (s SSHFlavor) KeysPath() string {
 	switch s {
 	case SSHFlavorDropbearGridOS:
-		return "/etc/dropbear"
+		return "/mnt/state/root-overlay/etc/dropbear"
 	case SSHFlavorOpenSSH:
 		// TODO this is actually dependent on the user we want to log in as. Stick with root-only for now.
 		return "/root/.ssh"

@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/grid-x/ds-api-types v0.0.0-20220810075806-1ab735dfe890
-	github.com/grid-x/wssh v0.0.0-20230116100510-a50fb324d29f
+	github.com/grid-x/wssh v0.0.0-20230302095047-b1fed4f262dd
 	github.com/landoop/tableprinter v0.0.0-20200104100433-ae9249991eb1
 	github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
 	github.com/spf13/viper v1.7.0

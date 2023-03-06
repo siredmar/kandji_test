@@ -70,7 +70,7 @@ github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps
 # github.com/grid-x/ds-k8s-v2 v0.0.0-20211015131425-24f18d851811
 ## explicit; go 1.17
 github.com/grid-x/ds-k8s-v2/apis/core/v1beta1
-# github.com/grid-x/wssh v0.0.0-20230116100510-a50fb324d29f
+# github.com/grid-x/wssh v0.0.0-20230302095047-b1fed4f262dd
 ## explicit; go 1.17
 github.com/grid-x/wssh/internal
 github.com/grid-x/wssh/internal/devicepod

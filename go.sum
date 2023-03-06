@@ -308,6 +308,8 @@ github.com/grid-x/ds-k8s-v2 v0.0.0-20211015131425-24f18d851811/go.mod h1:2ePIc4j
 github.com/grid-x/ds-supervisor-client v0.0.0-20210709095044-af2ec4d41655/go.mod h1:YNf+5WaohEugSelopij0E4o0l0szFQAQpZQ6SuYvAys=
 github.com/grid-x/wssh v0.0.0-20230116100510-a50fb324d29f h1:onH8hZF1Urpv375wdTidFSi+SGd1pb1FlA2pgFDzAwI=
 github.com/grid-x/wssh v0.0.0-20230116100510-a50fb324d29f/go.mod h1:IlJJpJA1TXsa/9FGDI5Uo4uNu7Wvha/9397Kg0sgDIg=
+github.com/grid-x/wssh v0.0.0-20230302095047-b1fed4f262dd h1:UdXEh+1X8vvrNAxsYAW5YTNe50b3HKkLUf528LXn66g=
+github.com/grid-x/wssh v0.0.0-20230302095047-b1fed4f262dd/go.mod h1:IlJJpJA1TXsa/9FGDI5Uo4uNu7Wvha/9397Kg0sgDIg=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/grpc-ecosystem/go-grpc-middleware v1.3.0/go.mod h1:z0ButlSOZa5vEBq9m2m2hlwIgKw+rp3sdCBRoJY+30Y=
