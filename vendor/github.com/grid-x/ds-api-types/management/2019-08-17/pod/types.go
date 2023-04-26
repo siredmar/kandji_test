@@ -41,6 +41,9 @@ type PodConfig struct {
 	// present, old pods should not be killed and new pods should not be started.
 	// +optional
 	UpdateLockfilePath *string `json:"updateLockfilePath,omitempty"`
+	// Additional rules for the cgroup allowed devices list
+	// +optional
+	DeviceCGroupRules []string `json:"deviceCGroupRules,omitempty"`
 }
 
 // DevicePodStatus defines the observed state of DevicePod
