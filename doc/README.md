@@ -10,6 +10,7 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 - Extract the binary and run `sudo install -o root -g root -m 0755 gxctl /usr/local/bin/gxctl`
 
 #### MacOS
+- Move the archive outside of your Downloads folder, e.g. to your home folder.
 - Extract the binary and make it executable by running `chmod +x ./gxctl`
 - Create /usr/local/bin if it doesn't exist yet: `sudo mkdir -p /usr/local/bin`
 - Move the gxctl binary to a file location on your system PATH. `sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
