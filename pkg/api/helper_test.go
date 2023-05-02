@@ -114,28 +114,40 @@ func TestGetResources(t *testing.T) {
 			checkForExtensionSupport: true,
 			wantErr:                  true,
 		},
+		{
+			loc:                      "testdata/test3.yaml",
+			readOnly:                 false,
+			checkForExtensionSupport: true,
+			want: []ResAssoc{
+				{
+					ID:    "ds-metric-agent",
+					Res:   &Application{},
+					Order: 0,
+				},
+			},
+		},
 	}
 
-	for _, tc := range testcases {
+	for i, tc := range testcases {
 		sortedRes, err := GetResources(tc.loc, tc.readOnly, tc.checkForExtensionSupport)
 		if !tc.wantErr && err != nil {
-			t.Fatalf("unexpected error: %+v", err)
+			t.Fatalf("case %d: unexpected error: %+v", i, err)
 		} else if tc.wantErr && err == nil {
-			t.Fatal("expected error but did not get one")
+			t.Fatalf("case %d: expected error but did not get one", i)
 		}
 
 		// Check if resources has been split if multiple resources exist in the file
 		if len(sortedRes) != len(tc.want) {
-			t.Errorf("Result does not match. Expected: %d, Got: %d", len(tc.want), len(sortedRes))
+			t.Errorf("case %d: Result does not match. Expected: %d, Got: %d", i, len(tc.want), len(sortedRes))
 		}
 
 		for n, res := range sortedRes {
 			if res.ID != tc.want[n].ID {
-				t.Errorf("Result does not match. Expected: %s, Got: %s", tc.want[n].ID, res.ID)
+				t.Errorf("case %d: Result does not match. Expected: %s, Got: %s", i, tc.want[n].ID, res.ID)
 			}
 
 			if res.Order != tc.want[n].Order {
-				t.Errorf("Result does not match. Expected: %d, Got: %d", tc.want[n].Order, res.Order)
+				t.Errorf("case %d: Result does not match. Expected: %d, Got: %d", i, tc.want[n].Order, res.Order)
 			}
 		}
 	}
