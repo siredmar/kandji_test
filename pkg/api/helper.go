@@ -103,9 +103,10 @@ func CheckResourceFile(bytes []byte, readOnly bool) (Resource, string, error) {
 }
 
 type ResAssoc struct {
-	ID    string
-	Res   Resource
-	Order int
+	ID       string
+	Filename string
+	Res      Resource
+	Order    int
 }
 
 var (
@@ -116,35 +117,19 @@ var (
 	}
 )
 
-func sortByKind(resources map[string]Resource) []ResAssoc {
-	result := make([]ResAssoc, len(resources))
-	i := 0
-	for resID, res := range resources {
-		if res == nil {
-			result[i] = ResAssoc{
-				resID,
-				res,
-				-1,
-			}
-			i++
-			continue
-		}
-		kind := reflect.TypeOf(res).Elem().Name()
+func sortByKind(assocs []ResAssoc) {
+	for i := range assocs {
+		kind := reflect.TypeOf(assocs[i].Res).Elem().Name()
 		var order int
 		var exists bool
 		if order, exists = kindOrder[kind]; kind == "" || !exists {
 			order = -1
 		}
-		result[i] = ResAssoc{
-			resID,
-			res,
-			order,
-		}
-		i++
+		assocs[i].Order = order
 	}
-	sort.SliceStable(result, func(i, j int) bool {
-		s := result[i].Order
-		t := result[j].Order
+	sort.SliceStable(assocs, func(i, j int) bool {
+		s := assocs[i].Order
+		t := assocs[j].Order
 
 		// resources with no kind go last
 		if s > -1 && t == -1 {
@@ -156,14 +141,12 @@ func sortByKind(resources map[string]Resource) []ResAssoc {
 
 		// fallback: sort by id
 		if s == -1 && t == -1 || s == t {
-			return result[i].ID < result[j].ID
+			return assocs[i].ID < assocs[j].ID
 		}
 
 		// sort by kind
 		return s < t
 	})
-
-	return result
 }
 
 func hasSupportedExtension(filename string) bool {
@@ -181,7 +164,7 @@ func GetResources(loc string, readOnly bool, checkForExtensionSupport bool) ([]R
 		return nil, err
 	}
 
-	resources := make(map[string]Resource, len(contents))
+	assocs := make([]ResAssoc, 0, len(contents))
 	for n, c := range contents {
 		var err error
 		var res Resource
@@ -195,11 +178,18 @@ func GetResources(loc string, readOnly bool, checkForExtensionSupport bool) ([]R
 		if err != nil {
 			return nil, err
 		}
-		resources[resID] = res
+		assoc := ResAssoc{
+			ID:       resID,
+			Filename: n,
+			Res:      res,
+			Order:    -1,
+		}
+
+		assocs = append(assocs, assoc)
 	}
 
-	return sortByKind(resources), nil
-
+	sortByKind(assocs)
+	return assocs, nil
 }
 
 func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
