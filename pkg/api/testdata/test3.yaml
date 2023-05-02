@@ -1,0 +1,7 @@
+---
+---
+# check that empty resources are ignored - e.g. from a `---` right at the start
+---
+metadata:
+  id: ds-metric-agent
+name: ds-metric-agent

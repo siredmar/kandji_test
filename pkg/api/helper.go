@@ -217,10 +217,14 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 			for key, val := range retVal {
 				b, err := yaml.YAMLToJSON(val)
 				if err == nil {
+					// TODO does it make sense to silently ignore errors here?
 					val = b
 				}
 
-				ret[key] = val
+				// ignore null values - these are created e.g. if there is a `---` right at the document start
+				if !bytes.Equal(b, []byte("null")) {
+					ret[key] = val
+				}
 			}
 			return nil
 		})
@@ -235,10 +239,14 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 		for key, val := range retVal {
 			b, err := yaml.YAMLToJSON(val)
 			if err == nil {
+				// TODO does it make sense to silently ignore errors here?
 				val = b
 			}
 
-			ret[key] = val
+			// ignore null values - these are created e.g. if there is a `---` right at the document start
+			if !bytes.Equal(b, []byte("null")) {
+				ret[key] = val
+			}
 		}
 		return ret, nil
 	}
