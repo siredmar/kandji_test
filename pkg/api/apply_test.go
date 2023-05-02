@@ -17,147 +17,171 @@ func (m *mockResource) Meta() *types.Metadata {
 func TestSortByKind(t *testing.T) {
 	testcases := []struct {
 		desc      string
-		resources map[string]Resource
+		resources []ResAssoc
 		want      []ResAssoc
 	}{
 		{
 			desc: "Application before Deployment",
-			resources: map[string]Resource{
-				"foo": &Application{},
-				"bar": &Deployment{},
-				"config": &DeviceConfigMap{},
+			resources: []ResAssoc{
+				ResAssoc{ID: "foo", Res: &Application{}},
+				ResAssoc{ID: "bar", Res: &Deployment{}},
+				ResAssoc{ID: "config", Res: &DeviceConfigMap{}},
 			},
 			want: []ResAssoc{
 				{
-					"foo",
-					&Application{},
-					0,
+					ID:    "foo",
+					Res:   &Application{},
+					Order: 0,
 				},
 				{
-					"config",
-					&DeviceConfigMap{},
-					1,
+					ID:    "config",
+					Res:   &DeviceConfigMap{},
+					Order: 1,
 				},
 				{
-					"bar",
-					&Deployment{},
-					2,
+					ID:    "bar",
+					Res:   &Deployment{},
+					Order: 2,
 				},
 			},
 		},
 		{
 			desc: "Applications (sorted by by Name) before Deployments (sorted by ID)",
-			resources: map[string]Resource{
-				"d": &Application{
-					Name: "d",
-				},
-				"c": &Application{
-					Name: "c",
-				},
-				"f": &DeviceConfigMap{
-					Metadata: types.Metadata{
-						ID: "f",
-					},
-				},
-				"e": &DeviceConfigMap{
-					Metadata: types.Metadata{
-						ID: "e",
-					},
-				},
-				"b": &Deployment{
-					Metadata: types.Metadata{
-						ID: "b",
-					},
-				},
-				"a": &Deployment{
-					Metadata: types.Metadata{
-						ID: "a",
-					},
-				},
-			},
-			want: []ResAssoc{
+			resources: []ResAssoc{
 				{
-					"c",
-					&Application{
-						Name: "c",
-					},
-					0,
-				},
-				{
-					"d",
-					&Application{
+					ID: "d",
+					Res: &Application{
 						Name: "d",
 					},
-					0,
 				},
 				{
-					"e",
-					&DeviceConfigMap{
-						Metadata: types.Metadata{
-							ID: "e",
-						},
+					Res: &Application{
+						Name: "c",
 					},
-					1,
+					ID: "c",
 				},
 				{
-					"f",
-					&DeviceConfigMap{
+					Res: &DeviceConfigMap{
 						Metadata: types.Metadata{
 							ID: "f",
 						},
 					},
-					1,
+					ID: "f",
 				},
 				{
-					"a",
-					&Deployment{
+					Res: &DeviceConfigMap{
 						Metadata: types.Metadata{
-							ID: "a",
+							ID: "e",
 						},
 					},
-					2,
+					ID: "e",
 				},
 				{
-					"b",
-					&Deployment{
+					Res: &Deployment{
 						Metadata: types.Metadata{
 							ID: "b",
 						},
 					},
-					2,
+					ID: "b",
+				},
+				{
+					Res: &Deployment{
+						Metadata: types.Metadata{
+							ID: "a",
+						},
+					},
+					ID: "a",
+				},
+			},
+			want: []ResAssoc{
+				{
+					ID: "c",
+					Res: &Application{
+						Name: "c",
+					},
+					Order: 0,
+				},
+				{
+					ID: "d",
+					Res: &Application{
+						Name: "d",
+					},
+					Order: 0,
+				},
+				{
+					ID: "e",
+					Res: &DeviceConfigMap{
+						Metadata: types.Metadata{
+							ID: "e",
+						},
+					},
+					Order: 1,
+				},
+				{
+					ID: "f",
+					Res: &DeviceConfigMap{
+						Metadata: types.Metadata{
+							ID: "f",
+						},
+					},
+					Order: 1,
+				},
+				{
+					ID: "a",
+					Res: &Deployment{
+						Metadata: types.Metadata{
+							ID: "a",
+						},
+					},
+					Order: 2,
+				},
+				{
+					ID: "b",
+					Res: &Deployment{
+						Metadata: types.Metadata{
+							ID: "b",
+						},
+					},
+					Order: 2,
 				},
 			},
 		},
 		{
 			desc: "Deployments before unspecified",
-			resources: map[string]Resource{
-				"b": &Deployment{},
-				"a": &mockResource{},
+			resources: []ResAssoc{
+				{
+					ID:  "b",
+					Res: &Deployment{},
+				},
+				{
+					ID:  "a",
+					Res: &mockResource{},
+				},
 			},
 			want: []ResAssoc{
 				{
-					"b",
-					&Deployment{},
-					2,
+					ID:    "b",
+					Res:   &Deployment{},
+					Order: 2,
 				},
 				{
-					"a",
-					&mockResource{},
-					-1,
+					ID:    "a",
+					Res:   &mockResource{},
+					Order: -1,
 				},
 			},
 		},
 		{
 			desc:      "no resources",
-			resources: map[string]Resource{},
+			resources: []ResAssoc{},
 			want:      []ResAssoc{},
 		},
 	}
 
 	for _, tc := range testcases {
 		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
-			got := sortByKind(tc.resources)
-			if diff := cmp.Diff(tc.want, got); diff != "" {
+			sortByKind(tc.resources)
+			if diff := cmp.Diff(tc.want, tc.resources); diff != "" {
 				t.Errorf("sortByKind error (-want +got):\n%s", diff)
 			}
 		})
