@@ -43,7 +43,7 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool,
 	}
 
 	for _, r := range resources {
-		if err := diff(fileName, r.Res, r.ID, diffCmd, skipOnLabel, isCI, s.Client); err != nil {
+		if err := diff(r.Filename, r.Res, r.ID, diffCmd, skipOnLabel, isCI, s.Client); err != nil {
 			return err
 		}
 	}
