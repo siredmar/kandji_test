@@ -60,3 +60,27 @@ Profiles:
     Token: '...'
   Default: false
   Name: 1komma5
+- Auth:
+    Auth0ClientID: rXa3P49rRzgmR94E6Tg2mcz0OKd8UaL3
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: homenergy
+- Auth:
+    Auth0ClientID: KVVDIk80bbZQnveAQQLmk3k4FPFcoAaK
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: ibc-solar
+- Auth:
+    Auth0ClientID: zn0ulBjZk9XDQvcQQjJqto1H192HLbHY
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: klarsolar
+- Auth:
+    Auth0ClientID: oequf6ltcb44ovlrthf6T5FOXXhi4KBi
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: wegatech
