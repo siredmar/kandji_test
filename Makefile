@@ -65,13 +65,9 @@ test:
 	go test -v $(shell go list ./...)
 
 ssh_config:
-	docker buildx build \
-		-t gxctl-ssh-config \
-		-f Dockerfile.ssh_config \
-		--build-arg HOST_OS=linux \
-		--build-arg HOST_ARCH=${HOST_ARCH} \
-		.
-	docker run --rm -v $$PWD:/go/src/${GO_PROJECT}:z -w /go/src/${GO_PROJECT} --entrypoint cp gxctl-ssh-config /etc/ssh/ssh_config ./bin
+	@jq -r 'to_entries[] | "Host \(.key)\n\((.value | to_entries | map("  \(.key) \(.value)")) | join("\n"))\n"' \
+	pkg/action/ssh_config.json > \
+	bin/ssh_config
 
 docker: docker_${HOST_OS}_${HOST_ARCH}
 
