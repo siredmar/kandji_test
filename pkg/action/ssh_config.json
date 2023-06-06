@@ -1,0 +1,22 @@
+{
+  "*.gridbox-tunnel": {
+    "ProxyCommand": "gxctl ssh tunnel --profile='*' $(echo %h | cut -d'.' -f1)",
+    "ServerAliveInterval": "30",
+    "StrictHostKeyChecking": "no",
+    "HashKnownHosts": "no",
+    "User": "root",
+    "ControlMaster": "auto",
+    "ControlPath": "~/.ssh/master-%r@%h:%p",
+    "ControlPersist": "no",
+    "LogLevel": "ERROR"
+  },
+  "*.gridbox": {
+    "User": "root",
+    "HostName": "127.0.0.1",
+    "Port": "22222",
+    "UserKnownHostsFile": "/dev/null",
+    "StrictHostKeyChecking": "no",
+    "LogLevel": "ERROR",
+    "ProxyCommand": "ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -t 60 -q /keys/id_wssh_ecdsa && nc %h %p'"
+  }
+}

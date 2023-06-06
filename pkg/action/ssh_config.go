@@ -1,6 +1,8 @@
 package action
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,31 +12,24 @@ import (
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
-var configWant = map[string]map[string]string{
-	"*.gridbox-tunnel": {
-		"ProxyCommand":          "gxctl ssh tunnel --profile='*' $(echo %h | cut -d'.' -f1)",
-		"ServerAliveInterval":   "30",
-		"StrictHostKeyChecking": "no",
-		"HashKnownHosts":        "no",
-		"User":                  "root",
-		"ControlMaster":         "auto",
-		"ControlPath":           "~/.ssh/master-%r@%h:%p",
-		"ControlPersist":        "no",
-		"LogLevel":              "ERROR",
-	},
-	"*.gridbox": {
-		"User":                  "root",
-		"HostName":              "127.0.0.1",
-		"Port":                  "22222",
-		"UserKnownHostsFile":    "/dev/null",
-		"StrictHostKeyChecking": "no",
-		"LogLevel":              "ERROR",
-		"ProxyCommand":          "ssh -o 'ForwardAgent yes' $(echo %n | cut -d'.' -f1).gridbox-tunnel 'ssh-add -t 60 -q /keys/id_wssh_ecdsa && nc %h %p'",
-	},
+//go:embed ssh_config.json
+var configRaw []byte
+
+func decodeConfig() (map[string]map[string]string, error) {
+	var config map[string]map[string]string
+	if err := json.Unmarshal(configRaw, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 func SSHConfigPrint(s *service.Service) error {
 	var b strings.Builder
+
+	configWant, err := decodeConfig()
+	if err != nil {
+		return err
+	}
 
 	for host, entry := range configWant {
 		fmt.Fprintf(&b, "Host %v\n", host)
@@ -49,6 +44,12 @@ func SSHConfigPrint(s *service.Service) error {
 
 func SSHConfigCheck(s *service.Service) error {
 	var diffs []sshConfigDiff
+
+	configWant, err := decodeConfig()
+	if err != nil {
+		return err
+	}
+
 	for host := range configWant {
 		configHave, err := sshGetConfig(host)
 		if err != nil {
