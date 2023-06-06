@@ -64,6 +64,8 @@ func GetDevices(c *APIClient, sn string, f filter.Filter) (map[string]GetDevices
 		resp.Profile = response.Profile
 		if response.Err != nil {
 			resp.Err = response.Err
+			responseList[response.Profile] = resp
+			continue
 		}
 
 		deviceList, err := api.NewDevices(response.Body, false)
@@ -86,6 +88,5 @@ func GetDevices(c *APIClient, sn string, f filter.Filter) (map[string]GetDevices
 
 		responseList[response.Profile] = resp
 	}
-
 	return responseList, nil
 }
