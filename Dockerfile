@@ -1,4 +1,4 @@
-FROM 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/base-images:devpack-buster.latest
+FROM public.ecr.aws/gridx/base-images:devpack-buster.latest
 
 ARG SRC_BIN
 ARG SRC_CONFIG=bin/ssh_config
