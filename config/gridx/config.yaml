@@ -84,3 +84,9 @@ Profiles:
     Token: '...'
   Default: false
   Name: wegatech
+- Auth:
+    Auth0ClientID: JQC6QwN1PIhfP9LWHOTCAFx9A5S2MfGN
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Default: false
+  Name: chargepoint
