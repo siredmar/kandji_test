@@ -52,7 +52,7 @@ $ gxctl --profile profile1 login
 $ gxctl --profile profile1 get device
 ```
 
-*Note*: You can set a default profile using `Default: true` in your config file at `~/.gxctl/config.yaml`.
+*Note*: You can set a default profile using `gxctl config use-profile profile1`.
 
 ## Syntax
 

@@ -1,8 +1,8 @@
+CurrentProfile: eon-eis
 Profiles:
   - Auth:
       Auth0ClientID: vLBUjWs26vmGhRohL2CskPIMTZd3qkOC
       Auth0Tenant: gridx-ds-root.eu.auth0.com
       Token: <TODO>
-    Default: true
     Name: eon-eis
     Staging: false

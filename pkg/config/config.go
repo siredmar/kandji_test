@@ -48,3 +48,14 @@ func (c *Config) readAuth() error {
 
 	return nil
 }
+
+// Write a configuration
+func (c *Config) Write(key string, value string) error {
+	viper.Set(key, value)
+
+	if err := viper.WriteConfig(); err != nil {
+		return err
+	}
+
+	return c.readAuth()
+}

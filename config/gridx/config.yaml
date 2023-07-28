@@ -1,92 +1,78 @@
+CurrentProfile: gridx
 Profiles:
 - Auth:
     Auth0ClientID: 0yLqBjHS16bvbKQABidMYIMZMIxhZ0g4
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: testing
 - Auth:
     Auth0ClientID: hzOXwM0npvgI6xmIJzN8IGCfhCublPDd
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: provisioning
 - Auth:
     Auth0ClientID: zuCMg0DjWrp29J8eCXrgNW11EPGxrFMB
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: true
   Name: gridx
 - Auth:
     Auth0ClientID: 4ckrdbfCmC7hdC6d02wdzVsax5PMjcDW
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: gridx-staging
   Staging: true
 - Auth:
     Auth0ClientID: oDHQIf0MUAzcWWMFbRO5hlZPcS9jRlVT
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: viessmann
 - Auth:
     Auth0ClientID: QNJLmZixoLJYUJBIz3X3RCGUNFvN4Rq6
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: innogy
 - Auth:
     Auth0ClientID: j7f670v9sY6jRzjtBos7BrumaFrWToXf
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: eon
 - Auth:
     Auth0ClientID: UkgefDVzWAywYXV7Mv7AFO2hZ7NVtMNh
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: electris
 - Auth:
     Auth0ClientID: rfHlztrEhDwXnPuMrE8C41JZ2vYIVQxR
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: engie
 - Auth:
     Auth0ClientID: t6AdvSFooErolljJzoxHRZX3LWCm2vgc
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: 1komma5
 - Auth:
     Auth0ClientID: rXa3P49rRzgmR94E6Tg2mcz0OKd8UaL3
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: homenergy
 - Auth:
     Auth0ClientID: KVVDIk80bbZQnveAQQLmk3k4FPFcoAaK
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: ibc-solar
 - Auth:
     Auth0ClientID: zn0ulBjZk9XDQvcQQjJqto1H192HLbHY
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: klarsolar
 - Auth:
     Auth0ClientID: oequf6ltcb44ovlrthf6T5FOXXhi4KBi
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: wegatech
 - Auth:
     Auth0ClientID: JQC6QwN1PIhfP9LWHOTCAFx9A5S2MfGN
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
-  Default: false
   Name: chargepoint
