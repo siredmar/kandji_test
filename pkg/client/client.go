@@ -24,9 +24,9 @@ const (
 )
 
 type AuthConfig struct {
-	Profiles []struct {
+	CurrentProfile string `yaml:"currentProfile"`
+	Profiles       []struct {
 		Name    string `yaml:"name"`
-		Default bool   `yaml:"default,omitempty"`
 		Staging bool   `yaml:"staging,omitempty"`
 		Auth    struct {
 			Auth0Tenant   string `yaml:"auth0Tenant"`
@@ -384,18 +384,13 @@ func (apiclient *APIClient) resolveProfileNames() ([]string, error) {
 		return profileIDs, nil
 	}
 
-	var defaultProfile string
-	for _, profile := range apiclient.Auth.Profiles {
-		if profile.Default {
-			defaultProfile = profile.Name
-		}
-	}
+	currentProfile := apiclient.Auth.CurrentProfile
 
 	if *apiclient.Profile == "" {
-		if defaultProfile == "" {
-			return nil, fmt.Errorf("No default profile configured. Use --profile or configure a default profile")
+		if currentProfile != "" {
+			return []string{apiclient.Auth.CurrentProfile}, nil
 		} else {
-			return []string{defaultProfile}, nil
+			return nil, fmt.Errorf("No current profile set. Use gxctl config use-profile PROFILE_NAME to set it")
 		}
 	}
 
