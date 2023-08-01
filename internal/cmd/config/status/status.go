@@ -1,11 +1,10 @@
-package config
+package status
 
 import (
 	clix "github.com/go-clix/cli"
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/config/current_profile"
-	"github.com/grid-x/gxctl/internal/cmd/config/status"
-	"github.com/grid-x/gxctl/internal/cmd/config/use_profile"
+	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -33,14 +32,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "config",
-		Short: "modify gxctl config file",
-	}
-
-	c.children = []cmd.CMD{
-		use_profile.New(),
-		current_profile.New(),
-		status.New(),
+		Use:   "status",
+		Short: "checks the current state of tokens in the config file",
+		Args: args.Args{
+			Validator: args.ValidateNil(),
+			Predictor: args.PredictNil(),
+		},
+		Run: func(cmd *clix.Command, args []string) error {
+			return action.ValidateTokens(s)
+		},
 	}
 
 	return nil
