@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: gxctl
+  annotations:
+    github.com/project-slug: grid-x/gxctl
+    dependencytrack/project-id: 09cb6792-69d5-4159-8463-6b00f268d1b5
+    buildkite.com/project-slug: gridX/gxctl
+spec:
+  type: service
+  lifecycle: production
+  owner: sre-device-infrastructure-team
+  consumesApis:
+  - ds-management-api
