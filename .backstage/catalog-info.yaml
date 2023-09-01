@@ -2,6 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: gxctl
+  description: Command-line interface to the DS management API
   annotations:
     github.com/project-slug: grid-x/gxctl
     dependencytrack/project-id: 09cb6792-69d5-4159-8463-6b00f268d1b5
@@ -10,5 +11,6 @@ spec:
   type: service
   lifecycle: production
   owner: sre-device-infrastructure-team
+  system: device-services
   consumesApis:
   - ds-management-api
