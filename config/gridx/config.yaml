@@ -76,3 +76,8 @@ Profiles:
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
   Name: chargepoint
+- Auth:
+    Auth0ClientID: ZoDYcDUdDqC8qlIRmLhv5fJNKVvKDukL
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Name: soly
