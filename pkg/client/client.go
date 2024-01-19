@@ -84,7 +84,7 @@ func (apiclient *APIClient) GetToken() (*Token, error) {
 	return &token, err
 }
 
-//GetRequest to call via GET
+// GetRequest to call via GET
 func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
 	result, err := apiclient.internalRequest(http.MethodGet, nil, endpoint)
 	if err != nil {
@@ -93,7 +93,7 @@ func (apiclient *APIClient) GetRequest(endpoint string) ([]byte, error) {
 	return result[0].Body, result[0].Err
 }
 
-//GetMultiRequest to call via GET
+// GetMultiRequest to call via GET
 func (apiclient *APIClient) GetMultiRequest(endpoint string) ([]RequestResult, error) {
 	result, err := apiclient.internalRequest(http.MethodGet, nil, endpoint)
 	if err != nil {
@@ -102,7 +102,7 @@ func (apiclient *APIClient) GetMultiRequest(endpoint string) ([]RequestResult, e
 	return result, err
 }
 
-//PostRequest to call via POST
+// PostRequest to call via POST
 func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte, error) {
 	body, err := json.Marshal(v)
 	if err != nil {
@@ -115,7 +115,7 @@ func (apiclient *APIClient) PostRequest(endpoint string, v interface{}) ([]byte,
 	return result[0].Body, result[0].Err
 }
 
-//PatchRequest to call via PATCH
+// PatchRequest to call via PATCH
 func (apiclient *APIClient) PatchRequest(endpoint string, v api.Resource, id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", endpoint, id)
 	body, err := json.Marshal(v)
@@ -129,7 +129,7 @@ func (apiclient *APIClient) PatchRequest(endpoint string, v api.Resource, id str
 	return result[0].Body, result[0].Err
 }
 
-//DeleteRequest to call via DELETE
+// DeleteRequest to call via DELETE
 func (apiclient *APIClient) DeleteRequest(endpoint string, id string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", endpoint, id)
 	result, err := apiclient.internalRequest(http.MethodDelete, nil, url)
@@ -263,6 +263,7 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 			result.Err = errors.E(
 				errors.Internal,
 				errorMsg,
+				[]string{fmt.Sprintf("status:%v(code:%v)", r.Status, r.StatusCode)},
 			)
 			continue
 		}
