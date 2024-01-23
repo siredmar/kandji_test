@@ -262,7 +262,7 @@ $ gxctl create app testapp
 
 ```shell
 # Set default profile
-$ gxctl config use-profile some_custormer_profile
+$ gxctl config use-profile some_customer_profile
 # Get default profile
 $ gxctl config current-profile
 # See token status per profile
