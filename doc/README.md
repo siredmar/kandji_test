@@ -91,6 +91,7 @@ $ gxctl get apps testapp testapp2
 
 * **apply**   `gxctl apply [[-f | ----filename]=Filename] [flags]`
 * **create**   `gxctl create [[-f | ----filename]=Filename] [flags]`
+* **config**   `gxctl config [flags]`
 * **delete**   `gxctl delete [TYPE] [NAME] [flags]`
 * **diff**   `gxctl apply [[-f | ----filename]=Filename]`
 * **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
@@ -255,6 +256,17 @@ We end up with the following allocation:
 $ gxctl create -f new_deployment.json
 # Create a new app
 $ gxctl create app testapp
+```
+
+`gxctl config` - Deal with profile configuration
+
+```shell
+# Set default profile
+$ gxctl config use-profile some_customer_profile
+# Get default profile
+$ gxctl config current-profile
+# See token status per profile
+$ gxctl config status
 ```
 
 `gxctl update` - Updates a existing resource
