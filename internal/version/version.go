@@ -54,7 +54,7 @@ func UserAgent() string {
 	return fmt.Sprintf("gxctl/%s (%.7s; %s/%s; %s)", Version, GitCommit, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }
 
-// IsRogueBuild returns true iff this build has probably not been build using make build
+// IsRogueBuild returns true if this build has probably not been built using make build
 func IsRogueBuild() bool {
 	return (GitCommit == Unknown || Version == Unknown || BuildTime == Unknown)
 }
