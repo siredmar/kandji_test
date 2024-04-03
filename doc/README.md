@@ -12,21 +12,21 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 #### MacOS
 - Move the archive outside of your Downloads folder, e.g. to your home folder.
 - Extract the binary and make it executable by running `chmod +x ./gxctl`
-- Create /usr/local/bin if it doesn't exist yet: `sudo mkdir -p /usr/local/bin`
+- Create `/usr/local/bin` if it doesn't exist yet: `sudo mkdir -p /usr/local/bin`
 - Move the gxctl binary to a file location on your system PATH. `sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
 - After trying to run `gxctl` for the first time, you might have to make an exception in your system settings to allow it to run even though it is not signed.
 
 #### Windows
-- Extract the binary and append or prepend the folder containig the gxctl binary to your PATH environment variable.
+- Extract the binary and append or prepend the folder containing the gxctl binary to your PATH environment variable.
 
 ### Configuration
 
-- Navigate to your home directory and create a folder called `.gxctl`. For Windows, this is the root of your %USERPROFILE% directory of the user that will be running the gxctl command.
-- Copy the provided base config file in to `~/.gxctl/config.yaml`. This file mainly lists the settings for
+- Navigate to your home directory and create a folder called `.gxctl`. For Windows, this is the root of your `%USERPROFILE%` directory of the user that will be running the gxctl command.
+- Copy the provided base `config.yaml` file to `~/.gxctl/config.yaml`. If using the git repo instead of the archive, you can find the file in `config/gxctl`. This file mainly lists the settings for
 authenticating gxctl for usage with the different subaccounts. Before you can start working, you have to use `gxctl login` to retrieve a token by
 authenticating with your user account.
 
-```
+```sh
 $ mkdir -p ~/.gxctl
 $ cp config.yaml ~/.gxctl/config.yaml
 $ gxctl login # will open a browser window where you can sign in using your gridx.de email
@@ -37,9 +37,10 @@ after that time, you may have to simply refresh the token by running `gxctl logi
 
 ### Remote Maintenance
 
-In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.  
+In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.
 If running for the first time, you can simply execute `mkdir -p ~/.ssh && gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
-with the contents of your ssh config and update the latter accordingly. You can run `gxctl ssh check` to find out, if your local configuration has been setup correctly. It will error and print a diff if there are issues and succeed otherwise.
+with the contents of your ssh config and update the latter accordingly. You can run `gxctl ssh check` to find out if your local configuration has been setup correctly. It will error and print a diff if there are issues and succeed otherwise.
+
 *Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.
 The most simple solution is running `eval $(ssh-agent)` once per terminal session - this will work fine for basic SSH usage, but will not allow you to open more than one connection at a time.
 
@@ -47,7 +48,7 @@ The most simple solution is running `eval $(ssh-agent)` once per terminal sessio
 
 The managed devices are split into different server-side accounts. Your available accounts are defined in `~/.gxctl/config.yaml`. To differentiate between them when using gxctl commands, you can pass the `--profile` argument. You will have to issue a `gxctl login` command separately for each profile that you want to use:
 
-```
+```sh
 $ gxctl --profile profile1 login
 $ gxctl --profile profile1 get device
 ```
@@ -105,10 +106,10 @@ $ gxctl get apps testapp testapp2
 
 
 ## General resource types
-* **applications**   Abbreviated alias `application`,`app`. Applications are used to allow a logical grouping of deployments. Read more about [Device Selectors](#howto-device-selectors).
-* **configmaps**   Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`. Configmaps can be used to inject arbitary data into a container. It can eg. be used to provide the a JSON or YAML config file or add some custom content. In our [Example Deployment](#howto-example-deployment), we're using a Configmap to provide the NGINX container with some custom HTML content to display.
-* **deployments**   Abbreviated alias `deployment`,`deploy`. Deployments are defining a container blueprint. They're are getting translated into Pods as a concrete instance. Those Pods are getting started as a container on the corresponding device. Deployments can either match a single device or a group of devices. Read more about [Device Selectors](#howto-device-selectors).
-* **devices**   Abbreviated alias `device`. Devices are the API representation of the physical gateway. The resource stores general information like the serialnumber or MAC address and a current state of the device providing real time information about the device itself as well as information about the network the device is operationg in.
+* **applications**   Abbreviated alias `application`,`app`. Applications are used to allow a logical grouping of deployments. Read more about [Device Selectors](#device-selectors).
+* **configmaps**   Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`. Configmaps can be used to inject arbitrary data into a container. It can e.g. be used to provide the a JSON or YAML config file or add some custom content. In our [Example Deployment](#howto-example-deployment), we're using a Configmap to provide the NGINX container with some custom HTML content to display.
+* **deployments**   Abbreviated alias `deployment`,`deploy`. Deployments define a container blueprint. They're are getting translated into Pods as a concrete instance. Those Pods are getting started as a container on the corresponding device. Deployments can either match a single device or a group of devices. Read more about [Device Selectors](#device-selectors).
+* **devices**   Abbreviated alias `device`. Devices are the API representation of the physical gateway. The resource stores general information like the serialnumber or MAC address and a current state of the device providing real time information about the device itself as well as information about the network the device is operating in.
 * **pods**   Abbreviated alias `pod`,`po`. Pods are the API representation of a container running on a specific device. They're getting created by a controller for the best matching deployment of an application.
 
 
@@ -183,12 +184,12 @@ For `matchByLabels`, the following applies to allocate a deployment to a set of 
 * The following rules are always evaluated per `application`.
 * `matchByDeviceID` has precedence over `matchByLabels`
 * All labels defined in a `matchByLabels` selector must be attached to the targeted devices in order to match.
-* If there are multiple deployments matching a device for the same `application`, the one will be choosen, which matches most specificly, meaning having the biggest nummer of matching labels.
-* If there are multiple deployments matching a device for the same `application`, and also those deployments having an equal number of matching labels, we use the most recent deployment based on it's creation timestamp.
+* If there are multiple deployments matching a device for the same `application`, the one will be chosen, which matches most specifically, meaning having the biggest number of matching labels.
+* If there are multiple deployments matching a device for the same `application`, and also those deployments having an equal number of matching labels, we use the most recent deployment based on its creation timestamp.
 
-**A concrete example:** 
+**A concrete example:**
 
-Following we got a set of devices an deployments.
+Following we got a set of devices and deployments.
 
 ***Device01***
 ```yaml
@@ -245,7 +246,7 @@ We end up with the following allocation:
 
 * `Device01` runs `Deployment1`. Even though `Deployment2` would also match, based on it's values, it runs on `Deployment1` as `matchByDeviceID` always has precedence over `matchByLabels`. Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.
 * `Device02` runs `Deployment2` as the labels are matching.
-* `Device03` runs `Deployment3`. Even though, both `Deployment2` and `Deployment3` are matching based on the labels, `Deployment3` is more specific (2 vs. 1 matching labels). Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.. 
+* `Device03` runs `Deployment3`. Even though, both `Deployment2` and `Deployment3` are matching based on the labels, `Deployment3` is more specific (2 vs. 1 matching labels). Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.
 
 ## Howto: Common operations
 
@@ -286,20 +287,20 @@ $ gxctl delete app testapp
 # Delete an Deployment using the uuid abbreviation
 $ gxctl delete deploy c78
 # Delete two Deployments using both uuid abbreviation and full qualified name
-$ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05 
+$ gxctl delete deploy c78 35e3dede-2b45-4212-82fb-b92f7d391e05
 ```
 
 `gxctl get` - List one or more resources
 
 ```shell
-# Get a List of all devices 
+# Get a List of all devices
 $ gxctl get devices
 # Get a List of all devices and include additional information (such as labels).
 $ gxctl get devices -o wide
-# get a List of all devicess that match a serialnumber
+# get a List of all devices that match a serialnumber
 $ gxctl get devices --serial D294-200-000-000-581-P-X
 # get a List of all devices that match a serialnumber (wildcard)
-$ gxctl get devices --serial 581-P-X 
+$ gxctl get devices --serial 581-P-X
 # get a List of all devices that have a label with key gridx.de/channel
 $ gxctl get devices --label gridx.de/channel
 # get a List of all devices that have a label with key gridx.de/channel and value alpha
@@ -312,11 +313,11 @@ $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f -o json
 # Get information of two devices
 $ gxctl get device 57e82f8e-08f4-48f9-8e75-28552d09701f 8st62f8e-22gd-ab45-ll23-115980970ab
-# Get a List of all pods 
+# Get a List of all pods
 $ gxctl get pods
 # Get a List of all pods on a certain device
 $ gxctl get pods -d 57e82f8e-08f4-48f9-8e75-28552d09701f
-# Get a List of all deployments 
+# Get a List of all deployments
 $ gxctl get deploy
 # Get information of a single device, showing its deployments
 $ gxctl get deploy --device-id 57e82f8e-08f4-48f9-8e75-28552d09701f
