@@ -1,6 +1,6 @@
 # gxctl - Device Services CLI
 
-This is the development documentation - if you only want to use gxctl, see the user documentation [here](doc/README.md)
+This is the development documentation - if you only want to use gxctl, see the user documentation [here](docs/README.md)
 
 ## Building
 
