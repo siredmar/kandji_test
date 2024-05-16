@@ -28,6 +28,7 @@ type AuthConfig struct {
 	Profiles       []struct {
 		Name    string `yaml:"name"`
 		Staging bool   `yaml:"staging,omitempty"`
+		URI     string `yaml:"uri,omitempty"`
 		Auth    struct {
 			Auth0Tenant   string `yaml:"auth0Tenant"`
 			Auth0ClientID string `yaml:"auth0ClientID"`
@@ -178,9 +179,12 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 			continue
 		}
 
-		base := baseURL
-		if isStaging := apiclient.IsStaging(p); isStaging {
-			base = baseURLStaging
+		base := apiclient.URI(p)
+		if base == "" {
+			base = baseURL
+			if isStaging := apiclient.IsStaging(p); isStaging {
+				base = baseURLStaging
+			}
 		}
 
 		url := fmt.Sprintf("https://%s/%s", base, endpoint)
@@ -271,6 +275,15 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 
 	}
 	return results, nil
+}
+
+func (apiclient *APIClient) URI(profileName string) string {
+	for _, profile := range apiclient.Auth.Profiles {
+		if profile.Name == profileName {
+			return profile.URI
+		}
+	}
+	return ""
 }
 
 func (apiclient *APIClient) IsStaging(profileName string) bool {
