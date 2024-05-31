@@ -1,13 +1,10 @@
-FROM public.ecr.aws/gridx/base-images:devpack-buster.latest
+FROM public.ecr.aws/gridx/base-images:devpack-bookworm.latest
 
 ARG SRC_BIN
 ARG SRC_CONFIG=bin/ssh_config
 
-# Install colordiff and new OpenSSH from backports (OpenSSH from buster doesn't fully support
-# the needed SSH config)
-RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
-      apt-get update && apt-get install -y --no-install-recommends colordiff && \
-      apt-get install -y --no-install-recommends -t buster-backports openssh-client && \
+RUN apt-get update && apt-get install -y --no-install-recommends colordiff && \
+      apt-get install -y --no-install-recommends openssh-client && \
   rm -rf /var/lib/apt/lists/*
 
 ENV YAML2JSON_VERSION=0.4.0

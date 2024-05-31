@@ -25,7 +25,7 @@ GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILDTIME := $(shell date)
 VERSION ?= $(shell bin/version.sh)
 
-GO_TOOLS := public.ecr.aws/gridx/base-images:golang-docker-dev-1.17.latest
+GO_TOOLS := public.ecr.aws/gridx/base-images:golang-docker-dev-1.22.latest
 GO_PROJECT := github.com/grid-x/gxctl
 
 BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
