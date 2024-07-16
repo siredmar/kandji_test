@@ -3,6 +3,7 @@ gxctl is a command line interface for running commands against gridX Device Serv
 
 ## Getting started
 gxctl is installable on a variety of Linux platforms, macOS and Windows.
+If you read these instructions, you most likely have received an archive containing the binary along with a default configuration file.
 
 ### Installation
 
@@ -22,7 +23,7 @@ gxctl is installable on a variety of Linux platforms, macOS and Windows.
 ### Configuration
 
 - Navigate to your home directory and create a folder called `.gxctl`. For Windows, this is the root of your `%USERPROFILE%` directory of the user that will be running the gxctl command.
-- Copy the provided base `config.yaml` file to `~/.gxctl/config.yaml`. If using the git repo instead of the archive, you can find the file in `config/gxctl`. This file mainly lists the settings for
+- Copy the provided base `config.yaml` file to `~/.gxctl/config.yaml`. If using the git repo instead of the archive, you can find the file in `config/gridx`. This file mainly lists the settings for
 authenticating gxctl for usage with the different subaccounts. Before you can start working, you have to use `gxctl login` to retrieve a token by
 authenticating with your user account.
 
