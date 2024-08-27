@@ -25,7 +25,7 @@
         pkgs.lib.attrsets.updateManyAttrsByPath [
           {
             path = ["*.gridbox-tunnel" "ProxyCommand"];
-            update = old: "${self.packages.${system}.gxctl}/bin/gxctl ssh tunnel --skip-config-check --profile='*' $(echo %h | cut -d'.' -f1)";
+            update = _: "${self.packages.${system}.gxctl}/bin/gxctl ssh tunnel --skip-config-check --profile='*' $(echo %h | cut -d'.' -f1)";
           }
           {
             path = ["*.gridbox" "ProxyCommand"];
@@ -48,6 +48,18 @@
       in
         mapAttrsToStringsSep mkSection attrOfAttrs;
       gxssh-config = pkgs.writeText "gxssh-config" (toSSHConf modifiedConfigJSON);
+      # wrap given binary from the ssh package with above gxssh-config
+      sshBinWrapped = name:
+        pkgs.symlinkJoin {
+          name = "gx" + name;
+          buildInputs = [pkgs.makeWrapper];
+          paths = [];
+          postBuild = ''
+            mkdir -p $out/bin
+            cp ${pkgs.openssh}/bin/${name} $out/bin/gx${name}
+            wrapProgram $out/bin/gx${name} --add-flags "-F ${gxssh-config}"
+          '';
+        };
     in {
       packages = rec {
         gxctl = pkgs.buildGoModule {
@@ -65,26 +77,8 @@
             revFlag
           ];
         };
-        gxssh = pkgs.symlinkJoin {
-          name = "gxssh";
-          buildInputs = [pkgs.makeWrapper];
-          paths = [];
-          postBuild = ''
-            mkdir -p $out/bin
-            cp ${pkgs.openssh}/bin/ssh $out/bin/gxssh
-            wrapProgram $out/bin/gxssh --add-flags "-F ${gxssh-config}"
-          '';
-        };
-        gxscp = pkgs.symlinkJoin {
-          name = "gxscp";
-          buildInputs = [pkgs.makeWrapper];
-          paths = [];
-          postBuild = ''
-            mkdir -p $out/bin
-            cp ${pkgs.openssh}/bin/scp $out/bin/gxscp
-            wrapProgram $out/bin/gxscp --add-flags "-F ${gxssh-config}"
-          '';
-        };
+        gxssh = sshBinWrapped "ssh";
+        gxscp = sshBinWrapped "scp";
         default = gxctl;
       };
       devShells = {
