@@ -37,8 +37,8 @@ func (c *CMD) Init(s *service.Service) error {
 		Short:   "Creates an application",
 		Aliases: []string{"applications", "app", "apps"},
 		Args: args.Args{
-			args.ValidateSingle("NAME"),
-			args.PredictNil(),
+			Validator: args.ValidateSingle("NAME"),
+			Predictor: args.PredictNil(),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
 			return action.CreateApplication(s, args[0])

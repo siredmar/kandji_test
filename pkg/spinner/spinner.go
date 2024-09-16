@@ -31,7 +31,7 @@ func New(msg string) *Spinner {
 			enabled: enabled,
 		}
 	}
-	s := Spinner{
+	s := &Spinner{
 		done:    make(chan bool, 1),
 		enabled: enabled,
 		out:     os.Stderr,
@@ -41,7 +41,7 @@ func New(msg string) *Spinner {
 	signal.Notify(s.sigs, syscall.SIGINT, syscall.SIGTERM)
 	fmt.Fprintf(s.out, "      %v", msg)
 	s.start()
-	return &s
+	return s
 }
 
 // Disable spinners globally
