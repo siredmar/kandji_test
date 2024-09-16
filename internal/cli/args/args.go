@@ -44,7 +44,7 @@ func ValidateNil() clix.ValidateFunc {
 	}
 }
 
-// ValidateSingle passes iff at least one arg is specified
+// ValidateSingle passes if at least one arg is specified
 func ValidateSingle(argName string) clix.ValidateFunc {
 	return func(args []string) error {
 		if len(args) < 1 {
