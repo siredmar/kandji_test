@@ -15,6 +15,10 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 	var results []result.Result
 
 	switch resource.(type) {
+	case *api.MaintenanceTask:
+		rules = append(rules,
+			&rule.UUIDCase{},
+		)
 	case *api.Application:
 		rules = append(rules,
 			&rule.ResourceUniqueID{},
@@ -41,6 +45,7 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 			&rule.ResourceUniqueID{},
 			rule.NewDeploymentVolumeMountsAllowed([]string{"/proc"}),
 			rule.NewDeploymentVolumesAllowed([]string{"/var/run/supervisor.sock"}),
+			&rule.UUIDCase{},
 		)
 	}
 

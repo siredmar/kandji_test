@@ -99,7 +99,7 @@ func CheckResourceFile(bytes []byte, readOnly bool) (Resource, string, error) {
 	}
 
 	// Nothing found
-	return nil, "", errors.E(errors.Invalid, "Unsupported type")
+	return nil, "", errors.E(errors.Invalid, "Unsupported type", err)
 }
 
 type ResAssoc struct {
