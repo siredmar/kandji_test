@@ -269,6 +269,8 @@ $ gxctl config use-profile some_customer_profile
 $ gxctl config current-profile
 # See token status per profile
 $ gxctl config status
+# List all profiles
+$ gxctl config list-profiles
 ```
 
 `gxctl update` - Updates a existing resource
