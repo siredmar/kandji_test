@@ -15,6 +15,10 @@ func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result
 	var results []result.Result
 
 	switch resource.(type) {
+	case *api.Device:
+		rules = append(rules,
+			&rule.UUIDCase{},
+		)
 	case *api.MaintenanceTask:
 		rules = append(rules,
 			&rule.UUIDCase{},

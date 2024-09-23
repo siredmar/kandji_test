@@ -78,6 +78,29 @@ func TestUUIDs(t *testing.T) {
 			wantSkip:  false,
 			wantError: false,
 		},
+		// DEVICE
+		{
+			desc: "Device: valid metadata.ID",
+			res: &api.Device{
+				Metadata: types.Metadata{
+					ID: "d562e404-8684-409d-94c1-9a8d0f52b7a7",
+				},
+			},
+			wantPass:  true,
+			wantSkip:  true,
+			wantError: false,
+		},
+		{
+			desc: "Device: invalid metadata.ID",
+			res: &api.Device{
+				Metadata: types.Metadata{
+					ID: "DDDDDDDD-8684-409d-94c1-9a8d0f52b7a7",
+				},
+			},
+			wantPass:  false,
+			wantSkip:  false,
+			wantError: false,
+		},
 		// MAINTENANCETASK
 		{
 			desc: "MaintenanceTask: all UUIDs valid",

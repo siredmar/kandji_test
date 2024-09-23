@@ -64,6 +64,8 @@ func (r *UUIDCase) Exec(ctx *context.Context, resource interface{}) (*result.Res
 	}
 
 	switch res := resource.(type) {
+	case *api.Device:
+		break
 	case *api.MaintenanceTask:
 		r.path = "res.spec.deviceID"
 		result, err = r.checkRegex(res.Spec.DeviceID)
