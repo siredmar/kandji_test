@@ -87,7 +87,7 @@ func Lint(s *service.Service, lintCmdFilename string, quiet bool) error {
 		if quiet {
 			for _, r := range results {
 				if !r.Pass {
-					errs = append(errs, r.String())
+					errs = append(errs, fmt.Sprintf("\r%s\n", r.String()))
 				}
 			}
 		}
