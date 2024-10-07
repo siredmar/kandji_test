@@ -18,12 +18,14 @@ const (
 )
 
 func ValidateTokens(s *service.Service) error {
+	fmt.Printf("CurrentProfile: %q\n", s.Client.Auth.CurrentProfile)
+
 	for _, p := range s.Client.Auth.Profiles {
 		err := p.Auth.Token.Validate()
 		if err == nil {
-			fmt.Printf("%s CurrentProfile: %q Profile %q: %s\n", printGreen(ok), s.Client.Auth.CurrentProfile, p.Name, printYellow(validToken))
+			fmt.Printf("%s Profile %q: %s\n", printGreen(ok), p.Name, printYellow(validToken))
 		} else {
-			fmt.Printf("%s CurrentProfile: %q Profile %q: %s\n", printRed(fail), s.Client.Auth.CurrentProfile, p.Name, printYellow(err.Error()))
+			fmt.Printf("%s Profile %q: %s\n", printRed(fail), p.Name, printYellow(err.Error()))
 		}
 	}
 
