@@ -1,0 +1,58 @@
+metadata:
+  id: 0d140ad3-6a46-4047-96dc-1f6ebca944a7
+spec:
+  app: integrations
+  selector:
+    matchByLabels:
+      core.gridx.ai/architecture: arm32v7
+      gridx.de/channel: stable
+  template:
+    spec:
+      containers:
+        - image: 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gridbox-integrations:weekly_2024-09-24-2024_09_24-1063-917e643
+          args:
+            - -log.level=info
+          env:
+            - name: ADAPTIVE_PMAX_FROM_MEASUREMENTS
+              value: "true"
+          volumeMounts:
+            - mountPath: /var/run
+              name: runtime
+      network: host
+      restartPolicy:
+        type: Always
+      updateLockfilePath: /tmp/update.lock
+      volumes:
+        - hostPath:
+            path: /data/gridbox-monitoring
+            type: Directory
+          name: offline-cache
+      deviceCGroupRules:
+        - c 204:64 rmw
+        - c 188:* rmw
+  canary:
+    percentage: 0
+    template:
+      spec:
+        containers:
+          - image: 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gridbox-integrations:weekly_2024-09-24-2024_09_24-1063-917e644
+            args:
+              - -log.level=info
+            env:
+              - name: ADAPTIVE_PMAX_FROM_MEASUREMENTS
+                value: "true"
+            volumeMounts:
+              - mountPath: /var/run
+                name: runtime
+        network: host
+        restartPolicy:
+          type: Always
+        updateLockfilePath: /tmp/update.lock
+        volumes:
+          - hostPath:
+              path: /data/gridbox-monitoring
+              type: Directory
+            name: offline-cache
+        deviceCGroupRules:
+          - c 204:64 rmw
+          - c 188:* rmw
