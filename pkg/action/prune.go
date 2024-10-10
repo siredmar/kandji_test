@@ -46,7 +46,7 @@ func Prune(s *service.Service, dryRun bool, fileName string, yes bool, diffCmd s
 			ok  bool
 			err error
 		)
-		if ok, err = shouldPrune(diffCmd, dryRun, yes, id, rec); err != nil {
+		if ok, err = shouldPrune(diffCmd, dryRun, yes, rec); err != nil {
 			return err
 		}
 		if ok {
@@ -92,16 +92,20 @@ func buildPruneState(local map[string][]byte, remote api.Deployments) (map[strin
 	return state, nil
 }
 
-func shouldPrune(diffCmd string, dryRun bool, yes bool, id string, rec *record) (bool, error) {
+func shouldPrune(diffCmd string, dryRun, yes bool, rec *record) (bool, error) {
 	if rec == nil {
 		return false, errors.New("nil record")
 	}
 
-	err, f1, f2 := writeDiffFiles(rec.local, rec.remote)
+	f1, err1 := writeObjectToDiffFile(rec.local)
+	f2, err2 := writeObjectToDiffFile(rec.remote)
 	defer os.Remove(f1)
 	defer os.Remove(f2)
-	if err != nil {
-		return false, err
+	if err1 != nil {
+		return false, fmt.Errorf("failed to write a local record to a diff file: %v", err1)
+	}
+	if err2 != nil {
+		return false, fmt.Errorf("failed to write a remote record to a diff file: %v", err2)
 	}
 
 	output, err := exec.Command(diffCmd, f1, f2).Output()

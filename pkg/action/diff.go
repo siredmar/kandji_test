@@ -1,10 +1,13 @@
 package action
 
 import (
+	"cmp"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
+	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	deviceApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
@@ -28,14 +31,12 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool,
 		}
 	}
 
-	var isCI bool
 	token, err := s.Client.GetToken()
 	if err != nil {
 		return err
 	}
-	if token.IsCI() {
-		isCI = true
-	}
+
+	isCI := token.IsCI()
 
 	resources, err := api.GetResources(fileName, true, true)
 	if err != nil {
@@ -55,11 +56,16 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 	var f1, f2 string
 	if resID == KNOWN_AFTER_APPLY {
 		// Looks like a new resource... Diff against empty file
-		err, f1, f2 := writeDiffFiles(nil, res)
+		var err1, err2 error
+		f1, err1 = writeObjectToDiffFile(nil)
+		f2, err2 = writeObjectToDiffFile(res)
 		defer os.Remove(f1)
 		defer os.Remove(f2)
-		if err != nil {
-			return err
+		if err1 != nil {
+			return fmt.Errorf("failed to write an empty object to a diff file: %v", err1)
+		}
+		if err2 != nil {
+			return fmt.Errorf("failed to write an object to a diff file: %v", err2)
 		}
 	} else {
 		// There is a resID - Check if res already exists
@@ -100,15 +106,19 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 		withoutAnnotations(current)
 		withoutAnnotations(res)
 
-		err, f1, f2 = writeDiffFiles(current, res)
+		var err1, err2 error
+		f1, err1 = writeObjectToDiffFile(current)
+		f2, err2 = writeObjectToDiffFile(res)
 		defer os.Remove(f1)
 		defer os.Remove(f2)
-		if err != nil {
-			return err
+		if err1 != nil {
+			return fmt.Errorf("failed to write a current version of the object to a diff file: %v", err1)
+		}
+		if err2 != nil {
+			return fmt.Errorf("failed to write a new version of the object to a diff file: %v", err2)
 		}
 	}
 
-	// Diff it
 	output, err := exec.Command(differ, f1, f2).Output()
 	if err != nil {
 		switch err.(type) {
@@ -123,6 +133,7 @@ func diff(filename string, res api.Resource, resID string, differ string, skipOn
 		fmt.Printf("%s:\n", filename)
 		fmt.Println(string(output))
 	}
+
 	return nil
 }
 
@@ -163,43 +174,82 @@ func getResource(cl *client.APIClient, req api.Resource) (api.Resource, error) {
 	return res, err
 }
 
-func writeDiffFiles(i1, i2 interface{}) (error, string, string) {
-	rev1, err := ioutil.TempFile("/tmp", "rev2")
+func writeObjectToDiffFile(obj any) (string, error) {
+	tmpFile, err := os.CreateTemp("/tmp", "rev")
 	if err != nil {
-		return err, "", ""
+		return "", fmt.Errorf("failed to create a temp file for an object: %v", err)
 	}
 
-	rev2, err := ioutil.TempFile("/tmp", "rev2")
+	// if the object is nil, the empty file is used for comparison
+	if obj == nil {
+		return tmpFile.Name(), nil
+	}
+
+	yamlBytes, err := yaml.Marshal(obj)
 	if err != nil {
-		return err, "", ""
+		return "", fmt.Errorf("failed to marshal an object to yaml: %v", err)
 	}
 
-	if i1 != nil {
-
-		b1, err := yaml.Marshal(i1)
-		if err != nil {
-			return err, "", ""
-		}
-		if _, err := rev1.Write(b1); err != nil {
-			return err, "", ""
-		}
-		if err := rev1.Close(); err != nil {
-			return err, "", ""
-		}
+	var yamlToMap map[string]any
+	if err := yaml.Unmarshal(yamlBytes, &yamlToMap); err != nil {
+		return "", fmt.Errorf("failed to unmarshal a yaml into a map: %v", err)
 	}
 
-	if i2 != nil {
-		b2, err := yaml.Marshal(i2)
-		if err != nil {
-			return err, "", ""
-		}
-		if _, err := rev2.Write(b2); err != nil {
-			return err, "", ""
-		}
-		if err := rev2.Close(); err != nil {
-			return err, "", ""
-		}
+	flatMap := make(map[string]any)
+	// to be able to see if the difference belongs to a nested structure or not
+	flatten("", yamlToMap, ".", flatMap)
+	// so the file always looks the same from the diff perspective
+	sortedList := yamlToSortedList(flatMap)
+
+	var sb strings.Builder
+	for _, kv := range sortedList {
+		fmt.Fprintf(&sb, "%s: %v\n", kv.key, kv.val)
 	}
 
-	return nil, rev1.Name(), rev2.Name()
+	if _, err := tmpFile.Write([]byte(sb.String())); err != nil {
+		return "", err
+	}
+
+	if err := tmpFile.Close(); err != nil {
+		return "", err
+	}
+
+	return tmpFile.Name(), nil
+}
+
+func flatten(prefix string, nested any, delimiter string, flatMap map[string]any) {
+	switch value := nested.(type) {
+	case map[string]any:
+		for key, v := range value {
+			newKey := key
+			if prefix != "" {
+				newKey = prefix + delimiter + key
+			}
+			flatten(newKey, v, delimiter, flatMap)
+		}
+	case []any:
+		for i, v := range value {
+			newKey := prefix + "[" + strconv.Itoa(i) + "]"
+			flatten(newKey, v, delimiter, flatMap)
+		}
+	default:
+		flatMap[prefix] = value
+	}
+}
+
+type yamlAsKV struct {
+	key string
+	val any
+}
+
+func yamlToSortedList(yamlAsFlatMap map[string]any) []yamlAsKV {
+	sortedList := make([]yamlAsKV, len(yamlAsFlatMap))
+	i := 0
+	for k, v := range yamlAsFlatMap {
+		sortedList[i] = yamlAsKV{key: k, val: v}
+		i++
+	}
+
+	slices.SortStableFunc(sortedList, func(a, b yamlAsKV) int { return cmp.Compare(a.key, b.key) })
+	return sortedList
 }

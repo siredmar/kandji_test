@@ -134,7 +134,7 @@ func Test_shouldPrune(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.desc, func(t *testing.T) {
-			got, gotErr := shouldPrune("diff", false, true, "foo", tc.record)
+			got, gotErr := shouldPrune("diff", false, true, tc.record)
 			if tc.wantErr != (gotErr != nil) {
 				t.Errorf("wantErr=%v, gotErr=%v", tc.wantErr, gotErr)
 			}
