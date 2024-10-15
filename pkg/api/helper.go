@@ -3,6 +3,7 @@ package api
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"sigs.k8s.io/yaml"
+	yaml3 "gopkg.in/yaml.v3"
 
 	"github.com/grid-x/gxctl/pkg/errors"
 )
@@ -209,49 +210,49 @@ func GetFilesContentsToProcess(loc string) (map[string][]byte, error) {
 				return nil
 			}
 
-			retVal, err := readFile(path)
-			if err != nil {
-				return err
+			if readErr := readYaml(path, ret); readErr != nil {
+				return fmt.Errorf("failed to read the file within a directory: %v", readErr)
 			}
 
-			for key, val := range retVal {
-				b, err := yaml.YAMLToJSON(val)
-				if err == nil {
-					// TODO does it make sense to silently ignore errors here?
-					val = b
-				}
-
-				// ignore null values - these are created e.g. if there is a `---` right at the document start
-				if !bytes.Equal(b, []byte("null")) {
-					ret[key] = val
-				}
-			}
 			return nil
 		})
 
 		return ret, err
 	case mode.IsRegular():
-		retVal, err := readFile(loc)
-		if err != nil {
-			return nil, err
+		if err := readYaml(loc, ret); err != nil {
+			return nil, fmt.Errorf("failed to read yaml: %v", err)
 		}
 
-		for key, val := range retVal {
-			b, err := yaml.YAMLToJSON(val)
-			if err == nil {
-				// TODO does it make sense to silently ignore errors here?
-				val = b
-			}
-
-			// ignore null values - these are created e.g. if there is a `---` right at the document start
-			if !bytes.Equal(b, []byte("null")) {
-				ret[key] = val
-			}
-		}
 		return ret, nil
+	default:
+		return nil, fmt.Errorf("unknown error while processing filename")
+	}
+}
+
+func readYaml(loc string, ret map[string][]byte) error {
+	retVal, err := readFile(loc)
+	if err != nil {
+		return fmt.Errorf("failed to read the file: %v", err)
 	}
 
-	return nil, fmt.Errorf("Unknown error while processing filename")
+	genericYaml := make(map[string]any)
+	for key, val := range retVal {
+		genericYaml = make(map[string]any)
+		if err := yaml3.Unmarshal(val, &genericYaml); err != nil {
+			return fmt.Errorf("invalid yaml: %v", err)
+		}
+
+		b, err := json.Marshal(genericYaml)
+		if err != nil {
+			return fmt.Errorf("failed to marshal a generic yaml: %v", err)
+		}
+
+		// ignore null values - these are created e.g. if there is a `---` right at the document start
+		if !(bytes.Equal(b, []byte("null")) || bytes.Equal(b, []byte("{}"))) {
+			ret[key] = b
+		}
+	}
+	return nil
 }
 
 const yamlSeparator = "\n---"
