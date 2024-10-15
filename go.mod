@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/toqueteos/webbrowser v1.2.1-0.20190725205412-dc97d39f4758
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
-	sigs.k8s.io/yaml v1.2.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -59,7 +59,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.56.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.22.3 // indirect
 	k8s.io/apimachinery v0.22.3 // indirect
 	k8s.io/client-go v0.22.3 // indirect
@@ -68,4 +67,5 @@ require (
 	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a // indirect
 	sigs.k8s.io/controller-runtime v0.10.2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	sigs.k8s.io/yaml v1.2.0 // indirect
 )
