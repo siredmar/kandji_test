@@ -3,6 +3,8 @@ package api
 import (
 	"fmt"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type computeMetadataMapTestcase struct {
@@ -150,5 +152,43 @@ func TestGetResources(t *testing.T) {
 				t.Errorf("case %d: Result does not match. Expected: %d, Got: %d", i, tc.want[n].Order, res.Order)
 			}
 		}
+	}
+}
+
+func TestGetFilesContentsToProcess(t *testing.T) {
+	type args struct {
+		loc string
+	}
+	testCases := []struct {
+		desc    string
+		args    args
+		want    map[string][]byte
+		wantErr bool
+	}{
+		{
+			desc: "invalid yaml",
+			args: args{
+				loc: "./testdata/invalid.yaml",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.desc, func(t *testing.T) {
+			got, err := GetFilesContentsToProcess(tt.args.loc)
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("GetFilesContentsToProcess() want mismatch (-want +got):\n%s", diff)
+			}
+
+			if !tt.wantErr && err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if tt.wantErr && err == nil {
+				t.Errorf("an error is expected")
+			}
+		})
 	}
 }
