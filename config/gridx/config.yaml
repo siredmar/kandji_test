@@ -81,3 +81,8 @@ Profiles:
     Auth0Tenant: gridx-ds-root.eu.auth0.com
     Token: '...'
   Name: soly
+- Auth:
+    Auth0ClientID: Z84OnHIcMAes0Vk6bznCJWzayZDn4HNy
+    Auth0Tenant: gridx-ds-root.eu.auth0.com
+    Token: '...'
+  Name: greenblocks
