@@ -29,7 +29,7 @@ archives:
       - src: dist/CHANGELOG.md
         dst: .
         strip_parent: true
-      - src: doc/README.md
+      - src: docs/README.md
         dst: .
         strip_parent: true
       - src: config/gridx/config.yaml
@@ -50,7 +50,7 @@ archives:
       - src: dist/CHANGELOG.md
         dst: .
         strip_parent: true
-      - src: doc/README.md
+      - src: docs/README.md
         dst: .
         strip_parent: true
       - src: config/eis/config.yaml
