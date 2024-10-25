@@ -93,7 +93,7 @@ docker_push:
 
 release:
 	# TODO actually integrate publishing
-	goreleaser release --skip-publish
+	goreleaser release --skip=publish
 
 ci_build:
 	${DOCKER_RUN} "make bin/gxctl-linux-amd64"
@@ -106,4 +106,4 @@ ci_test:
 	${DOCKER_RUN} "make test"
 
 ci_release:
-	${DOCKER_RUN} "goreleaser release --skip-publish --skip-validate --rm-dist"
+	${DOCKER_RUN} "goreleaser release --skip=publish --skip=validate --clean"
