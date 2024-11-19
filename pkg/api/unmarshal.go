@@ -115,6 +115,18 @@ func NewCreateMaintenanceTask(j []byte, strict bool) (CreateMaintenanceTask, err
 	return cmt, err
 }
 
+func NewDevicesLogs(j []byte, strict bool) (DevicesLogs, error) {
+	dl := DevicesLogs{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
+func NewDeviceLogs(j []byte, strict bool) (DeviceLogs, error) {
+	dl := DeviceLogs{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
 func decode(j []byte, i any, strict bool) error {
 	dec := json.NewDecoder(bytes.NewReader(j))
 	if strict {
