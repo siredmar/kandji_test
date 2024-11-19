@@ -37,12 +37,12 @@ func (c *CMD) Init(s *service.Service) error {
 			Validator: args.ValidateSingle("device ID"),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
-			isSerialNumber, _ := cmd.Flags().GetBool("serial-number")
+			isSerialNumber, _ := cmd.Flags().GetBool("serial")
 			return action.DisableLogs(s, args[0], isSerialNumber)
 		},
 	}
 
-	c.cmd.Flags().BoolP("serial-number", "S", false, "treat device ID as a serial number")
+	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 
 	return nil
 }

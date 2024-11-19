@@ -38,7 +38,7 @@ func (c *CMD) Init(s *service.Service) error {
 		Short: "enable logs setting for a given device",
 		Run: func(cmd *clix.Command, args []string) error {
 			level, _ := cmd.Flags().GetString("level")
-			isSerialNumber, _ := cmd.Flags().GetBool("serial-number")
+			isSerialNumber, _ := cmd.Flags().GetBool("serial")
 			duration, _ := cmd.Flags().GetDuration("expiration")
 			output, _ := c.cmd.Flags().GetString("output")
 
@@ -47,7 +47,7 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.cmd.Flags().StringP("level", "l", "debug", "the desired log level for the device")
-	c.cmd.Flags().BoolP("serial-number", "S", false, "treat device ID as a serial number")
+	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 	c.cmd.Flags().DurationP("duration", "d", defaultDuration, "how long these logs settings are going to work. The value is parsed by time.ParseDuration from the go standard library")
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 

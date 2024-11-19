@@ -38,14 +38,14 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 		Run: func(cmd *clix.Command, args []string) error {
 			output, _ := c.cmd.Flags().GetString("output")
-			isSerialNumber, _ := c.cmd.Flags().GetBool("serial-number")
+			isSerialNumber, _ := c.cmd.Flags().GetBool("serial")
 
 			return action.GetLogs(s, args[0], isSerialNumber, output)
 		},
 	}
 
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
-	c.cmd.Flags().BoolP("serial-number", "S", false, "treat device ID as a serial number")
+	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 
 	return nil
 }
