@@ -64,7 +64,7 @@ func ListLogs(s *service.Service, output string) error {
 	return nil
 }
 
-func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, output string, duration time.Duration) error {
+func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, output string, expiry time.Duration) error {
 	printerCfg := printer.PrintConfig{
 		OutputFormat: output,
 	}
@@ -79,7 +79,7 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 
 	var body api.DeviceLogs
 	body.Spec.LogLevel = logLevel
-	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(duration))
+	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(expiry))
 	resp, err := s.Client.PostRequest(fmt.Sprintf("%s/%s", api.DeviceLogsEndpoint, id), &body)
 	if err != nil {
 		return fmt.Errorf("failed to enable device logs: %v", err)
@@ -113,7 +113,7 @@ func DisableLogs(s *service.Service, id string, isSerialNumber bool) error {
 	return nil
 }
 
-func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool, logLevel, output string, duration time.Duration) error {
+func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool, logLevel, output string, expiry time.Duration) error {
 	printerCfg := printer.PrintConfig{
 		OutputFormat: output,
 	}
@@ -128,7 +128,7 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 
 	var body api.DeviceLogs
 	body.Spec.LogLevel = logLevel
-	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(duration))
+	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(expiry))
 	if !changeOwner {
 		dl, err := getDeviceLogsByDeviceID(s, id)
 		if err != nil {

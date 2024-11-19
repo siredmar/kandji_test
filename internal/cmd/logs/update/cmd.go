@@ -43,18 +43,18 @@ func (c *CMD) Init(s *service.Service) error {
 		Run: func(cmd *clix.Command, args []string) error {
 			level, _ := cmd.Flags().GetString("level")
 			isSerialNumber, _ := cmd.Flags().GetBool("serial")
-			duration, _ := cmd.Flags().GetDuration("duration")
+			expiry, _ := cmd.Flags().GetDuration("expiry")
 			output, _ := c.cmd.Flags().GetString("output")
 			changeOwner, _ := c.cmd.Flags().GetBool("change-owner")
 
-			return action.UpdateLogs(s, args[0], isSerialNumber, changeOwner, level, output, duration)
+			return action.UpdateLogs(s, args[0], isSerialNumber, changeOwner, level, output, expiry)
 		},
 	}
 
 	c.cmd.Flags().StringP("level", "l", "debug", "the desired log level for the device")
 	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 	c.cmd.Flags().BoolP("change-owner", "c", false, "replace the current owner of the device logs settings with yourself. The new owner will receive notifications about logs settings for this device via slack")
-	c.cmd.Flags().DurationP("expiration", "e", defaultDuration, "how long these logs settings are going to work. The value is parsed by time.ParseDuration from go standard library")
+	c.cmd.Flags().DurationP("expiry", "e", defaultDuration, "the expiry of these log settings depends on the duration specified. Example: 25h4m")
 	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
