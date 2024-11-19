@@ -3,7 +3,6 @@ package logs
 import (
 	clix "github.com/go-clix/cli"
 
-	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/internal/cmd/logs/disable"
 	"github.com/grid-x/gxctl/internal/cmd/logs/enable"
@@ -36,9 +35,6 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
 		Use:   "logs",
 		Short: "manage device logs settings",
-		Args: args.Args{
-			Validator: args.ValidateSingle("deviceID"),
-		},
 	}
 
 	c.children = []cmd.CMD{

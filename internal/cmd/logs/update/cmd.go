@@ -5,6 +5,7 @@ import (
 
 	clix "github.com/go-clix/cli"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
@@ -34,8 +35,11 @@ func (c *CMD) Children() []cmd.CMD {
 
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "update DEVICE_ID (or serial number if used with the -S flag)",
+		Use:   "update deviceID (or serial number if used with the -S flag)",
 		Short: "update logs settings for a given device",
+		Args: args.Args{
+			Validator: args.ValidateSingle("deviceID"),
+		},
 		Run: func(cmd *clix.Command, args []string) error {
 			level, _ := cmd.Flags().GetString("level")
 			isSerialNumber, _ := cmd.Flags().GetBool("serial")

@@ -31,10 +31,10 @@ func (c *CMD) Children() []cmd.CMD {
 
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "disable DEVICE_ID (or serial number if used with the -S flag)",
+		Use:   "disable deviceID (or serial number if used with the -S flag)",
 		Short: "disable logs settings for a given device",
 		Args: args.Args{
-			Validator: args.ValidateSingle("device ID"),
+			Validator: args.ValidateSingle("deviceID"),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
 			isSerialNumber, _ := cmd.Flags().GetBool("serial")
