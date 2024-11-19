@@ -115,6 +115,30 @@ func NewCreateMaintenanceTask(j []byte, strict bool) (CreateMaintenanceTask, err
 	return cmt, err
 }
 
+func NewDeviceLogsList(j []byte, strict bool) (DeviceLogsList, error) {
+	dl := DeviceLogsList{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
+func NewGetDeviceLogsResponse(j []byte, strict bool) (GetDeviceLogsResponse, error) {
+	dl := GetDeviceLogsResponse{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
+func NewCreateDeviceLogsResponse(j []byte, strict bool) (CreateDeviceLogsResponse, error) {
+	dl := CreateDeviceLogsResponse{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
+func NewUpdateDeviceLogsResponse(j []byte, strict bool) (UpdateDeviceLogsResponse, error) {
+	dl := UpdateDeviceLogsResponse{}
+	err := decode(j, &dl, strict)
+	return dl, err
+}
+
 func decode(j []byte, i any, strict bool) error {
 	dec := json.NewDecoder(bytes.NewReader(j))
 	if strict {

@@ -11,6 +11,7 @@ import (
 	maintenanceApi "github.com/grid-x/ds-api-types/management/2019-11-04/maintenance"
 	deploymentsApi "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
 	deviceConfigMapApi "github.com/grid-x/ds-api-types/management/2021-03-10/deviceconfigmaps"
+	devicelogsapi "github.com/grid-x/ds-api-types/management/2024-11-04/devicelogs"
 )
 
 type Resource interface {
@@ -283,4 +284,19 @@ func (m *MaintenanceTasks) GetIds() []string {
 		out = append(out, dev.Metadata.ID)
 	}
 	return out
+}
+
+func NewTime(t time.Time) types.Time {
+	return types.NewTime(t)
+}
+
+type GetDeviceLogsResponse devicelogsapi.GetResponse
+type CreateDeviceLogsResponse devicelogsapi.CreateResponse
+type UpdateDeviceLogsResponse devicelogsapi.UpdateResponse
+type DeviceLogsList devicelogsapi.DeviceLogsList
+type CreateDeviceLogs devicelogsapi.CreateRequest
+type UpdateDeviceLogs devicelogsapi.UpdateRequest
+
+func (r *UpdateDeviceLogs) Meta() *types.Metadata {
+	return nil
 }
