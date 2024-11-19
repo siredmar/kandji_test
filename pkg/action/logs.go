@@ -52,7 +52,7 @@ func ListLogs(s *service.Service, output string) error {
 		return fmt.Errorf("error getting device logs list: %v", err)
 	}
 
-	dl, err := api.NewDeviceLogsList(resp, true)
+	dl, err := api.NewDevicesLogs(resp, true)
 	if err != nil {
 		return fmt.Errorf("error creating device logs list: %v", err)
 	}
@@ -77,7 +77,7 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 		}
 	}
 
-	var body api.CreateDeviceLogs
+	var body api.DeviceLogs
 	body.Spec.LogLevel = logLevel
 	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(duration))
 	resp, err := s.Client.PostRequest(fmt.Sprintf("%s/%s", api.DeviceLogsEndpoint, id), &body)
@@ -85,7 +85,7 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 		return fmt.Errorf("failed to enable device logs: %v", err)
 	}
 
-	deviceLogs, err := api.NewCreateDeviceLogsResponse(resp, true)
+	deviceLogs, err := api.NewDeviceLogs(resp, true)
 	if err != nil {
 		return fmt.Errorf("error creating create device logs response: %v", err)
 	}
@@ -126,7 +126,7 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 		}
 	}
 
-	var body api.UpdateDeviceLogs
+	var body api.DeviceLogs
 	body.Spec.LogLevel = logLevel
 	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(duration))
 	if !changeOwner {
@@ -150,7 +150,7 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 		return fmt.Errorf("error updating device logs: %v", err)
 	}
 
-	updatedDeviceLogs, err := api.NewUpdateDeviceLogsResponse(resp, true)
+	updatedDeviceLogs, err := api.NewDeviceLogs(resp, true)
 	if err != nil {
 		return fmt.Errorf("error creating update device logs response: %v", err)
 	}
@@ -162,15 +162,15 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 	return nil
 }
 
-func getDeviceLogsByDeviceID(s *service.Service, deviceID string) (api.GetDeviceLogsResponse, error) {
+func getDeviceLogsByDeviceID(s *service.Service, deviceID string) (api.DeviceLogs, error) {
 	resp, err := s.Client.GetRequest(fmt.Sprintf("%s/%s", api.DeviceLogsEndpoint, deviceID))
 	if err != nil {
-		return api.GetDeviceLogsResponse{}, fmt.Errorf("error getting device logs: %v", err)
+		return api.DeviceLogs{}, fmt.Errorf("error getting device logs: %v", err)
 	}
 
-	dl, err := api.NewGetDeviceLogsResponse(resp, true)
+	dl, err := api.NewDeviceLogs(resp, true)
 	if err != nil {
-		return api.GetDeviceLogsResponse{}, fmt.Errorf("error creating device logs: %v", err)
+		return api.DeviceLogs{}, fmt.Errorf("error creating device logs: %v", err)
 	}
 
 	return dl, nil

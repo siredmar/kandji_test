@@ -290,13 +290,9 @@ func NewTime(t time.Time) types.Time {
 	return types.NewTime(t)
 }
 
-type GetDeviceLogsResponse devicelogsapi.GetResponse
-type CreateDeviceLogsResponse devicelogsapi.CreateResponse
-type UpdateDeviceLogsResponse devicelogsapi.UpdateResponse
-type DeviceLogsList devicelogsapi.DeviceLogsList
-type CreateDeviceLogs devicelogsapi.CreateRequest
-type UpdateDeviceLogs devicelogsapi.UpdateRequest
+type DeviceLogs devicelogsapi.DeviceLogs
+type DevicesLogs devicelogsapi.DeviceLogsList
 
-func (r *UpdateDeviceLogs) Meta() *types.Metadata {
+func (r *DeviceLogs) Meta() *types.Metadata {
 	return nil
 }
