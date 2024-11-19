@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/grid-x/ds-api-types v0.0.0-20230524090415-2d26e4a2b644
+	github.com/grid-x/ds-api-types v0.0.0-20241105131820-5e567b0fb259
 	github.com/grid-x/wssh v0.0.0-20230302095047-b1fed4f262dd
 	github.com/landoop/tableprinter v0.0.0-20200104100433-ae9249991eb1
 	github.com/posener/complete v1.2.4-0.20191122220828-f6dd29e97e24
@@ -28,7 +28,7 @@ require (
 	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/gofuzz v1.1.0 // indirect
+	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/grid-x/ds-k8s-v2 v0.0.0-20211015131425-24f18d851811 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
