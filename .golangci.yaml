@@ -1,0 +1,101 @@
+output:
+  # sorts results by: filepath, line and column
+  sort-results: true
+
+run:
+  skip-dirs:
+    - vendor
+
+issues:
+  # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
+  max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+  max-same-issues: 0
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - unused
+    - varcheck
+    - bodyclose
+    - exportloopref
+    - gocritic
+    - gofmt
+    - goimports
+    - importas
+    - nakedret
+    - nilnil
+    - prealloc
+    - predeclared
+    - revive
+    - tparallel
+    - unconvert
+
+# settings of specific linters
+linters-settings:
+  gosimple:
+    # Select the Go version to target. The default is '1.13'.
+    go: "1.22"
+    # https://staticcheck.io/docs/options#checks
+    checks: ["all"]
+
+  govet:
+    disable:
+      - composites
+
+  staticcheck:
+    # Select the Go version to target. The default is '1.13'.
+    go: "1.22"
+    # https://staticcheck.io/docs/options#checks
+    checks:
+      - all
+
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+
+  gosec:
+    # To specify a set of rules to explicitly exclude.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    excludes:
+      - G401
+      - G501
+      - G505
+
+  revive:
+    ignore-generated-header: false
+    severity: error
+    confidence: 0.8
+    error-code: 1
+    warning-code: 0
+    rules:
+      - name: bare-return
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: redefines-builtin-id
+      - name: superfluous-else
+      - name: unexported-return
+      - name: unreachable-code
+      - name: var-declaration
+      - name: var-naming
