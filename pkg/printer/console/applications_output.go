@@ -8,8 +8,8 @@ import (
 
 type ApplicationsConsoleOutput []ApplicationConsoleOutput
 
-func (do ApplicationsConsoleOutput) Map(a api.Applications) ApplicationsConsoleOutput {
-	var out ApplicationsConsoleOutput
+func (ApplicationsConsoleOutput) Map(a api.Applications) ApplicationsConsoleOutput {
+	out := make(ApplicationsConsoleOutput, len(a.Applications))
 	for _, e := range a.Applications {
 		out = append(out, ApplicationConsoleOutput{}.Map(e))
 	}

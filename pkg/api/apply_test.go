@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -23,9 +22,9 @@ func TestSortByKind(t *testing.T) {
 		{
 			desc: "Application before Deployment",
 			resources: []ResAssoc{
-				ResAssoc{ID: "foo", Res: &Application{}},
-				ResAssoc{ID: "bar", Res: &Deployment{}},
-				ResAssoc{ID: "config", Res: &DeviceConfigMap{}},
+				{ID: "foo", Res: &Application{}},
+				{ID: "bar", Res: &Deployment{}},
+				{ID: "config", Res: &DeviceConfigMap{}},
 			},
 			want: []ResAssoc{
 				{
@@ -179,7 +178,7 @@ func TestSortByKind(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			sortByKind(tc.resources)
 			if diff := cmp.Diff(tc.want, tc.resources); diff != "" {
 				t.Errorf("sortByKind error (-want +got):\n%s", diff)

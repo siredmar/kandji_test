@@ -50,7 +50,7 @@ func (o DeviceConfigMapConsoleOutput) Map(d api.DeviceConfigMap) DeviceConfigMap
 }
 
 func (o DeviceConfigMapConsoleOutputWide) Map(d api.DeviceConfigMap) []DeviceConfigMapConsoleOutputWide {
-	var output []DeviceConfigMapConsoleOutputWide
+	output := make([]DeviceConfigMapConsoleOutputWide, 0)
 	first := true
 	i := 0
 	bd := make([]string, len(d.Spec.BinaryData))

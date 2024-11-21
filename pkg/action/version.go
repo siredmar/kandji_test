@@ -7,5 +7,5 @@ import (
 
 // Version prints the version info
 func Version(s *service.Service) error {
-	return version.VersionDetails()
+	return version.Details()
 }

@@ -11,8 +11,8 @@ import (
 
 // Lint the given resource
 func Lint(ctx *context.Context, fileName string, resource interface{}) ([]result.Result, error) {
-	var rules []rule.Rule
-	var results []result.Result
+	rules := make([]rule.Rule, 0)
+	results := make([]result.Result, 0)
 
 	switch resource.(type) {
 	case *api.Device:

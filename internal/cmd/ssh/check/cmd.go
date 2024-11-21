@@ -5,8 +5,8 @@ import (
 
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
-	"github.com/grid-x/gxctl/pkg/service"
 	"github.com/grid-x/gxctl/pkg/errors"
+	"github.com/grid-x/gxctl/pkg/service"
 )
 
 // CMD contains a command and all its sub commands

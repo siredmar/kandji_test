@@ -1,34 +1,37 @@
 steps:
-- label: ":bash: Shellcheck"
-  plugins:
-  - shellcheck#v1.1.2:
-      files:
-      - "bin/*.sh"
-- command:
-  - "make ci_test"
-  label: ":golang: Test"
-  agents:
-  - "queue=default"
-- command:
-  - "make ci_build"
-  label: ":golang: Build"
-  agents:
-  - "queue=default"
-  artifact_paths:
-  - "bin/gxctl-*"
-- wait
-- command:
-  - "buildkite-agent artifact download \"bin/gxctl-*\" . --step \":golang: Build\""
-  - "make docker_all"
-  - "make docker_push"
-  label: ":docker: Build docker image"
-  env:
-    DOCKER_CLI_EXPERIMENTAL: enabled
-  agents:
-  - "queue=default"
-- command:
-  - "make ci_release"
-  label: ":golang: Release"
-  artifact_paths:
-  - "dist/*"
-  if: "build.tag != null"
+  - label: ":bash: Shellcheck"
+    plugins:
+      - shellcheck#v1.1.2:
+          files:
+            - "bin/*.sh"
+  - command:
+      - "make ci_lint"
+    label: ":golang: Lint"
+  - command:
+      - "make ci_test"
+    label: ":golang: Test"
+    agents:
+      - "queue=default"
+  - command:
+      - "make ci_build"
+    label: ":golang: Build"
+    agents:
+      - "queue=default"
+    artifact_paths:
+      - "bin/gxctl-*"
+  - wait
+  - command:
+      - 'buildkite-agent artifact download "bin/gxctl-*" . --step ":golang: Build"'
+      - "make docker_all"
+      - "make docker_push"
+    label: ":docker: Build docker image"
+    env:
+      DOCKER_CLI_EXPERIMENTAL: enabled
+    agents:
+      - "queue=default"
+  - command:
+      - "make ci_release"
+    label: ":golang: Release"
+    artifact_paths:
+      - "dist/*"
+    if: "build.tag != null"

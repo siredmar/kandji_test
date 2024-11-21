@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"fmt"
 	"testing"
 
 	v20190817Pod "github.com/grid-x/ds-api-types/management/2019-08-17/pod"
@@ -92,7 +91,7 @@ func TestDeploymentContainersUnique(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			got, gotErr := tc.rule.Exec(tc.ctx, tc.res)
 			got.SourceID = "test"
 			got.Rule = tc.rule

@@ -9,7 +9,7 @@ import (
 )
 
 func LabelDeployment(s *service.Service, ids []string) error {
-	d, err := getDeploymentById(s.Client, ids[0], nil)
+	d, err := getDeploymentByID(s.Client, ids[0], nil)
 	if err != nil {
 		return err
 	}

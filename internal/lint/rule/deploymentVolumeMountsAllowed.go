@@ -33,7 +33,7 @@ func (r *DeploymentVolumeMountsAllowed) ID() string {
 
 // Desc returns the description of this rule
 func (r *DeploymentVolumeMountsAllowed) Desc() string {
-	var exclude []string
+	exclude := make([]string, len(r.exclude))
 	for ex := range r.exclude {
 		exclude = append(exclude, ex)
 	}
@@ -56,7 +56,7 @@ func (r *DeploymentVolumeMountsAllowed) Exec(ctx *context.Context, resource inte
 
 	containers := res.Spec.Template.Spec.Containers
 
-	if containers == nil || len(containers) == 0 {
+	if len(containers) == 0 {
 		result.Skip = true
 		result.Have = "no containers"
 	}

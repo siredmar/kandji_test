@@ -20,7 +20,7 @@ type Resource interface {
 
 type FullObjectMeta struct {
 	Meta struct {
-		Id   string `json:"id,omitempty"`
+		ID   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	} `json:"metadata"`
 }
@@ -80,24 +80,18 @@ func (d *Device) Meta() *types.Metadata {
 }
 
 func (d *Device) IsEmpty() bool {
-	if cmp.Diff(Device{}, *d) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(Device{}, *d) == ""
 }
 
 func (d *Device) IsOnline() bool {
-	return d.Status.LastHeartbeat != nil && time.Now().Sub(d.Status.LastHeartbeat.Time) < (2*time.Minute)
+	return d.Status.LastHeartbeat != nil && time.Since(d.Status.LastHeartbeat.Time) < (2*time.Minute)
 }
 
 func (d *Devices) IsEmpty() bool {
-	if len(d.Devices) == 0 {
-		return true
-	}
-	return false
+	return len(d.Devices) == 0
 }
 
-func (d *Devices) GetIds() []string {
+func (d *Devices) GetIDs() []string {
 	out := make([]string, 0, len(d.Devices))
 	for _, dev := range d.Devices {
 		out = append(out, dev.Metadata.ID)
@@ -110,10 +104,7 @@ func (d *UpdateDevice) Meta() *types.Metadata {
 }
 
 func (d *UpdateDevice) IsEmpty() bool {
-	if cmp.Diff(UpdateDevice{}, *d) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(UpdateDevice{}, *d) == ""
 }
 
 func (d *UpdateDevice) IsValid() bool {
@@ -137,20 +128,14 @@ func (p *Pod) Meta() *types.Metadata {
 }
 
 func (p *Pod) IsEmpty() bool {
-	if cmp.Diff(Pod{}, *p) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(Pod{}, *p) == ""
 }
 
 func (p *Pods) IsEmpty() bool {
-	if len(p.Pods) == 0 {
-		return true
-	}
-	return false
+	return len(p.Pods) == 0
 }
 
-func (p *Pods) GetIds() []string {
+func (p *Pods) GetIDs() []string {
 	out := make([]string, len(p.Pods))
 	for _, po := range p.Pods {
 		out = append(out, po.Metadata.ID)
@@ -167,20 +152,14 @@ func (d *Deployment) Meta() *types.Metadata {
 }
 
 func (d *Deployment) IsEmpty() bool {
-	if cmp.Diff(Deployment{}, *d) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(Deployment{}, *d) == ""
 }
 
 func (d *Deployments) IsEmpty() bool {
-	if len(d.Deployments) == 0 {
-		return true
-	}
-	return false
+	return len(d.Deployments) == 0
 }
 
-func (d *Deployments) GetIds() []string {
+func (d *Deployments) GetIDs() []string {
 	out := make([]string, len(d.Deployments))
 	for _, dep := range d.Deployments {
 		out = append(out, dep.Metadata.ID)
@@ -189,41 +168,35 @@ func (d *Deployments) GetIds() []string {
 }
 
 func (d *CreateDeployment) IsEmpty() bool {
-	if cmp.Diff(CreateDeployment{}, *d) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(CreateDeployment{}, *d) == ""
 }
 
 func (d *UpdateDeployment) IsEmpty() bool {
-	if cmp.Diff(UpdateDeployment{}, *d) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(UpdateDeployment{}, *d) == ""
 }
 
-func (a *CreateDeployment) IsValid() bool {
-	if a.Spec.App == "" {
+func (d *CreateDeployment) IsValid() bool {
+	if d.Spec.App == "" {
 		return false
 	}
-	if a.Spec.Selector.MatchByLabels == nil && a.Spec.Selector.MatchByDeviceID == nil {
+	if d.Spec.Selector.MatchByLabels == nil && d.Spec.Selector.MatchByDeviceID == nil {
 		return false
 	}
-	if a.Spec.Template.Spec.Containers == nil {
+	if d.Spec.Template.Spec.Containers == nil {
 		return false
 	}
 
 	return true
 }
 
-func (a *UpdateDeployment) IsValid() bool {
-	if a.Spec.App == "" {
+func (d *UpdateDeployment) IsValid() bool {
+	if d.Spec.App == "" {
 		return false
 	}
-	if a.Spec.Selector.MatchByLabels == nil && a.Spec.Selector.MatchByDeviceID == nil {
+	if d.Spec.Selector.MatchByLabels == nil && d.Spec.Selector.MatchByDeviceID == nil {
 		return false
 	}
-	if a.Spec.Template.Spec.Containers == nil {
+	if d.Spec.Template.Spec.Containers == nil {
 		return false
 	}
 
@@ -235,50 +208,35 @@ func (a *Application) Meta() *types.Metadata {
 }
 
 func (a *Application) IsEmpty() bool {
-	if cmp.Diff(Application{}, *a) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(Application{}, *a) == ""
 }
 
 func (a *Applications) IsEmpty() bool {
-	if len(a.Applications) == 0 {
-		return true
-	}
-	return false
+	return len(a.Applications) == 0
 }
 
 func (a *CreateApplication) IsEmpty() bool {
-	if cmp.Diff(CreateApplication{}, *a) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(CreateApplication{}, *a) == ""
 }
 
 func (a *CreateApplication) IsValid() bool {
-	//Todo: Check if it's valid eg. mandatory fields
+	// TODO: Check if it's valid eg. mandatory fields
 	return true
 }
 
-func (mt *MaintenanceTask) Meta() *types.Metadata {
-	return &mt.Metadata
+func (m *MaintenanceTask) Meta() *types.Metadata {
+	return &m.Metadata
 }
 
 func (m *MaintenanceTask) IsEmpty() bool {
-	if cmp.Diff(MaintenanceTask{}, *m) == "" {
-		return true
-	}
-	return false
+	return cmp.Diff(MaintenanceTask{}, *m) == ""
 }
 
 func (m *MaintenanceTasks) IsEmpty() bool {
-	if len(m.MaintenanceTasks) == 0 {
-		return true
-	}
-	return false
+	return len(m.MaintenanceTasks) == 0
 }
 
-func (m *MaintenanceTasks) GetIds() []string {
+func (m *MaintenanceTasks) GetIDs() []string {
 	out := make([]string, len(m.MaintenanceTasks))
 	for _, dev := range m.MaintenanceTasks {
 		out = append(out, dev.Metadata.ID)

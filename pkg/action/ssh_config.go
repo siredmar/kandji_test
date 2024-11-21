@@ -3,12 +3,13 @@ package action
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/grid-x/gxctl/pkg/errors"
+	gerrors "github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -57,7 +58,7 @@ func SSHConfigCheck(s *service.Service) error {
 		}
 		for k, v := range configWant[host] {
 			diff, err := sshDiff(host, k, configHave, v)
-			if err != nil {
+			if err != nil && !errors.Is(err, errNoDiff) {
 				return err
 			}
 			if diff != nil {
@@ -66,15 +67,15 @@ func SSHConfigCheck(s *service.Service) error {
 		}
 	}
 
-	var res []string
+	res := make([]string, len(diffs))
 	for _, d := range diffs {
 		s := fmt.Sprintf("[%v] %v\n  have: %v\n  want: %v\n", d.host, d.key, d.have, d.want)
 		res = append(res, s)
 	}
 
 	if len(diffs) > 0 {
-		return errors.E(
-			errors.Validation,
+		return gerrors.E(
+			gerrors.Validation,
 			res,
 		)
 	}
@@ -109,8 +110,10 @@ type sshConfigDiff struct {
 	want string
 }
 
+var errNoDiff = errors.New("sentinel error for the no difference case")
+
 func sshDiff(host, key string, configHave map[string]string, want string) (*sshConfigDiff, error) {
-	have, _ := configHave[strings.ToLower(key)]
+	have := configHave[strings.ToLower(key)]
 	d := &sshConfigDiff{
 		host: host,
 		key:  key,
@@ -119,7 +122,7 @@ func sshDiff(host, key string, configHave map[string]string, want string) (*sshC
 	}
 
 	if d.have == "false" && (d.want == "no" || d.want == "off") {
-		return nil, nil
+		return nil, errNoDiff
 	}
 
 	if strings.HasPrefix(d.want, "~") {
@@ -139,7 +142,7 @@ func sshDiff(host, key string, configHave map[string]string, want string) (*sshC
 	}
 
 	if d.have == d.want {
-		return nil, nil
+		return nil, errNoDiff
 	}
 
 	return d, nil

@@ -55,6 +55,5 @@ func (r *DeploymentDeviceConfigMapExist) Exec(ctx *context.Context, resource int
 		}
 	}
 
-
 	return result, nil
 }

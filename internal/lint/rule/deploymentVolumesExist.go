@@ -35,7 +35,7 @@ func (r *DeploymentVolumesExist) Exec(ctx *context.Context, resource interface{}
 	}
 
 	containers := res.Spec.Template.Spec.Containers
-	if containers == nil || len(containers) == 0 {
+	if len(containers) == 0 {
 		result.Skip = true
 		result.Have = "no containers"
 	}

@@ -9,15 +9,15 @@ import (
 )
 
 func DeleteMaintenance(s *service.Service, ids []string) error {
-	//Lookup all existing deployments to validate ids and autocomplete them if necessary
+	// Lookup all existing deployments to validate ids and autocomplete them if necessary
 	tasks, err := getMaintenanceTasks(s.Client)
 	if err != nil {
 		return err
 	}
-	taskIds := tasks.GetIds()
+	taskIDs := tasks.GetIDs()
 
 	for _, id := range ids {
-		msg, err := deleteMaintenanceTask(s.Client, id, taskIds)
+		msg, err := deleteMaintenanceTask(s.Client, id, taskIDs)
 		if err != nil {
 			return err
 		}
@@ -26,16 +26,16 @@ func DeleteMaintenance(s *service.Service, ids []string) error {
 	return nil
 }
 
-func deleteMaintenanceTask(client *client.APIClient, id string, taskIds []string) (string, error) {
-	taskId, err := api.LookupID(id, taskIds)
+func deleteMaintenanceTask(client *client.APIClient, id string, taskIDs []string) (string, error) {
+	taskID, err := api.LookupID(id, taskIDs)
 	if err != nil {
 		return "", err
 	}
 
-	_, err = client.DeleteRequest(api.MaintenanceEndpoint, taskId)
+	_, err = client.DeleteRequest(api.MaintenanceEndpoint, taskID)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("Maintenance task %s deleted successfully", taskId), nil
+	return fmt.Sprintf("Maintenance task %s deleted successfully", taskID), nil
 }

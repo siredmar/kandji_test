@@ -42,7 +42,7 @@ func Login(s *service.Service, openBrowser bool) error {
 		if openBrowser {
 			// wait for server to startup
 			time.Sleep(time.Second * 1)
-			webbrowser.Open(loginLocation)
+			_ = webbrowser.Open(loginLocation)
 		}
 	}()
 
@@ -61,7 +61,7 @@ func Login(s *service.Service, openBrowser bool) error {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		server.Shutdown(ctx)
+		_ = server.Shutdown(ctx)
 	}()
 
 	r.HandleFunc("/callback", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -76,15 +76,13 @@ func Login(s *service.Service, openBrowser bool) error {
 
 		tokenChannel <- token
 
-		return
 	}))
 
 	r.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, auth.Redirect)
-		return
 	}))
 
-	server.ListenAndServe()
+	_ = server.ListenAndServe()
 
 	if token != "" {
 		if err := s.Client.SetTokenInAuthConfig(client.Token(token)); err != nil {
@@ -100,7 +98,7 @@ func Login(s *service.Service, openBrowser bool) error {
 func getRandomString() string {
 	const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._"
 
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	b := make([]byte, 32)
 	for i := range b {

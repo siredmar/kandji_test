@@ -34,6 +34,7 @@ GXCTL_BASE_URL := 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl
 GXCTL_IMAGE_URL ?= ${GXCTL_BASE_URL}:${IMAGE_TAG}
 
 DOCKER_RUN := docker run -e HOST_OS=${HOST_OS} -e HOST_ARCH=${HOST_ARCH} -e TARGET_OS=${TARGET_OS} -e TARGET_ARCH=${TARGET_ARCH} -e GXCTL_IMAGE_URL=${GXCTL_IMAGE_URL} --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -v /var/run/docker.sock:/var/run/docker.sock -w /go/src/${GO_PROJECT} ${GO_TOOLS} bash -c
+GO_LINT=golangci-lint run --config .golangci.yaml --verbose --timeout 5m
 
 define goBuild
 	GOOS=$1 GOARCH=$2 CGO_ENABLED=0 go build -o ./bin/gxctl-$1-$2 -ldflags="-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'" ./cmd/gxctl
@@ -59,7 +60,7 @@ bin/gxctl-darwin-arm64:
 all: bin/gxctl-linux-amd64 bin/gxctl-linux-arm64 bin/gxctl-darwin-amd64 bin/gxctl-darwin-arm64
 
 lint:
-	golint -set_exit_status $(shell go list ./...)
+	${GO_LINT}
 
 test:
 	go test -v $(shell go list ./...)

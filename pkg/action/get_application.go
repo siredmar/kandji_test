@@ -6,19 +6,19 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
 func GetApplication(s *service.Service, outputType string, ids []string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 	}
 
 	if len(ids) > 0 {
-		//Get multiple application
+		// Get multiple application
 		for _, id := range ids {
-			application, err := getApplicationById(s.Client, id)
+			application, err := getApplicationByID(s.Client, id)
 			if err != nil {
 				return err
 			}
@@ -28,7 +28,7 @@ func GetApplication(s *service.Service, outputType string, ids []string) error {
 			}
 		}
 	} else {
-		//List all applications
+		// List all applications
 		applications, err := getApplications(s.Client)
 		if err != nil {
 			return err
@@ -62,7 +62,7 @@ func getApplications(client *client.APIClient) (api.Applications, error) {
 	return applicationList, nil
 }
 
-func getApplicationById(client *client.APIClient, id string) (api.Application, error) {
+func getApplicationByID(client *client.APIClient, id string) (api.Application, error) {
 	endpoint := fmt.Sprintf("%s/%s", api.ApplicationsEndpoint, id)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {

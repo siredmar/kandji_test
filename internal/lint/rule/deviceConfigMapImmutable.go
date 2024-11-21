@@ -37,7 +37,7 @@ func (r *DeviceConfigMapImmutable) Exec(ctx *context.Context, resource interface
 	have := ctx.DeviceConfigMaps()
 
 	for _, dcm := range have {
-		if dcm.Metadata.ID == res.Metadata.ID && dcm.Spec.Immutable != nil && *dcm.Spec.Immutable == true {
+		if dcm.Metadata.ID == res.Metadata.ID && dcm.Spec.Immutable != nil && *dcm.Spec.Immutable {
 			result.Pass = false
 			return result, nil
 		}

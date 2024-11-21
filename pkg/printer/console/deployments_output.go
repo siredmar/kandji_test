@@ -30,7 +30,7 @@ func (do DeploymentsConsoleOutputWide) Inject(i api.Deployments) DeploymentsCons
 }
 
 func (do DeploymentsConsoleOutput) Map() []DeploymentConsoleOutput {
-	var output []DeploymentConsoleOutput
+	output := make([]DeploymentConsoleOutput, len(do.raw.Deployments))
 	for _, e := range do.raw.Deployments {
 		output = append(output, DeploymentConsoleOutput{}.Map(e))
 	}
@@ -39,7 +39,7 @@ func (do DeploymentsConsoleOutput) Map() []DeploymentConsoleOutput {
 }
 
 func (do DeploymentsConsoleOutputWide) Map() []DeploymentConsoleOutputWide {
-	var output []DeploymentConsoleOutputWide
+	output := make([]DeploymentConsoleOutputWide, len(do.raw.Deployments))
 	for _, e := range do.raw.Deployments {
 		output = append(output, DeploymentConsoleOutputWide{}.Map(e))
 	}
@@ -63,8 +63,8 @@ func (do DeploymentsConsoleOutputWide) Sort(sortBy string) DeploymentsConsoleOut
 
 func sortDeployments(in api.Deployments, sortBy string) []api.Deployment {
 	s := interface{}(nil)
-	rawJson, _ := json.Marshal(in)
-	json.Unmarshal(rawJson, &s)
+	rawJSON, _ := json.Marshal(in)
+	_ = json.Unmarshal(rawJSON, &s)
 
 	if len(in.Deployments) < 2 {
 		return in.Deployments

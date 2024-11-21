@@ -67,9 +67,7 @@ func buildPruneState(local map[string][]byte, remote api.Deployments) (map[strin
 		if err != nil {
 			continue
 		}
-		if v, ok := res.(*api.Deployment); !ok {
-			continue
-		} else {
+		if v, ok := res.(*api.Deployment); ok {
 			state[resID] = &record{
 				local:    *v,
 				fileName: fn,
@@ -113,7 +111,7 @@ func shouldPrune(diffCmd string, dryRun, yes bool, rec *record) (bool, error) {
 		switch err.(type) {
 		case *exec.ExitError:
 			// this is just an exit code error, no worries
-		default: //couldnt run diff
+		default: // couldnt run diff
 			return false, err
 		}
 	}
@@ -134,7 +132,7 @@ func shouldPrune(diffCmd string, dryRun, yes bool, rec *record) (bool, error) {
 func confirmCli(msg string) bool {
 	var s string
 
-	fmt.Printf(msg + " (y/N): ")
+	fmt.Printf("%s (y/N): ", msg)
 	_, err := fmt.Scan(&s)
 	if err != nil {
 		return false

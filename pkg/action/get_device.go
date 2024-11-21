@@ -6,7 +6,7 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/filter"
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -21,7 +21,7 @@ func GetDevice(
 	deploymentID string,
 	ids []string,
 ) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}
@@ -29,8 +29,8 @@ func GetDevice(
 	responseList := make(map[string]client.GetDevicesResponse)
 	var err error
 	if deploymentID != "" {
-		//Get devices by Deployment ID
-		devices, err := getDevicesByDeploymentId(s.Client, deploymentID)
+		// Get devices by Deployment ID
+		devices, err := getDevicesByDeploymentID(s.Client, deploymentID)
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func GetDevice(
 	} else if len(ids) > 0 {
 		resp := client.GetDevicesResponse{}
 		for _, id := range ids {
-			device, err := client.GetDeviceById(s.Client, id, nil)
+			device, err := client.GetDeviceByID(s.Client, id, nil)
 			if err != nil {
 				return err
 			}
@@ -53,7 +53,7 @@ func GetDevice(
 			return err
 		}
 	} else {
-		//List all devices
+		// List all devices
 		responseList, err = client.GetDevices(s.Client, "", filter.NewLabelFilter(label))
 		if err != nil {
 			return err
@@ -61,18 +61,15 @@ func GetDevice(
 	}
 
 	for _, resp := range responseList {
-		if printerConfig.OutputFormat == print.Console || printerConfig.OutputFormat == print.ConsoleWide {
+		if printerConfig.OutputFormat == printer.Console || printerConfig.OutputFormat == printer.ConsoleWide {
 			if len(responseList) > 1 {
 				if resp.Err != nil {
 					fmt.Printf("%v:\n%v\n\n", resp.Profile, resp.Err)
 					continue
-				} else {
-					fmt.Println(resp.Profile)
 				}
-			} else {
-				if resp.Err != nil {
-					fmt.Println(resp.Err)
-				}
+				fmt.Println(resp.Profile)
+			} else if resp.Err != nil {
+				fmt.Println(resp.Err)
 			}
 
 			if showPublicIP {
@@ -98,7 +95,7 @@ func GetDevice(
 			}
 		}
 	}
-	if printerConfig.OutputFormat == print.JSON || printerConfig.OutputFormat == print.YAML {
+	if printerConfig.OutputFormat == printer.JSON || printerConfig.OutputFormat == printer.YAML {
 		// raw
 		var devices []api.Device
 		var device api.Device
@@ -135,7 +132,7 @@ func getDeviceBySN(cl *client.APIClient, sn string) (map[string]client.GetDevice
 	return client.GetDevices(cl, sn, nil)
 }
 
-func getDevicesByDeploymentId(client *client.APIClient, deploymentID string) (api.Devices, error) {
+func getDevicesByDeploymentID(client *client.APIClient, deploymentID string) (api.Devices, error) {
 	endpoint := fmt.Sprintf("%s?filter=deployment:%s", api.DevicesEndpoint, deploymentID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {

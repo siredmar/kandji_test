@@ -3,10 +3,10 @@ package config
 import (
 	clix "github.com/go-clix/cli"
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/config/current_profile"
-	"github.com/grid-x/gxctl/internal/cmd/config/list_profiles"
+	"github.com/grid-x/gxctl/internal/cmd/config/currentprofile"
+	"github.com/grid-x/gxctl/internal/cmd/config/listprofiles"
 	"github.com/grid-x/gxctl/internal/cmd/config/status"
-	"github.com/grid-x/gxctl/internal/cmd/config/use_profile"
+	"github.com/grid-x/gxctl/internal/cmd/config/useprofile"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -39,10 +39,10 @@ func (c *CMD) Init(s *service.Service) error {
 	}
 
 	c.children = []cmd.CMD{
-		use_profile.New(),
-		current_profile.New(),
+		useprofile.New(),
+		currentprofile.New(),
 		status.New(),
-		list_profiles.New(),
+		listprofiles.New(),
 	}
 
 	return nil

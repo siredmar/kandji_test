@@ -29,8 +29,8 @@ type clientVersion struct {
 	Arch       string
 }
 
-// VersionDetails prints detailed version info
-func VersionDetails() error {
+// Details prints detailed version info
+func Details() error {
 	v := clientVersion{
 		Version:    Version,
 		APIVersion: api.APIVersion,

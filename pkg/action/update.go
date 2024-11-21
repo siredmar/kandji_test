@@ -38,7 +38,7 @@ func update(resID string, res api.Resource, cl *client.APIClient) error {
 
 	switch v := res.(type) {
 	case *api.Application:
-		app, err := getApplicationById(cl, resID)
+		app, err := getApplicationByID(cl, resID)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -48,7 +48,7 @@ func update(resID string, res api.Resource, cl *client.APIClient) error {
 		app.Metadata.Labels = api.ComputeMetadataMap(app.Metadata.Labels, v.Metadata.Labels)
 		update = &app
 	case *api.Device:
-		device, err := client.GetDeviceById(cl, resID, nil)
+		device, err := client.GetDeviceByID(cl, resID, nil)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -69,7 +69,7 @@ func update(resID string, res api.Resource, cl *client.APIClient) error {
 		update = &dcm
 
 	case *api.Deployment:
-		deploy, err := getDeploymentById(cl, resID, nil)
+		deploy, err := getDeploymentByID(cl, resID, nil)
 		if err != nil {
 			return errors.E(
 				errors.NotExists,
@@ -95,10 +95,10 @@ func update(resID string, res api.Resource, cl *client.APIClient) error {
 }
 
 func updateResource(client *client.APIClient, v api.Resource, id string, ids []string) (string, error) {
-	resId := id
+	resID := id
 	if ids != nil {
 		var err error
-		resId, err = api.LookupID(id, ids)
+		resID, err = api.LookupID(id, ids)
 		if err != nil {
 			return "", err
 		}
@@ -120,7 +120,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		in.Metadata = &types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DevicesEndpoint, &in, resId)
+		response, err := client.PatchRequest(api.DevicesEndpoint, &in, resID)
 		if err != nil {
 			return "", err
 		}
@@ -144,7 +144,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DeviceConfigMapsEndpoint, &in, resId)
+		response, err := client.PatchRequest(api.DeviceConfigMapsEndpoint, &in, resID)
 		if err != nil {
 			return "", err
 		}
@@ -163,7 +163,7 @@ func updateResource(client *client.APIClient, v api.Resource, id string, ids []s
 		in.Metadata = types.UpdateMetadata{}
 		in.Metadata.Labels = v.Metadata.Labels
 
-		response, err := client.PatchRequest(api.DeploymentsEndpoint, &in, resId)
+		response, err := client.PatchRequest(api.DeploymentsEndpoint, &in, resID)
 		if err != nil {
 			return "", err
 		}

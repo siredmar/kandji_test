@@ -1,4 +1,4 @@
-package delete
+package deletecmd
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
-	"github.com/grid-x/gxctl/internal/cmd/delete/application"
-	"github.com/grid-x/gxctl/internal/cmd/delete/deployment"
-	"github.com/grid-x/gxctl/internal/cmd/delete/device"
-	"github.com/grid-x/gxctl/internal/cmd/delete/deviceconfigmap"
+	"github.com/grid-x/gxctl/internal/cmd/deletecmd/application"
+	"github.com/grid-x/gxctl/internal/cmd/deletecmd/deployment"
+	"github.com/grid-x/gxctl/internal/cmd/deletecmd/device"
+	"github.com/grid-x/gxctl/internal/cmd/deletecmd/deviceconfigmap"
 	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -61,7 +61,6 @@ func (c *CMD) Init(s *service.Service) error {
 		deployment.New(),
 		device.New(),
 		deviceconfigmap.New(),
-		//maintenance.New(),
 	}
 
 	c.cmd.Flags().StringP("filename", "f", "", "Filename or directory of files")

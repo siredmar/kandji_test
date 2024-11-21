@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	KNOWN_AFTER_APPLY = "(Known after apply)"
+	KnownAfterApply = "(Known after apply)"
 )
 
 func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool, lint bool) error {
@@ -54,7 +54,7 @@ func Diff(s *service.Service, fileName string, diffCmd string, skipOnLabel bool,
 
 func diff(filename string, res api.Resource, resID string, differ string, skipOnLabel bool, isCI bool, client *client.APIClient) error {
 	var f1, f2 string
-	if resID == KNOWN_AFTER_APPLY {
+	if resID == KnownAfterApply {
 		// Looks like a new resource... Diff against empty file
 		var err1, err2 error
 		f1, err1 = writeObjectToDiffFile(nil)
@@ -144,18 +144,18 @@ func getResource(cl *client.APIClient, req api.Resource) (api.Resource, error) {
 	switch v := req.(type) {
 	case *api.Application:
 		var app api.Application
-		app, err = getApplicationById(cl, v.Metadata.ID)
+		app, err = getApplicationByID(cl, v.Metadata.ID)
 		res = &app
 
 	case *api.Device:
 		var device api.Device
-		device, err = client.GetDeviceById(cl, v.Metadata.ID, nil)
+		device, err = client.GetDeviceByID(cl, v.Metadata.ID, nil)
 		device.Status = deviceApi.DeviceStatus{}
 		res = &device
 
 	case *api.Deployment:
 		var deploy api.Deployment
-		deploy, err = getDeploymentById(cl, v.Metadata.ID, nil)
+		deploy, err = getDeploymentByID(cl, v.Metadata.ID, nil)
 		deploy.Status = deploymentsApi.DeviceDeploymentStatus{}
 		res = &deploy
 

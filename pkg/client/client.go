@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -38,7 +39,7 @@ type AuthConfig struct {
 }
 
 type APIClient struct {
-	Http    *http.Client
+	HTTP    *http.Client
 	limiter *rate.Limiter
 	Auth    *AuthConfig
 	Profile *string
@@ -58,7 +59,7 @@ type RequestResult struct {
 
 func NewAPIClient(auth *AuthConfig, profile string) *APIClient {
 	return &APIClient{
-		Http:    &http.Client{Timeout: 60 * time.Second},
+		HTTP:    &http.Client{Timeout: 60 * time.Second},
 		limiter: rate.NewLimiter(rate.Every(200*time.Millisecond), 1),
 		Auth:    auth,
 		Profile: &profile,
@@ -199,14 +200,14 @@ func (apiclient *APIClient) internalRequest(method string, body []byte, endpoint
 		req.Header.Add("Content-Type", "application/json")
 		req.Header.Add("Accept", api.APIVersion)
 
-		r, err := apiclient.Http.Do(req)
+		r, err := apiclient.HTTP.Do(req)
 		if err != nil {
 			result.Err = err
 			continue
 		}
 		defer r.Body.Close()
 
-		bodyBytes, err := ioutil.ReadAll(r.Body)
+		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			result.Err = err
 			continue
@@ -334,7 +335,7 @@ func (apiclient *APIClient) SetTokenInAuthConfig(token Token) error {
 		return err
 	}
 
-	return ioutil.WriteFile(viper.ConfigFileUsed(), c, 0644)
+	return os.WriteFile(viper.ConfigFileUsed(), c, 0644)
 }
 
 func (apiclient *APIClient) GetAuth0TenantFromAuthConfig() (string, error) {
@@ -403,9 +404,8 @@ func (apiclient *APIClient) resolveProfileNames() ([]string, error) {
 	if *apiclient.Profile == "" {
 		if currentProfile != "" {
 			return []string{apiclient.Auth.CurrentProfile}, nil
-		} else {
-			return nil, fmt.Errorf("No current profile set. Use gxctl config use-profile PROFILE_NAME to set it")
 		}
+		return nil, fmt.Errorf("No current profile set. Use gxctl config use-profile PROFILE_NAME to set it")
 	}
 
 	for _, p := range apiclient.Auth.Profiles {

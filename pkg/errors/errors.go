@@ -80,8 +80,8 @@ func E(args ...interface{}) error {
 		case Kind:
 			e.Kind = arg
 		case *Error:
-			copy := *arg
-			e.Err = &copy
+			copied := *arg
+			e.Err = &copied
 		case error:
 			e.Err = arg
 		case string:

@@ -5,13 +5,12 @@ import (
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
-
-	print "github.com/grid-x/gxctl/pkg/printer"
 )
 
 func GetDeviceConfigMap(s *service.Service, outputType string, sortBy string, ids []string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}
@@ -29,7 +28,7 @@ func GetDeviceConfigMap(s *service.Service, outputType string, sortBy string, id
 		return err
 	}
 
-	if printerConfig.OutputFormat == print.JSON || printerConfig.OutputFormat == print.YAML {
+	if printerConfig.OutputFormat == printer.JSON || printerConfig.OutputFormat == printer.YAML {
 		return s.Printer.Print(dcms.DeviceConfigMaps, printerConfig)
 	}
 

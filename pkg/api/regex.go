@@ -5,7 +5,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -44,16 +43,8 @@ var (
 	// TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
 	TagRegexp = match(`[\w][\w.-]{0,127}`)
 
-	// anchoredTagRegexp matches valid tag names, anchored at the start and
-	// end of the matched string.
-	anchoredTagRegexp = anchored(TagRegexp)
-
 	// DigestRegexp matches valid digests.
 	DigestRegexp = match(`[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}`)
-
-	// anchoredDigestRegexp matches valid digests, anchored at the start and
-	// end of the matched string.
-	anchoredDigestRegexp = anchored(DigestRegexp)
 
 	// NameRegexp is the format for the name component of references. The
 	// regexp has capturing groups for the domain and name part omitting
@@ -62,13 +53,6 @@ var (
 		optional(DomainRegexp, literal(`/`)),
 		nameComponentRegexp,
 		optional(repeated(literal(`/`), nameComponentRegexp)))
-
-	// anchoredNameRegexp is used to parse a name value, capturing the
-	// domain and trailing components.
-	anchoredNameRegexp = anchored(
-		optional(capture(DomainRegexp), literal(`/`)),
-		capture(nameComponentRegexp,
-			optional(repeated(literal(`/`), nameComponentRegexp))))
 
 	// ReferenceRegexp is the full supported format of a reference. The regexp
 	// is anchored and has capturing groups for name, tag, and digest
@@ -86,15 +70,6 @@ var (
 	// of an identifier. A prefix may be used to match a sha256 identifier
 	// within a list of trusted identifiers.
 	ShortIdentifierRegexp = match(`([a-f0-9]{6,64})`)
-
-	// anchoredIdentifierRegexp is used to check or match an
-	// identifier value, anchored at start and end of string.
-	anchoredIdentifierRegexp = anchored(IdentifierRegexp)
-
-	// anchoredShortIdentifierRegexp is used to check if a value
-	// is a possible identifier prefix, anchored at start and end
-	// of string.
-	anchoredShortIdentifierRegexp = anchored(ShortIdentifierRegexp)
 )
 
 // match compiles the string to a regular expression.
@@ -175,12 +150,12 @@ func GetDockerImageName(input string) (string, error) {
 		return "", errors.New("Bad format")
 	}
 
-	matches_name := NameRegexp.FindStringSubmatch(matches[1])
+	matchesName := NameRegexp.FindStringSubmatch(matches[1])
 
-	if matches_name == nil {
+	if matchesName == nil {
 		return "", errors.New("Bad format")
 	}
-	if len(matches_name) != (NameRegexp.NumSubexp()+1) || matches_name[0] != matches[1] {
+	if len(matchesName) != (NameRegexp.NumSubexp()+1) || matchesName[0] != matches[1] {
 		return "", errors.New("Bad format")
 	}
 
@@ -188,7 +163,6 @@ func GetDockerImageName(input string) (string, error) {
 		matches[2] = "latest"
 	}
 
-	matches_name[0] = strings.Replace(matches_name[0], "/", "-", -1)
-
-	return fmt.Sprintf("%s", matches_name[0]), nil
+	matchesName[0] = strings.ReplaceAll(matchesName[0], "/", "-")
+	return matchesName[0], nil
 }

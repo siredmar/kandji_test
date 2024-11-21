@@ -9,12 +9,12 @@ import (
 )
 
 func DeleteDeployment(s *service.Service, ids []string) error {
-	//Lookup all existing deployments to validate ids and autocomplete them if necessary
+	// Lookup all existing deployments to validate ids and autocomplete them if necessary
 	deployments, err := getDeployments(s.Client)
 	if err != nil {
 		return err
 	}
-	deploymentIDs := deployments.GetIds()
+	deploymentIDs := deployments.GetIDs()
 
 	for _, id := range ids {
 		msg, err := deleteDeployment(s.Client, id, deploymentIDs)
@@ -26,8 +26,8 @@ func DeleteDeployment(s *service.Service, ids []string) error {
 	return nil
 }
 
-func deleteDeployment(client *client.APIClient, id string, deploymentsIds []string) (string, error) {
-	deploymentID, err := api.LookupID(id, deploymentsIds)
+func deleteDeployment(client *client.APIClient, id string, deploymentsIDs []string) (string, error) {
+	deploymentID, err := api.LookupID(id, deploymentsIDs)
 	if err != nil {
 		return "", err
 	}

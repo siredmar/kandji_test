@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -97,7 +96,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, flavor, sn strin
 			getDevice.Fail()
 			err := errs.E(
 				errs.Invalid,
-				fmt.Sprintf("        more than one device found"),
+				"        more than one device found",
 			)
 			return err
 		} else if len(r.Device.Devices) == 1 {
@@ -105,7 +104,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, flavor, sn strin
 				getDevice.Fail()
 				err := errs.E(
 					errs.Invalid,
-					fmt.Sprintf("        more than one device found"),
+					"        more than one device found",
 				)
 				return err
 			}
@@ -118,7 +117,7 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, flavor, sn strin
 		getDevice.Fail()
 		err := errs.E(
 			errs.Invalid,
-			fmt.Sprintf("        no device found"),
+			"        no device found",
 		)
 		return err
 	}
@@ -171,11 +170,12 @@ func SSHTunnel(s *service.Service, quiet, skipConfigCheck bool, flavor, sn strin
 	}
 
 	connectTunnel := spinner.New("connect to tunnel")
-	conn, _, err := websocket.DefaultDialer.Dial(u.String(), headers)
+	conn, resp, err := websocket.DefaultDialer.Dial(u.String(), headers)
 	if err != nil {
 		connectTunnel.Fail()
 		return err
 	}
+	defer resp.Body.Close()
 
 	wsStream := ws.New(conn)
 	defer conn.Close()
@@ -254,14 +254,14 @@ func Post(c *http.Client, serverAddr string, token string, url string, payload [
 		return err
 	}
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	res.Body.Close()
 	if err != nil {
 		return err
 	}
 
 	if err := json.Unmarshal(resBody, &v); err != nil {
-		return fmt.Errorf("Unknown error: " + string(resBody))
+		return fmt.Errorf("Unknown error: %s", resBody)
 	}
 
 	return nil
@@ -272,10 +272,7 @@ func sshAgentAvailable() bool {
 	_, err := cmd.Output()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			if exitError.ExitCode() == 2 {
-				return false
-			}
-			return true
+			return exitError.ExitCode() != 2
 		}
 	}
 	return true

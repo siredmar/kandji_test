@@ -6,7 +6,7 @@ import (
 	"github.com/grid-x/gxctl/internal/cmd/apply"
 	"github.com/grid-x/gxctl/internal/cmd/config"
 	"github.com/grid-x/gxctl/internal/cmd/create"
-	"github.com/grid-x/gxctl/internal/cmd/delete"
+	"github.com/grid-x/gxctl/internal/cmd/deletecmd"
 	"github.com/grid-x/gxctl/internal/cmd/diff"
 	"github.com/grid-x/gxctl/internal/cmd/get"
 	"github.com/grid-x/gxctl/internal/cmd/label"
@@ -52,15 +52,13 @@ func (c *CMD) Init(s *service.Service) error {
 		apply.New(),
 		create.New(),
 		config.New(),
-		delete.New(),
+		deletecmd.New(),
 		diff.New(),
 		get.New(),
 		label.New(),
 		lint.New(),
 		login.New(),
 		logs.New(),
-		//prune.New(),
-		//restart.New(),
 		ssh.New(),
 		update.New(),
 		validate.New(),

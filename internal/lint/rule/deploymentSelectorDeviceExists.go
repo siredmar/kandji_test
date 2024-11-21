@@ -42,7 +42,7 @@ func (r *DeploymentSelectorDeviceExists) Exec(ctx *context.Context, resource int
 		return result, nil
 	}
 
-	_, err := ctx.Cl.GetDeviceById(*selector)
+	_, err := ctx.Cl.GetDeviceByID(*selector)
 	if err != nil {
 		result.Pass = false
 		result.Have = *selector
@@ -52,6 +52,6 @@ func (r *DeploymentSelectorDeviceExists) Exec(ctx *context.Context, resource int
 	return result, nil
 }
 
-func (r *DeploymentSelectorDeviceExists) GetDeviceById() error {
+func (r *DeploymentSelectorDeviceExists) GetDeviceByID() error {
 	return nil
 }

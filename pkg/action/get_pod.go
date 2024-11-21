@@ -6,19 +6,19 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
 func GetPod(s *service.Service, deviceID string, outputType string, sortBy string, ids []string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}
 
 	if deviceID != "" {
-		//Get pods by Device ID
-		pods, err := getPodByDeviceId(s.Client, deviceID)
+		// Get pods by Device ID
+		pods, err := getPodByDeviceID(s.Client, deviceID)
 		if err != nil {
 			return err
 		}
@@ -27,16 +27,16 @@ func GetPod(s *service.Service, deviceID string, outputType string, sortBy strin
 			return err
 		}
 	} else if len(ids) > 0 {
-		//Lookup all existing pods to validate ids and autocomplete them if necessary
+		// Lookup all existing pods to validate ids and autocomplete them if necessary
 		pods, err := getPods(s.Client)
 		if err != nil {
 			return err
 		}
-		podIds := pods.GetIds()
+		podIDs := pods.GetIDs()
 
-		//Get pods
+		// Get pods
 		for _, a := range ids {
-			pod, err := getPodById(s.Client, a, podIds)
+			pod, err := getPodByID(s.Client, a, podIDs)
 			if err != nil {
 				return err
 			}
@@ -46,7 +46,7 @@ func GetPod(s *service.Service, deviceID string, outputType string, sortBy strin
 			}
 		}
 	} else {
-		//List pods
+		// List pods
 		pods, err := getPods(s.Client)
 		if err != nil {
 			return err
@@ -80,8 +80,8 @@ func getPods(client *client.APIClient) (api.Pods, error) {
 	return podList, nil
 }
 
-func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, error) {
-	podID, err := api.LookupID(id, podIds)
+func getPodByID(client *client.APIClient, id string, podIDs []string) (api.Pod, error) {
+	podID, err := api.LookupID(id, podIDs)
 	if err != nil {
 		return api.Pod{}, err
 	}
@@ -100,7 +100,7 @@ func getPodById(client *client.APIClient, id string, podIds []string) (api.Pod, 
 	return pod, nil
 }
 
-func getPodByDeviceId(client *client.APIClient, id string) (api.Pods, error) {
+func getPodByDeviceID(client *client.APIClient, id string) (api.Pods, error) {
 	endpoint := fmt.Sprintf("%s/%s/pods", api.DevicesEndpoint, id)
 
 	response, err := client.GetRequest(endpoint)

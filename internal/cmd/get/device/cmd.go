@@ -46,11 +46,7 @@ func (c *CMD) Init(s *service.Service) error {
 			showPublicKey, _ := cmd.Flags().GetBool("show-publickey")
 			deploymentID, _ := cmd.Flags().GetString("deployment-id")
 
-			if err := action.GetDevice(s, outputType, label, serial, sortBy, showPublicIP, showPublicKey, deploymentID, args); err != nil {
-				return err
-			}
-
-			return nil
+			return action.GetDevice(s, outputType, label, serial, sortBy, showPublicIP, showPublicKey, deploymentID, args)
 		},
 		Predictors: args.Predictors{
 			"sort-by":       args.PredictNil(),

@@ -41,7 +41,7 @@ func (r *DeploymentAppExists) Exec(ctx *context.Context, resource interface{}) (
 	}
 
 	result := &result.Result{}
-	var names []string
+	names := make([]string, 0, len(apps))
 	for _, a := range apps {
 		names = append(names, a.Name)
 		if a.Name == app {
