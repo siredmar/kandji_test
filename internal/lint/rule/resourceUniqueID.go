@@ -48,7 +48,6 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 				break
 			}
 		}
-		break
 
 	case *api.Deployment:
 		ID := res.Metadata.ID
@@ -70,7 +69,6 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 				break
 			}
 		}
-		break
 
 	case *api.DeviceConfigMap:
 		ID := res.Metadata.ID
@@ -92,7 +90,6 @@ func (r *ResourceUniqueID) Exec(ctx *context.Context, resource interface{}) (*re
 				break
 			}
 		}
-		break
 
 	default:
 		return nil, errors.E(

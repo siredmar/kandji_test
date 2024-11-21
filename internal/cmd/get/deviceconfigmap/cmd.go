@@ -43,8 +43,8 @@ func (c *CMD) Init(s *service.Service) error {
 			return action.GetDeviceConfigMap(s, outputType, sortBy, args)
 		},
 		Predictors: args.Predictors{
-			"output":    args.PredictOutputType(),
-			"sort-by":   args.PredictNil(),
+			"output":  args.PredictOutputType(),
+			"sort-by": args.PredictNil(),
 		},
 	}
 

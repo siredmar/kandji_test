@@ -1,8 +1,7 @@
-package maintenance
+package useprofile
 
 import (
 	clix "github.com/go-clix/cli"
-
 	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
@@ -33,15 +32,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:     "maintenance ID",
-		Aliases: []string{"maintenances"},
-		Short:   "delete maintenance",
+		Use:     "use-profile PROFILE_NAME",
+		Aliases: []string{"use"},
+		Short:   "set the CurrentProfile in the gxctl config file",
 		Args: args.Args{
-			args.ValidateSingle("ID"),
-			args.PredictNil(),
+			Validator: args.ValidateSingle("PROFILE_NAME"),
+			Predictor: args.PredictNil(),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
-			return action.DeleteMaintenance(s, args)
+			return action.UseProfile(s, args[0])
 		},
 	}
 

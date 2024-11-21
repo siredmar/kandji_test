@@ -35,7 +35,7 @@ func (o DeviceConsoleOutput) Map(d api.Device) DeviceConsoleOutput {
 	o.ID = offlineIndicator + d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
 	if d.Status.LastHeartbeat != nil {
-		o.LastHeartbeat = units.HumanDuration(time.Now().Sub(d.Status.LastHeartbeat.Time)) + " ago"
+		o.LastHeartbeat = units.HumanDuration(time.Since(d.Status.LastHeartbeat.Time)) + " ago"
 	}
 	if d.Status.Info != nil {
 		if d.Status.Info.SupervisorVersion != nil {
@@ -52,7 +52,7 @@ func (o DeviceConsoleOutputWide) Map(d api.Device) DeviceConsoleOutputWide {
 	o.ID = d.Metadata.ID
 	o.Serialnumber = d.Spec.Serialnumber
 	if d.Status.LastHeartbeat != nil {
-		o.LastHeartbeat = units.HumanDuration(time.Now().Sub(d.Status.LastHeartbeat.Time)) + " ago"
+		o.LastHeartbeat = units.HumanDuration(time.Since(d.Status.LastHeartbeat.Time)) + " ago"
 	}
 	if d.Spec.FirstSeen != nil {
 		o.FirstSeen = d.Spec.FirstSeen.Format("02.01.2006 15:04:05")

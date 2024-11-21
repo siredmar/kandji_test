@@ -15,18 +15,18 @@ type GetDevicesResponse struct {
 	Err     error
 }
 
-func GetDeviceById(client *APIClient, id string, deviceIds []string) (api.Device, error) {
-	if len(id) != 36 && deviceIds == nil {
+func GetDeviceByID(client *APIClient, id string, deviceIDs []string) (api.Device, error) {
+	if len(id) != 36 && deviceIDs == nil {
 		responseList, err := GetDevices(client, "", nil)
 		if err != nil {
 			return api.Device{}, err
 		}
 		for _, r := range responseList {
-			deviceIds = append(deviceIds, r.Device.GetIds()...)
+			deviceIDs = append(deviceIDs, r.Device.GetIDs()...)
 		}
 	}
 
-	deviceID, err := api.LookupID(id, deviceIds)
+	deviceID, err := api.LookupID(id, deviceIDs)
 	if err != nil {
 		return api.Device{}, err
 	}
@@ -74,7 +74,7 @@ func GetDevices(c *APIClient, sn string, f filter.Filter) (map[string]GetDevices
 		}
 
 		if f != nil {
-			deviceList = filter.FilterDevices(deviceList, f)
+			deviceList = filter.Devices(deviceList, f)
 		}
 
 		if resp.Err == nil && deviceList.IsEmpty() {

@@ -34,7 +34,7 @@ func (o PodConsoleOutput) Map(p api.Pod) PodConsoleOutput {
 	o.Image = images
 
 	if p.Status.StartTime != nil {
-		o.Age = units.HumanDuration(time.Now().Sub(p.Status.StartTime.Time)) + " ago"
+		o.Age = units.HumanDuration(time.Since(p.Status.StartTime.Time)) + " ago"
 	}
 	return o
 }

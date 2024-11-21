@@ -25,9 +25,9 @@ func HumanDuration(d time.Duration) string {
 	// Allow deviation no more than 2 seconds(excluded) to tolerate machine time
 	// inconsistence, it can be considered as almost now.
 	if seconds := int(d.Seconds()); seconds < -1 {
-		return fmt.Sprintf("<invalid>")
+		return "<invalid>"
 	} else if seconds < 0 {
-		return fmt.Sprintf("0s")
+		return "0s"
 	} else if seconds < 60*2 {
 		return fmt.Sprintf("%ds", seconds)
 	}
@@ -61,5 +61,5 @@ func HumanDuration(d time.Duration) string {
 	} else if hours < 24*365*8 {
 		return fmt.Sprintf("%dy%dd", hours/24/365, (hours/24)%365)
 	}
-	return fmt.Sprintf("%dy", int(hours/24/365))
+	return fmt.Sprintf("%dy", hours/24/365)
 }

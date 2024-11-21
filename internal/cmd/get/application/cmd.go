@@ -39,11 +39,7 @@ func (c *CMD) Init(s *service.Service) error {
 		Long:    "print a list of all applications you have access to",
 		Run: func(cmd *clix.Command, args []string) error {
 			outputType, _ := cmd.Flags().GetString("output")
-			if err := action.GetApplication(s, outputType, args); err != nil {
-				return err
-			}
-
-			return nil
+			return action.GetApplication(s, outputType, args)
 		},
 		Predictors: args.Predictors{
 			"output": args.PredictOutputType(),

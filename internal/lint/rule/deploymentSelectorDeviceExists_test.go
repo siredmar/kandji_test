@@ -2,7 +2,6 @@ package rule
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	// devicesApi "github.com/grid-x/ds-api-types/management/2019-06-13/device"
@@ -17,7 +16,7 @@ type mockClient struct {
 	err error
 }
 
-func (m mockClient) GetDeviceById(id string) (api.Device, error) {
+func (m mockClient) GetDeviceByID(id string) (api.Device, error) {
 	return api.Device{}, m.err
 }
 
@@ -57,7 +56,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 				Current: state.State{},
 				Desired: nilState,
 			},
-			deviceErr: errors.New("does not exist!"),
+			deviceErr: errors.New("does not exist"),
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Selector: deployments.Selector{
@@ -72,7 +71,7 @@ func TestDeploymentSelectorDeviceExists(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			tc.ctx.Cl = mockClient{tc.deviceErr}
 			got, gotErr := r.Exec(tc.ctx, tc.res)
 			got.SourceID = "test"

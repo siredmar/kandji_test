@@ -1,4 +1,4 @@
-package current_profile
+package currentprofile
 
 import (
 	clix "github.com/go-clix/cli"

@@ -54,7 +54,7 @@ func (s *Spinner) Write(t string) {
 	if !s.enabled {
 		return
 	}
-	fmt.Fprintf(s.out, "\r"+t+"\n")
+	fmt.Fprintf(s.out, "\r%s\n", t)
 }
 
 // Ok indicates success

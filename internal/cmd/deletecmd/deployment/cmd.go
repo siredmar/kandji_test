@@ -1,11 +1,11 @@
-package list_profiles
+package deployment
 
 import (
 	clix "github.com/go-clix/cli"
-	"github.com/grid-x/gxctl/internal/cli/args"
-	"github.com/grid-x/gxctl/pkg/action"
 
+	"github.com/grid-x/gxctl/internal/cli/args"
 	"github.com/grid-x/gxctl/internal/cmd"
+	"github.com/grid-x/gxctl/pkg/action"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -33,21 +33,17 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:   "list-profiles",
-		Short: "list all profiles in the gxctl config file",
-		Run: func(cmd *clix.Command, args []string) error {
-			outputType, _ := cmd.Flags().GetString("output")
-
-			if err := action.ListProfiles(s, outputType); err != nil {
-				return err
-			}
-			return nil
+		Use:     "deployment ID",
+		Aliases: []string{"deployments", "deploy"},
+		Short:   "delete deployment",
+		Args: args.Args{
+			Validator: args.ValidateSingle("ID"),
+			Predictor: args.PredictNil(),
 		},
-		Predictors: args.Predictors{
-			"output": args.PredictOutputType(),
+		Run: func(cmd *clix.Command, args []string) error {
+			return action.DeleteDeployment(s, args)
 		},
 	}
-	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }

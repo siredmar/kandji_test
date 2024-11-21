@@ -42,11 +42,7 @@ func (c *Config) readAuth() error {
 		return err
 	}
 
-	if err := viper.Unmarshal(&c.Auth); err != nil {
-		return err
-	}
-
-	return nil
+	return viper.Unmarshal(&c.Auth)
 }
 
 // Write a configuration

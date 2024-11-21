@@ -44,7 +44,7 @@ func (r *DeploymentContainersUnique) Exec(ctx *context.Context, resource interfa
 
 	cn := make(map[string]bool)
 
-	if containers == nil || len(containers) == 0 {
+	if len(containers) == 0 {
 		result.Skip = true
 		result.Have = "no containers"
 		return result, nil

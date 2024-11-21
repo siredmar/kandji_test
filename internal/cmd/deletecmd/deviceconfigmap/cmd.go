@@ -1,4 +1,4 @@
-package device
+package deviceconfigmap
 
 import (
 	clix "github.com/go-clix/cli"
@@ -33,15 +33,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:     "device ID",
-		Aliases: []string{"devices"},
-		Short:   "delete device",
+		Use:     "deviceconfigmap ID",
+		Aliases: []string{"configmaps", "configmap", "cm", "deviceconfigmaps", "dcm"},
+		Short:   "delete device config map",
 		Args: args.Args{
-			args.ValidateSingle("ID"),
-			args.PredictNil(),
+			Validator: args.ValidateSingle("ID"),
+			Predictor: args.PredictNil(),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
-			return action.DeleteDevice(s, args)
+			return action.DeleteDeviceConfigMap(s, args)
 		},
 	}
 

@@ -1,11 +1,11 @@
-package deviceconfigmap
+package listprofiles
 
 import (
 	clix "github.com/go-clix/cli"
-
 	"github.com/grid-x/gxctl/internal/cli/args"
-	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/action"
+
+	"github.com/grid-x/gxctl/internal/cmd"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -33,17 +33,18 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:     "deviceconfigmap ID",
-		Aliases: []string{"configmaps", "configmap", "cm", "deviceconfigmaps", "dcm"},
-		Short:   "delete device config map",
-		Args: args.Args{
-			args.ValidateSingle("ID"),
-			args.PredictNil(),
-		},
+		Use:   "list-profiles",
+		Short: "list all profiles in the gxctl config file",
 		Run: func(cmd *clix.Command, args []string) error {
-			return action.DeleteDeviceConfigMap(s, args)
+			outputType, _ := cmd.Flags().GetString("output")
+
+			return action.ListProfiles(s, outputType)
+		},
+		Predictors: args.Predictors{
+			"output": args.PredictOutputType(),
 		},
 	}
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }

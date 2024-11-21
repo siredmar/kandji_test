@@ -33,7 +33,7 @@ func (r *DeploymentVolumesAllowed) ID() string {
 
 // Desc returns the description of this rule
 func (r *DeploymentVolumesAllowed) Desc() string {
-	var exclude []string
+	exclude := make([]string, len(r.exclude))
 	for ex := range r.exclude {
 		exclude = append(exclude, ex)
 	}
@@ -56,7 +56,7 @@ func (r *DeploymentVolumesAllowed) Exec(ctx *context.Context, resource interface
 
 	volumes := res.Spec.Template.Spec.Volumes
 
-	if volumes == nil || len(volumes) == 0 {
+	if len(volumes) == 0 {
 		result.Skip = true
 		result.Have = "no volumes"
 		return result, nil

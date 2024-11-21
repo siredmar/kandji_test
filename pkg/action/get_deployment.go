@@ -8,18 +8,18 @@ import (
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/service"
 
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 )
 
 func GetDeployment(s *service.Service, deviceID string, outputType string, serial string, app string, sortBy string, ids []string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 		SortBy:       sortBy,
 	}
 
 	if deviceID != "" {
-		//Get deployments by Device ID
-		deployments, err := getDeploymentsByDeviceId(s.Client, deviceID)
+		// Get deployments by Device ID
+		deployments, err := getDeploymentsByDeviceID(s.Client, deviceID)
 		if err != nil {
 			return err
 		}
@@ -31,7 +31,7 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, seria
 		}
 	} else if len(ids) > 0 {
 		for _, a := range ids {
-			deployment, err := getDeploymentById(s.Client, a, nil)
+			deployment, err := getDeploymentByID(s.Client, a, nil)
 			if err != nil {
 				return err
 			}
@@ -47,21 +47,21 @@ func GetDeployment(s *service.Service, deviceID string, outputType string, seria
 		}
 
 		if len(responseList) != 1 {
-			return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber.", len(responseList))
+			return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber", len(responseList))
 		}
 
 		var deviceID string
 
 		for _, devices := range responseList {
-			ids := devices.Device.GetIds()
+			ids := devices.Device.GetIDs()
 			if len(ids) != 1 {
-				return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber.", len(ids))
+				return fmt.Errorf("found %d devices starting with this serialnumber, but only one device can be used with this feature. Please enter the exact serialnumber", len(ids))
 			}
 			deviceID = ids[0]
 		}
 
 		// Get deployments by Device ID
-		deployments, err := getDeploymentsByDeviceId(s.Client, deviceID)
+		deployments, err := getDeploymentsByDeviceID(s.Client, deviceID)
 		if err != nil {
 			return err
 		}
@@ -123,16 +123,16 @@ func getDeployments(client *client.APIClient) (api.Deployments, error) {
 	return deploymentList, nil
 }
 
-func getDeploymentById(client *client.APIClient, id string, deploymentIds []string) (api.Deployment, error) {
-	if len(id) != 36 && deploymentIds == nil {
+func getDeploymentByID(client *client.APIClient, id string, deploymentIDs []string) (api.Deployment, error) {
+	if len(id) != 36 && deploymentIDs == nil {
 		deployments, err := getDeployments(client)
 		if err != nil {
 			return api.Deployment{}, err
 		}
-		deploymentIds = deployments.GetIds()
+		deploymentIDs = deployments.GetIDs()
 	}
 
-	deploymentID, err := api.LookupID(id, deploymentIds)
+	deploymentID, err := api.LookupID(id, deploymentIDs)
 	if err != nil {
 		return api.Deployment{}, err
 	}
@@ -151,8 +151,8 @@ func getDeploymentById(client *client.APIClient, id string, deploymentIds []stri
 	return deployment, nil
 }
 
-func getDeploymentsByDeviceId(client *client.APIClient, deviceID string) (api.Deployments, error) {
-	pods, err := getPodByDeviceId(client, deviceID)
+func getDeploymentsByDeviceID(client *client.APIClient, deviceID string) (api.Deployments, error) {
+	pods, err := getPodByDeviceID(client, deviceID)
 	if err != nil {
 		return api.Deployments{}, err
 	}
@@ -169,10 +169,10 @@ func getDeploymentsByDeviceId(client *client.APIClient, deviceID string) (api.De
 		}
 	}
 
-	var deployments []api.Deployment
+	deployments := make([]api.Deployment, len(deploymentIDs))
 
 	for _, id := range deploymentIDs {
-		deployment, err := getDeploymentById(client, id, deploymentIDs)
+		deployment, err := getDeploymentByID(client, id, deploymentIDs)
 		if err != nil {
 			return api.Deployments{}, err
 		}

@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"fmt"
 	"testing"
 
 	deployments "github.com/grid-x/ds-api-types/management/2020-08-29/deployments"
@@ -121,7 +120,7 @@ func TestDeploymentAppExists(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			got, gotErr := r.Exec(tc.ctx, tc.res)
 			got.SourceID = "test"
 			got.Rule = &r

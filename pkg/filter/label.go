@@ -55,7 +55,7 @@ func (f *LabelFilter) Eval(in interface{}) (bool, error) {
 			}
 		} else {
 			// check if key has value
-			if v, _ := labels[s[0]]; v != s[1] {
+			if v := labels[s[0]]; v != s[1] {
 				return false, nil
 			}
 		}

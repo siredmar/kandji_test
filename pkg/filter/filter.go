@@ -7,7 +7,7 @@ type Filter interface {
 	Eval(interface{}) (bool, error)
 }
 
-func FilterDevices(devices api.Devices, f Filter) api.Devices {
+func Devices(devices api.Devices, f Filter) api.Devices {
 	var out api.Devices
 
 	for _, d := range devices.Devices {

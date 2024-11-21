@@ -19,7 +19,7 @@ import (
 
 func LookupID(prefix string, ids []string) (string, error) {
 	if len(prefix) == 36 {
-		//Not an prefix at all but the full ID
+		// Not an prefix at all but the full ID
 		return prefix, nil
 	}
 
@@ -52,21 +52,21 @@ func resolveIdentifierFromFile(bytes []byte) (string, error) {
 	if fullMeta.Meta.Name != "" {
 		return fullMeta.Meta.Name, nil
 	}
-	if fullMeta.Meta.Id != "" {
-		return fullMeta.Meta.Id, nil
+	if fullMeta.Meta.ID != "" {
+		return fullMeta.Meta.ID, nil
 	}
 
 	return "", fmt.Errorf("not found")
 }
 
 const (
-	KNOWN_AFTER_APPLY = "(Known after apply)"
+	KnownAfterApply = "(Known after apply)"
 )
 
 func CheckResourceFile(bytes []byte, readOnly bool) (Resource, string, error) {
 	resID, err := resolveIdentifierFromFile(bytes)
 	if err != nil && readOnly {
-		resID = KNOWN_AFTER_APPLY
+		resID = KnownAfterApply
 	}
 
 	application, err := NewApplication(bytes, true)
@@ -315,7 +315,7 @@ func readFile(filepath string) (map[string][]byte, error) {
 		bytes := scanner.Bytes()
 		// Do not add empty documents
 		if len(bytes) > 1 {
-			fileCounter += 1
+			fileCounter++
 			// Trim whitespace in both ends of each yaml docs.
 			trimmedString := strings.TrimSpace(scanner.Text())
 			retVal[strconv.Itoa(fileCounter)+"/"+filepath] = []byte(trimmedString)

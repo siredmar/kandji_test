@@ -1,4 +1,4 @@
-package application
+package device
 
 import (
 	clix "github.com/go-clix/cli"
@@ -33,15 +33,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:     "application NAME",
-		Aliases: []string{"applications", "app", "apps"},
-		Short:   "delete app",
+		Use:     "device ID",
+		Aliases: []string{"devices"},
+		Short:   "delete device",
 		Args: args.Args{
-			args.ValidateSingle("NAME"),
-			args.PredictNil(),
+			Validator: args.ValidateSingle("ID"),
+			Predictor: args.PredictNil(),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
-			return action.DeleteApplication(s, args)
+			return action.DeleteDevice(s, args)
 		},
 	}
 

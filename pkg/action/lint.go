@@ -19,7 +19,7 @@ func Lint(s *service.Service, lintCmdFilename string, quiet bool) error {
 		return err
 	}
 
-	var fsNames []string
+	fsNames := make([]string, len(contents))
 	fsResources := make(map[string]interface{})
 
 	for n, c := range contents {

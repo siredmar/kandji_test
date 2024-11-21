@@ -61,7 +61,7 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 }
 
 func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
-	var output []DeviceConsoleOutput
+	output := make([]DeviceConsoleOutput, len(do.raw.Devices))
 	for _, e := range do.raw.Devices {
 		output = append(output, DeviceConsoleOutput{}.Map(e))
 	}
@@ -70,7 +70,7 @@ func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
 }
 
 func (do DevicesConsoleOutputWide) Map() []DeviceConsoleOutputWide {
-	var output []DeviceConsoleOutputWide
+	output := make([]DeviceConsoleOutputWide, len(do.raw.Devices))
 	for _, e := range do.raw.Devices {
 		output = append(output, DeviceConsoleOutputWide{}.Map(e))
 	}
@@ -93,8 +93,8 @@ func (do DevicesConsoleOutputWide) Sort(sortBy string) DevicesConsoleOutputWide 
 
 func sortDevices(in api.Devices, sortBy string) []api.Device {
 	s := interface{}(nil)
-	rawJson, _ := json.Marshal(in)
-	json.Unmarshal(rawJson, &s)
+	rawJSON, _ := json.Marshal(in)
+	_ = json.Unmarshal(rawJSON, &s)
 
 	if len(in.Devices) < 2 {
 		return in.Devices

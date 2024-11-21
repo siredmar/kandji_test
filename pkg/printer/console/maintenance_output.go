@@ -40,11 +40,11 @@ func (o MaintenanceConsoleOutputWide) Map(m api.MaintenanceTask) MaintenanceCons
 	o.Running = strconv.Itoa(m.Status.Running)
 
 	if m.Status.StartedAt != nil {
-		o.StartedAt = units.HumanDuration(time.Now().Sub(m.Status.StartedAt.Time)) + " ago"
+		o.StartedAt = units.HumanDuration(time.Since(m.Status.StartedAt.Time)) + " ago"
 	}
 
 	if m.Status.FinishedAt != nil {
-		o.FinishedAt = units.HumanDuration(time.Now().Sub(m.Status.FinishedAt.Time)) + " ago"
+		o.FinishedAt = units.HumanDuration(time.Since(m.Status.FinishedAt.Time)) + " ago"
 	}
 
 	return o

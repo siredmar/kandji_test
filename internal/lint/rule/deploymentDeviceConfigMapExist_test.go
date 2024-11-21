@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"fmt"
 	"testing"
 
 	types "github.com/grid-x/ds-api-types"
@@ -122,7 +121,7 @@ func TestDeploymentDeviceConfigMapExist(t *testing.T) {
 		},
 		{
 			desc: "dcm does not exist",
-			ctx: nilCtx,
+			ctx:  nilCtx,
 			res: &api.Deployment{
 				Spec: deployments.DeviceDeploymentSpec{
 					Template: deployments.PodTemplate{
@@ -155,7 +154,7 @@ func TestDeploymentDeviceConfigMapExist(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			got, gotErr := r.Exec(tc.ctx, tc.res)
 
 			didErr := false

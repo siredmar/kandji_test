@@ -42,7 +42,7 @@ func (c *CMD) Init(s *service.Service) error {
 			fileName, _ := cmd.Flags().GetString("filename")
 			dryRun, _ := cmd.Flags().GetBool("dry-run")
 			yes, _ := cmd.Flags().GetBool("yes")
-			diffCmd , _ := cmd.Flags().GetString("command")
+			diffCmd, _ := cmd.Flags().GetString("command")
 
 			if fileName == "" {
 				fmt.Println(cmd.Usage())
@@ -70,8 +70,8 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().StringP("command", "c", "diff", "External diff programm")
 	c.cmd.Flags().Bool("dry-run", true, "Show diff only")
 	c.cmd.Flags().Bool("yes", false, "Answer yes to all interactive prompts")
-	c.cmd.Flags().MarkHidden("dry-run")
-	c.cmd.Flags().MarkHidden("yes")
+	_ = c.cmd.Flags().MarkHidden("dry-run")
+	_ = c.cmd.Flags().MarkHidden("yes")
 
 	return nil
 }

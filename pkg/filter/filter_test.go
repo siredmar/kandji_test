@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"testing"
 
 	types "github.com/grid-x/ds-api-types"
@@ -133,7 +132,7 @@ func TestFilters(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(fmt.Sprintf("%s", tc.desc), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			include, err := tc.filter.Eval(tc.in)
 
 			didErr := false

@@ -6,26 +6,26 @@ import (
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
 	"github.com/grid-x/gxctl/pkg/errors"
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
 func GetMaintenance(s *service.Service, outputType string, ids []string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 	}
 
 	if len(ids) > 0 {
-		//Get multiple maintenance tasks
-		//Lookup all existing maintenance task to validate ids and autocomplete them if necessary
+		// Get multiple maintenance tasks
+		// Lookup all existing maintenance task to validate ids and autocomplete them if necessary
 		tasks, err := getMaintenanceTasks(s.Client)
 		if err != nil {
 			return err
 		}
-		taskIDs := tasks.GetIds()
+		taskIDs := tasks.GetIDs()
 
 		for _, a := range ids {
-			task, err := getMaintenanceTaskById(s.Client, a, taskIDs)
+			task, err := getMaintenanceTaskByID(s.Client, a, taskIDs)
 			if err != nil {
 				return err
 			}
@@ -35,7 +35,7 @@ func GetMaintenance(s *service.Service, outputType string, ids []string) error {
 			}
 		}
 	} else {
-		//List all deployments
+		// List all deployments
 		tasks, err := getMaintenanceTasks(s.Client)
 		if err != nil {
 			return err
@@ -70,13 +70,13 @@ func getMaintenanceTasks(client *client.APIClient) (api.MaintenanceTasks, error)
 	return taskList, nil
 }
 
-func getMaintenanceTaskById(client *client.APIClient, id string, taskIds []string) (api.MaintenanceTask, error) {
-	taskId, err := api.LookupID(id, taskIds)
+func getMaintenanceTaskByID(client *client.APIClient, id string, taskIDs []string) (api.MaintenanceTask, error) {
+	taskID, err := api.LookupID(id, taskIDs)
 	if err != nil {
 		return api.MaintenanceTask{}, err
 	}
 
-	endpoint := fmt.Sprintf("%s/%s", api.MaintenanceEndpoint, taskId)
+	endpoint := fmt.Sprintf("%s/%s", api.MaintenanceEndpoint, taskID)
 	response, err := client.GetRequest(endpoint)
 	if err != nil {
 		return api.MaintenanceTask{}, err

@@ -11,7 +11,7 @@ import (
 )
 
 func Restart(s *service.Service, id string) error {
-	d, err := client.GetDeviceById(s.Client, id, nil)
+	d, err := client.GetDeviceByID(s.Client, id, nil)
 	if err != nil {
 		return err
 	}

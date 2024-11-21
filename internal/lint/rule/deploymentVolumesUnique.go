@@ -44,7 +44,7 @@ func (r *DeploymentVolumesUnique) Exec(ctx *context.Context, resource interface{
 
 	vn := make(map[string]bool)
 
-	if volumes == nil || len(volumes) == 0 {
+	if len(volumes) == 0 {
 		result.Skip = true
 		result.Have = "no volumes"
 		return result, nil

@@ -3,7 +3,7 @@ package action
 import (
 	"fmt"
 
-	print "github.com/grid-x/gxctl/pkg/printer"
+	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
 
@@ -12,7 +12,7 @@ type profiles struct {
 }
 
 func ListProfiles(s *service.Service, outputType string) error {
-	printerConfig := print.PrintConfig{
+	printerConfig := printer.PrintConfig{
 		OutputFormat: outputType,
 	}
 
@@ -24,7 +24,7 @@ func ListProfiles(s *service.Service, outputType string) error {
 	}
 
 	switch printerConfig.OutputFormat {
-	case print.JSON, print.YAML:
+	case printer.JSON, printer.YAML:
 		return s.Printer.Print(profiles, printerConfig)
 
 	default:

@@ -10,7 +10,7 @@ type MaintenancesConsoleOutput []MaintenanceConsoleOutput
 type MaintenancesConsoleOutputWide []MaintenanceConsoleOutputWide
 
 func (mo MaintenancesConsoleOutput) Map(m api.MaintenanceTasks) MaintenancesConsoleOutput {
-	var out MaintenancesConsoleOutput
+	out := make(MaintenancesConsoleOutput, len(m.MaintenanceTasks))
 	for _, e := range m.MaintenanceTasks {
 		out = append(out, MaintenanceConsoleOutput{}.Map(e))
 	}
@@ -19,7 +19,7 @@ func (mo MaintenancesConsoleOutput) Map(m api.MaintenanceTasks) MaintenancesCons
 }
 
 func (mo MaintenancesConsoleOutputWide) Map(m api.MaintenanceTasks) MaintenancesConsoleOutputWide {
-	var out MaintenancesConsoleOutputWide
+	out := make(MaintenancesConsoleOutputWide, len(m.MaintenanceTasks))
 	for _, e := range m.MaintenanceTasks {
 		out = append(out, MaintenanceConsoleOutputWide{}.Map(e))
 	}

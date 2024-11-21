@@ -1,4 +1,4 @@
-package deployment
+package application
 
 import (
 	clix "github.com/go-clix/cli"
@@ -33,15 +33,15 @@ func (c *CMD) Children() []cmd.CMD {
 // Init the Command
 func (c *CMD) Init(s *service.Service) error {
 	c.cmd = &clix.Command{
-		Use:     "deployment ID",
-		Aliases: []string{"deployments", "deploy"},
-		Short:   "delete deployment",
+		Use:     "application NAME",
+		Aliases: []string{"applications", "app", "apps"},
+		Short:   "delete app",
 		Args: args.Args{
-			args.ValidateSingle("ID"),
-			args.PredictNil(),
+			Validator: args.ValidateSingle("NAME"),
+			Predictor: args.PredictNil(),
 		},
 		Run: func(cmd *clix.Command, args []string) error {
-			return action.DeleteDeployment(s, args)
+			return action.DeleteApplication(s, args)
 		},
 	}
 
