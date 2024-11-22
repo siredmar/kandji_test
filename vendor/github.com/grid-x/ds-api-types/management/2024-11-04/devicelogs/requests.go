@@ -19,7 +19,7 @@ type DeleteRequest struct{}
 type DeleteResponse struct{}
 
 // ListRequest represents the request type
-// Endpoint: GET /deviceslogs
+// Endpoint: GET /devicelogs
 type ListRequest struct{}
 
 // ListResponse represents the response type

@@ -59,7 +59,7 @@ github.com/googleapis/gnostic/openapiv2
 # github.com/gorilla/websocket v1.4.2
 ## explicit; go 1.12
 github.com/gorilla/websocket
-# github.com/grid-x/ds-api-types v0.0.0-20241105131820-5e567b0fb259
+# github.com/grid-x/ds-api-types v0.0.0-20241121134227-6afae5c6d8cc
 ## explicit; go 1.17
 github.com/grid-x/ds-api-types
 github.com/grid-x/ds-api-types/management/2018-11-27/application
