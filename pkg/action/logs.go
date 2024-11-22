@@ -47,7 +47,7 @@ func ListLogs(s *service.Service, output string) error {
 		OutputFormat: output,
 	}
 
-	resp, err := s.Client.GetRequest(api.DeviceLogsListEndpoint)
+	resp, err := s.Client.GetRequest(api.DeviceLogsEndpoint)
 	if err != nil {
 		return fmt.Errorf("error getting device logs list: %v", err)
 	}
