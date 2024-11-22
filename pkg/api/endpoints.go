@@ -9,5 +9,4 @@ const (
 	ApplicationsEndpoint     = "api/management/applications"
 	MaintenanceEndpoint      = "api/management/maintenance"
 	DeviceLogsEndpoint       = "api/management/devicelogs"
-	DeviceLogsListEndpoint   = "api/management/deviceslogs"
 )
