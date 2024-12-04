@@ -105,7 +105,7 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 	case api.DeviceLogs:
 		out = DeviceLogsConsoleOutputWide{}.Map(v)
 	case api.DevicesLogs:
-			out = DevicesLogsConsoleOutputWide{}.Map(v)
+		out = DevicesLogsConsoleOutputWide{}.Map(v)
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknown type %T.", v)
 		return errors.New(s)
