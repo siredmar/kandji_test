@@ -15,6 +15,9 @@ var (
 	ErrDeviceNotFound       = errors.New("device not found")
 	ErrNotExactSerialNumber = errors.New("there are multiple devices with this serial number pattern. Please give an exact serial number")
 	ErrWrongOwner           = errors.New("there are device logs settings for this device created by another user. If you want to override them, run the command again with the --change-owner flag")
+	ErrInvalidExpiry        = errors.New("logs expiry must not exceed 1 month")
+
+	maxExpiry = time.Hour * 24 * 30 // 1 month
 )
 
 func GetLogs(s *service.Service, id string, isSerialNumber bool, output string) error {
@@ -65,6 +68,10 @@ func ListLogs(s *service.Service, output string) error {
 }
 
 func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, output string, expiry time.Duration) error {
+	if expiry > maxExpiry {
+		return ErrInvalidExpiry
+	}
+
 	printerCfg := printer.PrintConfig{
 		OutputFormat: output,
 	}
@@ -114,6 +121,10 @@ func DisableLogs(s *service.Service, id string, isSerialNumber bool) error {
 }
 
 func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool, logLevel, output string, expiry time.Duration) error {
+	if expiry > maxExpiry {
+		return ErrInvalidExpiry
+	}
+
 	printerCfg := printer.PrintConfig{
 		OutputFormat: output,
 	}
