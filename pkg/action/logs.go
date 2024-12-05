@@ -3,11 +3,11 @@ package action
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/grid-x/gxctl/pkg/api"
 	"github.com/grid-x/gxctl/pkg/client"
+	gerrors "github.com/grid-x/gxctl/pkg/errors"
 	"github.com/grid-x/gxctl/pkg/printer"
 	"github.com/grid-x/gxctl/pkg/service"
 )
@@ -112,8 +112,8 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(expiry))
 	resp, err := s.Client.PostRequest(fmt.Sprintf("%s/%s", api.DeviceLogsEndpoint, id), &body)
 	if err != nil {
-
-		if strings.Contains(err.Error(), "device logs already exists") {
+		var gerr *gerrors.Error
+		if errors.As(err, &gerr) && gerr.Kind == gerrors.Exist {
 			return ErrLogsAlreadyExists
 		}
 		return fmt.Errorf("failed to enable device logs: %v", err)
