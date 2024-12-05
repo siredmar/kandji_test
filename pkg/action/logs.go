@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/grid-x/gxctl/pkg/api"
@@ -16,6 +17,7 @@ var (
 	ErrNotExactSerialNumber = errors.New("there are multiple devices with this serial number pattern. Please give an exact serial number")
 	ErrWrongOwner           = errors.New("there are device logs settings for this device created by another user. If you want to override them, run the command again with the --change-owner flag")
 	ErrInvalidExpiry        = errors.New("logs expiry must not exceed 1 month")
+	ErrLogsAlreadyExists    = errors.New("Logs are already enabled for this device")
 
 	maxExpiry = time.Hour * 24 * 30 // 1 month
 )
@@ -89,6 +91,9 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 	body.Spec.ExpiresAt = api.NewTime(time.Now().Add(expiry))
 	resp, err := s.Client.PostRequest(fmt.Sprintf("%s/%s", api.DeviceLogsEndpoint, id), &body)
 	if err != nil {
+		if strings.Contains(err.Error(), "device logs already exists") {
+			return ErrLogsAlreadyExists
+		}
 		return fmt.Errorf("failed to enable device logs: %v", err)
 	}
 
