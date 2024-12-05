@@ -53,7 +53,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().StringP("level", "l", "debug", "the desired log level for the device")
 	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 	c.cmd.Flags().DurationP("expiry", "e", defaultExpiration, "the expiry of these log settings depends on the duration specified. Example: 25h4m")
-	c.cmd.Flags().StringP("output", "o", "yaml", "Print result in a different format. Must be one of: json|wide|yaml")
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }

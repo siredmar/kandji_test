@@ -55,7 +55,7 @@ func (c *CMD) Init(s *service.Service) error {
 	c.cmd.Flags().BoolP("serial", "S", false, "treat device ID as a serial number")
 	c.cmd.Flags().BoolP("change-owner", "c", false, "replace the current owner of the device logs settings with yourself. The new owner will receive notifications about logs settings for this device via slack")
 	c.cmd.Flags().DurationP("expiry", "e", defaultDuration, "the expiry of these log settings depends on the duration specified. Example: 25h4m")
-	c.cmd.Flags().StringP("output", "o", "yaml", "Print result in a different format. Must be one of: json|wide|yaml")
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }

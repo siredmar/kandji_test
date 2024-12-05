@@ -38,7 +38,7 @@ func (c *CMD) Init(s *service.Service) error {
 		},
 	}
 
-	c.cmd.Flags().StringP("output", "o", "yaml", "Print result in a different format. Must be one of: json|wide|yaml")
+	c.cmd.Flags().StringP("output", "o", "", "Print result in a different format. Must be one of: json|wide|yaml")
 
 	return nil
 }
