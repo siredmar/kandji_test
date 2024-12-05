@@ -55,9 +55,9 @@ func (c *ConsolePrinter) Print(v interface{}, config ConsolePrintConfig) error {
 		out = MaintenanceConsoleOutput{}.Map(v)
 	case api.MaintenanceTasks:
 		out = MaintenancesConsoleOutput{}.Map(v).Sort()
-	case api.DeviceLogs:
+	case api.DeviceLogsWithSerialNumber:
 		out = DeviceLogsConsoleOutput{}.Map(v)
-	case api.DevicesLogs:
+	case api.DevicesLogsWithSerialNumber:
 		out = DevicesLogsConsoleOutput{}.Map(v)
 
 	default:
@@ -107,9 +107,9 @@ func (c *ConsolePrinter) PrintWide(v interface{}, config ConsolePrintConfig) err
 		out = MaintenanceConsoleOutputWide{}.Map(v)
 	case api.MaintenanceTasks:
 		out = MaintenancesConsoleOutputWide{}.Map(v).Sort()
-	case api.DeviceLogs:
+	case api.DeviceLogsWithSerialNumber:
 		out = DeviceLogsConsoleOutputWide{}.Map(v)
-	case api.DevicesLogs:
+	case api.DevicesLogsWithSerialNumber:
 		out = DevicesLogsConsoleOutputWide{}.Map(v)
 	default:
 		s := fmt.Sprintf("Not able to print to console! Unknown type %T.", v)

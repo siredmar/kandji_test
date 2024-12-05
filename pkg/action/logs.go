@@ -27,7 +27,9 @@ func GetLogs(s *service.Service, id string, isSerialNumber bool, output string) 
 		OutputFormat: output,
 	}
 
+	var serialNumber string
 	if isSerialNumber {
+		serialNumber = id
 		var err error
 		id, err = getDeviceID(s, id)
 		if err != nil {
@@ -40,7 +42,15 @@ func GetLogs(s *service.Service, id string, isSerialNumber bool, output string) 
 		return fmt.Errorf("error getting device logs by device ID: %v", err)
 	}
 
-	if err := s.Printer.Print(dl, printerCfg); err != nil {
+	if serialNumber == "" {
+		device, err := client.GetDeviceByID(s.Client, dl.Metadata.ID, nil)
+		if err != nil {
+			return fmt.Errorf("error getting a device: %v", err)
+		}
+		serialNumber = device.Spec.Serialnumber
+	}
+
+	if err := s.Printer.Print(api.NewDeviceLogsWithSerialNumber(dl, serialNumber), printerCfg); err != nil {
 		return fmt.Errorf("error printing device logs: %v", err)
 	}
 
@@ -62,7 +72,16 @@ func ListLogs(s *service.Service, output string) error {
 		return fmt.Errorf("error creating device logs list: %v", err)
 	}
 
-	if err := s.Printer.Print(dl, printerCfg); err != nil {
+	devicesLogsWithSerialNumber := make(api.DevicesLogsWithSerialNumber, len(dl.Items))
+	for i, d := range dl.Items {
+		device, err := client.GetDeviceByID(s.Client, d.Metadata.ID, nil)
+		if err != nil {
+			return fmt.Errorf("error getting a device: %v", err)
+		}
+		devicesLogsWithSerialNumber[i] = api.NewDeviceLogsWithSerialNumber(api.DeviceLogs(d), device.Spec.Serialnumber)
+	}
+
+	if err := s.Printer.Print(devicesLogsWithSerialNumber, printerCfg); err != nil {
 		return fmt.Errorf("error printing the device logs list: %v", err)
 	}
 
@@ -78,7 +97,9 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 		OutputFormat: output,
 	}
 
+	var serialNumber string
 	if isSerialNumber {
+		serialNumber = id
 		var err error
 		id, err = getDeviceID(s, id)
 		if err != nil {
@@ -102,7 +123,15 @@ func EnableLogs(s *service.Service, id string, isSerialNumber bool, logLevel, ou
 		return fmt.Errorf("error creating create device logs response: %v", err)
 	}
 
-	if err := s.Printer.Print(deviceLogs, printerCfg); err != nil {
+	if serialNumber == "" {
+		device, err := client.GetDeviceByID(s.Client, deviceLogs.Metadata.ID, nil)
+		if err != nil {
+			return fmt.Errorf("error getting a device: %v", err)
+		}
+		serialNumber = device.Spec.Serialnumber
+	}
+
+	if err := s.Printer.Print(api.NewDeviceLogsWithSerialNumber(deviceLogs, serialNumber), printerCfg); err != nil {
 		return fmt.Errorf("error printing device logs: %v", err)
 	}
 	return nil
@@ -134,7 +163,9 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 		OutputFormat: output,
 	}
 
+	var serialNumber string
 	if isSerialNumber {
+		serialNumber = id
 		var err error
 		id, err = getDeviceID(s, id)
 		if err != nil {
@@ -171,7 +202,15 @@ func UpdateLogs(s *service.Service, id string, isSerialNumber, changeOwner bool,
 		return fmt.Errorf("error creating update device logs response: %v", err)
 	}
 
-	if err := s.Printer.Print(updatedDeviceLogs, printerCfg); err != nil {
+	if serialNumber == "" {
+		device, err := client.GetDeviceByID(s.Client, updatedDeviceLogs.Metadata.ID, nil)
+		if err != nil {
+			return fmt.Errorf("error getting a device: %v", err)
+		}
+		serialNumber = device.Spec.Serialnumber
+	}
+
+	if err := s.Printer.Print(api.NewDeviceLogsWithSerialNumber(updatedDeviceLogs, serialNumber), printerCfg); err != nil {
 		return fmt.Errorf("error printing updated device logs: %v", err)
 	}
 

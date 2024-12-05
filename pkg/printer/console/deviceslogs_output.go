@@ -6,11 +6,11 @@ import (
 
 type DevicesLogsConsoleOutput []DeviceLogsConsoleOutput
 
-func (o DevicesLogsConsoleOutput) Map(v api.DevicesLogs) DevicesLogsConsoleOutput {
-	o = make(DevicesLogsConsoleOutput, len(v.Items))
+func (o DevicesLogsConsoleOutput) Map(v api.DevicesLogsWithSerialNumber) DevicesLogsConsoleOutput {
+	o = make(DevicesLogsConsoleOutput, len(v))
 
-	for i, l := range v.Items {
-		o[i] = DeviceLogsConsoleOutput{}.Map(api.DeviceLogs(l))
+	for i, l := range v {
+		o[i] = DeviceLogsConsoleOutput{}.Map(l)
 	}
 
 	return o
@@ -18,11 +18,11 @@ func (o DevicesLogsConsoleOutput) Map(v api.DevicesLogs) DevicesLogsConsoleOutpu
 
 type DevicesLogsConsoleOutputWide []DeviceLogsConsoleOutputWide
 
-func (o DevicesLogsConsoleOutputWide) Map(v api.DevicesLogs) DevicesLogsConsoleOutputWide {
-	o = make(DevicesLogsConsoleOutputWide, len(v.Items))
+func (o DevicesLogsConsoleOutputWide) Map(v api.DevicesLogsWithSerialNumber) DevicesLogsConsoleOutputWide {
+	o = make(DevicesLogsConsoleOutputWide, len(v))
 
-	for i, l := range v.Items {
-		o[i] = DeviceLogsConsoleOutputWide{}.Map(api.DeviceLogs(l))
+	for i, l := range v {
+		o[i] = DeviceLogsConsoleOutputWide{}.Map(l)
 	}
 
 	return o

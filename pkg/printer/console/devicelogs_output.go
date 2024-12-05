@@ -7,14 +7,14 @@ import (
 )
 
 type DeviceLogsConsoleOutput struct {
-	ID         string `header:"id"`
-	ExpiresAt  string `header:"expires_at"`
-	LogLevel   string `header:"log_level"`
-	NotifiedAt string `header:"notified_at"`
+	SerialNumber string `header:"serial_number"`
+	ExpiresAt    string `header:"expires_at"`
+	LogLevel     string `header:"log_level"`
+	NotifiedAt   string `header:"notified_at"`
 }
 
-func (o DeviceLogsConsoleOutput) Map(v api.DeviceLogs) DeviceLogsConsoleOutput {
-	o.ID = v.Metadata.ID
+func (o DeviceLogsConsoleOutput) Map(v api.DeviceLogsWithSerialNumber) DeviceLogsConsoleOutput {
+	o.SerialNumber = v.SerialNumber
 	o.ExpiresAt = v.Spec.ExpiresAt.Format(time.RFC3339)
 	o.LogLevel = v.Spec.LogLevel
 	if len(v.Status.NotifiedAt) > 0 {
@@ -25,21 +25,24 @@ func (o DeviceLogsConsoleOutput) Map(v api.DeviceLogs) DeviceLogsConsoleOutput {
 }
 
 type DeviceLogsConsoleOutputWide struct {
-	ID         string `header:"id"`
-	ExpiresAt  string `header:"expires_at"`
-	LogLevel   string `header:"log_level"`
-	NotifiedAt string `header:"notified_at"`
-	Owner      string `header:"owner"`
+	SerialNumber string `header:"serial_number"`
+	ExpiresAt    string `header:"expires_at"`
+	LogLevel     string `header:"log_level"`
+	NotifiedAt   string `header:"notified_at"`
+	Owner        string `header:"owner"`
+	ID           string `header:"id"`
 }
 
-func (o DeviceLogsConsoleOutputWide) Map(v api.DeviceLogs) DeviceLogsConsoleOutputWide {
-	o.ID = v.Metadata.ID
+func (o DeviceLogsConsoleOutputWide) Map(v api.DeviceLogsWithSerialNumber) DeviceLogsConsoleOutputWide {
+	o.SerialNumber = v.SerialNumber
 	o.ExpiresAt = v.Spec.ExpiresAt.Format(time.RFC3339)
 	o.LogLevel = v.Spec.LogLevel
-	o.Owner = v.Spec.Owner
 	if len(v.Status.NotifiedAt) > 0 {
 		o.NotifiedAt = v.Status.NotifiedAt[0].Format(time.RFC3339)
 	}
+
+	o.Owner = v.Spec.Owner
+	o.ID = v.Metadata.ID
 
 	return o
 }

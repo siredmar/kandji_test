@@ -254,3 +254,17 @@ type DevicesLogs devicelogsapi.DeviceLogsList
 func (r *DeviceLogs) Meta() *types.Metadata {
 	return nil
 }
+
+type DeviceLogsWithSerialNumber struct {
+	DeviceLogs
+	SerialNumber string `json:"serialNumber"`
+}
+
+func NewDeviceLogsWithSerialNumber(dl DeviceLogs, serialNumber string) DeviceLogsWithSerialNumber {
+	return DeviceLogsWithSerialNumber{
+		DeviceLogs:   dl,
+		SerialNumber: serialNumber,
+	}
+}
+
+type DevicesLogsWithSerialNumber []DeviceLogsWithSerialNumber
