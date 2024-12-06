@@ -1,7 +1,7 @@
 # gxctl - Device Services CLI
 
 gxctl is a command line interface for running commands against gridX Device
-Services API.  You can use gxctl to deploy applications, inspect and manage
+Services API. You can use gxctl to deploy applications, inspect and manage
 devices, and run remote maintenance. This overview covers gxctl syntax,
 describes the command operations, and provides common examples.
 
@@ -98,7 +98,7 @@ where `command`, `TYPE`, `NAME`, and `flags` are:
 
 - __command__   Specifies the operation that you want to perform on one or more resources,
 for example `create`, `get`, `update`
-_ __TYPE__   Specifies the resource type. Resource types are case-insensitive and
+- __TYPE__   Specifies the resource type. Resource types are case-insensitive and
 you can specify the singular, plural, or abbreviated forms. For example, the
 following commands produce the same output:
 
@@ -142,6 +142,7 @@ flags to specify the output format of your command
 - __label__   `gxctl label [TYPE] [NAME] [flags]`
 - __lint__   `gxctl lint [[-f | ----filename]=Filename] [flags]`
 - __login__   `gxctl login [flags]`
+- __logs__ `gxctl logs [SUBCOMMAND] [NAME] [flags]`
 - __ssh__   `gxctl ssh [NAME] [flags]`
 - __update__   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
 - __validate__   `gxctl validate [[-f | ----filename]=Filename] [flags]`
@@ -179,7 +180,7 @@ best matching deployment of an application.
 
 The default output format for all gxctl commands is the human readable plain-text
 format. To output details to your terminal window in a specific format, you can
-add either the -o or --output flags to a supported gxctl command.
+add either the `-o` or `--output` flags to a supported gxctl command.
 
 ```shell
  gxctl [command] [TYPE] [NAME] -o=<output_format>
@@ -423,6 +424,35 @@ $ gxctl get deploy -S D294-200-000-000-581-P-X
 $ gxctl get deploy -S D294-200-000-000-581-P-X -a monitoring -o yaml
 # Get a information of a deployment include additional information using uuid abbreviation
 $ gxctl get deploy c78 -o wide
+```
+
+`gxctl logs` - manage logs settings on the devices. Allows to control
+how long and on which level the device is going to save logs.
+
+```shell
+# Get help for the command. The -h flag is also applicable to any of subcommands
+# of logs.
+$ gxctl logs -h
+# Get logs settings for all the devices
+$ gxctl logs list
+# Get logs settings for a specific device
+$ gxctl logs get <device_id>
+# Get logs settings for a specific device in a yaml format
+$ gxctl logs get <device_id> -o yaml
+# Get logs for a specific device while referring to a device by its serial number
+$ gxctl logs get <device_serial_number> -S
+# Enable logs for a specific device for 1 hour on the INFO level
+# (also works with -S, as well as all following commands if you want to give a
+# serial number instead of a device id)
+$ gxctl logs enable <device_id> -e 1h -l info
+# Change logs settings for a specific device: make them expire in 2 hours
+# instead of 1 hour and change the logs level to WARNING. 
+# If there are logs settings creted by someone else before you,
+# provide a -c flag to become a new owner of these settings. Otherwise,
+# you will get an error.
+$ gxctl logs update <device_serial_number> -S -e 2h -l warning 
+# Disable logs for a specific device
+$ gxctl logs disable <device_id>
 ```
 
 `gxctl label` - Labels different resources
