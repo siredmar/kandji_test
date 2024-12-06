@@ -1,57 +1,89 @@
 # gxctl - Device Services CLI
-gxctl is a command line interface for running commands against gridX Device Services API. You can use gxctl to deploy applications, inspect and manage devices, and run remote maintenance. This overview covers gxctl syntax, describes the command operations, and provides common examples.
+
+gxctl is a command line interface for running commands against gridX Device
+Services API.  You can use gxctl to deploy applications, inspect and manage
+devices, and run remote maintenance. This overview covers gxctl syntax,
+describes the command operations, and provides common examples.
 
 ## Getting started
+
 gxctl is installable on a variety of Linux platforms, macOS and Windows.
-If you read these instructions, you most likely have received an archive containing the binary along with a default configuration file.
+If you read these instructions, you most likely have received an archive
+containing the binary along with a default configuration file.
 
 ### Installation
 
 #### Linux
+
 - Extract the binary and run `sudo install -o root -g root -m 0755 gxctl /usr/local/bin/gxctl`
 
 #### MacOS
+
 - Move the archive outside of your Downloads folder, e.g. to your home folder.
 - Extract the binary and make it executable by running `chmod +x ./gxctl`
 - Create `/usr/local/bin` if it doesn't exist yet: `sudo mkdir -p /usr/local/bin`
-- Move the gxctl binary to a file location on your system PATH. `sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
-- After trying to run `gxctl` for the first time, you might have to make an exception in your system settings to allow it to run even though it is not signed.
+- Move the gxctl binary to a file location on your system PATH:
+`sudo mv ./gxctl /usr/local/bin/gxctl && sudo chown root: /usr/local/bin/gxctl`
+- After trying to run `gxctl` for the first time, you might have to
+make an exception in your system settings to allow it to run even though it is
+not signed.
 
 #### Windows
-- Extract the binary and append or prepend the folder containing the gxctl binary to your PATH environment variable.
+
+- Extract the binary and append or prepend the folder containing the gxctl
+binary to your PATH environment variable.
 
 ### Configuration
 
-- Navigate to your home directory and create a folder called `.gxctl`. For Windows, this is the root of your `%USERPROFILE%` directory of the user that will be running the gxctl command.
-- Copy the provided base `config.yaml` file to `~/.gxctl/config.yaml`. If using the git repo instead of the archive, you can find the file in `config/gridx`. This file mainly lists the settings for
-authenticating gxctl for usage with the different subaccounts. Before you can start working, you have to use `gxctl login` to retrieve a token by
+- Navigate to your home directory and create a folder called `.gxctl`.
+For Windows, this is the root of your `%USERPROFILE%` directory of
+the user that will be running the gxctl command.
+- Copy the provided base `config.yaml` file to `~/.gxctl/config.yaml`.
+If using the git repo instead of the archive, you can find the file in
+`config/gridx`. This file mainly lists the settings for
+authenticating gxctl for usage with the different subaccounts. Before you can
+start working, you have to use `gxctl login` to retrieve a token by
 authenticating with your user account.
 
 ```sh
-$ mkdir -p ~/.gxctl
-$ cp config.yaml ~/.gxctl/config.yaml
-$ gxctl login # will open a browser window where you can sign in using your gridx.de email
+mkdir -p ~/.gxctl
+cp config.yaml ~/.gxctl/config.yaml
+gxctl login # will open a browser window where you can sign in using your
+# gridx.de email
 ```
 
-The generated token is only valid for a limited amount of time (currently 4 weeks); if you see errors regarding authentication
-after that time, you may have to simply refresh the token by running `gxctl login` again.
+The generated token is only valid for a limited amount of time (currently 4 weeks);
+if you see errors regarding authentication
+after that time, you may have to simply refresh the token by running
+`gxctl login` again.
 
 ### Remote Maintenance
 
-In order to use the SSH functionality, you'll want to alter your SSH config, typically located in `~/.ssh/config`.
-If running for the first time, you can simply execute `mkdir -p ~/.ssh && gxctl ssh setup >> ~/.ssh/config`. Otherwise, please compare the output of `gxctl ssh setup`
-with the contents of your ssh config and update the latter accordingly. You can run `gxctl ssh check` to find out if your local configuration has been setup correctly. It will error and print a diff if there are issues and succeed otherwise.
+In order to use the SSH functionality, you'll want to alter your SSH config,
+typically located in `~/.ssh/config`.
+If running for the first time, you can simply execute
+`mkdir -p ~/.ssh && gxctl ssh setup >> ~/.ssh/config`. Otherwise,
+please compare the output of `gxctl ssh setup`
+with the contents of your ssh config and update the latter accordingly.
+You can run `gxctl ssh check` to find out if your local configuration has been
+setup correctly. It will error and print a diff if there are issues and succeed otherwise.
 
-*Note*: As the SSH functionality uses agent forwarding, you must have __ssh-agent__ available.
-The most simple solution is running `eval $(ssh-agent)` once per terminal session - this will work fine for basic SSH usage, but will not allow you to open more than one connection at a time.
+*Note*: As the SSH functionality uses agent forwarding, you must have
+__ssh-agent__ available.
+The most simple solution is running `eval $(ssh-agent)` once per terminal
+session - this will work fine for basic SSH usage, but will not allow you to
+open more than one connection at a time.
 
 ## Profiles / Accounts
 
-The managed devices are split into different server-side accounts. Your available accounts are defined in `~/.gxctl/config.yaml`. To differentiate between them when using gxctl commands, you can pass the `--profile` argument. You will have to issue a `gxctl login` command separately for each profile that you want to use:
+The managed devices are split into different server-side accounts. Your available
+accounts are defined in `~/.gxctl/config.yaml`. To differentiate between them
+when using gxctl commands, you can pass the `--profile` argument. You will have
+to issue a `gxctl login` command separately for each profile that you want to use:
 
 ```sh
-$ gxctl --profile profile1 login
-$ gxctl --profile profile1 get device
+ gxctl --profile profile1 login
+ gxctl --profile profile1 get device
 ```
 
 *Note*: You can set a default profile using `gxctl config use-profile profile1`.
@@ -64,75 +96,111 @@ Use the following syntax to run gxctl commands from your terminal window:
 
 where `command`, `TYPE`, `NAME`, and `flags` are:
 
-* **command**   Specifies the operation that you want to perform on one or more resources, for example `create`, `get`, `update`
-* **TYPE**   Specifies the resource type. Resource types are case-insensitive and you can specify the singular, plural, or abbreviated forms. For example, the following commands produce the same output:
+- __command__   Specifies the operation that you want to perform on one or more resources,
+for example `create`, `get`, `update`
+_ __TYPE__   Specifies the resource type. Resource types are case-insensitive and
+you can specify the singular, plural, or abbreviated forms. For example, the
+following commands produce the same output:
 
 ```shell
-$ gxctl get deployment deployment1
-$ gxctl get deployments deployment1
-$ gxctl get deploy deployment1
+ gxctl get deployment deployment1
+ gxctl get deployments deployment1
+ gxctl get deploy deployment1
 ```
-* **NAME**   Specifies the name of the resource. Names are case-sensitive. If the name is omitted, details for all resources are displayed, for example `gxctl get pods`
 
-When performing an operation on multiple resources, you can specify each resource by name:
+- __NAME__   Specifies the name of the resource. Names are case-sensitive.
+If the name is omitted, details for all resources are displayed, for example
+`gxctl get pods`
+
+When performing an operation on multiple resources, you can specify each resource
+by name:
 
 ```shell
-$ gxctl get pod 57e82f8e-08f4-48f9-8e75-28552d09701f 21d7d72a-ceac-437d-bf57-816a43efbaba
+ gxctl get pod 57e82f8e-08f4-48f9-8e75-28552d09701f 21d7d72a-ceac-437d-bf57-816a43efbaba
 ```
 
-It is possible to abbreviate uuids which are used as an identifier eg. for pods or deployments. Please note that identifiers not of the format of an uuid eg. in the case of applications need to be specified with it's full name.
+It is possible to abbreviate uuids which are used as an identifier eg. for pods
+or deployments.  Please note that identifiers not of the format of an uuid eg.
+in the case of applications need to be specified with it's full name.
 
 ```shell
-$ gxctl get pods 57e 21d
-$ gxctl get apps testapp testapp2
+ gxctl get pods 57e 21d
+ gxctl get apps testapp testapp2
 ```
 
-* **flags**   Specifies optional flags. For example, you can use the -o or --output flags to specify the output format of your command
+- __flags__   Specifies optional flags. For example, you can use the `-o` or `--output`
+flags to specify the output format of your command
 
 ## Operations
 
-* **apply**   `gxctl apply [[-f | ----filename]=Filename] [flags]`
-* **create**   `gxctl create [[-f | ----filename]=Filename] [flags]`
-* **config**   `gxctl config [flags]`
-* **delete**   `gxctl delete [TYPE] [NAME] [flags]`
-* **diff**   `gxctl apply [[-f | ----filename]=Filename]`
-* **get**   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
-* **label**   `gxctl label [TYPE] [NAME] [flags]`
-* **lint**   `gxctl lint [[-f | ----filename]=Filename] [flags]`
-* **login**   `gxctl login [flags]`
-* **ssh**   `gxctl ssh [NAME] [flags]`
-* **update**   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
-* **validate**   `gxctl validate [[-f | ----filename]=Filename] [flags]`
-* **version**   `gxctl version [flags]`
-
+- __apply__   `gxctl apply [[-f | ----filename]=Filename] [flags]`
+- __create__   `gxctl create [[-f | ----filename]=Filename] [flags]`
+- __config__   `gxctl config [flags]`
+- __delete__   `gxctl delete [TYPE] [NAME] [flags]`
+- __diff__   `gxctl apply [[-f | ----filename]=Filename]`
+- __get__   `gxctl get [TYPE] [NAME] [[-o | --output]=OUTPUT_FORMAT] [flags]`
+- __label__   `gxctl label [TYPE] [NAME] [flags]`
+- __lint__   `gxctl lint [[-f | ----filename]=Filename] [flags]`
+- __login__   `gxctl login [flags]`
+- __ssh__   `gxctl ssh [NAME] [flags]`
+- __update__   `gxctl update [TYPE] [NAME] [[-f | ----filename]=Filename] [flags]`
+- __validate__   `gxctl validate [[-f | ----filename]=Filename] [flags]`
+- __version__   `gxctl version [flags]`
 
 ## General resource types
-* **applications**   Abbreviated alias `application`,`app`. Applications are used to allow a logical grouping of deployments. Read more about [Device Selectors](#device-selectors).
-* **configmaps**   Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`. Configmaps can be used to inject arbitrary data into a container. It can e.g. be used to provide the a JSON or YAML config file or add some custom content. In our [Example Deployment](#howto-example-deployment), we're using a Configmap to provide the NGINX container with some custom HTML content to display.
-* **deployments**   Abbreviated alias `deployment`,`deploy`. Deployments define a container blueprint. They're are getting translated into Pods as a concrete instance. Those Pods are getting started as a container on the corresponding device. Deployments can either match a single device or a group of devices. Read more about [Device Selectors](#device-selectors).
-* **devices**   Abbreviated alias `device`. Devices are the API representation of the physical gateway. The resource stores general information like the serialnumber or MAC address and a current state of the device providing real time information about the device itself as well as information about the network the device is operating in.
-* **pods**   Abbreviated alias `pod`,`po`. Pods are the API representation of a container running on a specific device. They're getting created by a controller for the best matching deployment of an application.
 
+- __applications__   Abbreviated alias `application`,`app`.
+Applications are used to allow a logical grouping of deployments. Read more about
+[Device Selectors](#device-selectors).
+- __configmaps__
+Abbreviated alias `configmap`,`deviceconfigmaps`,`deviceconfigmap`,`cm`,`dcm`.
+Configmaps can be used to inject arbitrary data into a container.
+It can e.g. be used to provide the a JSON or YAML config file or add some
+custom content. In our [Example Deployment](#howto-example-deployment),
+we're using a Configmap to provide the NGINX container with some custom HTML
+content to display.
+- __deployments__
+Abbreviated alias `deployment`,`deploy`. Deployments define a container blueprint.
+They're are getting translated into Pods as a concrete instance. Those Pods are
+getting started as a container on the corresponding device. Deployments can
+either match a single device or a group of devices. Read more about [Device Selectors](#device-selectors).
+- __devices__
+Abbreviated alias `device`. Devices are the API representation of the physical
+gateway. The resource stores general information like the serialnumber or MAC
+address and a current state of the device providing real time information about
+the device itself as well as information about the network the device is operating
+in.
+- __pods__
+Abbreviated alias `pod`,`po`. Pods are the API representation of a container
+running on a specific device. They're getting created by a controller for the
+best matching deployment of an application.
 
 ## Output options
 
-The default output format for all gxctl commands is the human readable plain-text format. To output details to your terminal window in a specific format, you can add either the -o or --output flags to a supported gxctl command.
+The default output format for all gxctl commands is the human readable plain-text
+format. To output details to your terminal window in a specific format, you can
+add either the -o or --output flags to a supported gxctl command.
 
 ```shell
-$ gxctl [command] [TYPE] [NAME] -o=<output_format>
+ gxctl [command] [TYPE] [NAME] -o=<output_format>
 ```
 
-* **-o=json**   Output a JSON formatted API object.
-* **-o=wide**   Output in the plain-text format with any additional information.
-* **-o=yaml**   Output a YAML formatted API object.
+- __-o=json__   Output a JSON formatted API object.
+- __-o=wide__   Output in the plain-text format with any additional information.
+- __-o=yaml__   Output a YAML formatted API object.
 
 ## Howto: Example Deployment
 
-gxctl is designed to be used in a declarative way, thus most commands are expecting a file to get provided. We generally recommend using the combination of `diff` and `apply` instead of using `create` and `update`.
+gxctl is designed to be used in a declarative way, thus most commands are expecting
+a file to get provided. We generally recommend using the combination of
+`diff` and `apply` instead of using `create` and `update`.
 
-The following files are given an easy example of a combination of deployment and configmap to deploy a NGINX including a specific content on a specific device called `7b6419fa-7ac5-4320-a87b-8fe8513130dc`.
+The following files are given an easy example of a combination of deployment
+and configmap to deploy a NGINX including a specific content on a specific
+device called `7b6419fa-7ac5-4320-a87b-8fe8513130dc`.
 
-***configmap.yaml***
+### configmap.yaml
+
 ```yaml
 metadata:
   id: 2cde6802-a7f9-4a35-872c-c10c364babec
@@ -150,7 +218,8 @@ spec:
       </html>
 ```
 
-***deployment.yaml***
+### deployment.yaml
+
 ```yaml
 metadata:
   id: 5c4dc7b2-c684-41c5-9e83-b2cc87b5c3cb
@@ -178,21 +247,33 @@ spec:
 
 ## Device Selectors
 
-We're using the concept of a device selector to make sure the right pods are running on the right device. There are two different types of selector's which can be added to a deployment, namely `matchByDeviceID` and `matchByLabels`. While `matchByDeviceID` is used as a 1:1 relation to allocate a deployment to a specific device using it's UUID, `matchByLabels` can be used to target a set of devices based on their labels. Those selector's are always working in the scope of an `application`.
+We're using the concept of a device selector to make sure the right pods are
+running on the right device. There are two different types of selector's which
+can be added to a deployment, namely `matchByDeviceID` and `matchByLabels`.
+While `matchByDeviceID` is used as a 1:1 relation to allocate a deployment to
+a specific device using it's UUID, `matchByLabels` can be used to target a set
+of devices based on their labels. Those selector's are always working in the
+scope of an `application`.
 
 For `matchByLabels`, the following applies to allocate a deployment to a set of devices:
 
-* The following rules are always evaluated per `application`.
-* `matchByDeviceID` has precedence over `matchByLabels`
-* All labels defined in a `matchByLabels` selector must be attached to the targeted devices in order to match.
-* If there are multiple deployments matching a device for the same `application`, the one will be chosen, which matches most specifically, meaning having the biggest number of matching labels.
-* If there are multiple deployments matching a device for the same `application`, and also those deployments having an equal number of matching labels, we use the most recent deployment based on its creation timestamp.
+- The following rules are always evaluated per `application`.
+- `matchByDeviceID` has precedence over `matchByLabels`
+- All labels defined in a `matchByLabels` selector must be attached to the
+targeted devices in order to match.
+- If there are multiple deployments matching a device for the same `application`,
+the one will be chosen, which matches most specifically, meaning having the
+highest number of matching labels.
+- If there are multiple deployments matching a device for the same `application`,
+and also those deployments having an equal number of matching labels, we use
+the most recent deployment based on its creation timestamp.
 
-**A concrete example:**
+__A concrete example:__
 
 Following we got a set of devices and deployments.
 
-***Device01***
+### Device01
+
 ```yaml
 id: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 labels:
@@ -201,7 +282,8 @@ labels:
   gridx.de/region: eu-central
 ```
 
-***Device02***
+### Device02
+
 ```yaml
 id: de6dfaf0-bebd-4338-b4ce-bd451406b39a
 labels:
@@ -210,7 +292,8 @@ labels:
   gridx.de/region: eu-central
 ```
 
-***Device03***
+### Device03
+
 ```yaml
 id: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 labels:
@@ -219,14 +302,16 @@ labels:
   gridx.de/region: eu-west
 ```
 
-***Deployment1***
+### Deployment1
+
 ```yaml
 app: nginx
 selector:
   matchByDeviceID: 7b6419fa-7ac5-4320-a87b-8fe8513130dc
 ```
 
-***Deployment2***
+### Deployment2
+
 ```yaml
 app: nginx
 selector:
@@ -234,7 +319,8 @@ selector:
     gridx.de/channel: stable
 ```
 
-***Deployment3***
+### Deployment3
+
 ```yaml
 app: nginx
 selector:
@@ -245,9 +331,15 @@ selector:
 
 We end up with the following allocation:
 
-* `Device01` runs `Deployment1`. Even though `Deployment2` would also match, based on it's values, it runs on `Deployment1` as `matchByDeviceID` always has precedence over `matchByLabels`. Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.
-* `Device02` runs `Deployment2` as the labels are matching.
-* `Device03` runs `Deployment3`. Even though, both `Deployment2` and `Deployment3` are matching based on the labels, `Deployment3` is more specific (2 vs. 1 matching labels). Remember: Since both `Deployment1` and `Deployment2` are of the same application only one will be running.
+- `Device01` runs `Deployment1`. Even though `Deployment2` would also match,
+based on it's values, it runs on `Deployment1` as `matchByDeviceID` always has
+precedence over `matchByLabels`. Remember: Since both `Deployment1` and
+`Deployment2` are of the same application only one will be running.
+- `Device02` runs `Deployment2` as the labels are matching.
+- `Device03` runs `Deployment3`. Even though, both `Deployment2` and
+`Deployment3` are matching based on the labels, `Deployment3` is more specific
+(2 vs. 1 matching labels). Remember: Since both `Deployment1` and `Deployment2`
+are of the same application only one will be running.
 
 ## Howto: Common operations
 
@@ -306,7 +398,8 @@ $ gxctl get devices --serial D294-200-000-000-581-P-X
 $ gxctl get devices --serial 581-P-X
 # get a List of all devices that have a label with key gridx.de/channel
 $ gxctl get devices --label gridx.de/channel
-# get a List of all devices that have a label with key gridx.de/channel and value alpha
+# get a List of all devices that have a label with key gridx.de/channel and value
+# alpha
 $ gxctl get devices --label gridx.de/channel=alpha
 # get a List of all devices that match all key/value label pairs
 $ gxctl get devices --label gridx.de/channel=alpha,gridx.de/datadog=true
@@ -368,9 +461,11 @@ $ ssh 445-P-X.gridbox
 $ scp /tmp/foo.txt D244-200-000-000-445-P-X.gridbox:/tmp
 # copy remote file from device
 $ scp D244-200-000-000-445-P-X.gridbox:/tmp/foo.txt /tmp
-# forward port 8080 of devices 192.168.169.198 and 192.168.169.199 in the remote network to local ports 8080 and 8081
+# forward port 8080 of devices 192.168.169.198 and 192.168.169.199 in the remote
+# network to local ports 8080 and 8081
 $ ssh -L 8080:192.168.169.198:8080 -L 8081:192.168.169.199:8080 D294-200-000-000-581-P-X.gridbox
-# open up port 2210 on the gridbox in the remote network and forward incoming traffic to local port 2210
+# open up port 2210 on the gridbox in the remote network and forward incoming
+# traffic to local port 2210
 $ ssh -R 2210:localhost:2210 D294-200-000-000-581-P-X.gridbox
 
 `gxctl diff` - Diff a resource file
