@@ -30,21 +30,21 @@ func (do PodsConsoleOutputWide) Inject(i api.Pods) PodsConsoleOutputWide {
 }
 
 func (do PodsConsoleOutput) Map() []PodConsoleOutput {
-	output := make([]PodConsoleOutput, len(do.raw.Pods))
+	out := []PodConsoleOutput{}
 	for _, e := range do.raw.Pods {
-		output = append(output, PodConsoleOutput{}.Map(e))
+		out = append(out, PodConsoleOutput{}.Map(e))
 	}
 
-	return output
+	return out
 }
 
 func (do PodsConsoleOutputWide) Map() []PodConsoleOutputWide {
-	output := make([]PodConsoleOutputWide, len(do.raw.Pods))
+	out := []PodConsoleOutputWide{}
 	for _, e := range do.raw.Pods {
-		output = append(output, PodConsoleOutputWide{}.Map(e))
+		out = append(out, PodConsoleOutputWide{}.Map(e))
 	}
 
-	return output
+	return out
 }
 
 func (do PodsConsoleOutput) Sort(sortBy string) PodsConsoleOutput {

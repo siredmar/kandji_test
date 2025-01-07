@@ -24,7 +24,7 @@ func (do DeviceConfigMapsConsoleOutputWide) Inject(i api.DeviceConfigMaps) Devic
 }
 
 func (do DeviceConfigMapsConsoleOutput) Map() []DeviceConfigMapConsoleOutput {
-	output := make([]DeviceConfigMapConsoleOutput, len(do.raw.DeviceConfigMaps))
+	output := []DeviceConfigMapConsoleOutput{}
 	for _, e := range do.raw.DeviceConfigMaps {
 		output = append(output, DeviceConfigMapConsoleOutput{}.Map(e))
 	}
@@ -33,7 +33,7 @@ func (do DeviceConfigMapsConsoleOutput) Map() []DeviceConfigMapConsoleOutput {
 }
 
 func (do DeviceConfigMapsConsoleOutputWide) Map() []DeviceConfigMapConsoleOutputWide {
-	output := make([]DeviceConfigMapConsoleOutputWide, len(do.raw.DeviceConfigMaps))
+	output := []DeviceConfigMapConsoleOutputWide{}
 	for _, e := range do.raw.DeviceConfigMaps {
 		output = append(output, DeviceConfigMapConsoleOutputWide{}.Map(e)...)
 		output = append(output, DeviceConfigMapConsoleOutputWide{})
