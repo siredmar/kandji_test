@@ -30,7 +30,7 @@ func (do DeploymentsConsoleOutputWide) Inject(i api.Deployments) DeploymentsCons
 }
 
 func (do DeploymentsConsoleOutput) Map() []DeploymentConsoleOutput {
-	output := make([]DeploymentConsoleOutput, len(do.raw.Deployments))
+	output := []DeploymentConsoleOutput{}
 	for _, e := range do.raw.Deployments {
 		output = append(output, DeploymentConsoleOutput{}.Map(e))
 	}
@@ -39,7 +39,7 @@ func (do DeploymentsConsoleOutput) Map() []DeploymentConsoleOutput {
 }
 
 func (do DeploymentsConsoleOutputWide) Map() []DeploymentConsoleOutputWide {
-	output := make([]DeploymentConsoleOutputWide, len(do.raw.Deployments))
+	output := []DeploymentConsoleOutputWide{}
 	for _, e := range do.raw.Deployments {
 		output = append(output, DeploymentConsoleOutputWide{}.Map(e))
 	}

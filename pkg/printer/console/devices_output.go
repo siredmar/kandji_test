@@ -61,7 +61,7 @@ func (do DevicesConsoleOutputWide) Inject(i api.Devices) DevicesConsoleOutputWid
 }
 
 func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
-	output := make([]DeviceConsoleOutput, len(do.raw.Devices))
+	output := []DeviceConsoleOutput{}
 	for _, e := range do.raw.Devices {
 		output = append(output, DeviceConsoleOutput{}.Map(e))
 	}
@@ -70,7 +70,7 @@ func (do DevicesConsoleOutput) Map() []DeviceConsoleOutput {
 }
 
 func (do DevicesConsoleOutputWide) Map() []DeviceConsoleOutputWide {
-	output := make([]DeviceConsoleOutputWide, len(do.raw.Devices))
+	output := []DeviceConsoleOutputWide{}
 	for _, e := range do.raw.Devices {
 		output = append(output, DeviceConsoleOutputWide{}.Map(e))
 	}

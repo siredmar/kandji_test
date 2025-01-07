@@ -9,7 +9,7 @@ import (
 type ApplicationsConsoleOutput []ApplicationConsoleOutput
 
 func (ApplicationsConsoleOutput) Map(a api.Applications) ApplicationsConsoleOutput {
-	out := make(ApplicationsConsoleOutput, len(a.Applications))
+	out := ApplicationsConsoleOutput{}
 	for _, e := range a.Applications {
 		out = append(out, ApplicationConsoleOutput{}.Map(e))
 	}
