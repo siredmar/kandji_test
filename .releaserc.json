@@ -1,0 +1,63 @@
+{
+    "repositoryUrl": "https://github.com/grid-x/gxctl.git",
+    "branches": [
+      {
+        "name": "master"
+      },
+      {
+        "name": "develop",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "cd /go/src/github.com/grid-x/gxctl && echo '${nextRelease.notes}' > CHANGELOG.md"
+        }
+      ],
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "cd /go/src/github.com/grid-x/gxctl && CI_RELEASE_VERSION=${nextRelease.version} CI_CHANGELOG_PATH=CHANGELOG.md make ci_build_release"
+        }
+      ],
+      [
+        "semantic-release-slack-with-files",
+        {
+            "assets": {
+              "dist/gxctl_${nextRelease.version}_Linux_amd64.tar.gz": "Linux AMD64",
+              "dist/gxctl_${nextRelease.version}_Linux_arm64.tar.gz": "Linux ARM64",
+              "dist/gxctl_${nextRelease.version}_Mac_amd64.zip": "macOS AMD64",
+              "dist/gxctl_${nextRelease.version}_Mac_arm64.zip": "macOS ARM64",
+              "dist/gxctl_${nextRelease.version}_Windows_amd64.zip": "Windows AMD64"
+            },
+            "changelog": false,
+            "lastCommitText": true,
+            "message": ":rocket: New gxctl Release is Here! :tada:\n\n*gxctl ${nextRelease.version}*\n",
+            "lastLine": "As always, your feedback helps us improve! Let us know what you think.\n— The gxctl Team :blue_heart:",
+            "prerelease": {
+                "enabled": false,
+                "changelog": true,
+                "lastCommitText": false,
+                "message": "🚀 Prerelease: `gxctl` ${nextRelease.version} 🚧\n\n",
+                "lastLine": "_This is an experimental build._ 🔬"
+            }
+        }
+      ],
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            { "path": "dist/gxctl_*_Linux_amd64.tar.gz", "label": "Linux AMD64"},
+            { "path": "dist/gxctl_*_Linux_arm64.tar.gz", "label": "Linux ARM64"},
+            { "path": "dist/gxctl_*_Mac_amd64.zip", "label": "macOS AMD64"},
+            { "path": "dist/gxctl_*_Mac_arm64.zip", "label": "macOS ARM64"},
+            { "path": "dist/gxctl_*_Windows_amd64.zip", "label":"Windows AMD64"}
+          ]
+        }
+      ]
+    ]
+  }

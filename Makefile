@@ -26,6 +26,8 @@ BUILDTIME := $(shell date)
 VERSION ?= $(shell bin/version.sh)
 
 GO_TOOLS := public.ecr.aws/gridx/base-images:golang-docker-dev-1.22.latest
+NODE_TOOLS := siredmar/semantic-release:latest
+
 GO_PROJECT := github.com/grid-x/gxctl
 
 BRANCH := $(shell echo ${BUILDKITE_BRANCH} | sed 's/\//_/g')
@@ -33,8 +35,10 @@ IMAGE_TAG := ${BRANCH}.${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT}
 GXCTL_BASE_URL := 108014196837.dkr.ecr.eu-central-1.amazonaws.com/gridx/gxctl
 GXCTL_IMAGE_URL ?= ${GXCTL_BASE_URL}:${IMAGE_TAG}
 
-DOCKER_RUN := docker run -e HOST_OS=${HOST_OS} -e HOST_ARCH=${HOST_ARCH} -e TARGET_OS=${TARGET_OS} -e TARGET_ARCH=${TARGET_ARCH} -e GXCTL_IMAGE_URL=${GXCTL_IMAGE_URL} --init -it --rm -v $$PWD:/go/src/${GO_PROJECT}:z -v /var/run/docker.sock:/var/run/docker.sock -w /go/src/${GO_PROJECT} ${GO_TOOLS} bash -c
+DOCKER_GO_RUN := docker run -e HOST_OS=${HOST_OS} -e HOST_ARCH=${HOST_ARCH} -e TARGET_OS=${TARGET_OS} -e TARGET_ARCH=${TARGET_ARCH} -e GXCTL_IMAGE_URL=${GXCTL_IMAGE_URL} --init --rm -v $${HOST_PROJECT_PATH}:/go/src/${GO_PROJECT}:z -v /var/run/docker.sock:/var/run/docker.sock -w /go/src/${GO_PROJECT}
 GO_LINT=golangci-lint run --config .golangci.yaml --verbose --timeout 5m
+
+DOCKER_SEMANTIC_RELEASE_RUN := docker run -e GITHUB_TOKEN=${GITHUB_TOKEN} -e SLACK_CHANNEL=${SLACK_CHANNEL} -e SLACK_TOKEN=${SLACK_TOKEN} -e HOST_PROJECT_PATH=$$PWD --init --rm -v $$PWD:/go/src/${GO_PROJECT}:z -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/buildkite-agent/.ssh:/root/.ssh -w /go/src/${GO_PROJECT} ${NODE_TOOLS} bash -c
 
 define goBuild
 	GOOS=$1 GOARCH=$2 CGO_ENABLED=0 go build -o ./bin/gxctl-$1-$2 -ldflags="-w -s -X 'github.com/grid-x/gxctl/internal/version.GitCommit=$(GIT_COMMIT)' -X 'github.com/grid-x/gxctl/internal/version.BuildTime=$(BUILDTIME)' -X 'github.com/grid-x/gxctl/internal/version.Version=$(VERSION)'" ./cmd/gxctl
@@ -92,19 +96,24 @@ docker_push:
 	docker manifest annotate ${GXCTL_IMAGE_URL} ${GXCTL_IMAGE_URL}-linux-arm64 --arch arm64 --os linux --variant v8
 	docker manifest push ${GXCTL_IMAGE_URL}
 
-release:
-	# TODO actually integrate publishing
-	goreleaser release --skip=publish
-
 ci_build:
-	${DOCKER_RUN} "make bin/gxctl-linux-amd64"
-	${DOCKER_RUN} "make bin/gxctl-linux-arm64"
+	HOST_PROJECT_PATH=$(shell pwd) && ${DOCKER_GO_RUN} -e HOST_PROJECT_PATH=$(shell pwd) ${GO_TOOLS} bash -c "make bin/gxctl-linux-amd64"
+	HOST_PROJECT_PATH=$(shell pwd) && ${DOCKER_GO_RUN} -e HOST_PROJECT_PATH=$(shell pwd) ${GO_TOOLS} bash -c "make bin/gxctl-linux-arm64"
 
 ci_lint:
-	${DOCKER_RUN} "make lint"
+	HOST_PROJECT_PATH=$(shell pwd) && ${DOCKER_GO_RUN} -e HOST_PROJECT_PATH=$(shell pwd) ${GO_TOOLS} bash -c "make lint"
 
 ci_test:
-	${DOCKER_RUN} "make test"
+	HOST_PROJECT_PATH=$(shell pwd) && ${DOCKER_GO_RUN} -e HOST_PROJECT_PATH=$(shell pwd) ${GO_TOOLS} bash -c "make test"
 
-ci_release:
-	${DOCKER_RUN} "goreleaser release --skip=publish --skip=validate --clean"
+CI_RELEASE_VERSION ?= "0.1.0"
+CI_CHANGELOG_PATH ?= "CHANGELOG.md"
+ci_build_release:
+	${DOCKER_GO_RUN} -e CI_RELEASE_VERSION=${CI_RELEASE_VERSION} -e CI_CHANGELOG_PATH=${CI_CHANGELOG_PATH} ${GO_TOOLS} bash -c "cd /go/src/github.com/grid-x/gxctl && \
+	.buildkite/steps/build_release.sh ${CI_RELEASE_VERSION} ${CI_CHANGELOG_PATH}"
+
+ci_semantic_release:
+	echo "Branch: $$(git rev-parse --abbrev-ref HEAD)"
+	${DOCKER_SEMANTIC_RELEASE_RUN} "git config --global --add safe.directory /go/src/github.com/grid-x/gxctl && \
+	npm install @semantic-release/git @semantic-release/exec siredmar/semantic-release-slack-with-files -D && \
+	npx -y semantic-release --no-ci --debug --branch $$(git rev-parse --abbrev-ref HEAD)"

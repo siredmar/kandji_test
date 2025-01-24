@@ -1,9 +1,17 @@
 steps:
+  - command: |
+      # Ensure the repository is fully cloned
+      git fetch --all --tags --prune
+      # Checkout the branch or commit from BUILDKITE_BRANCH or BUILDKITE_COMMIT
+      git checkout "${BUILDKITE_BRANCH}" || git checkout -b "${BUILDKITE_BRANCH}" "origin/${BUILDKITE_BRANCH}"
+      git reset --hard "${BUILDKITE_COMMIT}"
+    label: "Checkout Branch"
   - label: ":bash: Shellcheck"
     plugins:
       - shellcheck#v1.1.2:
           files:
             - "bin/*.sh"
+  - wait
   - command:
       - "make ci_lint"
     label: ":golang: Lint"
@@ -20,18 +28,17 @@ steps:
     artifact_paths:
       - "bin/gxctl-*"
   - wait
-  - command:
+  - label: ":docker: Build docker image"
+    command:
       - 'buildkite-agent artifact download "bin/gxctl-*" . --step ":golang: Build"'
       - "make docker_all"
       - "make docker_push"
-    label: ":docker: Build docker image"
     env:
       DOCKER_CLI_EXPERIMENTAL: enabled
     agents:
       - "queue=default"
-  - command:
-      - "make ci_release"
-    label: ":golang: Release"
-    artifact_paths:
-      - "dist/*"
-    if: "build.tag != null"
+  - wait
+  - label: ":golang: Publish Release"
+    command:
+      - "make ci_semantic_release"
+    branches: "master develop"

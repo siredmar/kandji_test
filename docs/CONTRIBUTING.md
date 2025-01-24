@@ -6,10 +6,20 @@
 
 ## Releasing
 
-We're using [goreleaser](https://goreleaser.com/intro/) to automate building and archiving. If enough changes have
-accumulated that merit a release, you can:
+The main release branch is `master`. For preparing releases the `develop` branch is used. This branch is used to accumulate changes and test them before merging them into `master`.
+For releasing `semantic-release` is used which automatically creates a new tag and release notes based on the commit messages.
 
-1. Tag a new version, e.g. `git tag v0.33.0`.
-2. See locally what goreleaser would do with it using `make release`.
-3. Check the `dist` directory for the output archives.
-4. If you're satisfied, push the tag to trigger the release pipeline: `git push v0.33.0`.
+The release process is as follows:
+1. commit to `develop`. This creates a new version with the `-develop` suffix.
+2. once you are happy with the changes, merge `develop` into `master`. This creates a new version and does the actual release on Slack.
+
+## Manual releasing (e.g. for EIS)
+
+You also can run the release process manually. This is useful if you want to release a version for EIS. To do this, run the following command. 
+You have to provide it a version and the path to the changelog file.
+
+```bash
+.buildkite/steps/build_release.sh <version> <changelog file>
+```
+
+The results will be located in `dist/`.
