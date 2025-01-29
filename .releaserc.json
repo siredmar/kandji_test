@@ -14,7 +14,7 @@
         "@siredmar/semantic-release-kandji",
         {
             "appID": "b785b73f-ffd7-48d3-8e4f-d42df4475481",
-            "asset": "gxctl_0.1.1_Mac_amd64.zip",
+            "asset": "hello.zip",
             "release": true,
             "preRelease": true,
             "postinstallScript": [
